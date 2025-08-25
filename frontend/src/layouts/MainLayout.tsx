@@ -33,23 +33,54 @@ export const MainLayout = () => {
   };
 
   const navigation = [
-    { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
-    { name: 'API Tokens', href: '/tokens', icon: KeyIcon },
+    {
+      name: 'Dashboard',
+      href: '/dashboard',
+      icon: HomeIcon,
+      isPage: (pathname: string) => pathname == '/dashboard',
+    },
+    {
+      name: 'API Tokens',
+      href: '/tokens',
+      icon: KeyIcon,
+      isPage: (pathname: string) => pathname == '/tokens',
+    },
     {
       name: 'Billing',
       icon: CreditCardIcon,
       children: [
-        { name: 'Current Period', href: '/billing-current-period' },
-        { name: 'History', href: '/billing' },
-        { name: 'Usage Details', href: '/usage' },
+        {
+          name: 'Current Period',
+          href: '/billing-current-period',
+          isPage: (pathname: string) => pathname == '/billing-current-period',
+        },
+        {
+          name: 'History',
+          href: '/billing-history',
+          isPage: (pathname: string) =>
+            pathname == '/billing-history' || pathname.startsWith('/billing/'),
+        },
+        {
+          name: 'Usage Details',
+          href: '/usage',
+          isPage: (pathname: string) => pathname == '/usage',
+        },
       ],
     },
     {
       name: 'Account',
       icon: UserCircleIcon,
       children: [
-        { name: 'Settings', href: '/account' },
-        { name: 'Change Password', href: '/account/password' },
+        {
+          name: 'Settings',
+          href: '/account',
+          isPage: (pathname: string) => pathname == '/account',
+        },
+        {
+          name: 'Change Password',
+          href: '/account/password',
+          isPage: (pathname: string) => pathname == '/account/password',
+        },
       ],
     },
   ];
@@ -114,7 +145,7 @@ export const MainLayout = () => {
                         onClick={() => !isSidebarCollapsed && toggleExpanded(item.name)}
                         className={clsx(
                           'w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md transition-colors',
-                          item.children.some((child) => location.pathname.startsWith(child.href))
+                          item.children.some((child) => child.isPage(location.pathname))
                             ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                             : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
                           isSidebarCollapsed && 'cursor-default'
@@ -147,6 +178,7 @@ export const MainLayout = () => {
                             <NavLink
                               key={child.name}
                               to={child.href}
+                              end={child.href === '/account'}
                               className={({ isActive }) =>
                                 clsx(
                                   'block px-3 py-2 text-sm rounded-md transition-colors',

@@ -39,7 +39,7 @@ export const BillingCurrentPeriodPage = () => {
 
   // Redirect to the current period's detail page
   if (currentPeriod?.id) {
-    return <Navigate to={`/billing/${currentPeriod.id}`} replace />;
+    return <Navigate to={`/billing-history/${currentPeriod.id}`} replace />;
   }
 
   // No current billing period found
@@ -54,7 +54,7 @@ export const BillingCurrentPeriodPage = () => {
           There is no active billing period at the moment.
         </p>
         <Link
-          to="/billing"
+          to="/billing-history"
           className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
         >
           View Billing History

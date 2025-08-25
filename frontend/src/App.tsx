@@ -31,9 +31,9 @@ export default function App() {
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/tokens" element={<TokensPage />} />
-              <Route path="/billing" element={<BillingPage />} />
+              <Route path="/billing-history" element={<BillingPage />} />
               <Route path="/billing-current-period" element={<BillingCurrentPeriodPage />} />
-              <Route path="/billing/:periodId" element={<BillingPeriodDetailsPage />} />
+              <Route path="/billing-history/:periodId" element={<BillingPeriodDetailsPage />} />
               <Route path="/usage" element={<UsagePage />} />
               <Route path="/account" element={<AccountPage />} />
               <Route path="/account/password" element={<ChangePasswordPage />} />

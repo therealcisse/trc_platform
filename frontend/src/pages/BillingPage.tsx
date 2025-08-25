@@ -107,7 +107,7 @@ export const BillingPage = () => {
           periods?.map((period) => (
             <Link
               key={period.id}
-              to={`/billing/${period.id}`}
+              to={`/billing-history/${period.id}`}
               className="block bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 hover:shadow-lg hover:border-primary-500 dark:hover:border-primary-400 transition-all group"
             >
               <div className="flex items-start justify-between">

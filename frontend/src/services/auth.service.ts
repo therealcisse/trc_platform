@@ -1,5 +1,5 @@
 import { http } from '../lib/http';
-import { queryClient } from "../lib/queryClient";
+import { queryClient } from '../lib/queryClient';
 import { bootstrapCsrf } from '../lib/http';
 import { clearAuthCookies, getCSRFToken } from '../lib/csrf';
 import type {
@@ -33,14 +33,10 @@ export const authService = {
   async logout(): Promise<void> {
     try {
       const csrftoken = getCSRFToken();
-      await http.post(
-        '/customers/logout',
-        null,
-        {
-            withCredentials: true,
-            headers: { "X-CSRFToken": csrftoken },
-        },
-      );
+      await http.post('/customers/logout', null, {
+        withCredentials: true,
+        headers: { 'X-CSRFToken': csrftoken },
+      });
     } finally {
       // Clear cookies even if the logout request fails
       // This ensures local cleanup happens regardless

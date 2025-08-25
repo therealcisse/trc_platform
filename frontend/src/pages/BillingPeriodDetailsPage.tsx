@@ -103,11 +103,11 @@ export const BillingPeriodDetailsPage = () => {
             The billing period you're looking for doesn't exist.
           </p>
           <Link
-            to="/billing"
+            to="/billing-history"
             className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
           >
             <ArrowLeftIcon className="h-4 w-4 mr-2" />
-            Back to Billing
+            Back to Billing History
           </Link>
         </div>
       </div>
@@ -118,11 +118,11 @@ export const BillingPeriodDetailsPage = () => {
     <div className="p-8">
       {/* Back Link */}
       <Link
-        to="/billing"
+        to="/billing-history"
         className="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-6"
       >
         <ArrowLeftIcon className="h-4 w-4 mr-2" />
-        Back to Billing
+        Back to Billing History
       </Link>
 
       {/* Header */}
