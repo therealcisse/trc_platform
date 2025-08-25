@@ -1,12 +1,13 @@
 import { useState } from 'react';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tokenService } from '../services/token.service';
-import { format } from 'date-fns';
-import { PlusIcon, KeyIcon, TrashIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import { useForm } from 'react-hook-form';
 import { zodResolver } from '@hookform/resolvers/zod';
 import { z } from 'zod';
+import { format } from 'date-fns';
+import { KeyIcon, PlusIcon, TrashIcon, ClipboardDocumentIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import type { TokenGenerationResponse } from '../types/token';
 
 const tokenSchema = z.object({
   name: z.string().min(1, 'Token name is required').max(50, 'Name must be 50 characters or less'),
@@ -17,7 +18,7 @@ type TokenFormData = z.infer<typeof tokenSchema>;
 export const TokensPage = () => {
   const queryClient = useQueryClient();
   const [isModalOpen, setIsModalOpen] = useState(false);
-  const [newToken, setNewToken] = useState<string | null>(null);
+  const [newTokenResponse, setNewTokenResponse] = useState<TokenGenerationResponse | null>(null);
   const [copiedToken, setCopiedToken] = useState(false);
 
   const { data: tokens, isLoading } = useQuery({
@@ -28,8 +29,8 @@ export const TokensPage = () => {
   const createTokenMutation = useMutation({
     mutationFn: tokenService.createToken,
     onSuccess: (data) => {
-      setNewToken(data.token);
       queryClient.invalidateQueries({ queryKey: ['tokens'] });
+      setNewTokenResponse(data);
     },
   });
 
@@ -55,8 +56,8 @@ export const TokensPage = () => {
   };
 
   const handleCopyToken = () => {
-    if (newToken) {
-      navigator.clipboard.writeText(newToken);
+    if (newTokenResponse) {
+      navigator.clipboard.writeText(newTokenResponse.token);
       setCopiedToken(true);
       setTimeout(() => setCopiedToken(false), 2000);
     }
@@ -64,7 +65,7 @@ export const TokensPage = () => {
 
   const handleCloseModal = () => {
     setIsModalOpen(false);
-    setNewToken(null);
+    setNewTokenResponse(null);
     reset();
   };
 
@@ -132,7 +133,7 @@ export const TokensPage = () => {
                         {token.name}
                       </h3>
                       <span className="ml-3 px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-sm font-mono">
-                        {token.prefix}...
+                        {token.tokenPrefix}...
                       </span>
                     </div>
                     <div className="mt-2 flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-500">
@@ -192,10 +193,10 @@ export const TokensPage = () => {
           <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md">
             <div className="p-6">
               <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
-                {newToken ? 'Token Created Successfully' : 'Create New Token'}
+                {newTokenResponse ? 'Token Created Successfully' : 'Create New Token'}
               </h2>
 
-              {!newToken ? (
+              {!newTokenResponse ? (
                 <form onSubmit={handleSubmit(onSubmit)}>
                   <div className="mb-4">
                     <label
@@ -249,7 +250,7 @@ export const TokensPage = () => {
                     <div className="flex items-center space-x-2">
                       <input
                         type="text"
-                        value={newToken}
+                        value={newTokenResponse.token}
                         readOnly
                         className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg font-mono text-sm"
                       />

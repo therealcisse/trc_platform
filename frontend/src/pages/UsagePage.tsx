@@ -10,7 +10,8 @@ import {
   ChevronRightIcon
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import type { ApiRequest } from '../types/billing';
+import { RequestStatus } from '../types/billing';
+import type { RequestLog } from '../types/billing';
 
 const PAGE_SIZE = 25; // As specified in UI.md
 
@@ -41,10 +42,9 @@ export const UsagePage = () => {
     setPage(1);
   };
 
-  const getStatusColor = (status: number): string => {
-    if (status >= 200 && status < 300) return 'text-green-600 dark:text-green-400';
-    if (status >= 400 && status < 500) return 'text-yellow-600 dark:text-yellow-400';
-    if (status >= 500) return 'text-red-600 dark:text-red-400';
+  const getStatusColor = (status: RequestStatus): string => {
+    if (status === RequestStatus.SUCCESS) return 'text-green-600 dark:text-green-400';
+    if (status === RequestStatus.ERROR) return 'text-red-600 dark:text-red-400';
     return 'text-gray-600 dark:text-gray-400';
   };
 
@@ -57,19 +57,18 @@ export const UsagePage = () => {
   };
 
   const exportData = () => {
-    if (!data?.data) return;
+    if (!data?.results) return;
     
     const csv = [
-      ['Timestamp', 'Service', 'Status', 'Duration (ms)', 'Request Size', 'Response Size', 'Token', 'Request ID'],
-      ...data.data.map((req: ApiRequest) => [
-        format(new Date(req.timestamp), 'yyyy-MM-dd HH:mm:ss'),
+      ['Timestamp', 'Service', 'Status', 'Duration (ms)', 'Request Size', 'Response Size', 'Request ID'],
+      ...data.results.map((req: RequestLog) => [
+        format(new Date(req.requestTs), 'yyyy-MM-dd HH:mm:ss'),
         req.service,
         req.status.toString(),
-        req.duration.toString(),
-        req.requestSize.toString(),
-        req.responseSize.toString(),
-        req.tokenPrefix || '',
-        req.id,
+        req.durationMs.toString(),
+        req.requestBytes.toString(),
+        req.responseBytes.toString(),
+        req.requestId,
       ])
     ].map(row => row.join(',')).join('\n');
 
@@ -153,11 +152,11 @@ export const UsagePage = () => {
       {/* Results Summary */}
       <div className="flex items-center justify-between mb-4">
         <p className="text-sm text-gray-600 dark:text-gray-400">
-          Showing {data?.data.length || 0} of {data?.totalItems || 0} requests
+          Showing {data?.results.length || 0} of {data?.count || 0} requests
         </p>
         <button
           onClick={exportData}
-          disabled={!data?.data.length}
+          disabled={!data?.results.length}
           className="px-4 py-2 text-sm font-medium text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
         >
           Export to CSV
@@ -166,7 +165,7 @@ export const UsagePage = () => {
 
       {/* Request Table */}
       <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
-        {data?.data.length === 0 ? (
+        {!data?.results || data.results.length === 0 ? (
           <div className="p-8 text-center">
             <ChartBarIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
             <p className="text-gray-600 dark:text-gray-400">No usage data found for the selected period</p>
@@ -200,10 +199,10 @@ export const UsagePage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {data?.data.map((request: ApiRequest) => (
-                  <tr key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                {data?.results.map((request: RequestLog) => (
+                  <tr key={request.requestId} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {format(new Date(request.timestamp), 'MMM d, yyyy HH:mm:ss')}
+                      {format(new Date(request.requestTs), 'MMM d, yyyy HH:mm:ss')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {request.service}
@@ -214,25 +213,25 @@ export const UsagePage = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {request.duration}ms
+                      {request.durationMs}ms
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex flex-col">
-                        <span>↑ {formatBytes(request.requestSize)}</span>
-                        <span>↓ {formatBytes(request.responseSize)}</span>
+                        <span>↑ {formatBytes(request.requestBytes)}</span>
+                        <span>↓ {formatBytes(request.responseBytes)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {request.tokenPrefix ? (
+                      {request.tokenId ? (
                         <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs">
-                          {request.tokenPrefix}...
+                          Token
                         </code>
                       ) : (
                         '-'
                       )}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs">
-                      {request.id}
+                      {request.requestId}
                     </td>
                   </tr>
                 ))}
@@ -243,15 +242,15 @@ export const UsagePage = () => {
       </div>
 
       {/* Pagination */}
-      {data && data.totalPages > 1 && (
+      {data && (data.next || data.previous) && (
         <div className="flex items-center justify-between mt-6">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={!data.hasPrevious}
+              disabled={!data.previous}
               className={clsx(
                 'p-2 rounded-lg border transition-colors',
-                data.hasPrevious
+                data.previous
                   ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                   : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
               )}
@@ -259,42 +258,16 @@ export const UsagePage = () => {
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
             
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: Math.min(5, data.totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (data.totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (page <= 3) {
-                  pageNum = i + 1;
-                } else if (page >= data.totalPages - 2) {
-                  pageNum = data.totalPages - 4 + i;
-                } else {
-                  pageNum = page - 2 + i;
-                }
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={clsx(
-                      'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
-                      pageNum === page
-                        ? 'bg-primary-600 text-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    )}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+              Page {page}
+            </span>
             
             <button
-              onClick={() => setPage(p => Math.min(data.totalPages, p + 1))}
-              disabled={!data.hasNext}
+              onClick={() => setPage(p => p + 1)}
+              disabled={!data.next}
               className={clsx(
                 'p-2 rounded-lg border transition-colors',
-                data.hasNext
+                data.next
                   ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                   : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
               )}
@@ -304,7 +277,7 @@ export const UsagePage = () => {
           </div>
           
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Page {page} of {data.totalPages}
+            Total: {data.count} requests
           </p>
         </div>
       )}

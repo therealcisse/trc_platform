@@ -27,10 +27,10 @@ export interface User {
   dateJoined: Date;
   isSuperuser?: boolean;
   lastLogin?: Date | null;
-  
+
   // Computed properties
   isEmailVerified?: boolean;
-  
+
   // Relations
   apiTokens?: ApiToken[];
   inviteCodeUsed?: InviteCode;
@@ -51,10 +51,10 @@ export interface ApiToken {
   createdAt: Date;
   revokedAt: Date | null;
   lastUsedAt: Date | null;
-  
+
   // Computed properties
   isRevoked?: boolean;
-  
+
   // Relations
   requestLogs?: RequestLog[];
 }
@@ -83,21 +83,21 @@ export interface BillingPeriod {
   totalRequests: number;
   totalCostCents: number;
   isCurrent: boolean;
-  
+
   // Payment tracking fields
   paymentStatus: PaymentStatus;
   paidAt: Date | null;
   paidAmountCents: number | null;
   paymentReference: string | null;
   paymentNotes: string | null;
-  
+
   createdAt: Date;
   updatedAt: Date;
-  
+
   // Computed properties
   periodLabel?: string;
   canBeMarkedPaid?: boolean;
-  
+
   // Relations
   requests?: RequestLog[];
 }
@@ -130,7 +130,7 @@ export interface RequestLog {
   billingPeriodId: string | null; // UUID foreign key
   billingPeriod?: BillingPeriod | null;
   result: string | null;
-  
+
   // Relations
   savedImage?: RequestImage;
 }
@@ -320,9 +320,9 @@ export const INVITE_CODE_LENGTH = 8 as const;
  */
 export function formatBillingPeriodLabel(period: BillingPeriod): string {
   const date = new Date(period.periodStart);
-  const options: Intl.DateTimeFormatOptions = { 
-    year: 'numeric', 
-    month: 'long' 
+  const options: Intl.DateTimeFormatOptions = {
+    year: 'numeric',
+    month: 'long'
   };
   return date.toLocaleDateString('en-US', options);
 }
@@ -348,11 +348,11 @@ export function isBillingPeriodOverdue(period: BillingPeriod): boolean {
   if (period.isCurrent || period.paymentStatus === PaymentStatus.PAID) {
     return false;
   }
-  
+
   const gracePeriodDays = 30;
   const overdueDate = new Date(period.periodEnd);
   overdueDate.setDate(overdueDate.getDate() + gracePeriodDays);
-  
+
   return new Date() > overdueDate && period.paymentStatus !== PaymentStatus.WAIVED;
 }
 

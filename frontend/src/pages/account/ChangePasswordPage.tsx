@@ -111,7 +111,7 @@ export const ChangePasswordPage = () => {
   };
 
   // Check if user email is verified
-  if (user && !user.emailVerified) {
+  if (user && !user.isEmailVerified) {
     return (
       <div className="p-8">
         <div className="max-w-2xl mx-auto">

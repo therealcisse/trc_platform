@@ -1,13 +1,29 @@
+export const PaymentStatus = {
+  PENDING: 'pending',
+  PAID: 'paid',
+  OVERDUE: 'overdue',
+  WAIVED: 'waived',
+} as const;
+
+export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
+
 export interface BillingPeriod {
   id: string;
-  label: string;
-  startDate: string;
-  endDate: string;
+  userId: string;
+  periodStart: Date;
+  periodEnd: Date;
   totalRequests: number;
-  totalCost: number;
-  status: 'pending' | 'paid' | 'overdue' | 'waived';
-  paymentDate?: string;
-  paymentReference?: string;
+  totalCostCents: number;
+  isCurrent: boolean;
+  paymentStatus: PaymentStatus;
+  paidAt: Date | null;
+  paidAmountCents: number | null;
+  paymentReference: string | null;
+  paymentNotes: string | null;
+  createdAt: Date;
+  updatedAt: Date;
+  periodLabel?: string; // Computed property
+  canBeMarkedPaid?: boolean; // Computed property
 }
 
 export interface UsageSummary {
@@ -18,22 +34,32 @@ export interface UsageSummary {
   lastRequestAt?: string;
 }
 
-export interface ApiRequest {
+export const RequestStatus = {
+  SUCCESS: 'success',
+  ERROR: 'error',
+} as const;
+
+export type RequestStatus = typeof RequestStatus[keyof typeof RequestStatus];
+
+export interface RequestLog {
   id: string;
-  timestamp: string;
+  userId: string;
+  tokenId: string | null;
   service: string;
-  status: number;
-  duration: number;
-  requestSize: number;
-  responseSize: number;
-  tokenPrefix?: string;
+  requestTs: Date;
+  durationMs: number;
+  requestBytes: number;
+  responseBytes: number;
+  status: RequestStatus;
+  errorCode: string | null;
+  requestId: string;
+  billingPeriodId: string | null;
+  result: string | null;
 }
 
 export interface PaginatedResponse<T> {
-  data: T[];
-  page: number;
-  totalPages: number;
-  totalItems: number;
-  hasNext: boolean;
-  hasPrevious: boolean;
+  results: T[];
+  count: number;
+  next: string | null;
+  previous: string | null;
 }

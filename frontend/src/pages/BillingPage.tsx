@@ -5,6 +5,7 @@ import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
 import { CreditCardIcon, CheckCircleIcon, ClockIcon, ExclamationCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { PaymentStatus } from '../types/billing';
 
 export const BillingPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -14,38 +15,41 @@ export const BillingPage = () => {
     queryFn: () => billingService.getBillingPeriods(statusFilter || undefined),
   });
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    }).format(cents / 100);
   };
 
   const formatNumber = (num: number) => {
     return new Intl.NumberFormat('en-US').format(num);
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
-      case 'paid':
+      case PaymentStatus.PAID:
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
-      case 'pending':
+      case PaymentStatus.PENDING:
         return <ClockIcon className="h-5 w-5 text-yellow-500" />;
-      case 'overdue':
+      case PaymentStatus.OVERDUE:
         return <ExclamationCircleIcon className="h-5 w-5 text-red-500" />;
+      case PaymentStatus.WAIVED:
+        return <CheckCircleIcon className="h-5 w-5 text-gray-500" />;
       default:
         return null;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: PaymentStatus) => {
     switch (status) {
-      case 'paid':
+      case PaymentStatus.PAID:
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'pending':
+      case PaymentStatus.PENDING:
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'overdue':
+      case PaymentStatus.OVERDUE:
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      case PaymentStatus.WAIVED:
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
     }
@@ -104,17 +108,17 @@ export const BillingPage = () => {
                 <div className="flex-1">
                   <div className="flex items-center mb-2">
                     <h3 className="text-xl font-semibold text-gray-900 dark:text-white">
-                      {period.label}
+                      {period.periodLabel || format(new Date(period.periodStart), 'MMMM yyyy')}
                     </h3>
                     <span
                       className={clsx(
                         'ml-3 px-3 py-1 rounded-full text-sm font-medium inline-flex items-center',
-                        getStatusColor(period.status)
+                        getStatusColor(period.paymentStatus)
                       )}
                     >
-                      {getStatusIcon(period.status)}
+                      {getStatusIcon(period.paymentStatus)}
                       <span className="ml-1">
-                        {period.status.charAt(0).toUpperCase() + period.status.slice(1)}
+                        {period.paymentStatus.charAt(0).toUpperCase() + period.paymentStatus.slice(1)}
                       </span>
                     </span>
                   </div>
@@ -123,8 +127,8 @@ export const BillingPage = () => {
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-500">Period</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {format(new Date(period.startDate), 'MMM d')} -{' '}
-                        {format(new Date(period.endDate), 'MMM d, yyyy')}
+                        {format(new Date(period.periodStart), 'MMM d')} -{' '}
+                        {format(new Date(period.periodEnd), 'MMM d, yyyy')}
                       </p>
                     </div>
                     
@@ -138,15 +142,15 @@ export const BillingPage = () => {
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-500">Total Cost</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
-                        {formatCurrency(period.totalCost)}
+                        {formatCurrency(period.totalCostCents)}
                       </p>
                     </div>
                     
-                    {period.paymentDate && (
+                    {period.paidAt && (
                       <div>
                         <p className="text-sm text-gray-500 dark:text-gray-500">Payment Date</p>
                         <p className="text-sm font-medium text-gray-900 dark:text-white">
-                          {format(new Date(period.paymentDate), 'PPP')}
+                          {format(new Date(period.paidAt), 'PPP')}
                         </p>
                       </div>
                     )}

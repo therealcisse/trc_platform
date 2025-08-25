@@ -1,5 +1,5 @@
 import { http } from '../lib/http';
-import type { BillingPeriod, UsageSummary, ApiRequest, PaginatedResponse } from '../types/billing';
+import type { BillingPeriod, UsageSummary, RequestLog, PaginatedResponse } from '../types/billing';
 
 export const billingService = {
   async getCurrentPeriod(): Promise<BillingPeriod> {
@@ -13,7 +13,7 @@ export const billingService = {
     return data;
   },
 
-  async getBillingPeriodDetails(periodId: string, page = 1): Promise<PaginatedResponse<ApiRequest>> {
+  async getBillingPeriodDetails(periodId: string, page = 1): Promise<PaginatedResponse<RequestLog>> {
     const { data } = await http.get(`/customers/billing/periods/${periodId}`, {
       params: { page },
     });
@@ -30,7 +30,7 @@ export const billingService = {
     to?: string;
     page?: number;
     pageSize?: number;
-  }): Promise<PaginatedResponse<ApiRequest>> {
+  }): Promise<PaginatedResponse<RequestLog>> {
     const { data } = await http.get('/customers/usage/requests', { 
       params: {
         ...params,

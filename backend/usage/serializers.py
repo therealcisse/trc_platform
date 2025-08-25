@@ -54,6 +54,7 @@ class CurrentBillingPeriodSerializer(serializers.ModelSerializer):
             "period_start",
             "period_end",
             "period_label",
+            "payment_status",
             "total_requests",
             "total_cost_cents",
             "last_request_at",

@@ -13,7 +13,8 @@ import {
   ExclamationCircleIcon
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
-import type { ApiRequest } from '../types/billing';
+import { PaymentStatus, RequestStatus } from '../types/billing';
+import type { RequestLog } from '../types/billing';
 
 export const BillingPeriodDetailsPage = () => {
   const { periodId } = useParams<{ periodId: string }>();
@@ -33,11 +34,11 @@ export const BillingPeriodDetailsPage = () => {
     enabled: !!periodId,
   });
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
-    }).format(amount);
+    }).format(cents / 100);
   };
 
   const formatNumber = (num: number) => {
@@ -52,36 +53,38 @@ export const BillingPeriodDetailsPage = () => {
     return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
   };
 
-  const getStatusIcon = (status: string) => {
+  const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
-      case 'paid':
+      case PaymentStatus.PAID:
         return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
-      case 'pending':
+      case PaymentStatus.PENDING:
         return <ClockIcon className="h-5 w-5 text-yellow-500" />;
-      case 'overdue':
+      case PaymentStatus.OVERDUE:
         return <ExclamationCircleIcon className="h-5 w-5 text-red-500" />;
+      case PaymentStatus.WAIVED:
+        return <CheckCircleIcon className="h-5 w-5 text-gray-500" />;
       default:
         return null;
     }
   };
 
-  const getStatusColor = (status: string) => {
+  const getStatusColor = (status: PaymentStatus) => {
     switch (status) {
-      case 'paid':
+      case PaymentStatus.PAID:
         return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
-      case 'pending':
+      case PaymentStatus.PENDING:
         return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
-      case 'overdue':
+      case PaymentStatus.OVERDUE:
         return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      case PaymentStatus.WAIVED:
       default:
         return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
     }
   };
 
-  const getRequestStatusColor = (status: number): string => {
-    if (status >= 200 && status < 300) return 'text-green-600 dark:text-green-400';
-    if (status >= 400 && status < 500) return 'text-yellow-600 dark:text-yellow-400';
-    if (status >= 500) return 'text-red-600 dark:text-red-400';
+  const getRequestStatusColor = (status: RequestStatus): string => {
+    if (status === RequestStatus.SUCCESS) return 'text-green-600 dark:text-green-400';
+    if (status === RequestStatus.ERROR) return 'text-red-600 dark:text-red-400';
     return 'text-gray-600 dark:text-gray-400';
   };
 
@@ -132,21 +135,21 @@ export const BillingPeriodDetailsPage = () => {
         <div className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
-              Billing Period: {period.label}
+              Billing Period: {period.periodLabel || format(new Date(period.periodStart), 'MMMM yyyy')}
             </h1>
             <p className="text-gray-600 dark:text-gray-400 mt-2">
-              {format(new Date(period.startDate), 'MMMM d')} - {format(new Date(period.endDate), 'MMMM d, yyyy')}
+              {format(new Date(period.periodStart), 'MMMM d')} - {format(new Date(period.periodEnd), 'MMMM d, yyyy')}
             </p>
           </div>
           <span
             className={clsx(
               'px-4 py-2 rounded-full text-sm font-medium inline-flex items-center',
-              getStatusColor(period.status)
+              getStatusColor(period.paymentStatus)
             )}
           >
-            {getStatusIcon(period.status)}
+            {getStatusIcon(period.paymentStatus)}
             <span className="ml-2">
-              {period.status.charAt(0).toUpperCase() + period.status.slice(1)}
+              {period.paymentStatus.charAt(0).toUpperCase() + period.paymentStatus.slice(1)}
             </span>
           </span>
         </div>
@@ -168,7 +171,7 @@ export const BillingPeriodDetailsPage = () => {
             Total Cost
           </p>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
-            {formatCurrency(period.totalCost)}
+            {formatCurrency(period.totalCostCents)}
           </p>
         </div>
         
@@ -178,14 +181,14 @@ export const BillingPeriodDetailsPage = () => {
           </p>
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {period.totalRequests > 0 
-              ? formatCurrency(period.totalCost / period.totalRequests)
+              ? formatCurrency(period.totalCostCents / period.totalRequests)
               : '$0.00'}
           </p>
         </div>
       </div>
 
       {/* Payment Information */}
-      {period.paymentDate && (
+      {period.paidAt && (
         <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-xl p-6 mb-8">
           <div className="flex items-start">
             <CheckCircleIcon className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5" />
@@ -194,7 +197,7 @@ export const BillingPeriodDetailsPage = () => {
                 Payment Received
               </h3>
               <p className="text-sm text-green-700 dark:text-green-300 mt-1">
-                Payment was received on {format(new Date(period.paymentDate), 'PPPP')}
+                Payment was received on {format(new Date(period.paidAt), 'PPPP')}
               </p>
               {period.paymentReference && (
                 <p className="text-sm text-green-700 dark:text-green-300 mt-2">
@@ -213,11 +216,11 @@ export const BillingPeriodDetailsPage = () => {
             Request History
           </h2>
           <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
-            Showing {requests?.data.length || 0} of {requests?.totalItems || 0} requests
+            Showing {requests?.results.length || 0} of {requests?.count || 0} requests
           </p>
         </div>
 
-        {requests?.data.length === 0 ? (
+        {!requests?.results || requests.results.length === 0 ? (
           <div className="p-8 text-center">
             <p className="text-gray-600 dark:text-gray-400">
               No requests found for this billing period
@@ -249,10 +252,10 @@ export const BillingPeriodDetailsPage = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
-                {requests?.data.map((request: ApiRequest) => (
-                  <tr key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                {requests?.results.map((request: RequestLog) => (
+                  <tr key={request.requestId} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
-                      {format(new Date(request.timestamp), 'MMM d, yyyy HH:mm:ss')}
+                      {format(new Date(request.requestTs), 'MMM d, yyyy HH:mm:ss')}
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
                       {request.service}
@@ -263,16 +266,16 @@ export const BillingPeriodDetailsPage = () => {
                       </span>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {request.duration}ms
+                      {request.durationMs}ms
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
                       <div className="flex flex-col">
-                        <span>↑ {formatBytes(request.requestSize)}</span>
-                        <span>↓ {formatBytes(request.responseSize)}</span>
+                        <span>↑ {formatBytes(request.requestBytes)}</span>
+                        <span>↓ {formatBytes(request.responseBytes)}</span>
                       </div>
                     </td>
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs">
-                      {request.id}
+                      {request.requestId}
                     </td>
                   </tr>
                 ))}
@@ -283,15 +286,15 @@ export const BillingPeriodDetailsPage = () => {
       </div>
 
       {/* Pagination */}
-      {requests && requests.totalPages > 1 && (
+      {requests && (requests.next || requests.previous) && (
         <div className="flex items-center justify-between mt-6">
           <div className="flex items-center space-x-2">
             <button
               onClick={() => setPage(p => Math.max(1, p - 1))}
-              disabled={!requests.hasPrevious}
+              disabled={!requests.previous}
               className={clsx(
                 'p-2 rounded-lg border transition-colors',
-                requests.hasPrevious
+                requests.previous
                   ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                   : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
               )}
@@ -299,42 +302,16 @@ export const BillingPeriodDetailsPage = () => {
               <ChevronLeftIcon className="h-5 w-5" />
             </button>
             
-            <div className="flex items-center space-x-1">
-              {Array.from({ length: Math.min(5, requests.totalPages) }, (_, i) => {
-                let pageNum: number;
-                if (requests.totalPages <= 5) {
-                  pageNum = i + 1;
-                } else if (page <= 3) {
-                  pageNum = i + 1;
-                } else if (page >= requests.totalPages - 2) {
-                  pageNum = requests.totalPages - 4 + i;
-                } else {
-                  pageNum = page - 2 + i;
-                }
-                
-                return (
-                  <button
-                    key={pageNum}
-                    onClick={() => setPage(pageNum)}
-                    className={clsx(
-                      'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
-                      pageNum === page
-                        ? 'bg-primary-600 text-white'
-                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
-                    )}
-                  >
-                    {pageNum}
-                  </button>
-                );
-              })}
-            </div>
+            <span className="px-3 py-1 text-sm text-gray-700 dark:text-gray-300">
+              Page {page}
+            </span>
             
             <button
-              onClick={() => setPage(p => Math.min(requests.totalPages, p + 1))}
-              disabled={!requests.hasNext}
+              onClick={() => setPage(p => p + 1)}
+              disabled={!requests.next}
               className={clsx(
                 'p-2 rounded-lg border transition-colors',
-                requests.hasNext
+                requests.next
                   ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
                   : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
               )}
@@ -344,7 +321,7 @@ export const BillingPeriodDetailsPage = () => {
           </div>
           
           <p className="text-sm text-gray-600 dark:text-gray-400">
-            Page {page} of {requests.totalPages}
+            Total: {requests.count} requests
           </p>
         </div>
       )}

@@ -1,5 +1,5 @@
 import { http } from '../lib/http';
-import type { ApiToken, CreateTokenResponse, TokenFormData } from '../types/token';
+import type { ApiToken, TokenGenerationResponse, TokenFormData } from '../types/token';
 
 export const tokenService = {
   async getTokens(): Promise<ApiToken[]> {
@@ -7,7 +7,7 @@ export const tokenService = {
     return data;
   },
 
-  async createToken(formData: TokenFormData): Promise<CreateTokenResponse> {
+  async createToken(formData: TokenFormData): Promise<TokenGenerationResponse> {
     const { data } = await http.post('/customers/tokens', formData);
     return data;
   },

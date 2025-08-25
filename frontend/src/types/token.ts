@@ -1,17 +1,19 @@
 export interface ApiToken {
   id: string;
+  userId: string;
   name: string;
-  prefix: string;
-  createdAt: string;
-  lastUsedAt: string | null;
-  revokedAt: string | null;
-  isRevoked: boolean;
+  tokenPrefix: string;
+  tokenHash: string;
+  createdAt: Date;
+  revokedAt: Date | null;
+  lastUsedAt: Date | null;
+  isRevoked?: boolean; // Computed property
 }
 
-export interface CreateTokenResponse {
+export interface TokenGenerationResponse {
   token: string;
-  tokenId: string;
-  prefix: string;
+  tokenPrefix: string;
+  apiToken: ApiToken;
 }
 
 export interface TokenFormData {

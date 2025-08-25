@@ -49,7 +49,7 @@ export const DashboardPage = () => {
     },
     {
       name: 'Current Cost',
-      value: currentPeriod?.totalCost || 0,
+      value: currentPeriod?.totalCostCents ? currentPeriod.totalCostCents / 100 : 0,
       icon: CurrencyDollarIcon,
       change: '+5%',
       changeType: 'positive',
@@ -101,10 +101,10 @@ export const DashboardPage = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-primary-100 text-sm font-medium">Current Billing Period</p>
-              <h2 className="text-2xl font-bold mt-1">{currentPeriod.label}</h2>
+              <h2 className="text-2xl font-bold mt-1">{currentPeriod.periodLabel || format(new Date(currentPeriod.periodStart), 'MMMM yyyy')}</h2>
               <p className="text-primary-100 text-sm mt-2">
-                {format(new Date(currentPeriod.startDate), 'MMM d')} -{' '}
-                {format(new Date(currentPeriod.endDate), 'MMM d, yyyy')}
+                {format(new Date(currentPeriod.periodStart), 'MMM d')} -{' '}
+                {format(new Date(currentPeriod.periodEnd), 'MMM d, yyyy')}
               </p>
             </div>
             <div className="text-right">
@@ -112,12 +112,12 @@ export const DashboardPage = () => {
               <span
                 className={clsx(
                   'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1',
-                  currentPeriod.status === 'paid' && 'bg-green-100 text-green-800',
-                  currentPeriod.status === 'pending' && 'bg-yellow-100 text-yellow-800',
-                  currentPeriod.status === 'overdue' && 'bg-red-100 text-red-800'
+                  currentPeriod.paymentStatus === 'paid' && 'bg-green-100 text-green-800',
+                  currentPeriod.paymentStatus === 'pending' && 'bg-yellow-100 text-yellow-800',
+                  currentPeriod.paymentStatus === 'overdue' && 'bg-red-100 text-red-800'
                 )}
               >
-                {currentPeriod.status.charAt(0).toUpperCase() + currentPeriod.status.slice(1)}
+                {currentPeriod.paymentStatus.charAt(0).toUpperCase() + currentPeriod.paymentStatus.slice(1)}
               </span>
             </div>
           </div>

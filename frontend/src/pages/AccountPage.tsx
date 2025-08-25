@@ -1,10 +1,10 @@
 import { Link } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  UserCircleIcon, 
-  KeyIcon, 
+import {
+  UserCircleIcon,
+  KeyIcon,
   ShieldCheckIcon,
-  ArrowRightIcon 
+  ArrowRightIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -19,14 +19,14 @@ export const AccountPage = () => {
       items: [
         { label: 'Email', value: user?.email || 'Not available' },
         { label: 'User ID', value: user?.id || 'Not available' },
-        { 
-          label: 'Email Verification', 
-          value: user?.emailVerified ? 'Verified' : 'Not Verified',
-          status: user?.emailVerified ? 'success' : 'warning'
+        {
+          label: 'Email Verification',
+          value: user?.isEmailVerified ? 'Verified' : 'Not Verified',
+          status: user?.isEmailVerified ? 'success' : 'warning'
         },
-        { 
-          label: 'Account Created', 
-          value: user?.createdAt ? format(new Date(user.createdAt), 'PPP') : 'Not available' 
+        {
+          label: 'Account Created',
+          value: user?.dateJoined ? format(new Date(user.dateJoined), 'PPP') : 'Not available'
         },
       ]
     },
@@ -56,7 +56,7 @@ export const AccountPage = () => {
       </div>
 
       {/* Email Verification Banner */}
-      {user && !user.emailVerified && (
+      {user && !user.isEmailVerified && (
         <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
           <div className="flex">
             <div className="flex-shrink-0">

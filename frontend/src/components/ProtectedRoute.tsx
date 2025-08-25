@@ -31,7 +31,7 @@ export const ProtectedRoute = () => {
     route => location.pathname.startsWith(route)
   );
 
-  if (requiresVerification && user && !user.emailVerified) {
+  if (requiresVerification && user && !user.isEmailVerified) {
     // Show access restricted message for unverified users
     return (
       <div className="min-h-screen bg-gray-50 dark:bg-gray-950 flex items-center justify-center">

@@ -19,7 +19,7 @@ export const EmailVerificationBanner = () => {
   const [attemptsRemaining, setAttemptsRemaining] = useState(MAX_VERIFICATION_ATTEMPTS);
 
   // Don't show banner if email is verified or user doesn't exist
-  if (!user || user.emailVerified || !showBanner) {
+  if (!user || user.isEmailVerified || !showBanner) {
     return null;
   }
 
