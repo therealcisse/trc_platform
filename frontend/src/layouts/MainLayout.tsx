@@ -27,8 +27,8 @@ export const MainLayout = () => {
   };
 
   const toggleExpanded = (name: string) => {
-    setExpandedItems(prev => 
-      prev.includes(name) 
+    setExpandedItems(prev =>
+      prev.includes(name)
         ? prev.filter(item => item !== name)
         : [...prev, name]
     );
@@ -37,8 +37,8 @@ export const MainLayout = () => {
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'API Tokens', href: '/tokens', icon: KeyIcon },
-    { 
-      name: 'Billing', 
+    {
+      name: 'Billing',
       icon: CreditCardIcon,
       children: [
         { name: 'Current Period', href: '/billing/current' },
@@ -46,8 +46,8 @@ export const MainLayout = () => {
         { name: 'Usage Details', href: '/usage' }
       ]
     },
-    { 
-      name: 'Account', 
+    {
+      name: 'Account',
       icon: UserCircleIcon,
       children: [
         { name: 'Settings', href: '/account' },
@@ -65,39 +65,45 @@ export const MainLayout = () => {
         {/* Sidebar */}
         <div
           className={clsx(
-            'bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300',
+            'bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 relative',
             isSidebarCollapsed ? 'w-16' : 'w-64'
           )}
         >
+          {/* Toggle button - positioned absolutely so it's always visible */}
+          <button
+            onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
+            className={clsx(
+              'absolute -right-3 top-8 z-50 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-full p-1.5 shadow-md hover:shadow-lg transition-all duration-200 hover:scale-110'
+            )}
+            aria-label={isSidebarCollapsed ? 'Expand sidebar' : 'Collapse sidebar'}
+          >
+            <svg
+              className="w-4 h-4 text-gray-600 dark:text-gray-400"
+              fill="none"
+              viewBox="0 0 24 24"
+              stroke="currentColor"
+            >
+              <path
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                strokeWidth={2}
+                d={isSidebarCollapsed ? 'M13 5l7 7-7 7' : 'M11 19l-7-7 7-7'}
+              />
+            </svg>
+          </button>
+
           <div className="flex flex-col h-full">
             {/* Logo/Brand */}
-            <div className="flex items-center justify-between h-16 px-4 border-b border-gray-200 dark:border-gray-800">
-              <h1
-                className={clsx(
-                  'font-semibold text-xl text-gray-900 dark:text-white transition-opacity',
-                  isSidebarCollapsed && 'opacity-0'
-                )}
-              >
-                API Platform
-              </h1>
-              <button
-                onClick={() => setIsSidebarCollapsed(!isSidebarCollapsed)}
-                className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800"
-              >
-                <svg
-                  className="w-5 h-5 text-gray-500"
-                  fill="none"
-                  viewBox="0 0 24 24"
-                  stroke="currentColor"
-                >
-                  <path
-                    strokeLinecap="round"
-                    strokeLinejoin="round"
-                    strokeWidth={2}
-                    d={isSidebarCollapsed ? 'M13 5l7 7-7 7' : 'M11 19l-7-7 7-7'}
-                  />
-                </svg>
-              </button>
+            <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-800">
+              {isSidebarCollapsed ? (
+                <div className="w-8 h-8 rounded bg-primary-500 flex items-center justify-center">
+                  <span className="text-white font-bold text-sm">AP</span>
+                </div>
+              ) : (
+                <h1 className="font-semibold text-xl text-gray-900 dark:text-white">
+                  TRC Platform
+                </h1>
+              )}
             </div>
 
             {/* Navigation */}
@@ -105,16 +111,16 @@ export const MainLayout = () => {
               {navigation.map((item) => (
                 <div key={item.name}>
                   {item.children ? (
-                    <>
+                    <div className="relative group">
                       <button
-                        onClick={() => toggleExpanded(item.name)}
+                        onClick={() => !isSidebarCollapsed && toggleExpanded(item.name)}
                         className={clsx(
                           'w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md transition-colors',
                           item.children.some(child => location.pathname.startsWith(child.href))
                             ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
+                          isSidebarCollapsed && 'cursor-default'
                         )}
-                        title={isSidebarCollapsed ? item.name : undefined}
                       >
                         <div className="flex items-center">
                           <item.icon
@@ -126,7 +132,7 @@ export const MainLayout = () => {
                           {!isSidebarCollapsed && <span>{item.name}</span>}
                         </div>
                         {!isSidebarCollapsed && (
-                          <ChevronDownIcon 
+                          <ChevronDownIcon
                             className={clsx(
                               "h-4 w-4 transition-transform",
                               expandedItems.includes(item.name) && "rotate-180"
@@ -134,6 +140,12 @@ export const MainLayout = () => {
                           />
                         )}
                       </button>
+                      {/* Tooltip for collapsed state */}
+                      {isSidebarCollapsed && (
+                        <div className="absolute left-full ml-2 py-1 px-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                          {item.name}
+                        </div>
+                      )}
                       {!isSidebarCollapsed && expandedItems.includes(item.name) && (
                         <div className="ml-8 mt-1 space-y-1">
                           {item.children.map((child) => (
@@ -154,28 +166,35 @@ export const MainLayout = () => {
                           ))}
                         </div>
                       )}
-                    </>
+                    </div>
                   ) : (
-                    <NavLink
-                      to={item.href}
-                      className={({ isActive }) =>
-                        clsx(
-                          'flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
-                          isActive
-                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                        )
-                      }
-                      title={isSidebarCollapsed ? item.name : undefined}
-                    >
-                      <item.icon
-                        className={clsx(
-                          'flex-shrink-0 h-5 w-5',
-                          !isSidebarCollapsed && 'mr-3'
-                        )}
-                      />
-                      {!isSidebarCollapsed && <span>{item.name}</span>}
-                    </NavLink>
+                    <div className="relative group">
+                      <NavLink
+                        to={item.href}
+                        className={({ isActive }) =>
+                          clsx(
+                            'flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
+                            isActive
+                              ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                              : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                          )
+                        }
+                      >
+                        <item.icon
+                          className={clsx(
+                            'flex-shrink-0 h-5 w-5',
+                            !isSidebarCollapsed && 'mr-3'
+                          )}
+                        />
+                        {!isSidebarCollapsed && <span>{item.name}</span>}
+                      </NavLink>
+                      {/* Tooltip for collapsed state */}
+                      {isSidebarCollapsed && (
+                        <div className="absolute left-full ml-2 py-1 px-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
+                          {item.name}
+                        </div>
+                      )}
+                    </div>
                   )}
                 </div>
               ))}
