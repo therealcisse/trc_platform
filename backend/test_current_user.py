@@ -12,14 +12,16 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 import json
+from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.test import Client
+from django.utils import timezone as django_utils_timezone
 
 User = get_user_model()
 
 
-def test_current_user_endpoint():
+def test_current_user_endpoint() -> None:
     """Test that /customers/me returns the correct logged-in user."""
 
     client = Client()
@@ -39,17 +41,17 @@ def test_current_user_endpoint():
         test_user = User.objects.create_user(
             email="test_current@example.com", password="testpass123"
         )
-        test_user.email_verified_at = django.utils.timezone.now()
+        test_user.email_verified_at = django_utils_timezone.now()
         test_user.save()
         print(f"Created test user: {test_user.email}")
     else:
-        test_user = regular_users.first()
+        test_user = regular_users.first()  # type: ignore[assignment]
         print(f"Using existing regular user: {test_user.email}")
 
     # Ensure the user has a verified email
     if not test_user.is_email_verified:
         print(f"   Setting email as verified for {test_user.email}")
-        test_user.email_verified_at = django.utils.timezone.now()
+        test_user.email_verified_at = django_utils_timezone.now()
         test_user.save()
 
     # Try to login with this user
@@ -117,25 +119,26 @@ def test_current_user_endpoint():
     admin_users = User.objects.filter(is_staff=True)
     if admin_users.exists():
         admin_user = admin_users.first()
-        print(f"   Testing with admin: {admin_user.email}")
+        if admin_user:
+            print(f"   Testing with admin: {admin_user.email}")
 
-        # Set password for admin
-        admin_user.set_password("adminpass123")
-        admin_user.save()
+            # Set password for admin
+            admin_user.set_password("adminpass123")
+            admin_user.save()
 
-        admin_login = admin_client.post(
-            "/api/customers/login",
-            data=json.dumps({"email": admin_user.email, "password": "adminpass123"}),
-            content_type="application/json",
-        )
+            admin_login = admin_client.post(
+                "/api/customers/login",
+                data=json.dumps({"email": admin_user.email, "password": "adminpass123"}),
+                content_type="application/json",
+            )
 
-        if admin_login.status_code == 200:
-            print("   ✓ Admin login successful")
+            if admin_login.status_code == 200:
+                print("   ✓ Admin login successful")
 
-            admin_me = admin_client.get("/api/customers/me")
-            if admin_me.status_code == 200:
-                admin_me_data = admin_me.json()
-                print(f"   Admin /me response: {admin_me_data.get('email')}")
+                admin_me = admin_client.get("/api/customers/me")
+                if admin_me.status_code == 200:
+                    admin_me_data = admin_me.json()
+                    print(f"   Admin /me response: {admin_me_data.get('email')}")
 
         # Now check if original client still returns correct user
         print("\n4. Re-checking original client session...")

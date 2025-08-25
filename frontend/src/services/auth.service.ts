@@ -1,4 +1,7 @@
 import { http } from '../lib/http';
+import { queryClient } from "../lib/queryClient";
+import { bootstrapCsrf } from '../lib/http';
+import { clearAuthCookies, getCSRFToken } from '../lib/csrf';
 import type {
   User,
   LoginCredentials,
@@ -9,6 +12,9 @@ import type {
 export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {
     const { data } = await http.post('/customers/login', credentials);
+
+    await bootstrapCsrf();
+
     return data;
   },
 
@@ -25,7 +31,22 @@ export const authService = {
   },
 
   async logout(): Promise<void> {
-    await http.post('/customers/logout');
+    try {
+      const csrftoken = getCSRFToken();
+      await http.post(
+        '/customers/logout',
+        null,
+        {
+            withCredentials: true,
+            headers: { "X-CSRFToken": csrftoken },
+        },
+      );
+    } finally {
+      // Clear cookies even if the logout request fails
+      // This ensures local cleanup happens regardless
+      queryClient.clear();
+      clearAuthCookies();
+    }
   },
 
   async getCurrentUser(): Promise<User> {

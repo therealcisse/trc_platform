@@ -20,7 +20,7 @@ from core.services.openai_client import (  # noqa: E402
 )
 
 
-def test_mock_mode():
+def test_mock_mode() -> None:
     """Test the mock implementation."""
     print("\n=== Testing Mock Mode ===")
     print(f"USE_MOCK_OPENAI: {settings.USE_MOCK_OPENAI}")
@@ -62,7 +62,7 @@ def test_mock_mode():
     print(f"\nPing test: {mock_client.ping()}")
 
 
-def test_singleton_client():
+def test_singleton_client() -> None:
     """Test the singleton client that respects USE_MOCK_OPENAI setting."""
     print("\n=== Testing Singleton Client ===")
     print(f"Implementation type: {type(openai_client._impl).__name__}")
@@ -85,7 +85,7 @@ def test_singleton_client():
     print(f"\nPing test: {openai_client.ping()}")
 
 
-def test_production_mode_validation():
+def test_production_mode_validation() -> None:
     """Test that production mode properly validates API key requirement."""
     print("\n=== Testing Production Mode Validation ===")
 

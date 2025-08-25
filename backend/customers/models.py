@@ -6,10 +6,11 @@ from datetime import UTC, datetime
 from argon2 import PasswordHasher
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
+from typing import Any
 
 
 class UserManager(BaseUserManager):
-    def create_user(self, email: str, password: str | None = None, **extra_fields) -> "User":
+    def create_user(self, email: str, password: str | None = None, **extra_fields: Any) -> "User":
         if not email:
             raise ValueError("The Email field must be set")
         email = self.normalize_email(email)
@@ -19,7 +20,7 @@ class UserManager(BaseUserManager):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email: str, password: str | None = None, **extra_fields) -> "User":
+    def create_superuser(self, email: str, password: str | None = None, **extra_fields: Any) -> "User":
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)

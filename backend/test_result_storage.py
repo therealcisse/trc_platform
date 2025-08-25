@@ -19,7 +19,7 @@ from usage.models import RequestLog
 User = get_user_model()
 
 
-def test_result_storage():
+def test_result_storage() -> None:
     """Test that results are properly stored in RequestLog."""
     print("\n=== Testing Result Storage in RequestLog ===")
     print(f"USE_MOCK_OPENAI: {settings.USE_MOCK_OPENAI}")
@@ -59,10 +59,10 @@ def test_result_storage():
         service="core.image_solve",
         duration_ms=100,
         request_bytes=len(test_image),
-        response_bytes=len(result["result"]),
+        response_bytes=len(str(result["result"])),
         status="success",
         request_id=uuid4(),
-        result=result["result"],  # Store the result
+        result=str(result["result"]),  # Store the result as string
     )
     print(f"\nCreated RequestLog with ID: {request_log.id}")
 

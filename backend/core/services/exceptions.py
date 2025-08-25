@@ -171,7 +171,7 @@ class InvalidImageError(OpenAIError):
             image_size: Size of the invalid image in bytes
             image_format: Detected format of the invalid image
         """
-        details = {}
+        details: dict[str, Any] = {}
         if image_size is not None:
             details["image_size_bytes"] = image_size
         if image_format:
@@ -255,7 +255,7 @@ class ModelNotFoundError(OpenAIError):
             available_models: List of available models if known
         """
         message = f"Model '{model_name}' not found"
-        details = {"requested_model": model_name}
+        details: dict[str, Any] = {"requested_model": model_name}
         if available_models:
             details["available_models"] = available_models
             message += f". Available models: {', '.join(available_models)}"

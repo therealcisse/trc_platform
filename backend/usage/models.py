@@ -68,7 +68,7 @@ class BillingPeriod(models.Model):
         """Check if this period can be marked as paid."""
         return not self.is_current and self.payment_status in ["pending", "overdue"]
 
-    def mark_as_paid(self, amount_cents=None, reference=None, notes=None):
+    def mark_as_paid(self, amount_cents: int | None = None, reference: str | None = None, notes: str | None = None) -> None:
         """Mark billing period as paid."""
         if self.is_current:
             raise ValueError("Cannot mark current billing period as paid")
@@ -92,7 +92,7 @@ class BillingPeriod(models.Model):
             ]
         )
 
-    def mark_as_overdue(self):
+    def mark_as_overdue(self) -> None:
         """Mark billing period as overdue."""
         if self.is_current:
             raise ValueError("Cannot mark current billing period as overdue")
@@ -103,7 +103,7 @@ class BillingPeriod(models.Model):
         self.payment_status = "overdue"
         self.save(update_fields=["payment_status", "updated_at"])
 
-    def mark_as_waived(self, notes=None):
+    def mark_as_waived(self, notes: str | None = None) -> None:
         """Mark billing period as waived (no payment required)."""
         if self.is_current:
             raise ValueError("Cannot waive current billing period")

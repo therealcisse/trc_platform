@@ -1,7 +1,9 @@
 import logging
 import time
+from typing import cast
 
 from django.conf import settings
+from django.contrib.auth import get_user_model
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FileUploadParser, MultiPartParser
@@ -11,6 +13,8 @@ from rest_framework.views import APIView
 
 from usage.models import RequestImage, RequestLog
 from usage.utils import get_or_create_current_billing_period
+
+User = get_user_model()
 
 from .models import Settings
 from .permissions import IsTokenAuthenticated
@@ -56,20 +60,20 @@ class SolveView(APIView):
             duration_ms = int((time.time() - start_time) * 1000)
 
             # Get current billing period
-            billing_period = get_or_create_current_billing_period(request.user)
+            billing_period = get_or_create_current_billing_period(cast(User, request.user))
 
             # Log request with billing period and store the result
             request_log = RequestLog.objects.create(
-                user=request.user,
+                user=cast(User, request.user),
                 token=getattr(request, "token", None),
                 billing_period=billing_period,
                 service="core.image_solve",
                 duration_ms=duration_ms,
                 request_bytes=len(image_bytes),
-                response_bytes=len(result["result"]),
+                response_bytes=len(str(result["result"])),
                 status="success",
                 request_id=request.request_id,
-                result=result["result"],  # Store the actual result
+                result=str(result["result"]),  # Store the actual result as string
             )
 
             # Save image if feature is enabled
@@ -112,11 +116,11 @@ class SolveView(APIView):
             duration_ms = int((time.time() - start_time) * 1000)
 
             # Get current billing period (even for errors to track all requests)
-            billing_period = get_or_create_current_billing_period(request.user)
+            billing_period = get_or_create_current_billing_period(cast(User, request.user))
 
             # Log error with billing period (no result stored for errors)
             request_log = RequestLog.objects.create(
-                user=request.user,
+                user=cast(User, request.user),
                 token=getattr(request, "token", None),
                 billing_period=billing_period,
                 service="core.image_solve",

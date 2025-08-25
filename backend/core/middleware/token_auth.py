@@ -1,4 +1,5 @@
 from collections.abc import Callable
+from typing import TYPE_CHECKING
 
 from argon2 import PasswordHasher
 from argon2.exceptions import VerifyMismatchError
@@ -8,7 +9,10 @@ from django.http import HttpRequest, HttpResponse
 
 from customers.models import ApiToken
 
-User = get_user_model()
+if TYPE_CHECKING:
+    from customers.models import User
+else:
+    User = get_user_model()
 
 
 class TokenAuthMiddleware:
@@ -28,14 +32,14 @@ class TokenAuthMiddleware:
         if token:
             user, api_token = self._authenticate_token(token)
             if user:
-                request.user = user  # type: ignore
-                request.token = api_token  # type: ignore
+                request.user = user
+                request.token = api_token  # type: ignore[attr-defined]
                 # Update last used timestamp
                 if api_token:
                     api_token.update_last_used()
             else:
-                request.user = AnonymousUser()  # type: ignore
-                request.token = None  # type: ignore
+                request.user = AnonymousUser()
+                request.token = None  # type: ignore[attr-defined]
 
         return self.get_response(request)
 

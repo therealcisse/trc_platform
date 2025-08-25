@@ -1,4 +1,5 @@
 from datetime import UTC, datetime, timedelta
+from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
@@ -12,7 +13,7 @@ User = get_user_model()
 class Command(BaseCommand):
     help = "Bootstrap demo data for the application"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         self.stdout.write("Creating demo data...")
 
         # Create Settings

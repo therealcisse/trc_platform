@@ -2,7 +2,7 @@
 Test script to verify the /customers/me endpoint returns the correct User interface shape.
 """
 
-from typing import TypedDict
+from typing import Any, TypedDict
 
 
 class User(TypedDict):
@@ -14,7 +14,7 @@ class User(TypedDict):
     createdAt: str
 
 
-def verify_response_shape(response_data: dict) -> bool:
+def verify_response_shape(response_data: dict[str, Any]) -> bool:
     """Verify that the response matches the expected User interface."""
     required_fields = {"id", "email", "emailVerified", "createdAt"}
 

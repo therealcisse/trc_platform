@@ -1,3 +1,4 @@
+from typing import Any
 from django.core.exceptions import ValidationError
 from django.db import models
 
@@ -18,7 +19,7 @@ class Settings(models.Model):
     def __str__(self) -> str:
         return "Application Settings"
 
-    def save(self, *args, **kwargs) -> None:
+    def save(self, *args: Any, **kwargs: Any) -> None:
         """Ensure only one Settings instance exists."""
         if not self.pk and Settings.objects.exists():
             # If a new instance is being created and one already exists

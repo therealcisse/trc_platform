@@ -3,6 +3,8 @@ Create billing periods for existing users.
 Run once after implementing the billing system.
 """
 
+from typing import Any
+
 from django.contrib.auth import get_user_model
 from django.core.management.base import BaseCommand
 
@@ -14,7 +16,7 @@ User = get_user_model()
 class Command(BaseCommand):
     help = "Create current billing periods for all active users"
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         users = User.objects.filter(is_active=True)
         count = 0
 

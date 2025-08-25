@@ -4,6 +4,7 @@ Example cron: 0 0 5 * * python manage.py mark_overdue_periods
 """
 
 from datetime import timedelta
+from typing import Any
 
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -14,7 +15,7 @@ from usage.models import BillingPeriod
 class Command(BaseCommand):
     help = "Mark unpaid billing periods as overdue"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
             "--days",
             type=int,
@@ -22,7 +23,7 @@ class Command(BaseCommand):
             help="Number of days after period end to mark as overdue",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         days = options["days"]
 
         # Mark periods as overdue if they ended > X days ago and are still pending

@@ -20,7 +20,7 @@ from usage.models import RequestImage, RequestLog
 User = get_user_model()
 
 
-def test_image_storage():
+def test_image_storage() -> bool:
     print("=" * 60)
     print("IMAGE STORAGE FEATURE TEST")
     print("=" * 60)

@@ -2,8 +2,11 @@ from datetime import timedelta
 
 from django.utils import timezone
 
+from customers.models import User
+from .models import BillingPeriod
 
-def get_or_create_current_billing_period(user):
+
+def get_or_create_current_billing_period(user: User) -> BillingPeriod:
     """Get or create billing period for current month."""
     from .models import BillingPeriod
 

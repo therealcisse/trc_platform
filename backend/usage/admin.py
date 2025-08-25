@@ -1,6 +1,8 @@
 import base64
+from typing import Any
 
 from django.contrib import admin
+from django.http import HttpRequest
 from django.utils.html import format_html
 
 from .models import BillingPeriod, RequestImage, RequestLog
@@ -36,11 +38,11 @@ class RequestLogAdmin(admin.ModelAdmin):
     ]
     ordering = ["-request_ts"]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         # Make RequestLog read-only in admin
         return False
 
-    def has_delete_permission(self, request, obj=None):
+    def has_delete_permission(self, request: HttpRequest, obj: RequestLog | None = None) -> bool:
         # Prevent deletion of logs
         return False
 
@@ -81,12 +83,12 @@ class BillingPeriodAdmin(admin.ModelAdmin):
         ("Timestamps", {"fields": ("created_at", "updated_at"), "classes": ("collapse",)}),
     )
 
-    def total_cost_cents_display(self, obj):
+    def total_cost_cents_display(self, obj: BillingPeriod) -> str:
         return f"${obj.total_cost_cents / 100:.2f}"
 
-    total_cost_cents_display.short_description = "Total Cost"
+    total_cost_cents_display.short_description = "Total Cost"  # type: ignore[attr-defined]
 
-    def payment_status_badge(self, obj):
+    def payment_status_badge(self, obj: BillingPeriod) -> str:
         colors = {
             "pending": "orange",
             "paid": "green",
@@ -100,9 +102,9 @@ class BillingPeriodAdmin(admin.ModelAdmin):
             obj.get_payment_status_display(),
         )
 
-    payment_status_badge.short_description = "Payment Status"
+    payment_status_badge.short_description = "Payment Status"  # type: ignore[attr-defined]
 
-    def mark_as_paid(self, request, queryset):
+    def mark_as_paid(self, request: HttpRequest, queryset: Any) -> None:
         count = 0
         for period in queryset:
             if period.can_be_marked_paid:
@@ -110,9 +112,9 @@ class BillingPeriodAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f"{count} billing periods marked as paid.")
 
-    mark_as_paid.short_description = "Mark selected periods as paid"
+    mark_as_paid.short_description = "Mark selected periods as paid"  # type: ignore[attr-defined]
 
-    def mark_as_overdue(self, request, queryset):
+    def mark_as_overdue(self, request: HttpRequest, queryset: Any) -> None:
         count = 0
         for period in queryset:
             if not period.is_current and period.payment_status != "paid":
@@ -120,9 +122,9 @@ class BillingPeriodAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f"{count} billing periods marked as overdue.")
 
-    mark_as_overdue.short_description = "Mark selected periods as overdue"
+    mark_as_overdue.short_description = "Mark selected periods as overdue"  # type: ignore[attr-defined]
 
-    def mark_as_waived(self, request, queryset):
+    def mark_as_waived(self, request: HttpRequest, queryset: Any) -> None:
         count = 0
         for period in queryset:
             if not period.is_current and period.payment_status not in ["paid", "waived"]:
@@ -130,7 +132,7 @@ class BillingPeriodAdmin(admin.ModelAdmin):
                 count += 1
         self.message_user(request, f"{count} billing periods marked as waived.")
 
-    mark_as_waived.short_description = "Mark selected periods as waived"
+    mark_as_waived.short_description = "Mark selected periods as waived"  # type: ignore[attr-defined]
 
 
 @admin.register(RequestImage)
@@ -158,16 +160,16 @@ class RequestImageAdmin(admin.ModelAdmin):
     date_hierarchy = "created_at"
     ordering = ["-created_at"]
 
-    def has_add_permission(self, request):
+    def has_add_permission(self, request: HttpRequest) -> bool:
         # Make RequestImage read-only in admin
         return False
 
-    def request_log_id(self, obj):
+    def request_log_id(self, obj: RequestImage) -> str:
         return obj.request_log.request_id
 
-    request_log_id.short_description = "Request ID"
+    request_log_id.short_description = "Request ID"  # type: ignore[attr-defined]
 
-    def file_size_display(self, obj):
+    def file_size_display(self, obj: RequestImage) -> str:
         # Convert bytes to human-readable format
         size = obj.file_size
         for unit in ["B", "KB", "MB"]:
@@ -176,16 +178,16 @@ class RequestImageAdmin(admin.ModelAdmin):
             size /= 1024.0
         return f"{size:.1f} GB"
 
-    file_size_display.short_description = "Size"
+    file_size_display.short_description = "Size"  # type: ignore[attr-defined]
 
-    def dimensions(self, obj):
+    def dimensions(self, obj: RequestImage) -> str:
         if obj.width and obj.height:
             return f"{obj.width}x{obj.height}"
         return "Unknown"
 
-    dimensions.short_description = "Dimensions"
+    dimensions.short_description = "Dimensions"  # type: ignore[attr-defined]
 
-    def image_preview(self, obj):
+    def image_preview(self, obj: RequestImage) -> str:
         # Show preview in admin
         if obj.image_data:
             b64_image = base64.b64encode(obj.image_data).decode("utf-8")
@@ -196,4 +198,4 @@ class RequestImageAdmin(admin.ModelAdmin):
             )
         return "No image"
 
-    image_preview.short_description = "Preview"
+    image_preview.short_description = "Preview"  # type: ignore[attr-defined]

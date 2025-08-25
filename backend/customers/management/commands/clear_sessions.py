@@ -2,6 +2,8 @@
 Management command to clear user sessions.
 """
 
+from typing import Any
+
 from django.contrib.sessions.models import Session
 from django.core.management.base import BaseCommand
 from django.utils import timezone
@@ -10,7 +12,7 @@ from django.utils import timezone
 class Command(BaseCommand):
     help = "Clear all sessions or sessions for a specific user"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
             "--user-email",
             type=str,
@@ -27,7 +29,7 @@ class Command(BaseCommand):
             help="Clear only expired sessions",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         if options["expired"]:
             # Clear expired sessions
             Session.objects.filter(expire_date__lt=timezone.now()).delete()

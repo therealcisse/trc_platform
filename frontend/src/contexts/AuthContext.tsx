@@ -58,6 +58,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const login = async (credentials: LoginCredentials) => {
     const userData = await authService.login(credentials);
     setUser(userData);
+    // Refresh user data to ensure we have the latest information
+    await refreshUser();
     navigate('/dashboard');
   };
 
@@ -71,9 +73,21 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const logout = async () => {
-    await authService.logout();
-    setUser(null);
-    navigate('/login');
+    try {
+      await authService.logout();
+    } catch (error) {
+      // Log error but continue with local cleanup
+      console.error('Logout request failed:', error);
+    } finally {
+      // Always clear local state regardless of API call result
+      setUser(null);
+      // Clear any stored redirect path
+      sessionStorage.removeItem('redirectAfterLogin');
+      // Clear any other session/local storage items if needed
+      localStorage.removeItem('userPreferences');
+      // Navigate to login page
+      navigate('/login');
+    }
   };
 
   const changePassword = async (data: ChangePasswordData) => {

@@ -19,7 +19,7 @@ from usage.models import BillingPeriod
 from usage.serializers import CurrentBillingPeriodSerializer
 
 
-def test_camelcase_conversion():
+def test_camelcase_conversion() -> None:
     """Test that the serializer outputs camelCase fields"""
 
     # Create a test user
@@ -51,8 +51,8 @@ def test_camelcase_conversion():
     print("=" * 60)
 
     # Test with the camelCase renderer
-    from djangorestframework_camel_case.render import CamelCaseJSONRenderer
-    from djangorestframework_camel_case.util import camelize
+    from djangorestframework_camel_case.render import CamelCaseJSONRenderer  # type: ignore[import-untyped]
+    from djangorestframework_camel_case.util import camelize  # type: ignore[import-untyped]
 
     renderer = CamelCaseJSONRenderer()
 

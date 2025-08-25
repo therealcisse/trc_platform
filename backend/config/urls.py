@@ -4,7 +4,14 @@ from django.contrib import admin
 from django.urls import include, path
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
+from django.views.decorators.csrf import ensure_csrf_cookie
+from django.http import HttpResponse
+
 from core.views import healthz
+
+@ensure_csrf_cookie
+def csrf_bootstrap(request):
+    return HttpResponse(status=204)
 
 urlpatterns = [
     # Health check
@@ -18,6 +25,7 @@ urlpatterns = [
     path("api/customers/", include("customers.urls")),
     path("api/core/", include("core.urls")),
     path("api/usage/", include("usage.urls")),
+    path("api/auth/csrf/", csrf_bootstrap),
 ]
 
 # Serve static files in development

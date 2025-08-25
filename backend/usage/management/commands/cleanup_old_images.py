@@ -1,4 +1,5 @@
 from datetime import timedelta
+from typing import Any
 
 from django.conf import settings
 from django.core.management.base import BaseCommand
@@ -10,7 +11,7 @@ from usage.models import RequestImage
 class Command(BaseCommand):
     help = "Clean up old saved images based on retention policy"
 
-    def add_arguments(self, parser):
+    def add_arguments(self, parser: Any) -> None:
         parser.add_argument(
             "--days",
             type=int,
@@ -23,7 +24,7 @@ class Command(BaseCommand):
             help="Show what would be deleted without actually deleting",
         )
 
-    def handle(self, *args, **options):
+    def handle(self, *args: Any, **options: Any) -> None:
         days = options["days"]
         dry_run = options["dry_run"]
 
