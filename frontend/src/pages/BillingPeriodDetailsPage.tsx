@@ -1,0 +1,353 @@
+import { useState } from 'react';
+import { useParams, Link } from 'react-router-dom';
+import { useQuery } from '@tanstack/react-query';
+import { billingService } from '../services/billing.service';
+import { format } from 'date-fns';
+import { 
+  ArrowLeftIcon,
+  CreditCardIcon,
+  ChevronLeftIcon,
+  ChevronRightIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationCircleIcon
+} from '@heroicons/react/24/outline';
+import clsx from 'clsx';
+import type { ApiRequest } from '../types/billing';
+
+export const BillingPeriodDetailsPage = () => {
+  const { periodId } = useParams<{ periodId: string }>();
+  const [page, setPage] = useState(1);
+
+  const { data: period } = useQuery({
+    queryKey: ['billing', 'period', periodId],
+    queryFn: () => billingService.getBillingPeriods().then(
+      periods => periods.find(p => p.id === periodId)
+    ),
+    enabled: !!periodId,
+  });
+
+  const { data: requests, isLoading } = useQuery({
+    queryKey: ['billing', 'period', periodId, 'requests', page],
+    queryFn: () => billingService.getBillingPeriodDetails(periodId!, page),
+    enabled: !!periodId,
+  });
+
+  const formatCurrency = (amount: number) => {
+    return new Intl.NumberFormat('en-US', {
+      style: 'currency',
+      currency: 'USD',
+    }).format(amount);
+  };
+
+  const formatNumber = (num: number) => {
+    return new Intl.NumberFormat('en-US').format(num);
+  };
+
+  const formatBytes = (bytes: number): string => {
+    if (bytes === 0) return '0 B';
+    const k = 1024;
+    const sizes = ['B', 'KB', 'MB', 'GB'];
+    const i = Math.floor(Math.log(bytes) / Math.log(k));
+    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
+  };
+
+  const getStatusIcon = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return <CheckCircleIcon className="h-5 w-5 text-green-500" />;
+      case 'pending':
+        return <ClockIcon className="h-5 w-5 text-yellow-500" />;
+      case 'overdue':
+        return <ExclamationCircleIcon className="h-5 w-5 text-red-500" />;
+      default:
+        return null;
+    }
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'paid':
+        return 'bg-green-100 text-green-800 dark:bg-green-900/20 dark:text-green-400';
+      case 'pending':
+        return 'bg-yellow-100 text-yellow-800 dark:bg-yellow-900/20 dark:text-yellow-400';
+      case 'overdue':
+        return 'bg-red-100 text-red-800 dark:bg-red-900/20 dark:text-red-400';
+      default:
+        return 'bg-gray-100 text-gray-800 dark:bg-gray-900/20 dark:text-gray-400';
+    }
+  };
+
+  const getRequestStatusColor = (status: number): string => {
+    if (status >= 200 && status < 300) return 'text-green-600 dark:text-green-400';
+    if (status >= 400 && status < 500) return 'text-yellow-600 dark:text-yellow-400';
+    if (status >= 500) return 'text-red-600 dark:text-red-400';
+    return 'text-gray-600 dark:text-gray-400';
+  };
+
+  if (isLoading) {
+    return (
+      <div className="flex items-center justify-center h-64">
+        <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary-600"></div>
+      </div>
+    );
+  }
+
+  if (!period) {
+    return (
+      <div className="p-8">
+        <div className="text-center">
+          <CreditCardIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
+          <h3 className="text-lg font-medium text-gray-900 dark:text-white mb-2">
+            Billing Period Not Found
+          </h3>
+          <p className="text-gray-600 dark:text-gray-400 mb-4">
+            The billing period you're looking for doesn't exist.
+          </p>
+          <Link
+            to="/billing"
+            className="inline-flex items-center text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 font-medium"
+          >
+            <ArrowLeftIcon className="h-4 w-4 mr-2" />
+            Back to Billing
+          </Link>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div className="p-8">
+      {/* Back Link */}
+      <Link
+        to="/billing"
+        className="inline-flex items-center text-sm font-medium text-gray-600 dark:text-gray-400 hover:text-gray-900 dark:hover:text-white mb-6"
+      >
+        <ArrowLeftIcon className="h-4 w-4 mr-2" />
+        Back to Billing
+      </Link>
+
+      {/* Header */}
+      <div className="mb-8">
+        <div className="flex items-center justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">
+              Billing Period: {period.label}
+            </h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              {format(new Date(period.startDate), 'MMMM d')} - {format(new Date(period.endDate), 'MMMM d, yyyy')}
+            </p>
+          </div>
+          <span
+            className={clsx(
+              'px-4 py-2 rounded-full text-sm font-medium inline-flex items-center',
+              getStatusColor(period.status)
+            )}
+          >
+            {getStatusIcon(period.status)}
+            <span className="ml-2">
+              {period.status.charAt(0).toUpperCase() + period.status.slice(1)}
+            </span>
+          </span>
+        </div>
+      </div>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+            Total Requests
+          </p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {formatNumber(period.totalRequests)}
+          </p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+            Total Cost
+          </p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {formatCurrency(period.totalCost)}
+          </p>
+        </div>
+        
+        <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
+          <p className="text-sm font-medium text-gray-600 dark:text-gray-400 mb-2">
+            Average Cost per Request
+          </p>
+          <p className="text-3xl font-bold text-gray-900 dark:text-white">
+            {period.totalRequests > 0 
+              ? formatCurrency(period.totalCost / period.totalRequests)
+              : '$0.00'}
+          </p>
+        </div>
+      </div>
+
+      {/* Payment Information */}
+      {period.paymentDate && (
+        <div className="bg-green-50 dark:bg-green-900/10 border border-green-200 dark:border-green-800 rounded-xl p-6 mb-8">
+          <div className="flex items-start">
+            <CheckCircleIcon className="h-6 w-6 text-green-500 flex-shrink-0 mt-0.5" />
+            <div className="ml-3">
+              <h3 className="text-lg font-semibold text-green-900 dark:text-green-200">
+                Payment Received
+              </h3>
+              <p className="text-sm text-green-700 dark:text-green-300 mt-1">
+                Payment was received on {format(new Date(period.paymentDate), 'PPPP')}
+              </p>
+              {period.paymentReference && (
+                <p className="text-sm text-green-700 dark:text-green-300 mt-2">
+                  Reference: <span className="font-mono">{period.paymentReference}</span>
+                </p>
+              )}
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Request History */}
+      <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+            Request History
+          </h2>
+          <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+            Showing {requests?.data.length || 0} of {requests?.totalItems || 0} requests
+          </p>
+        </div>
+
+        {requests?.data.length === 0 ? (
+          <div className="p-8 text-center">
+            <p className="text-gray-600 dark:text-gray-400">
+              No requests found for this billing period
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full">
+              <thead className="bg-gray-50 dark:bg-gray-800 border-b border-gray-200 dark:border-gray-700">
+                <tr>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Timestamp
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Service
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Status
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Duration
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Size
+                  </th>
+                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
+                    Request ID
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-gray-200 dark:divide-gray-700">
+                {requests?.data.map((request: ApiRequest) => (
+                  <tr key={request.id} className="hover:bg-gray-50 dark:hover:bg-gray-800 transition-colors">
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {format(new Date(request.timestamp), 'MMM d, yyyy HH:mm:ss')}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 dark:text-white">
+                      {request.service}
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap">
+                      <span className={clsx('text-sm font-medium', getRequestStatusColor(request.status))}>
+                        {request.status}
+                      </span>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      {request.duration}ms
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
+                      <div className="flex flex-col">
+                        <span>↑ {formatBytes(request.requestSize)}</span>
+                        <span>↓ {formatBytes(request.responseSize)}</span>
+                      </div>
+                    </td>
+                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs">
+                      {request.id}
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {/* Pagination */}
+      {requests && requests.totalPages > 1 && (
+        <div className="flex items-center justify-between mt-6">
+          <div className="flex items-center space-x-2">
+            <button
+              onClick={() => setPage(p => Math.max(1, p - 1))}
+              disabled={!requests.hasPrevious}
+              className={clsx(
+                'p-2 rounded-lg border transition-colors',
+                requests.hasPrevious
+                  ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+              )}
+            >
+              <ChevronLeftIcon className="h-5 w-5" />
+            </button>
+            
+            <div className="flex items-center space-x-1">
+              {Array.from({ length: Math.min(5, requests.totalPages) }, (_, i) => {
+                let pageNum: number;
+                if (requests.totalPages <= 5) {
+                  pageNum = i + 1;
+                } else if (page <= 3) {
+                  pageNum = i + 1;
+                } else if (page >= requests.totalPages - 2) {
+                  pageNum = requests.totalPages - 4 + i;
+                } else {
+                  pageNum = page - 2 + i;
+                }
+                
+                return (
+                  <button
+                    key={pageNum}
+                    onClick={() => setPage(pageNum)}
+                    className={clsx(
+                      'px-3 py-1 rounded-lg text-sm font-medium transition-colors',
+                      pageNum === page
+                        ? 'bg-primary-600 text-white'
+                        : 'text-gray-700 dark:text-gray-300 hover:bg-gray-100 dark:hover:bg-gray-800'
+                    )}
+                  >
+                    {pageNum}
+                  </button>
+                );
+              })}
+            </div>
+            
+            <button
+              onClick={() => setPage(p => Math.min(requests.totalPages, p + 1))}
+              disabled={!requests.hasNext}
+              className={clsx(
+                'p-2 rounded-lg border transition-colors',
+                requests.hasNext
+                  ? 'border-gray-300 dark:border-gray-700 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-700 dark:text-gray-300'
+                  : 'border-gray-200 dark:border-gray-800 text-gray-400 dark:text-gray-600 cursor-not-allowed'
+              )}
+            >
+              <ChevronRightIcon className="h-5 w-5" />
+            </button>
+          </div>
+          
+          <p className="text-sm text-gray-600 dark:text-gray-400">
+            Page {page} of {requests.totalPages}
+          </p>
+        </div>
+      )}
+    </div>
+  );
+};

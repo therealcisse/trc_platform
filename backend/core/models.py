@@ -1,0 +1,32 @@
+from django.core.exceptions import ValidationError
+from django.db import models
+
+
+class Settings(models.Model):
+    """Singleton settings model for the application."""
+
+    cost_per_request_cents = models.IntegerField(default=100)
+    openai_model = models.CharField(max_length=100, default="gpt-vision")
+    openai_timeout_s = models.IntegerField(default=30)
+    updated_at = models.DateTimeField(auto_now=True)
+
+    class Meta:
+        db_table = "settings"
+        verbose_name = "Settings"
+        verbose_name_plural = "Settings"
+
+    def __str__(self) -> str:
+        return "Application Settings"
+
+    def save(self, *args, **kwargs) -> None:
+        """Ensure only one Settings instance exists."""
+        if not self.pk and Settings.objects.exists():
+            # If a new instance is being created and one already exists
+            raise ValidationError("Only one Settings instance is allowed.")
+        super().save(*args, **kwargs)
+
+    @classmethod
+    def get_settings(cls) -> "Settings":
+        """Get or create the singleton settings instance."""
+        settings, created = cls.objects.get_or_create(pk=1)
+        return settings
