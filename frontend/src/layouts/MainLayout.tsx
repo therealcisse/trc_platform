@@ -58,7 +58,7 @@ export const MainLayout = () => {
           name: 'History',
           href: '/billing-history',
           isPage: (pathname: string) =>
-            pathname == '/billing-history' || pathname.startsWith('/billing/'),
+            pathname == '/billing-history' || pathname.startsWith('/billing-history/'),
         },
         {
           name: 'Usage Details',
@@ -148,7 +148,7 @@ export const MainLayout = () => {
                           item.children.some((child) => child.isPage(location.pathname))
                             ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                             : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
-                          isSidebarCollapsed && 'cursor-default'
+                          isSidebarCollapsed && 'cursor-pointer'
                         )}
                       >
                         <div className="flex items-center">
@@ -166,10 +166,31 @@ export const MainLayout = () => {
                           />
                         )}
                       </button>
-                      {/* Tooltip for collapsed state */}
+                      {/* Hover menu for collapsed state */}
                       {isSidebarCollapsed && (
-                        <div className="absolute left-full ml-2 py-1 px-2 bg-gray-900 dark:bg-gray-700 text-white text-xs rounded opacity-0 group-hover:opacity-100 pointer-events-none transition-opacity duration-200 whitespace-nowrap z-50">
-                          {item.name}
+                        <div className="absolute left-full ml-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
+                          <div className="py-2 px-3 border-b border-gray-200 dark:border-gray-700">
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.name}</p>
+                          </div>
+                          <div className="py-2">
+                            {item.children.map((child) => (
+                              <NavLink
+                                key={child.name}
+                                to={child.href}
+                                end={child.href === '/account'}
+                                className={({ isActive }) =>
+                                  clsx(
+                                    'block px-3 py-2 text-sm hover:bg-gray-100 dark:hover:bg-gray-700 transition-colors whitespace-nowrap',
+                                    isActive
+                                      ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 font-medium'
+                                      : 'text-gray-700 dark:text-gray-300'
+                                  )
+                                }
+                              >
+                                {child.name}
+                              </NavLink>
+                            ))}
+                          </div>
                         </div>
                       )}
                       {!isSidebarCollapsed && expandedItems.includes(item.name) && (
