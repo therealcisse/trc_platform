@@ -10,6 +10,7 @@ import { DashboardPage } from './pages/DashboardPage';
 import { TokensPage } from './pages/TokensPage';
 import { BillingPage } from './pages/BillingPage';
 import { BillingPeriodDetailsPage } from './pages/BillingPeriodDetailsPage';
+import { BillingCurrentPeriodPage } from './pages/BillingCurrentPeriodPage';
 import { UsagePage } from './pages/UsagePage';
 import { AccountPage } from './pages/AccountPage';
 import { ChangePasswordPage } from './pages/account/ChangePasswordPage';
@@ -31,6 +32,7 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/tokens" element={<TokensPage />} />
               <Route path="/billing" element={<BillingPage />} />
+              <Route path="/billing/current" element={<BillingCurrentPeriodPage />} />
               <Route path="/billing/:periodId" element={<BillingPeriodDetailsPage />} />
               <Route path="/usage" element={<UsagePage />} />
               <Route path="/account" element={<AccountPage />} />

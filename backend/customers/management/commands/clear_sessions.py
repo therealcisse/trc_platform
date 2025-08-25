@@ -32,30 +32,29 @@ class Command(BaseCommand):
             # Clear expired sessions
             Session.objects.filter(expire_date__lt=timezone.now()).delete()
             self.stdout.write(self.style.SUCCESS("Cleared all expired sessions"))
-        
+
         elif options["all"]:
             # Clear all sessions
             count = Session.objects.all().count()
             Session.objects.all().delete()
             self.stdout.write(self.style.SUCCESS(f"Cleared {count} sessions"))
-        
+
         elif options["user_email"]:
             # Clear sessions for specific user
             from django.contrib.auth import get_user_model
+
             User = get_user_model()
-            
+
             try:
                 user = User.objects.get(email=options["user_email"])
                 count = 0
                 for session in Session.objects.all():
                     session_data = session.get_decoded()
-                    if str(session_data.get('_auth_user_id')) == str(user.id):
+                    if str(session_data.get("_auth_user_id")) == str(user.id):
                         session.delete()
                         count += 1
                 self.stdout.write(
-                    self.style.SUCCESS(
-                        f"Cleared {count} sessions for user {options['user_email']}"
-                    )
+                    self.style.SUCCESS(f"Cleared {count} sessions for user {options['user_email']}")
                 )
             except User.DoesNotExist:
                 self.stdout.write(
@@ -63,7 +62,5 @@ class Command(BaseCommand):
                 )
         else:
             self.stdout.write(
-                self.style.WARNING(
-                    "Please specify --all, --expired, or --user-email"
-                )
+                self.style.WARNING("Please specify --all, --expired, or --user-email")
             )

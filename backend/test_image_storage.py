@@ -40,9 +40,7 @@ def test_image_storage():
     print("\n3. RequestImage Creation Test:")
     try:
         # Create a test user if needed
-        test_user, created = User.objects.get_or_create(
-            email="test_image@example.com"
-        )
+        test_user, created = User.objects.get_or_create(email="test_image@example.com")
         if created:
             print(f"   Created test user: {test_user.email}")
 

@@ -5,7 +5,7 @@ export interface BillingPeriod {
   endDate: string;
   totalRequests: number;
   totalCost: number;
-  status: 'pending' | 'paid' | 'overdue';
+  status: 'pending' | 'paid' | 'overdue' | 'waived';
   paymentDate?: string;
   paymentReference?: string;
 }

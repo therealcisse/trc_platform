@@ -3,7 +3,6 @@ Test script to verify that results are being stored in RequestLog.
 """
 
 import os
-import sys
 
 import django
 
@@ -48,10 +47,11 @@ def test_result_storage():
 
     # Simulate creating a RequestLog (normally done in the view)
     from uuid import uuid4
+
     from usage.utils import get_or_create_current_billing_period
 
     billing_period = get_or_create_current_billing_period(user)
-    
+
     request_log = RequestLog.objects.create(
         user=user,
         token=None,
@@ -81,7 +81,7 @@ def test_result_storage():
         error_result = openai_client.solve_image(empty_image)
     except InvalidImageError as e:
         print(f"Expected error occurred: {e}")
-        
+
         # Simulate creating an error log
         error_log = RequestLog.objects.create(
             user=user,
@@ -97,7 +97,7 @@ def test_result_storage():
             result=None,  # No result for errors
         )
         print(f"Created error RequestLog with ID: {error_log.id}")
-        
+
         # Verify no result was stored for error
         saved_error_log = RequestLog.objects.get(id=error_log.id)
         print(f"Error log result is None: {saved_error_log.result is None}")
@@ -110,10 +110,10 @@ def test_result_storage():
 
     # Summary
     final_count = RequestLog.objects.filter(user=user).count()
-    print(f"\n=== Summary ===")
+    print("\n=== Summary ===")
     print(f"RequestLogs created in this test: {final_count - initial_count}")
     print(f"Total RequestLogs for user: {final_count}")
-    
+
     # Check that we can query by result
     logs_with_results = RequestLog.objects.filter(user=user, result__isnull=False).count()
     logs_without_results = RequestLog.objects.filter(user=user, result__isnull=True).count()

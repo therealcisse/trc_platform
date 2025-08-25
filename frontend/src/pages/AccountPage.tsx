@@ -21,8 +21,8 @@ export const AccountPage = () => {
         { label: 'User ID', value: user?.id || 'Not available' },
         { 
           label: 'Email Verification', 
-          value: user?.isVerified ? 'Verified' : 'Not Verified',
-          status: user?.isVerified ? 'success' : 'warning'
+          value: user?.emailVerified ? 'Verified' : 'Not Verified',
+          status: user?.emailVerified ? 'success' : 'warning'
         },
         { 
           label: 'Account Created', 
@@ -56,7 +56,7 @@ export const AccountPage = () => {
       </div>
 
       {/* Email Verification Banner */}
-      {user && !user.isVerified && (
+      {user && !user.emailVerified && (
         <div className="mb-6 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-xl p-4">
           <div className="flex">
             <div className="flex-shrink-0">

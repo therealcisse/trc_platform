@@ -27,7 +27,7 @@ interface FormErrors {
 
 export const ChangePasswordPage = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { user, logout } = useAuth();
   const [showPasswords, setShowPasswords] = useState({
     current: false,
     new: false,
@@ -44,16 +44,16 @@ export const ChangePasswordPage = () => {
   const changePasswordMutation = useMutation({
     mutationFn: authService.changePassword,
     onSuccess: () => {
-      setSuccessMessage('Password changed successfully. You can now use your new password to login.');
+      setSuccessMessage('Password changed successfully. You will be logged out for security.');
       setFormData({
         currentPassword: '',
         newPassword: '',
         confirmPassword: '',
       });
-      // Optionally redirect after a delay
+      // Logout and redirect after showing message
       setTimeout(() => {
-        navigate('/account');
-      }, 3000);
+        logout(); // This will redirect to login
+      }, 2000);
     },
     onError: (error: any) => {
       if (error.response?.status === 401) {
@@ -111,7 +111,7 @@ export const ChangePasswordPage = () => {
   };
 
   // Check if user email is verified
-  if (user && !user.isVerified) {
+  if (user && !user.emailVerified) {
     return (
       <div className="p-8">
         <div className="max-w-2xl mx-auto">

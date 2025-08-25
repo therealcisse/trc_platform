@@ -16,6 +16,7 @@ from rest_framework.views import APIView
 from core.models import Settings
 from core.permissions import IsEmailVerified
 from usage.models import BillingPeriod, RequestLog
+from usage.serializers import CurrentBillingPeriodSerializer
 from usage.utils import get_or_create_current_billing_period
 
 from .models import ApiToken, User
@@ -349,23 +350,9 @@ class CurrentBillingPeriodView(APIView):
         """Get current billing period summary."""
         period = get_or_create_current_billing_period(request.user)
 
-        # Get last request timestamp
-        last_request = (
-            RequestLog.objects.filter(billing_period=period).order_by("-request_ts").first()
-        )
-
-        return Response(
-            {
-                "id": str(period.id),
-                "period_label": period.period_label,
-                "period_start": period.period_start.isoformat(),
-                "period_end": period.period_end.isoformat(),
-                "total_requests": period.total_requests,
-                "total_cost_cents": period.total_cost_cents,
-                "is_current": period.is_current,
-                "last_request_at": last_request.request_ts.isoformat() if last_request else None,
-            }
-        )
+        # Use the serializer for automatic camelCase conversion
+        serializer = CurrentBillingPeriodSerializer(period)
+        return Response(serializer.data)
 
 
 class BillingPeriodDetailView(APIView):

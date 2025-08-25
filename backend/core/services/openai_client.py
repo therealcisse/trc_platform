@@ -4,7 +4,7 @@ import logging
 import random
 import time
 from abc import ABC, abstractmethod
-from typing import Any, Literal, Optional, Union, overload
+from typing import Any, Literal, overload
 
 import requests
 from django.conf import settings
@@ -17,16 +17,13 @@ from .exceptions import (
     InvalidResponseError,
     ModelNotFoundError,
     NetworkError,
-    OpenAIError,
     RateLimitError,
     TimeoutError,
 )
 from .types import (
-    ErrorCode,
     ImageBytes,
     ImageValidationResult,
     ModelType,
-    OpenAIConfig,
     ResponseDict,
     SolveImageResult,
     TimeoutSeconds,
@@ -81,8 +78,8 @@ class BaseOpenAIClient(ABC):
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: Optional[str] = None,
-        timeout: Optional[TimeoutSeconds] = None,
+        model: str | None = None,
+        timeout: TimeoutSeconds | None = None,
     ) -> SolveImageResult:
         """Process an image containing a math problem."""
         pass
@@ -156,13 +153,13 @@ class MockOpenAIClient(BaseOpenAIClient):
             ("1000 - 337", "663"),
         ]
         self.call_count: int = 0
-        self.last_request_time: Optional[float] = None
+        self.last_request_time: float | None = None
 
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: Optional[str] = None,
-        timeout: Optional[TimeoutSeconds] = None,
+        model: str | None = None,
+        timeout: TimeoutSeconds | None = None,
     ) -> SolveImageResult:
         """Return a mock math solution response."""
         self.call_count += 1
@@ -241,8 +238,8 @@ class ProductionOpenAIClient(BaseOpenAIClient):
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: Optional[str] = None,
-        timeout: Optional[TimeoutSeconds] = None,
+        model: str | None = None,
+        timeout: TimeoutSeconds | None = None,
     ) -> SolveImageResult:
         """
         Process an image containing a math problem using OpenAI Vision API.
@@ -278,7 +275,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
             )
 
         # Retry logic with exponential backoff
-        last_exception: Optional[Exception] = None
+        last_exception: Exception | None = None
         for attempt in range(self.max_retries):
             try:
                 return self._make_api_call(
@@ -299,7 +296,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                     time.sleep(retry_delay)
                 else:
                     raise
-            except (TimeoutError, NetworkError, InvalidResponseError) as e:
+            except (TimeoutError, NetworkError, InvalidResponseError):
                 # Don't retry these errors
                 raise
 
@@ -513,31 +510,29 @@ class OpenAIClient:
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: Optional[str] = None,
-        timeout: Optional[TimeoutSeconds] = None,
+        model: str | None = None,
+        timeout: TimeoutSeconds | None = None,
         *,
         return_dict: Literal[True],
-    ) -> ResponseDict:
-        ...
+    ) -> ResponseDict: ...
 
     @overload
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: Optional[str] = None,
-        timeout: Optional[TimeoutSeconds] = None,
+        model: str | None = None,
+        timeout: TimeoutSeconds | None = None,
         *,
         return_dict: Literal[False] = False,
-    ) -> SolveImageResult:
-        ...
+    ) -> SolveImageResult: ...
 
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: Optional[str] = None,
-        timeout: Optional[TimeoutSeconds] = None,
+        model: str | None = None,
+        timeout: TimeoutSeconds | None = None,
         return_dict: bool = False,
-    ) -> Union[SolveImageResult, ResponseDict]:
+    ) -> SolveImageResult | ResponseDict:
         """
         Solve a math problem from an image.
 

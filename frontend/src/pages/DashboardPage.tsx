@@ -9,15 +9,21 @@ import {
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
+const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes as specified in UI.md
+
 export const DashboardPage = () => {
   const { data: currentPeriod, isLoading: periodLoading } = useQuery({
     queryKey: ['billing', 'current'],
     queryFn: billingService.getCurrentPeriod,
+    refetchInterval: REFRESH_INTERVAL, // Automatic refetch every 5 minutes
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   const { data: usageSummary, isLoading: usageLoading } = useQuery({
     queryKey: ['usage', 'summary'],
     queryFn: billingService.getUsageSummary,
+    refetchInterval: REFRESH_INTERVAL, // Automatic refetch every 5 minutes
+    refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
   const isLoading = periodLoading || usageLoading;

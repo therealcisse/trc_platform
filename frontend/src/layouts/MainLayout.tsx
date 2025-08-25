@@ -1,4 +1,4 @@
-import { Outlet, NavLink } from 'react-router-dom';
+import { Outlet, NavLink, useLocation } from 'react-router-dom';
 import { useAuth } from '../contexts/AuthContext';
 import {
   HomeIcon,
@@ -7,6 +7,7 @@ import {
   ChartBarIcon,
   UserCircleIcon,
   ArrowRightOnRectangleIcon,
+  ChevronDownIcon,
 } from '@heroicons/react/24/outline';
 import { useState } from 'react';
 import clsx from 'clsx';
@@ -14,7 +15,9 @@ import { EmailVerificationBanner } from '../components/EmailVerificationBanner';
 
 export const MainLayout = () => {
   const { user, logout } = useAuth();
+  const location = useLocation();
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [expandedItems, setExpandedItems] = useState<string[]>(['Billing', 'Account']);
 
   const handleLogout = async () => {
     try {
@@ -24,12 +27,34 @@ export const MainLayout = () => {
     }
   };
 
+  const toggleExpanded = (name: string) => {
+    setExpandedItems(prev => 
+      prev.includes(name) 
+        ? prev.filter(item => item !== name)
+        : [...prev, name]
+    );
+  };
+
   const navigation = [
     { name: 'Dashboard', href: '/dashboard', icon: HomeIcon },
     { name: 'API Tokens', href: '/tokens', icon: KeyIcon },
-    { name: 'Billing', href: '/billing', icon: CreditCardIcon },
-    { name: 'Usage', href: '/usage', icon: ChartBarIcon },
-    { name: 'Account', href: '/account', icon: UserCircleIcon },
+    { 
+      name: 'Billing', 
+      icon: CreditCardIcon,
+      children: [
+        { name: 'Current Period', href: '/billing/current' },
+        { name: 'History', href: '/billing' },
+        { name: 'Usage Details', href: '/usage' }
+      ]
+    },
+    { 
+      name: 'Account', 
+      icon: UserCircleIcon,
+      children: [
+        { name: 'Settings', href: '/account' },
+        { name: 'Change Password', href: '/account/password' }
+      ]
+    },
   ];
 
   return (
@@ -79,27 +104,81 @@ export const MainLayout = () => {
             {/* Navigation */}
             <nav className="flex-1 px-2 py-4 space-y-1">
               {navigation.map((item) => (
-                <NavLink
-                  key={item.name}
-                  to={item.href}
-                  className={({ isActive }) =>
-                    clsx(
-                      'flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
-                      isActive
-                        ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
-                        : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
-                    )
-                  }
-                  title={isSidebarCollapsed ? item.name : undefined}
-                >
-                  <item.icon
-                    className={clsx(
-                      'flex-shrink-0 h-5 w-5',
-                      !isSidebarCollapsed && 'mr-3'
-                    )}
-                  />
-                  {!isSidebarCollapsed && <span>{item.name}</span>}
-                </NavLink>
+                <div key={item.name}>
+                  {item.children ? (
+                    <>
+                      <button
+                        onClick={() => toggleExpanded(item.name)}
+                        className={clsx(
+                          'w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md transition-colors',
+                          item.children.some(child => location.pathname.startsWith(child.href))
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                        )}
+                        title={isSidebarCollapsed ? item.name : undefined}
+                      >
+                        <div className="flex items-center">
+                          <item.icon
+                            className={clsx(
+                              'flex-shrink-0 h-5 w-5',
+                              !isSidebarCollapsed && 'mr-3'
+                            )}
+                          />
+                          {!isSidebarCollapsed && <span>{item.name}</span>}
+                        </div>
+                        {!isSidebarCollapsed && (
+                          <ChevronDownIcon 
+                            className={clsx(
+                              "h-4 w-4 transition-transform",
+                              expandedItems.includes(item.name) && "rotate-180"
+                            )}
+                          />
+                        )}
+                      </button>
+                      {!isSidebarCollapsed && expandedItems.includes(item.name) && (
+                        <div className="ml-8 mt-1 space-y-1">
+                          {item.children.map((child) => (
+                            <NavLink
+                              key={child.name}
+                              to={child.href}
+                              className={({ isActive }) =>
+                                clsx(
+                                  'block px-3 py-2 text-sm rounded-md transition-colors',
+                                  isActive
+                                    ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400 font-medium'
+                                    : 'text-gray-600 hover:bg-gray-50 dark:text-gray-400 dark:hover:bg-gray-800'
+                                )
+                              }
+                            >
+                              {child.name}
+                            </NavLink>
+                          ))}
+                        </div>
+                      )}
+                    </>
+                  ) : (
+                    <NavLink
+                      to={item.href}
+                      className={({ isActive }) =>
+                        clsx(
+                          'flex items-center px-2 py-2 text-sm font-medium rounded-md transition-colors',
+                          isActive
+                            ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
+                            : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800'
+                        )
+                      }
+                      title={isSidebarCollapsed ? item.name : undefined}
+                    >
+                      <item.icon
+                        className={clsx(
+                          'flex-shrink-0 h-5 w-5',
+                          !isSidebarCollapsed && 'mr-3'
+                        )}
+                      />
+                      {!isSidebarCollapsed && <span>{item.name}</span>}
+                    </NavLink>
+                  )}
+                </div>
               ))}
             </nav>
 

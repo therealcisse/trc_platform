@@ -5,7 +5,7 @@ This module provides a comprehensive hierarchy of exceptions for better
 error handling and debugging capabilities.
 """
 
-from typing import Any, Optional
+from typing import Any
 
 from .types import ErrorCode
 
@@ -22,8 +22,8 @@ class OpenAIError(Exception):
         self,
         message: str,
         error_code: ErrorCode = ErrorCode.UNKNOWN,
-        details: Optional[dict[str, Any]] = None,
-        retry_after: Optional[int] = None,
+        details: dict[str, Any] | None = None,
+        retry_after: int | None = None,
     ) -> None:
         """
         Initialize the OpenAI error.
@@ -67,9 +67,9 @@ class APIError(OpenAIError):
     def __init__(
         self,
         message: str,
-        status_code: Optional[int] = None,
-        response_body: Optional[str] = None,
-        details: Optional[dict[str, Any]] = None,
+        status_code: int | None = None,
+        response_body: str | None = None,
+        details: dict[str, Any] | None = None,
     ) -> None:
         """
         Initialize API error with HTTP details.
@@ -113,7 +113,7 @@ class NetworkError(OpenAIError):
     def __init__(
         self,
         message: str,
-        original_exception: Optional[Exception] = None,
+        original_exception: Exception | None = None,
     ) -> None:
         """
         Initialize network error.
@@ -137,7 +137,7 @@ class InvalidResponseError(OpenAIError):
     def __init__(
         self,
         message: str,
-        response_data: Optional[Any] = None,
+        response_data: Any | None = None,
     ) -> None:
         """
         Initialize invalid response error.
@@ -160,8 +160,8 @@ class InvalidImageError(OpenAIError):
     def __init__(
         self,
         message: str,
-        image_size: Optional[int] = None,
-        image_format: Optional[str] = None,
+        image_size: int | None = None,
+        image_format: str | None = None,
     ) -> None:
         """
         Initialize invalid image error.
@@ -188,8 +188,8 @@ class RateLimitError(OpenAIError):
     def __init__(
         self,
         message: str,
-        retry_after: Optional[int] = None,
-        limit_type: Optional[str] = None,
+        retry_after: int | None = None,
+        limit_type: str | None = None,
     ) -> None:
         """
         Initialize rate limit error.
@@ -226,7 +226,7 @@ class InsufficientQuotaError(OpenAIError):
     def __init__(
         self,
         message: str = "Insufficient quota or credits",
-        remaining_quota: Optional[float] = None,
+        remaining_quota: float | None = None,
     ) -> None:
         """
         Initialize insufficient quota error.
@@ -246,7 +246,7 @@ class InsufficientQuotaError(OpenAIError):
 class ModelNotFoundError(OpenAIError):
     """Exception for model not found errors."""
 
-    def __init__(self, model_name: str, available_models: Optional[list[str]] = None) -> None:
+    def __init__(self, model_name: str, available_models: list[str] | None = None) -> None:
         """
         Initialize model not found error.
 

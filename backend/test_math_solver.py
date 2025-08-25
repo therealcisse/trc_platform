@@ -49,11 +49,11 @@ def test_mock_mode():
     print(f"  Usage: {result.usage}")
     print(f"  Request ID: {result.request_id}")
     print(f"  Processing time: {result.processing_time_ms}ms")
-    
+
     # Test numeric parsing
     numeric_result = result.get_numeric_result()
     print(f"  Numeric result: {numeric_result}")
-    
+
     # Test dictionary conversion (for backwards compatibility)
     result_dict = result.to_dict()
     print(f"  As dict: {result_dict}")
@@ -74,7 +74,7 @@ def test_singleton_client():
     print(f"  Result: {result.result}")
     print(f"  Model: {result.model}")
     print(f"  Is error: {result.is_error_response()}")
-    
+
     # Test backwards compatibility with return_dict=True
     result_dict = openai_client.solve_image(test_image, return_dict=True)
     print("\nImage solve test (dict mode):")

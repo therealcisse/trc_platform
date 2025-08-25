@@ -26,11 +26,11 @@ def image_performance_stats(request):
         avg_duration_ms=Avg("duration_ms"),
         avg_image_size=Avg("saved_image__file_size"),
         total_storage_bytes=Sum("saved_image__file_size"),
-        success_rate=Avg(
-            Count("id", filter=models.Q(status="success")) * 100.0 / Count("id")
-        )
-        if requests_with_images.exists()
-        else 0,
+        success_rate=(
+            Avg(Count("id", filter=models.Q(status="success")) * 100.0 / Count("id"))
+            if requests_with_images.exists()
+            else 0
+        ),
     )
 
     # Calculate success/error counts
@@ -91,17 +91,19 @@ def image_performance_stats(request):
                 "total_requests": stats["total_requests"] or 0,
                 "success_count": success_count,
                 "error_count": error_count,
-                "avg_duration_ms": round(stats["avg_duration_ms"], 2)
-                if stats["avg_duration_ms"]
-                else 0,
-                "avg_image_size_kb": round(stats["avg_image_size"] / 1024, 2)
-                if stats["avg_image_size"]
-                else 0,
+                "avg_duration_ms": (
+                    round(stats["avg_duration_ms"], 2) if stats["avg_duration_ms"] else 0
+                ),
+                "avg_image_size_kb": (
+                    round(stats["avg_image_size"] / 1024, 2) if stats["avg_image_size"] else 0
+                ),
                 "total_storage_mb": round((stats["total_storage_bytes"] or 0) / (1024 * 1024), 2),
                 "success_rate": round(
-                    (success_count / (success_count + error_count) * 100)
-                    if (success_count + error_count) > 0
-                    else 0,
+                    (
+                        (success_count / (success_count + error_count) * 100)
+                        if (success_count + error_count) > 0
+                        else 0
+                    ),
                     2,
                 ),
             },

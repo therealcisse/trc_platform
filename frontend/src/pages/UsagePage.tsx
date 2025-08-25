@@ -12,6 +12,8 @@ import {
 import clsx from 'clsx';
 import type { ApiRequest } from '../types/billing';
 
+const PAGE_SIZE = 25; // As specified in UI.md
+
 export const UsagePage = () => {
   const [page, setPage] = useState(1);
   const [dateRange, setDateRange] = useState({
@@ -23,6 +25,7 @@ export const UsagePage = () => {
     queryKey: ['usage', 'requests', page, dateRange.from, dateRange.to],
     queryFn: () => billingService.getUsageRequests({
       page,
+      pageSize: PAGE_SIZE,
       from: dateRange.from || undefined,
       to: dateRange.to || undefined,
     }),

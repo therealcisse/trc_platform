@@ -1,6 +1,7 @@
 """
 Script to create a staff user using the custom User model.
 """
+
 import os
 from datetime import UTC, datetime
 

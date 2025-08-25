@@ -29,8 +29,14 @@ export const billingService = {
     from?: string;
     to?: string;
     page?: number;
+    pageSize?: number;
   }): Promise<PaginatedResponse<ApiRequest>> {
-    const { data } = await http.get('/customers/usage/requests', { params });
+    const { data } = await http.get('/customers/usage/requests', { 
+      params: {
+        ...params,
+        page_size: params.pageSize // Map to backend parameter name
+      } 
+    });
     return data;
   },
 };

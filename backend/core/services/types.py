@@ -5,9 +5,9 @@ This module provides comprehensive type definitions to ensure type safety
 and improve maintainability of the OpenAI client implementation.
 """
 
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from enum import Enum
-from typing import Literal, Optional, Union
+from typing import Literal
 
 
 class ErrorCode(str, Enum):
@@ -64,14 +64,14 @@ class SolveImageResult:
     result: str
     model: str
     usage: UsageInfo
-    request_id: Optional[str] = None
-    processing_time_ms: Optional[int] = None
+    request_id: str | None = None
+    processing_time_ms: int | None = None
 
     def is_error_response(self) -> bool:
         """Check if the result indicates an error in processing."""
         return self.result.startswith("ERROR:")
 
-    def get_numeric_result(self) -> Optional[Union[float, list[float]]]:
+    def get_numeric_result(self) -> float | list[float] | None:
         """
         Attempt to parse the result as a numeric value or list of values.
 
@@ -92,14 +92,14 @@ class SolveImageResult:
             except ValueError:
                 return None
 
-    def to_dict(self) -> dict[str, Union[str, dict[str, int], int, None]]:
+    def to_dict(self) -> dict[str, str | dict[str, int] | int | None]:
         """
         Convert the result to a dictionary for backwards compatibility.
 
         Returns:
             Dictionary representation of the result.
         """
-        base_dict: dict[str, Union[str, dict[str, int], int, None]] = {
+        base_dict: dict[str, str | dict[str, int] | int | None] = {
             "result": self.result,
             "model": self.model,
             "usage": {
@@ -151,13 +151,13 @@ class ImageValidationResult:
     """Result of image validation."""
 
     is_valid: bool
-    error_message: Optional[str] = None
-    image_format: Optional[str] = None
-    image_size_bytes: Optional[int] = None
-    dimensions: Optional[tuple[int, int]] = None  # (width, height)
+    error_message: str | None = None
+    image_format: str | None = None
+    image_size_bytes: int | None = None
+    dimensions: tuple[int, int] | None = None  # (width, height)
 
 
 # Type aliases for clarity and consistency
 ImageBytes = bytes
 TimeoutSeconds = int
-ResponseDict = dict[str, Union[str, dict[str, int], int, None]]
+ResponseDict = dict[str, str | dict[str, int] | int | None]
