@@ -20,19 +20,14 @@ export const BillingPeriodDetailsPage = () => {
   const { periodId } = useParams<{ periodId: string }>();
   const [page, setPage] = useState(1);
 
-  const { data: period } = useQuery({
-    queryKey: ['billing', 'period', periodId],
-    queryFn: () => billingService.getBillingPeriods().then(
-      periods => periods.find(p => p.id === periodId)
-    ),
+  const { data, isLoading } = useQuery({
+    queryKey: ['billing', 'period', periodId, 'requests', page],
+    queryFn: () => billingService.getBillingPeriodWithRequests(periodId!, page),
     enabled: !!periodId,
   });
 
-  const { data: requests, isLoading } = useQuery({
-    queryKey: ['billing', 'period', periodId, 'requests', page],
-    queryFn: () => billingService.getBillingPeriodDetails(periodId!, page),
-    enabled: !!periodId,
-  });
+  const period = data?.period;
+  const requests = data?.requests;
 
   const formatCurrency = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
