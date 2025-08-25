@@ -6,11 +6,13 @@ from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
+from rest_framework.request import Request
+from rest_framework.response import Response
 
 from core.views import healthz
 
 @ensure_csrf_cookie
-def csrf_bootstrap(request):
+def csrf_bootstrap(request: Request) -> Response:
     return HttpResponse(status=204)
 
 urlpatterns = [

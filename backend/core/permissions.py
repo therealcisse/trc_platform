@@ -1,5 +1,10 @@
-from django.http import HttpRequest
+from typing import Any
+
 from rest_framework import permissions
+from rest_framework.request import Request
+from rest_framework.views import APIView
+
+from .types import get_authenticated_user
 
 
 class IsTokenAuthenticated(permissions.BasePermission):
@@ -7,13 +12,14 @@ class IsTokenAuthenticated(permissions.BasePermission):
     Custom permission to only allow access to users authenticated via API token.
     """
 
-    def has_permission(self, request: HttpRequest, view) -> bool:
+    def has_permission(self, request: Request, view: APIView) -> bool:
         # Check if user is authenticated
-        if not request.user or not request.user.is_authenticated:  # type: ignore
+        user = get_authenticated_user(request)
+        if user is None:
             return False
 
         # Check if authentication was via token (not session)
-        return hasattr(request, "token") and request.token is not None  # type: ignore
+        return hasattr(request, "token") and getattr(request, "token", None) is not None
 
 
 class IsEmailVerified(permissions.BasePermission):
@@ -21,8 +27,9 @@ class IsEmailVerified(permissions.BasePermission):
     Custom permission to only allow access to users with verified email.
     """
 
-    def has_permission(self, request: HttpRequest, view) -> bool:
-        if not request.user or not request.user.is_authenticated:  # type: ignore
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        user = get_authenticated_user(request)
+        if user is None:
             return False
 
-        return request.user.is_email_verified  # type: ignore
+        return user.is_email_verified
