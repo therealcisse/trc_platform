@@ -126,7 +126,7 @@ export const MainLayout = () => {
             <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-800">
               {isSidebarCollapsed ? (
                 <div className="w-8 h-8 rounded bg-primary-500 flex items-center justify-center">
-                  <span className="text-white font-bold text-sm">AP</span>
+                  <span className="text-white font-bold text-sm">TP</span>
                 </div>
               ) : (
                 <h1 className="font-semibold text-xl text-gray-900 dark:text-white">
