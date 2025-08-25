@@ -85,8 +85,8 @@ class CurrentUserView(APIView):
             {
                 "id": str(user.id),
                 "email": user.email,
-                "emailVerified": user.is_email_verified,
-                "createdAt": user.date_joined.isoformat(),
+                "isEmailVerified": user.is_email_verified,
+                "dateJoined": user.date_joined.isoformat(),
             }
         )
 

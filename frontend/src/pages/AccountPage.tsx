@@ -4,7 +4,8 @@ import {
   UserCircleIcon,
   KeyIcon,
   ShieldCheckIcon,
-  ArrowRightIcon
+  ArrowRightIcon,
+  ArrowRightOnRectangleIcon
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -167,20 +168,33 @@ export const AccountPage = () => {
         ))}
       </div>
 
-      {/* Danger Zone */}
-      <div className="mt-8 bg-red-50 dark:bg-red-900/10 rounded-xl border border-red-200 dark:border-red-900 p-6">
-        <h3 className="text-lg font-semibold text-red-900 dark:text-red-400 mb-2">
-          Danger Zone
-        </h3>
-        <p className="text-sm text-red-700 dark:text-red-300 mb-4">
-          Actions in this section are permanent and cannot be undone.
-        </p>
-        <button
-          className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors text-sm font-medium"
-          onClick={() => logout()}
-        >
-          Logout from Account
-        </button>
+      {/* Account Actions */}
+      <div className="mt-8 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        {/* Section Header */}
+        <div className="px-6 py-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center">
+            <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-400 mr-3" />
+            <div>
+              <h2 className="text-lg font-semibold text-gray-900 dark:text-white">
+                Account Actions
+              </h2>
+              <p className="text-sm text-gray-600 dark:text-gray-400 mt-1">
+                Manage your session and account
+              </p>
+            </div>
+          </div>
+        </div>
+        
+        {/* Section Content */}
+        <div className="p-6">
+          <button
+            className="px-4 py-2 bg-gray-600 dark:bg-gray-700 text-white rounded-lg hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors text-sm font-medium flex items-center"
+            onClick={() => logout()}
+          >
+            <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
+            Logout
+          </button>
+        </div>
       </div>
     </div>
   );

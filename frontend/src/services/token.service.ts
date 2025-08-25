@@ -4,7 +4,7 @@ import type { ApiToken, TokenGenerationResponse, TokenFormData } from '../types/
 export const tokenService = {
   async getTokens(): Promise<ApiToken[]> {
     const { data } = await http.get('/customers/tokens');
-    return data;
+    return data.results || [];
   },
 
   async createToken(formData: TokenFormData): Promise<TokenGenerationResponse> {
