@@ -6,8 +6,8 @@ import { z } from 'zod';
 import { EnvelopeIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
 
 // Get max attempts from environment variable with default of 3
-const MAX_VERIFICATION_ATTEMPTS = import.meta.env.VITE_MAX_VERIFICATION_ATTEMPTS 
-  ? parseInt(import.meta.env.VITE_MAX_VERIFICATION_ATTEMPTS) 
+const MAX_VERIFICATION_ATTEMPTS = import.meta.env.VITE_MAX_VERIFICATION_ATTEMPTS
+  ? parseInt(import.meta.env.VITE_MAX_VERIFICATION_ATTEMPTS)
   : 3;
 
 const COOLDOWN_SECONDS = 60; // 60 seconds between requests
@@ -72,7 +72,7 @@ export const ResendVerificationPage = () => {
       const attemptsData = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
       if (attemptsData) {
         const attempts: VerificationAttempts = JSON.parse(attemptsData);
-        
+
         // Reset attempts after 24 hours
         if (Date.now() > attempts.resetAt) {
           localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
@@ -98,14 +98,14 @@ export const ResendVerificationPage = () => {
         attempts = {
           count: 1,
           email,
-          resetAt: Date.now() + (24 * 60 * 60 * 1000), // 24 hours from now
+          resetAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
         };
       } else if (Date.now() > attempts.resetAt) {
         // Reset period expired
         attempts = {
           count: 1,
           email,
-          resetAt: Date.now() + (24 * 60 * 60 * 1000),
+          resetAt: Date.now() + 24 * 60 * 60 * 1000,
         };
       } else {
         // Increment existing count
@@ -116,7 +116,7 @@ export const ResendVerificationPage = () => {
       attempts = {
         count: 1,
         email,
-        resetAt: Date.now() + (24 * 60 * 60 * 1000),
+        resetAt: Date.now() + 24 * 60 * 60 * 1000,
       };
     }
 
@@ -127,29 +127,36 @@ export const ResendVerificationPage = () => {
   const onSubmit = async (data: ResendFormData) => {
     if (cooldownRemaining > 0) {
       setStatus('error');
-      setMessage(`Please wait ${cooldownRemaining} seconds before requesting another verification email.`);
+      setMessage(
+        `Please wait ${cooldownRemaining} seconds before requesting another verification email.`
+      );
       return;
     }
 
     if (attemptsRemaining <= 0) {
       setStatus('error');
-      setMessage(`Maximum verification attempts (${MAX_VERIFICATION_ATTEMPTS}) reached. Please try again in 24 hours or contact support.`);
+      setMessage(
+        `Maximum verification attempts (${MAX_VERIFICATION_ATTEMPTS}) reached. Please try again in 24 hours or contact support.`
+      );
       return;
     }
 
     try {
       setStatus('idle');
       setMessage('');
-      
+
       // Call the API to resend verification email
-      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/customers/resend-verification`, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-        },
-        credentials: 'include',
-        body: JSON.stringify({ email: data.email }),
-      });
+      const response = await fetch(
+        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/customers/resend-verification`,
+        {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+          credentials: 'include',
+          body: JSON.stringify({ email: data.email }),
+        }
+      );
 
       if (!response.ok) {
         const error = await response.json();
@@ -189,7 +196,8 @@ export const ResendVerificationPage = () => {
             <div className="flex items-start">
               <ExclamationTriangleIcon className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5 mr-2 flex-shrink-0" />
               <p className="text-sm text-yellow-800 dark:text-yellow-200">
-                {attemptsRemaining} verification {attemptsRemaining === 1 ? 'attempt' : 'attempts'} remaining today
+                {attemptsRemaining} verification {attemptsRemaining === 1 ? 'attempt' : 'attempts'}{' '}
+                remaining today
               </p>
             </div>
           </div>
@@ -208,9 +216,7 @@ export const ResendVerificationPage = () => {
 
         {status === 'success' && (
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-sm text-green-800 dark:text-green-200">
-              {message}
-            </p>
+            <p className="text-sm text-green-800 dark:text-green-200">{message}</p>
           </div>
         )}
 
@@ -236,9 +242,7 @@ export const ResendVerificationPage = () => {
               placeholder="you@example.com"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.email.message}
-              </p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
             )}
           </div>
 
@@ -247,20 +251,20 @@ export const ResendVerificationPage = () => {
             disabled={isButtonDisabled}
             className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            {isSubmitting ? 'Sending...' : 
-             cooldownRemaining > 0 ? `Wait ${cooldownRemaining}s` :
-             attemptsRemaining <= 0 ? 'Max attempts reached' :
-             'Send Verification Email'}
+            {isSubmitting
+              ? 'Sending...'
+              : cooldownRemaining > 0
+                ? `Wait ${cooldownRemaining}s`
+                : attemptsRemaining <= 0
+                  ? 'Max attempts reached'
+                  : 'Send Verification Email'}
           </button>
         </form>
 
         <div className="mt-6 text-center space-y-2">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Already verified?{' '}
-            <Link
-              to="/login"
-              className="font-medium text-primary-600 hover:text-primary-500"
-            >
+            <Link to="/login" className="font-medium text-primary-600 hover:text-primary-500">
               Sign in
             </Link>
           </p>

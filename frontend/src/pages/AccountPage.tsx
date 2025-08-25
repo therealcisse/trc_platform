@@ -5,7 +5,7 @@ import {
   KeyIcon,
   ShieldCheckIcon,
   ArrowRightIcon,
-  ArrowRightOnRectangleIcon
+  ArrowRightOnRectangleIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -23,13 +23,13 @@ export const AccountPage = () => {
         {
           label: 'Email Verification',
           value: user?.isEmailVerified ? 'Verified' : 'Not Verified',
-          status: user?.isEmailVerified ? 'success' : 'warning'
+          status: user?.isEmailVerified ? 'success' : 'warning',
         },
         {
           label: 'Account Created',
-          value: user?.dateJoined ? format(new Date(user.dateJoined), 'PPP') : 'Not available'
+          value: user?.dateJoined ? format(new Date(user.dateJoined), 'PPP') : 'Not available',
         },
-      ]
+      ],
     },
     {
       title: 'Security',
@@ -41,9 +41,9 @@ export const AccountPage = () => {
           description: 'Update your account password',
           link: '/account/password',
           icon: KeyIcon,
-        }
-      ]
-    }
+        },
+      ],
+    },
   ];
 
   return (
@@ -68,7 +68,8 @@ export const AccountPage = () => {
                 Email verification required
               </h3>
               <p className="mt-1 text-sm text-yellow-700 dark:text-yellow-300">
-                Please verify your email address to access all features. Check your inbox for the verification email.
+                Please verify your email address to access all features. Check your inbox for the
+                verification email.
               </p>
               <Link
                 to="/resend-verification"
@@ -136,11 +137,7 @@ export const AccountPage = () => {
               {section.actions && (
                 <div className="space-y-3">
                   {section.actions.map((action) => (
-                    <Link
-                      key={action.title}
-                      to={action.link}
-                      className="block group"
-                    >
+                    <Link key={action.title} to={action.link} className="block group">
                       <div className="p-4 border border-gray-200 dark:border-gray-700 rounded-lg hover:border-primary-500 dark:hover:border-primary-400 transition-colors">
                         <div className="flex items-center justify-between">
                           <div className="flex items-center">
@@ -184,7 +181,7 @@ export const AccountPage = () => {
             </div>
           </div>
         </div>
-        
+
         {/* Section Content */}
         <div className="p-6">
           <button

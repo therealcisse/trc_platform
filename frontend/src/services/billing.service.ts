@@ -13,7 +13,10 @@ export const billingService = {
     return data.results || [];
   },
 
-  async getBillingPeriodDetails(periodId: string, page = 1): Promise<PaginatedResponse<RequestLog>> {
+  async getBillingPeriodDetails(
+    periodId: string,
+    page = 1
+  ): Promise<PaginatedResponse<RequestLog>> {
     const { data } = await http.get(`/customers/billing/periods/${periodId}`, {
       params: { page },
     });
@@ -21,7 +24,10 @@ export const billingService = {
     return data.requests || { results: [], count: 0, next: null, previous: null };
   },
 
-  async getBillingPeriodWithRequests(periodId: string, page = 1): Promise<{ period: BillingPeriod; requests: PaginatedResponse<RequestLog> }> {
+  async getBillingPeriodWithRequests(
+    periodId: string,
+    page = 1
+  ): Promise<{ period: BillingPeriod; requests: PaginatedResponse<RequestLog> }> {
     const { data } = await http.get(`/customers/billing/periods/${periodId}`, {
       params: { page },
     });
@@ -39,11 +45,11 @@ export const billingService = {
     page?: number;
     pageSize?: number;
   }): Promise<PaginatedResponse<RequestLog>> {
-    const { data } = await http.get('/customers/usage/requests', { 
+    const { data } = await http.get('/customers/usage/requests', {
       params: {
         ...params,
-        page_size: params.pageSize // Map to backend parameter name
-      } 
+        page_size: params.pageSize, // Map to backend parameter name
+      },
     });
     return data;
   },

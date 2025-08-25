@@ -5,7 +5,7 @@ export const PaymentStatus = {
   WAIVED: 'waived',
 } as const;
 
-export type PaymentStatus = typeof PaymentStatus[keyof typeof PaymentStatus];
+export type PaymentStatus = (typeof PaymentStatus)[keyof typeof PaymentStatus];
 
 export interface BillingPeriod {
   id: string;
@@ -39,7 +39,7 @@ export const RequestStatus = {
   ERROR: 'error',
 } as const;
 
-export type RequestStatus = typeof RequestStatus[keyof typeof RequestStatus];
+export type RequestStatus = (typeof RequestStatus)[keyof typeof RequestStatus];
 
 export interface RequestLog {
   id: string;

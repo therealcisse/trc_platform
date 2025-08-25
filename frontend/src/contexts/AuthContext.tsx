@@ -1,5 +1,10 @@
 import React, { createContext, useContext, useState, useEffect, type ReactNode } from 'react';
-import { type User, type LoginCredentials, type RegisterCredentials, type ChangePasswordData } from '../types/auth';
+import {
+  type User,
+  type LoginCredentials,
+  type RegisterCredentials,
+  type ChangePasswordData,
+} from '../types/auth';
 import { authService } from '../services/auth.service';
 import { useNavigate } from 'react-router-dom';
 
@@ -59,7 +64,9 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   const register = async (credentials: RegisterCredentials) => {
     await authService.register(credentials);
     navigate('/login', {
-      state: { message: 'Registration successful! Please check your email to verify your account.' }
+      state: {
+        message: 'Registration successful! Please check your email to verify your account.',
+      },
     });
   };
 

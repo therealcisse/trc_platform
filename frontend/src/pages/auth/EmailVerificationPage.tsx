@@ -12,10 +12,12 @@ export const EmailVerificationPage = () => {
 
   useEffect(() => {
     const token = searchParams.get('token');
-    
+
     if (!token) {
       setStatus('error');
-      setErrorMessage('No verification token provided. Please check your email for the correct link.');
+      setErrorMessage(
+        'No verification token provided. Please check your email for the correct link.'
+      );
       return;
     }
 
@@ -27,7 +29,7 @@ export const EmailVerificationPage = () => {
       setStatus('loading');
       await verifyEmail(token);
       setStatus('success');
-      
+
       // Redirect to dashboard after 3 seconds if authenticated
       if (isAuthenticated) {
         setTimeout(() => {
@@ -36,7 +38,8 @@ export const EmailVerificationPage = () => {
       }
     } catch (error: any) {
       setStatus('error');
-      const message = error.response?.data?.detail || 'Verification failed. The link may be expired or invalid.';
+      const message =
+        error.response?.data?.detail || 'Verification failed. The link may be expired or invalid.';
       setErrorMessage(message);
     }
   };
@@ -86,9 +89,7 @@ export const EmailVerificationPage = () => {
             <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-2">
               Verification Failed
             </h2>
-            <p className="text-gray-600 dark:text-gray-400 mb-6">
-              {errorMessage}
-            </p>
+            <p className="text-gray-600 dark:text-gray-400 mb-6">{errorMessage}</p>
             <div className="space-y-3">
               <Link
                 to="/resend-verification"

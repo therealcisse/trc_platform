@@ -40,19 +40,13 @@ export const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 dark:from-gray-900 dark:to-gray-800">
       <div className="bg-white dark:bg-gray-900 p-8 rounded-2xl shadow-xl w-full max-w-md">
         <div className="text-center mb-8">
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">
-            Welcome back
-          </h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Sign in to your account to continue
-          </p>
+          <h1 className="text-3xl font-bold text-gray-900 dark:text-white mb-2">Welcome back</h1>
+          <p className="text-gray-600 dark:text-gray-400">Sign in to your account to continue</p>
         </div>
 
         {location.state?.message && (
           <div className="mb-6 p-4 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg">
-            <p className="text-sm text-green-800 dark:text-green-200">
-              {location.state.message}
-            </p>
+            <p className="text-sm text-green-800 dark:text-green-200">{location.state.message}</p>
           </div>
         )}
 
@@ -78,9 +72,7 @@ export const LoginPage = () => {
               placeholder="you@example.com"
             />
             {errors.email && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">
-                {errors.email.message}
-              </p>
+              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
             )}
           </div>
 
@@ -130,10 +122,7 @@ export const LoginPage = () => {
         <div className="mt-6 text-center">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
-            <Link
-              to="/register"
-              className="font-medium text-primary-600 hover:text-primary-500"
-            >
+            <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
               Sign up
             </Link>
           </p>

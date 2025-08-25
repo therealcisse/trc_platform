@@ -56,7 +56,7 @@ export const DashboardPage = () => {
       isCurrency: true,
     },
     {
-      name: 'Today\'s Usage',
+      name: "Today's Usage",
       value: usageSummary?.today || 0,
       icon: ChartBarIcon,
       change: '-2%',
@@ -101,7 +101,10 @@ export const DashboardPage = () => {
           <div className="flex justify-between items-start">
             <div>
               <p className="text-primary-100 text-sm font-medium">Current Billing Period</p>
-              <h2 className="text-2xl font-bold mt-1">{currentPeriod.periodLabel || format(new Date(currentPeriod.periodStart), 'MMMM yyyy')}</h2>
+              <h2 className="text-2xl font-bold mt-1">
+                {currentPeriod.periodLabel ||
+                  format(new Date(currentPeriod.periodStart), 'MMMM yyyy')}
+              </h2>
               <p className="text-primary-100 text-sm mt-2">
                 {format(new Date(currentPeriod.periodStart), 'MMM d')} -{' '}
                 {format(new Date(currentPeriod.periodEnd), 'MMM d, yyyy')}
@@ -117,7 +120,8 @@ export const DashboardPage = () => {
                   currentPeriod.paymentStatus === 'overdue' && 'bg-red-100 text-red-800'
                 )}
               >
-                {currentPeriod.paymentStatus.charAt(0).toUpperCase() + currentPeriod.paymentStatus.slice(1)}
+                {currentPeriod.paymentStatus.charAt(0).toUpperCase() +
+                  currentPeriod.paymentStatus.slice(1)}
               </span>
             </div>
           </div>
@@ -133,17 +137,15 @@ export const DashboardPage = () => {
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                  {stat.name}
-                </p>
+                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.name}</p>
                 <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
                   {stat.isCurrency
                     ? formatCurrency(stat.value as number)
                     : stat.isTime
-                    ? stat.value === 'Never'
-                      ? 'Never'
-                      : format(new Date(stat.value as string), 'PPp')
-                    : formatNumber(stat.value as number)}
+                      ? stat.value === 'Never'
+                        ? 'Never'
+                        : format(new Date(stat.value as string), 'PPp')
+                      : formatNumber(stat.value as number)}
                 </p>
                 {stat.change && (
                   <p
@@ -168,15 +170,11 @@ export const DashboardPage = () => {
 
       {/* Usage Summary */}
       <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">
-          Usage Summary
-        </h3>
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Usage Summary</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {usageStats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">
-                {stat.label}
-              </p>
+              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.label}</p>
               <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {formatNumber(stat.value)}
               </p>

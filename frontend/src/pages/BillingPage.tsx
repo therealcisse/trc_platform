@@ -3,7 +3,13 @@ import { useQuery } from '@tanstack/react-query';
 import { billingService } from '../services/billing.service';
 import { format } from 'date-fns';
 import { Link } from 'react-router-dom';
-import { CreditCardIcon, CheckCircleIcon, ClockIcon, ExclamationCircleIcon, ArrowRightIcon } from '@heroicons/react/24/outline';
+import {
+  CreditCardIcon,
+  CheckCircleIcon,
+  ClockIcon,
+  ExclamationCircleIcon,
+  ArrowRightIcon,
+} from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { PaymentStatus } from '../types/billing';
 
@@ -118,11 +124,12 @@ export const BillingPage = () => {
                     >
                       {getStatusIcon(period.paymentStatus)}
                       <span className="ml-1">
-                        {period.paymentStatus.charAt(0).toUpperCase() + period.paymentStatus.slice(1)}
+                        {period.paymentStatus.charAt(0).toUpperCase() +
+                          period.paymentStatus.slice(1)}
                       </span>
                     </span>
                   </div>
-                  
+
                   <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mt-4">
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-500">Period</p>
@@ -131,21 +138,21 @@ export const BillingPage = () => {
                         {format(new Date(period.periodEnd), 'MMM d, yyyy')}
                       </p>
                     </div>
-                    
+
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-500">Total Requests</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {formatNumber(period.totalRequests)}
                       </p>
                     </div>
-                    
+
                     <div>
                       <p className="text-sm text-gray-500 dark:text-gray-500">Total Cost</p>
                       <p className="text-sm font-medium text-gray-900 dark:text-white">
                         {formatCurrency(period.totalCostCents)}
                       </p>
                     </div>
-                    
+
                     {period.paidAt && (
                       <div>
                         <p className="text-sm text-gray-500 dark:text-gray-500">Payment Date</p>
@@ -155,11 +162,11 @@ export const BillingPage = () => {
                       </div>
                     )}
                   </div>
-                  
+
                   {period.paymentReference && (
                     <div className="mt-4">
                       <p className="text-sm text-gray-500 dark:text-gray-500">
-                        Payment Reference: {' '}
+                        Payment Reference:{' '}
                         <span className="font-mono text-gray-700 dark:text-gray-300">
                           {period.paymentReference}
                         </span>
@@ -167,7 +174,7 @@ export const BillingPage = () => {
                     </div>
                   )}
                 </div>
-                
+
                 <div className="flex items-center justify-end mt-4">
                   <span className="text-sm font-medium text-primary-600 dark:text-primary-400 group-hover:text-primary-700 dark:group-hover:text-primary-300 inline-flex items-center">
                     View Details

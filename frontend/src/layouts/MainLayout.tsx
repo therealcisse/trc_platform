@@ -27,10 +27,8 @@ export const MainLayout = () => {
   };
 
   const toggleExpanded = (name: string) => {
-    setExpandedItems(prev =>
-      prev.includes(name)
-        ? prev.filter(item => item !== name)
-        : [...prev, name]
+    setExpandedItems((prev) =>
+      prev.includes(name) ? prev.filter((item) => item !== name) : [...prev, name]
     );
   };
 
@@ -41,18 +39,18 @@ export const MainLayout = () => {
       name: 'Billing',
       icon: CreditCardIcon,
       children: [
-        { name: 'Current Period', href: '/billing/current' },
+        { name: 'Current Period', href: '/billing-current-period' },
         { name: 'History', href: '/billing' },
-        { name: 'Usage Details', href: '/usage' }
-      ]
+        { name: 'Usage Details', href: '/usage' },
+      ],
     },
     {
       name: 'Account',
       icon: UserCircleIcon,
       children: [
         { name: 'Settings', href: '/account' },
-        { name: 'Change Password', href: '/account/password' }
-      ]
+        { name: 'Change Password', href: '/account/password' },
+      ],
     },
   ];
 
@@ -116,7 +114,7 @@ export const MainLayout = () => {
                         onClick={() => !isSidebarCollapsed && toggleExpanded(item.name)}
                         className={clsx(
                           'w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md transition-colors',
-                          item.children.some(child => location.pathname.startsWith(child.href))
+                          item.children.some((child) => location.pathname.startsWith(child.href))
                             ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                             : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
                           isSidebarCollapsed && 'cursor-default'
@@ -124,18 +122,15 @@ export const MainLayout = () => {
                       >
                         <div className="flex items-center">
                           <item.icon
-                            className={clsx(
-                              'flex-shrink-0 h-5 w-5',
-                              !isSidebarCollapsed && 'mr-3'
-                            )}
+                            className={clsx('flex-shrink-0 h-5 w-5', !isSidebarCollapsed && 'mr-3')}
                           />
                           {!isSidebarCollapsed && <span>{item.name}</span>}
                         </div>
                         {!isSidebarCollapsed && (
                           <ChevronDownIcon
                             className={clsx(
-                              "h-4 w-4 transition-transform",
-                              expandedItems.includes(item.name) && "rotate-180"
+                              'h-4 w-4 transition-transform',
+                              expandedItems.includes(item.name) && 'rotate-180'
                             )}
                           />
                         )}
@@ -181,10 +176,7 @@ export const MainLayout = () => {
                         }
                       >
                         <item.icon
-                          className={clsx(
-                            'flex-shrink-0 h-5 w-5',
-                            !isSidebarCollapsed && 'mr-3'
-                          )}
+                          className={clsx('flex-shrink-0 h-5 w-5', !isSidebarCollapsed && 'mr-3')}
                         />
                         {!isSidebarCollapsed && <span>{item.name}</span>}
                       </NavLink>

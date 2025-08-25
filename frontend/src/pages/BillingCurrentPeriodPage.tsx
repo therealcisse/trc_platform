@@ -1,10 +1,14 @@
 import { useQuery } from '@tanstack/react-query';
 import { billingService } from '../services/billing.service';
-import { Navigate } from 'react-router-dom';
+import { Navigate, Link } from 'react-router-dom';
 import { CreditCardIcon } from '@heroicons/react/24/outline';
 
 export const BillingCurrentPeriodPage = () => {
-  const { data: currentPeriod, isLoading, error } = useQuery({
+  const {
+    data: currentPeriod,
+    isLoading,
+    error,
+  } = useQuery({
     queryKey: ['billing', 'current'],
     queryFn: billingService.getCurrentPeriod,
   });
@@ -49,7 +53,12 @@ export const BillingCurrentPeriodPage = () => {
         <p className="text-gray-600 dark:text-gray-400 mb-6">
           There is no active billing period at the moment.
         </p>
-        <Navigate to="/billing" replace />
+        <Link
+          to="/billing"
+          className="inline-flex items-center px-4 py-2 border border-transparent text-sm font-medium rounded-md shadow-sm text-white bg-primary-600 hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500"
+        >
+          View Billing History
+        </Link>
       </div>
     </div>
   );

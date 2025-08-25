@@ -6,6 +6,7 @@ import tseslint from 'typescript-eslint'
 import { globalIgnores } from 'eslint/config'
 import reactX from 'eslint-plugin-react-x'
 import reactDom from 'eslint-plugin-react-dom'
+import eslintConfigPrettier from 'eslint-config-prettier'
 
 export default tseslint.config([
   globalIgnores(['dist']),
@@ -32,4 +33,5 @@ export default tseslint.config([
     },
 
   },
+  eslintConfigPrettier,
 ])

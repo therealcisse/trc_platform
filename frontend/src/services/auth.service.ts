@@ -1,5 +1,10 @@
 import { http } from '../lib/http';
-import type { User, LoginCredentials, RegisterCredentials, ChangePasswordData } from '../types/auth';
+import type {
+  User,
+  LoginCredentials,
+  RegisterCredentials,
+  ChangePasswordData,
+} from '../types/auth';
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {

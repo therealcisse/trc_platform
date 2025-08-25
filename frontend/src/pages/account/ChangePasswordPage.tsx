@@ -3,13 +3,13 @@ import { useNavigate, Link } from 'react-router-dom';
 import { useMutation } from '@tanstack/react-query';
 import { authService } from '../../services/auth.service';
 import { useAuth } from '../../contexts/AuthContext';
-import { 
-  KeyIcon, 
-  EyeIcon, 
+import {
+  KeyIcon,
+  EyeIcon,
   EyeSlashIcon,
   ArrowLeftIcon,
   CheckCircleIcon,
-  ExclamationCircleIcon
+  ExclamationCircleIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 
@@ -92,22 +92,22 @@ export const ChangePasswordPage = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     setSuccessMessage('');
-    
+
     if (validateForm()) {
       changePasswordMutation.mutate(formData);
     }
   };
 
   const handleInputChange = (field: keyof FormData, value: string) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
     // Clear error for this field when user starts typing
     if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: undefined }));
+      setErrors((prev) => ({ ...prev, [field]: undefined }));
     }
   };
 
   const togglePasswordVisibility = (field: 'current' | 'new' | 'confirm') => {
-    setShowPasswords(prev => ({ ...prev, [field]: !prev[field] }));
+    setShowPasswords((prev) => ({ ...prev, [field]: !prev[field] }));
   };
 
   // Check if user email is verified
@@ -156,7 +156,8 @@ export const ChangePasswordPage = () => {
         <div className="mb-8">
           <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Change Password</h1>
           <p className="text-gray-600 dark:text-gray-400 mt-2">
-            Update your account password. Make sure to use a strong password that you don't use elsewhere.
+            Update your account password. Make sure to use a strong password that you don't use
+            elsewhere.
           </p>
         </div>
 
@@ -165,9 +166,7 @@ export const ChangePasswordPage = () => {
           <div className="mb-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-xl p-4">
             <div className="flex">
               <CheckCircleIcon className="h-5 w-5 text-green-400 flex-shrink-0" />
-              <p className="ml-3 text-sm text-green-800 dark:text-green-200">
-                {successMessage}
-              </p>
+              <p className="ml-3 text-sm text-green-800 dark:text-green-200">{successMessage}</p>
             </div>
           </div>
         )}
@@ -177,7 +176,10 @@ export const ChangePasswordPage = () => {
           <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6">
             {/* Current Password */}
             <div className="mb-6">
-              <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+              <label
+                htmlFor="currentPassword"
+                className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+              >
                 Current Password
               </label>
               <div className="relative">
@@ -207,14 +209,19 @@ export const ChangePasswordPage = () => {
                 </button>
               </div>
               {errors.currentPassword && (
-                <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.currentPassword}</p>
+                <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                  {errors.currentPassword}
+                </p>
               )}
             </div>
 
             <div className="border-t border-gray-200 dark:border-gray-800 pt-6">
               {/* New Password */}
               <div className="mb-6">
-                <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="newPassword"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   New Password
                 </label>
                 <div className="relative">
@@ -244,7 +251,9 @@ export const ChangePasswordPage = () => {
                   </button>
                 </div>
                 {errors.newPassword && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.newPassword}</p>
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.newPassword}
+                  </p>
                 )}
                 <p className="mt-2 text-xs text-gray-500 dark:text-gray-500">
                   Password must be at least 8 characters long
@@ -253,7 +262,10 @@ export const ChangePasswordPage = () => {
 
               {/* Confirm New Password */}
               <div>
-                <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2">
+                <label
+                  htmlFor="confirmPassword"
+                  className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
+                >
                   Confirm New Password
                 </label>
                 <div className="relative">
@@ -283,7 +295,9 @@ export const ChangePasswordPage = () => {
                   </button>
                 </div>
                 {errors.confirmPassword && (
-                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">{errors.confirmPassword}</p>
+                  <p className="mt-2 text-sm text-red-600 dark:text-red-400">
+                    {errors.confirmPassword}
+                  </p>
                 )}
               </div>
             </div>

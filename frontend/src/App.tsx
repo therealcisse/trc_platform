@@ -32,7 +32,7 @@ export default function App() {
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/tokens" element={<TokensPage />} />
               <Route path="/billing" element={<BillingPage />} />
-              <Route path="/billing/current" element={<BillingCurrentPeriodPage />} />
+              <Route path="/billing-current-period" element={<BillingCurrentPeriodPage />} />
               <Route path="/billing/:periodId" element={<BillingPeriodDetailsPage />} />
               <Route path="/usage" element={<UsagePage />} />
               <Route path="/account" element={<AccountPage />} />

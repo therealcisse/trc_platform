@@ -7,7 +7,8 @@ const VERIFICATION_REQUIRED_ROUTES = [
   '/tokens',
   '/usage',
   '/billing',
-  '/account/password'
+  '/billing-current-period',
+  '/account/password',
 ];
 
 export const ProtectedRoute = () => {
@@ -27,8 +28,8 @@ export const ProtectedRoute = () => {
   }
 
   // Check if current route requires email verification
-  const requiresVerification = VERIFICATION_REQUIRED_ROUTES.some(
-    route => location.pathname.startsWith(route)
+  const requiresVerification = VERIFICATION_REQUIRED_ROUTES.some((route) =>
+    location.pathname.startsWith(route)
   );
 
   if (requiresVerification && user && !user.isEmailVerified) {
