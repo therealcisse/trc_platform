@@ -8,7 +8,6 @@ This test suite verifies all security requirements for token authentication:
 4. Proper authentication flow
 """
 
-import io
 from datetime import UTC, datetime
 from unittest.mock import patch
 
@@ -66,6 +65,7 @@ class TokenAuthenticationTestCase(TestCase):
         )
         # Manually set the correct hash for our known token
         from argon2 import PasswordHasher
+
         ph = PasswordHasher()
         self.verified_api_token.token_hash = ph.hash(self.verified_token)
         self.verified_api_token.save()
@@ -109,9 +109,7 @@ class TokenAuthenticationTestCase(TestCase):
 
         # Create test image
         self.test_image = SimpleUploadedFile(
-            name="test.jpg",
-            content=b"fake_image_content",
-            content_type="image/jpeg"
+            name="test.jpg", content=b"fake_image_content", content_type="image/jpeg"
         )
 
     @patch("core.views.openai_client.solve_image")
@@ -124,11 +122,7 @@ class TokenAuthenticationTestCase(TestCase):
 
         # Make request with valid token
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.verified_token}")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
         self.assertEqual(response.data["result"], "42")
@@ -139,11 +133,7 @@ class TokenAuthenticationTestCase(TestCase):
 
     def test_missing_token(self):
         """Test request without token is rejected."""
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -152,11 +142,7 @@ class TokenAuthenticationTestCase(TestCase):
         """Test request with invalid token format is rejected."""
         # Token without tok_ prefix
         self.client.credentials(HTTP_AUTHORIZATION="Bearer invalid_token_format")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -164,11 +150,7 @@ class TokenAuthenticationTestCase(TestCase):
     def test_non_existent_token(self):
         """Test request with non-existent token is rejected."""
         self.client.credentials(HTTP_AUTHORIZATION="Bearer tok_nonexistent123456")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -176,11 +158,7 @@ class TokenAuthenticationTestCase(TestCase):
     def test_revoked_token(self):
         """Test request with revoked token is rejected."""
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.revoked_token}")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -188,11 +166,7 @@ class TokenAuthenticationTestCase(TestCase):
     def test_unverified_email(self):
         """Test request with token from unverified user is rejected."""
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.unverified_token}")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -200,11 +174,7 @@ class TokenAuthenticationTestCase(TestCase):
     def test_inactive_user(self):
         """Test request with token from inactive user is rejected."""
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.inactive_token}")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -215,11 +185,7 @@ class TokenAuthenticationTestCase(TestCase):
         self.client.force_authenticate(user=self.verified_user)
 
         # Try to access solver without token (only session)
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Should be rejected because IsTokenAuthenticated requires token auth
         # Returns 403 when permission check fails
@@ -229,6 +195,7 @@ class TokenAuthenticationTestCase(TestCase):
         """Test request with token that has wrong hash is rejected."""
         # Create a token with wrong hash - store a valid Argon2 hash format but for different content
         from argon2 import PasswordHasher
+
         ph = PasswordHasher()
         wrong_token = "tok_wronghash1234567890"
         wrong_api_token = ApiToken.objects.create(
@@ -239,11 +206,7 @@ class TokenAuthenticationTestCase(TestCase):
         )
 
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {wrong_token}")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         # Returns 403 when permission check fails (token validation failed)
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
@@ -260,11 +223,7 @@ class TokenAuthenticationTestCase(TestCase):
 
         # Make request with valid token
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.verified_token}")
-        response = self.client.post(
-            self.solve_url,
-            {"file": self.test_image},
-            format="multipart"
-        )
+        response = self.client.post(self.solve_url, {"file": self.test_image}, format="multipart")
 
         self.assertEqual(response.status_code, status.HTTP_200_OK)
 
@@ -289,9 +248,7 @@ class TokenAuthenticationTestCase(TestCase):
         # The view should accept this format
         self.client.credentials(HTTP_AUTHORIZATION=f"Bearer {self.verified_token}")
         response = self.client.post(
-            self.solve_url,
-            data=b"fake_image_binary_data",
-            content_type="application/octet-stream"
+            self.solve_url, data=b"fake_image_binary_data", content_type="application/octet-stream"
         )
 
         # The current implementation with application/octet-stream requires
@@ -320,18 +277,16 @@ class TokenAuthenticationTestCase(TestCase):
             ("BEARER " + self.verified_token, False),  # uppercase BEARER
             ("Bearer  " + self.verified_token, False),  # extra space
             (" Bearer " + self.verified_token, False),  # leading space
-            ("Basic " + self.verified_token, False),    # wrong auth type
-            (self.verified_token, False),               # no Bearer prefix
-            ("Bearer " + self.verified_token, True),    # correct format
+            ("Basic " + self.verified_token, False),  # wrong auth type
+            (self.verified_token, False),  # no Bearer prefix
+            ("Bearer " + self.verified_token, True),  # correct format
         ]
 
         for auth_header, should_succeed in test_cases:
             with self.subTest(auth_header=auth_header):
                 self.client.credentials(HTTP_AUTHORIZATION=auth_header)
                 response = self.client.post(
-                    self.solve_url,
-                    {"file": self.test_image},
-                    format="multipart"
+                    self.solve_url, {"file": self.test_image}, format="multipart"
                 )
 
                 if should_succeed:
@@ -339,9 +294,7 @@ class TokenAuthenticationTestCase(TestCase):
                         mock_solve.return_value = {"result": "42", "model": "gpt-4"}
                         self.client.credentials(HTTP_AUTHORIZATION=auth_header)
                         response = self.client.post(
-                            self.solve_url,
-                            {"file": self.test_image},
-                            format="multipart"
+                            self.solve_url, {"file": self.test_image}, format="multipart"
                         )
                         self.assertEqual(response.status_code, status.HTTP_200_OK)
                 else:
@@ -357,17 +310,13 @@ class TokenManagementTestCase(TestCase):
         self.client = APIClient()
 
         # Create verified user
-        self.user = User.objects.create_user(
-            email="user@example.com",
-            password="testpass123"
-        )
+        self.user = User.objects.create_user(email="user@example.com", password="testpass123")
         self.user.email_verified_at = datetime.now(UTC)
         self.user.save()
 
         # Create unverified user
         self.unverified_user = User.objects.create_user(
-            email="unverified@example.com",
-            password="testpass123"
+            email="unverified@example.com", password="testpass123"
         )
 
     def test_create_token_requires_verified_email(self):
@@ -375,11 +324,7 @@ class TokenManagementTestCase(TestCase):
         # Login as unverified user
         self.client.force_authenticate(user=self.unverified_user)
 
-        response = self.client.post(
-            "/api/customers/tokens",
-            {"name": "My Token"},
-            format="json"
-        )
+        response = self.client.post("/api/customers/tokens", {"name": "My Token"}, format="json")
 
         self.assertEqual(response.status_code, status.HTTP_403_FORBIDDEN)
 
@@ -389,9 +334,7 @@ class TokenManagementTestCase(TestCase):
         self.client.force_authenticate(user=self.user)
 
         response = self.client.post(
-            "/api/customers/tokens",
-            {"name": "My API Token"},
-            format="json"
+            "/api/customers/tokens", {"name": "My API Token"}, format="json"
         )
 
         self.assertEqual(response.status_code, status.HTTP_201_CREATED)
@@ -408,16 +351,10 @@ class TokenManagementTestCase(TestCase):
         """Test listing user's tokens."""
         # Create some tokens
         token1 = ApiToken.objects.create(
-            user=self.user,
-            name="Token 1",
-            token_prefix="tok_11111111",
-            token_hash="hash1"
+            user=self.user, name="Token 1", token_prefix="tok_11111111", token_hash="hash1"
         )
         token2 = ApiToken.objects.create(
-            user=self.user,
-            name="Token 2",
-            token_prefix="tok_22222222",
-            token_hash="hash2"
+            user=self.user, name="Token 2", token_prefix="tok_22222222", token_hash="hash2"
         )
 
         self.client.force_authenticate(user=self.user)
@@ -434,10 +371,7 @@ class TokenManagementTestCase(TestCase):
     def test_revoke_token(self):
         """Test revoking a token."""
         token = ApiToken.objects.create(
-            user=self.user,
-            name="Token to Revoke",
-            token_prefix="tok_revoke12",
-            token_hash="hash"
+            user=self.user, name="Token to Revoke", token_prefix="tok_revoke12", token_hash="hash"
         )
 
         self.client.force_authenticate(user=self.user)
@@ -452,18 +386,12 @@ class TokenManagementTestCase(TestCase):
 
     def test_cannot_revoke_other_users_token(self):
         """Test that users cannot revoke other users' tokens."""
-        other_user = User.objects.create_user(
-            email="other@example.com",
-            password="pass123"
-        )
+        other_user = User.objects.create_user(email="other@example.com", password="pass123")
         other_user.email_verified_at = datetime.now(UTC)
         other_user.save()
 
         other_token = ApiToken.objects.create(
-            user=other_user,
-            name="Other User Token",
-            token_prefix="tok_other123",
-            token_hash="hash"
+            user=other_user, name="Other User Token", token_prefix="tok_other123", token_hash="hash"
         )
 
         self.client.force_authenticate(user=self.user)

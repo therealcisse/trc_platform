@@ -68,7 +68,12 @@ class BillingPeriod(models.Model):
         """Check if this period can be marked as paid."""
         return not self.is_current and self.payment_status in ["pending", "overdue"]
 
-    def mark_as_paid(self, amount_cents: int | None = None, reference: str | None = None, notes: str | None = None) -> None:
+    def mark_as_paid(
+        self,
+        amount_cents: int | None = None,
+        reference: str | None = None,
+        notes: str | None = None,
+    ) -> None:
         """Mark billing period as paid."""
         if self.is_current:
             raise ValueError("Cannot mark current billing period as paid")

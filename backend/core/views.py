@@ -1,6 +1,6 @@
 import logging
 import time
-from typing import TYPE_CHECKING, Any, cast
+from typing import TYPE_CHECKING, Any
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
@@ -36,11 +36,12 @@ class SolveView(APIView):
 
     def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
         """Override dispatch to apply TokenAuthMiddleware before DRF processes the request."""
+
         # Apply TokenAuthMiddleware to the raw Django request
         def get_response(req: HttpRequest) -> HttpResponse:
             # Call parent's dispatch which will process the request through DRF
             return super(SolveView, self).dispatch(req, *args, **kwargs)
-        
+
         middleware = TokenAuthMiddleware(get_response)
         return middleware(request)
 

@@ -1,19 +1,20 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.urls import include, path
-from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
-
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.http import HttpResponse
+from django.urls import include, path
+from django.views.decorators.csrf import ensure_csrf_cookie
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.request import Request
 from rest_framework.response import Response
 
 from core.views import healthz
 
+
 @ensure_csrf_cookie
 def csrf_bootstrap(request: Request) -> Response:
     return HttpResponse(status=204)
+
 
 urlpatterns = [
     # Health check

@@ -1,12 +1,11 @@
 """Type utilities for handling Django authentication types."""
-from typing import TypeGuard, Union, cast
+
+from typing import TypeGuard, Union
 
 from django.contrib.auth.models import AnonymousUser
 from django.http import HttpRequest
 
-
 from customers.models import User
-
 
 # Type alias for the union of User and AnonymousUser
 AuthUserType = Union[User, AnonymousUser]
@@ -66,5 +65,7 @@ def require_authenticated_user(request: HttpRequest) -> User:
     """
     user = get_authenticated_user(request)
     if user is None:
-        raise ValueError("User is not authenticated. This function should only be used in protected views.")
+        raise ValueError(
+            "User is not authenticated. This function should only be used in protected views."
+        )
     return user

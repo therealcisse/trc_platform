@@ -1,14 +1,13 @@
 from datetime import timedelta
-from typing import List, Type
 
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
-from django.db.models import Count, QuerySet
+from django.db.models import Count
 from django.utils import timezone
 from rest_framework import status
-from rest_framework.generics import DestroyAPIView, ListAPIView
+from rest_framework.generics import DestroyAPIView
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -93,7 +92,7 @@ class CurrentUserView(APIView):
 
 
 class LogoutView(APIView):
-    permission_classes: List[Type[BasePermission]] = [IsAuthenticated]
+    permission_classes: list[type[BasePermission]] = [IsAuthenticated]
 
     def post(self, request: Request) -> Response:
         logout(request)

@@ -12,7 +12,6 @@ os.environ.setdefault("DJANGO_SETTINGS_MODULE", "config.settings")
 django.setup()
 
 import json
-from typing import Any
 
 from django.contrib.auth import get_user_model
 from django.test import Client

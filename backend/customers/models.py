@@ -2,11 +2,11 @@ import secrets
 import string
 import uuid
 from datetime import UTC, datetime
+from typing import Any
 
 from argon2 import PasswordHasher
 from django.contrib.auth.models import AbstractBaseUser, BaseUserManager, PermissionsMixin
 from django.db import models
-from typing import Any
 
 
 class UserManager(BaseUserManager["User"]):
@@ -20,7 +20,9 @@ class UserManager(BaseUserManager["User"]):
         user.save(using=self._db)
         return user
 
-    def create_superuser(self, email: str, password: str | None = None, **extra_fields: Any) -> "User":
+    def create_superuser(
+        self, email: str, password: str | None = None, **extra_fields: Any
+    ) -> "User":
         extra_fields.setdefault("is_staff", True)
         extra_fields.setdefault("is_superuser", True)
         extra_fields.setdefault("is_active", True)

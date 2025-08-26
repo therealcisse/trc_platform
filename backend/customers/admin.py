@@ -1,8 +1,5 @@
-from datetime import UTC, datetime
-from typing import Any
 
-from django.contrib import admin
-from django.contrib import messages
+from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import QuerySet
 from django.http import HttpRequest
@@ -48,25 +45,21 @@ class UserAdmin(BaseUserAdmin):
             self.message_user(
                 request,
                 f"Cannot deactivate {superusers.count()} superuser(s). Skipping them.",
-                level=messages.WARNING
+                level=messages.WARNING,
             )
             queryset = queryset.exclude(is_superuser=True)
-        
+
         # Prevent deactivating the current user
         if request.user in queryset:
             self.message_user(
-                request,
-                "You cannot deactivate your own account.",
-                level=messages.ERROR
+                request, "You cannot deactivate your own account.", level=messages.ERROR
             )
             queryset = queryset.exclude(pk=request.user.pk)
-        
+
         updated = queryset.update(is_active=False)
         if updated:
             self.message_user(
-                request,
-                f"Successfully deactivated {updated} user(s).",
-                level=messages.SUCCESS
+                request, f"Successfully deactivated {updated} user(s).", level=messages.SUCCESS
             )
 
     @admin.action(description="Activate selected users")
@@ -74,9 +67,7 @@ class UserAdmin(BaseUserAdmin):
         """Activate selected users."""
         updated = queryset.update(is_active=True)
         self.message_user(
-            request,
-            f"Successfully activated {updated} user(s).",
-            level=messages.SUCCESS
+            request, f"Successfully activated {updated} user(s).", level=messages.SUCCESS
         )
 
 
@@ -91,7 +82,15 @@ class InviteCodeAdmin(admin.ModelAdmin):
 
 @admin.register(ApiToken)
 class ApiTokenAdmin(admin.ModelAdmin):
-    list_display = ["token_prefix", "user", "name", "is_active", "created_at", "revoked_at", "last_used_at"]
+    list_display = [
+        "token_prefix",
+        "user",
+        "name",
+        "is_active",
+        "created_at",
+        "revoked_at",
+        "last_used_at",
+    ]
     list_filter = ["created_at", "revoked_at", "last_used_at"]
     search_fields = ["token_prefix", "user__email", "name"]
     readonly_fields = ["id", "token_prefix", "token_hash", "created_at", "last_used_at"]
@@ -101,7 +100,7 @@ class ApiTokenAdmin(admin.ModelAdmin):
     def is_active(self, obj: ApiToken) -> bool:
         """Display whether the token is active (not revoked)."""
         return obj.revoked_at is None
-    
+
     is_active.boolean = True  # This tells Django to use green checkmark/red X icons
     is_active.short_description = "Active"
 
@@ -114,19 +113,19 @@ class ApiTokenAdmin(admin.ModelAdmin):
             self.message_user(
                 request,
                 f"{already_revoked.count()} token(s) were already revoked. Skipping them.",
-                level=messages.WARNING
+                level=messages.WARNING,
             )
-        
+
         # Revoke only active tokens
         active_tokens = queryset.filter(revoked_at__isnull=True)
         revoked_count = 0
         for token in active_tokens:
             token.revoke()
             revoked_count += 1
-        
+
         if revoked_count:
             self.message_user(
                 request,
                 f"Successfully revoked {revoked_count} API token(s).",
-                level=messages.SUCCESS
+                level=messages.SUCCESS,
             )

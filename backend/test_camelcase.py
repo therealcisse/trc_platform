@@ -51,7 +51,9 @@ def test_camelcase_conversion() -> None:
     print("=" * 60)
 
     # Test with the camelCase renderer
-    from djangorestframework_camel_case.render import CamelCaseJSONRenderer  # type: ignore[import-untyped]
+    from djangorestframework_camel_case.render import (
+        CamelCaseJSONRenderer,  # type: ignore[import-untyped]
+    )
     from djangorestframework_camel_case.util import camelize  # type: ignore[import-untyped]
 
     renderer = CamelCaseJSONRenderer()
