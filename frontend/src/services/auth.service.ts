@@ -11,9 +11,14 @@ import type {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {
-    const { data } = await http.post('/customers/login', credentials);
-
     await bootstrapCsrf();
+
+    const csrftoken = getCSRFToken();
+    const { data } = await http.post('/customers/login', credentials, {
+        withCredentials: true,
+        headers: { 'X-CSRFToken': csrftoken },
+      });
+
 
     return data;
   },
@@ -23,11 +28,19 @@ export const authService = {
     if (password !== confirmPassword) {
       throw new Error('Passwords do not match');
     }
+
+    await bootstrapCsrf();
+
+    const csrftoken = getCSRFToken();
+
     await http.post('/customers/register', {
       email: credentials.email,
       password: credentials.password,
       inviteCode: inviteCode,
-    });
+    }, {
+        withCredentials: true,
+        headers: { 'X-CSRFToken': csrftoken },
+      });
   },
 
   async logout(): Promise<void> {
