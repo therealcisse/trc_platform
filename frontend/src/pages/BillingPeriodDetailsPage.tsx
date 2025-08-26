@@ -15,6 +15,7 @@ import {
 import clsx from 'clsx';
 import { PaymentStatus, RequestStatus } from '../types/billing';
 import type { RequestLog } from '../types/billing';
+import { formatCurrency, formatNumber, formatBytes } from '../utils/currency';
 
 export const BillingPeriodDetailsPage = () => {
   const { periodId } = useParams<{ periodId: string }>();
@@ -29,24 +30,6 @@ export const BillingPeriodDetailsPage = () => {
   const period = data?.period;
   const requests = data?.requests;
 
-  const formatCurrency = (cents: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(cents / 100);
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
-  };
-
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
@@ -177,7 +160,7 @@ export const BillingPeriodDetailsPage = () => {
           <p className="text-3xl font-bold text-gray-900 dark:text-white">
             {period.totalRequests > 0
               ? formatCurrency(period.totalCostCents / period.totalRequests)
-              : '$0.00'}
+              : '€0.00'}
           </p>
         </div>
       </div>

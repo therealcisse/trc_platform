@@ -12,6 +12,7 @@ import {
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { PaymentStatus } from '../types/billing';
+import { formatCurrency, formatNumber } from '../utils/currency';
 
 export const BillingPage = () => {
   const [statusFilter, setStatusFilter] = useState<string>('');
@@ -21,16 +22,6 @@ export const BillingPage = () => {
     queryFn: () => billingService.getBillingPeriods(statusFilter || undefined),
   });
 
-  const formatCurrency = (cents: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(cents / 100);
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
-  };
 
   const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {

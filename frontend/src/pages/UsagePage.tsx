@@ -12,6 +12,7 @@ import {
 import clsx from 'clsx';
 import { RequestStatus } from '../types/billing';
 import type { RequestLog } from '../types/billing';
+import { formatBytes } from '../utils/currency';
 
 const PAGE_SIZE = 25; // As specified in UI.md
 
@@ -49,13 +50,6 @@ export const UsagePage = () => {
     return 'text-gray-600 dark:text-gray-400';
   };
 
-  const formatBytes = (bytes: number): string => {
-    if (bytes === 0) return '0 B';
-    const k = 1024;
-    const sizes = ['B', 'KB', 'MB', 'GB'];
-    const i = Math.floor(Math.log(bytes) / Math.log(k));
-    return parseFloat((bytes / Math.pow(k, i)).toFixed(2)) + ' ' + sizes[i];
-  };
 
   const exportData = () => {
     if (!data?.results) return;

@@ -4,10 +4,11 @@ import { format } from 'date-fns';
 import {
   ChartBarIcon,
   ClockIcon,
-  CurrencyDollarIcon,
+  CurrencyEuroIcon,
   ServerIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
+import { formatCurrency, formatNumber } from '../utils/currency';
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes as specified in UI.md
 
@@ -28,16 +29,6 @@ export const DashboardPage = () => {
 
   const isLoading = periodLoading || usageLoading;
 
-  const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
-      style: 'currency',
-      currency: 'USD',
-    }).format(amount);
-  };
-
-  const formatNumber = (num: number) => {
-    return new Intl.NumberFormat('en-US').format(num);
-  };
 
   const stats = [
     {
@@ -49,8 +40,8 @@ export const DashboardPage = () => {
     },
     {
       name: 'Current Cost',
-      value: currentPeriod?.totalCostCents ? currentPeriod.totalCostCents / 100 : 0,
-      icon: CurrencyDollarIcon,
+      value: currentPeriod?.totalCostCents || 0,
+      icon: CurrencyEuroIcon,
       change: '+5%',
       changeType: 'positive',
       isCurrency: true,
