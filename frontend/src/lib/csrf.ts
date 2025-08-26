@@ -41,3 +41,13 @@ export function clearAuthCookies(): void {
 export function hasCSRFToken(): boolean {
   return getCSRFToken() !== null;
 }
+
+/**
+ * Bootstrap CSRF token by making a request to the CSRF endpoint
+ */
+export async function bootstrapCsrf(): Promise<void> {
+  const { default: axios } = await import('axios');
+  await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/csrf/`, {
+    withCredentials: true
+  });
+}

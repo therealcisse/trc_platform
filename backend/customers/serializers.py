@@ -63,8 +63,8 @@ class LoginSerializer(serializers.Serializer):
         if not user.is_active:
             raise ValidationError("account_disabled")
 
-        if not user.is_email_verified:
-            raise ValidationError("email_not_verified")
+        # if not user.is_email_verified:
+        #     raise ValidationError("email_not_verified")
 
         attrs["user"] = user
         return attrs

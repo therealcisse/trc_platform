@@ -1,9 +1,10 @@
 import logging
 import time
-from typing import TYPE_CHECKING, cast
+from typing import TYPE_CHECKING, Any, cast
 
 from django.conf import settings
 from django.contrib.auth import get_user_model
+from django.http import HttpRequest, HttpResponse
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FileUploadParser, MultiPartParser
@@ -14,6 +15,7 @@ from rest_framework.views import APIView
 from usage.models import RequestImage, RequestLog
 from usage.utils import get_or_create_current_billing_period
 
+from .middleware.token_auth import TokenAuthMiddleware
 from .models import Settings
 from .permissions import IsTokenAuthenticated
 from .services import openai_client
@@ -32,10 +34,20 @@ class SolveView(APIView):
     permission_classes = [IsTokenAuthenticated]
     parser_classes = [MultiPartParser, FileUploadParser]
 
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        """Override dispatch to apply TokenAuthMiddleware before DRF processes the request."""
+        # Apply TokenAuthMiddleware to the raw Django request
+        def get_response(req: HttpRequest) -> HttpResponse:
+            # Call parent's dispatch which will process the request through DRF
+            return super(SolveView, self).dispatch(req, *args, **kwargs)
+        
+        middleware = TokenAuthMiddleware(get_response)
+        return middleware(request)
+
     def post(self, request: Request) -> Response:
         # Start timer
         start_time = time.time()
-        
+
         # Get authenticated user (guaranteed by IsTokenAuthenticated)
         user = require_authenticated_user(request)
 

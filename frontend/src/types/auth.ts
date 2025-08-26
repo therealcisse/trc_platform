@@ -1,12 +1,8 @@
 export interface User {
   id: string;
   email: string;
-  // isActive: boolean;
-  // isStaff: boolean;
   isEmailVerified: boolean;
   dateJoined: Date;
-  // isSuperuser?: boolean;
-  // lastLogin?: Date | null;
 }
 
 export interface LoginCredentials {

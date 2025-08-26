@@ -57,7 +57,7 @@ export const TokensPage = () => {
 
   const handleCopyToken = () => {
     if (newTokenResponse) {
-      navigator.clipboard.writeText(newTokenResponse.token);
+      navigator.clipboard.writeText(newTokenResponse.tokenOnce);
       setCopiedToken(true);
       setTimeout(() => setCopiedToken(false), 2000);
     }
@@ -75,8 +75,8 @@ export const TokensPage = () => {
     }
   };
 
-  const activeTokens = tokens?.filter((t) => !t.isRevoked) || [];
-  const revokedTokens = tokens?.filter((t) => t.isRevoked) || [];
+  const activeTokens = tokens?.filter((t) => !t.revokedAt) || [];
+  const revokedTokens = tokens?.filter((t) => t.revokedAt) || [];
 
   if (isLoading) {
     return (
@@ -250,7 +250,7 @@ export const TokensPage = () => {
                     <div className="flex items-center space-x-2">
                       <input
                         type="text"
-                        value={newTokenResponse.token}
+                        value={newTokenResponse.tokenOnce}
                         readOnly
                         className="flex-1 px-4 py-2 bg-gray-50 dark:bg-gray-800 border border-gray-300 dark:border-gray-700 rounded-lg font-mono text-sm"
                       />

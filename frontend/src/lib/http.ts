@@ -1,4 +1,5 @@
 import axios, { AxiosError } from 'axios';
+import { hasCSRFToken, bootstrapCsrf, getCSRFToken } from './csrf';
 
 const BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:8000/api';
 
@@ -15,8 +16,18 @@ export const http = axios.create({
 
 // Request interceptor
 http.interceptors.request.use(
-  (config) => {
-    // Add any auth headers or tokens here if needed
+  async (config) => {
+    // Check if CSRF token exists, if not bootstrap it
+    if (!hasCSRFToken()) {
+      await bootstrapCsrf();
+    }
+
+    // Add CSRF token to request headers
+    const csrfToken = getCSRFToken();
+    if (csrfToken) {
+      config.headers['X-CSRFToken'] = csrfToken;
+    }
+
     return config;
   },
   (error) => {
@@ -112,10 +123,6 @@ http.interceptors.response.use(
     return Promise.reject(enhancedError);
   }
 );
-
-export async function bootstrapCsrf() {
-  await axios.get('/api/auth/csrf/', { withCredentials: true });
-}
 
 export interface ApiError {
   detail: string;

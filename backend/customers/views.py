@@ -157,16 +157,13 @@ class ChangePasswordView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
-class ApiTokenListView(ListAPIView):
+class ApiTokenView(APIView):
     permission_classes = [IsAuthenticated, IsEmailVerified]
-    serializer_class = ApiTokenListSerializer
 
-    def get_queryset(self):
-        return ApiToken.objects.filter(user=self.request.user)
-
-
-class ApiTokenCreateView(APIView):
-    permission_classes = [IsAuthenticated, IsEmailVerified]
+    def get(self, request: Request) -> Response:
+        tokens = ApiToken.objects.filter(user=request.user)
+        serializer = ApiTokenListSerializer(tokens, many=True)
+        return Response(serializer.data)
 
     def post(self, request: Request) -> Response:
         serializer = ApiTokenSerializer(data=request.data, context={"request": request})

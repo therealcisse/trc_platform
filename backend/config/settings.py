@@ -44,7 +44,7 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.RequestIDMiddleware",
-    "core.middleware.TokenAuthMiddleware",
+    # TokenAuthMiddleware removed - now applied per-view
 ]
 
 ROOT_URLCONF = "config.urls"

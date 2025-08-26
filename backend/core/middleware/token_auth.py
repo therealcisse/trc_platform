@@ -70,6 +70,10 @@ class TokenAuthMiddleware:
             if not api_token.user.is_active:
                 return None, None
 
+            # Check if user's email is verified
+            if not api_token.user.is_email_verified:
+                return None, None
+
             # Verify token hash
             try:
                 self.ph.verify(api_token.token_hash, token)

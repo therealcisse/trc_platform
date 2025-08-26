@@ -110,7 +110,7 @@ class ApiToken(models.Model):
     id = models.UUIDField(primary_key=True, default=uuid.uuid4, editable=False)
     user = models.ForeignKey(User, on_delete=models.CASCADE, related_name="api_tokens")
     name = models.CharField(max_length=100)
-    token_prefix = models.CharField(max_length=8, db_index=True)
+    token_prefix = models.CharField(max_length=12, db_index=True)  # tok_ + 8 chars
     token_hash = models.CharField(max_length=255)
     created_at = models.DateTimeField(auto_now_add=True)
     revoked_at = models.DateTimeField(null=True, blank=True)

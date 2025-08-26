@@ -1,6 +1,5 @@
 import { http } from '../lib/http';
 import { queryClient } from '../lib/queryClient';
-import { bootstrapCsrf } from '../lib/http';
 import { clearAuthCookies, getCSRFToken } from '../lib/csrf';
 import type {
   User,
@@ -11,15 +10,7 @@ import type {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {
-    await bootstrapCsrf();
-
-    const csrftoken = getCSRFToken();
-    const { data } = await http.post('/customers/login', credentials, {
-        withCredentials: true,
-        headers: { 'X-CSRFToken': csrftoken },
-      });
-
-
+    const { data } = await http.post('/customers/login', credentials);
     return data;
   },
 
@@ -29,18 +20,11 @@ export const authService = {
       throw new Error('Passwords do not match');
     }
 
-    await bootstrapCsrf();
-
-    const csrftoken = getCSRFToken();
-
     await http.post('/customers/register', {
       email: credentials.email,
       password: credentials.password,
       inviteCode: inviteCode,
-    }, {
-        withCredentials: true,
-        headers: { 'X-CSRFToken': csrftoken },
-      });
+    });
   },
 
   async logout(): Promise<void> {
