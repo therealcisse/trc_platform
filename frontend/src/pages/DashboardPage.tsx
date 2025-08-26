@@ -6,21 +6,36 @@ import {
   ClockIcon,
   CurrencyEuroIcon,
   ServerIcon,
+  ArrowPathIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { formatCurrency, formatNumber } from '../utils/currency';
+import { useEffect, useState } from 'react';
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes as specified in UI.md
 
 export const DashboardPage = () => {
-  const { data: currentPeriod, isLoading: periodLoading } = useQuery({
+  const [isRefreshing, setIsRefreshing] = useState(false);
+  const [nextRefreshIn, setNextRefreshIn] = useState(REFRESH_INTERVAL / 1000);
+
+  const { data: currentPeriod, isLoading: periodLoading, isFetching: periodFetching, refetch: refetchPeriod } = useQuery({
     queryKey: ['billing', 'current'],
     queryFn: billingService.getCurrentPeriod,
     refetchInterval: REFRESH_INTERVAL, // Automatic refetch every 5 minutes
     refetchOnWindowFocus: true, // Refetch when window regains focus
   });
 
-  const { data: usageSummary, isLoading: usageLoading } = useQuery({
+  const { data: previousPeriod } = useQuery({
+    queryKey: ['billing', 'previous'],
+    queryFn: async () => {
+      const periods = await billingService.getBillingPeriods();
+      // Find the previous non-current period
+      return periods.find(p => !p.isCurrent) || null;
+    },
+    enabled: !!currentPeriod,
+  });
+
+  const { data: usageSummary, isLoading: usageLoading, isFetching: usageFetching, refetch: refetchUsage } = useQuery({
     queryKey: ['usage', 'summary'],
     queryFn: billingService.getUsageSummary,
     refetchInterval: REFRESH_INTERVAL, // Automatic refetch every 5 minutes
@@ -28,30 +43,82 @@ export const DashboardPage = () => {
   });
 
   const isLoading = periodLoading || usageLoading;
+  const isFetching = periodFetching || usageFetching;
 
+  // Track refresh state
+  useEffect(() => {
+    setIsRefreshing(isFetching && !isLoading);
+  }, [isFetching, isLoading]);
+
+  // Countdown timer for next refresh
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setNextRefreshIn((prev) => {
+        if (prev <= 1) {
+          return REFRESH_INTERVAL / 1000;
+        }
+        return prev - 1;
+      });
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, []);
+
+  const handleManualRefresh = async () => {
+    setIsRefreshing(true);
+    await Promise.all([refetchPeriod(), refetchUsage()]);
+    setNextRefreshIn(REFRESH_INTERVAL / 1000);
+    setTimeout(() => setIsRefreshing(false), 500);
+  };
+
+
+  // Calculate percentage changes
+  const calculateChange = (current: number, previous: number) => {
+    if (!previous || previous === 0) return null;
+    const change = ((current - previous) / previous) * 100;
+    return {
+      value: Math.abs(change).toFixed(1),
+      type: change >= 0 ? 'positive' : 'negative',
+    };
+  };
+
+  const requestsChange = calculateChange(
+    currentPeriod?.totalRequests || 0,
+    previousPeriod?.totalRequests || 0
+  );
+
+  const costChange = calculateChange(
+    currentPeriod?.totalCostCents || 0,
+    previousPeriod?.totalCostCents || 0
+  );
+
+  const todayVsYesterday = calculateChange(
+    usageSummary?.today || 0,
+    usageSummary?.yesterday || 0
+  );
 
   const stats = [
     {
       name: 'Total Requests',
       value: currentPeriod?.totalRequests || 0,
       icon: ServerIcon,
-      change: '+12%',
-      changeType: 'positive',
+      change: requestsChange?.value,
+      changeType: requestsChange?.type,
     },
     {
       name: 'Current Cost',
       value: currentPeriod?.totalCostCents || 0,
       icon: CurrencyEuroIcon,
-      change: '+5%',
-      changeType: 'positive',
+      change: costChange?.value,
+      changeType: costChange?.type,
       isCurrency: true,
     },
     {
       name: "Today's Usage",
       value: usageSummary?.today || 0,
       icon: ChartBarIcon,
-      change: '-2%',
-      changeType: 'negative',
+      change: todayVsYesterday?.value,
+      changeType: todayVsYesterday?.type,
     },
     {
       name: 'Last Request',
@@ -80,10 +147,39 @@ export const DashboardPage = () => {
     <div className="p-8">
       {/* Header */}
       <div className="mb-8">
-        <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-        <p className="text-gray-600 dark:text-gray-400 mt-2">
-          Welcome back! Here's an overview of your API usage.
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
+            <p className="text-gray-600 dark:text-gray-400 mt-2">
+              Welcome back! Here's an overview of your API usage.
+            </p>
+          </div>
+          <div className="flex items-center space-x-4">
+            <div className="text-sm text-gray-500 dark:text-gray-400">
+              {isRefreshing ? (
+                <span className="flex items-center text-primary-600 dark:text-primary-400">
+                  <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin" />
+                  Refreshing...
+                </span>
+              ) : (
+                <span>Next refresh in {Math.floor(nextRefreshIn / 60)}:{String(nextRefreshIn % 60).padStart(2, '0')}</span>
+              )}
+            </div>
+            <button
+              onClick={handleManualRefresh}
+              disabled={isRefreshing}
+              className={clsx(
+                'p-2 rounded-lg transition-colors',
+                isRefreshing
+                  ? 'bg-gray-100 dark:bg-gray-800 text-gray-400 cursor-not-allowed'
+                  : 'bg-white dark:bg-gray-900 hover:bg-gray-100 dark:hover:bg-gray-800 text-gray-600 dark:text-gray-400 border border-gray-200 dark:border-gray-700'
+              )}
+              title="Refresh data"
+            >
+              <ArrowPathIcon className={clsx('h-5 w-5', isRefreshing && 'animate-spin')} />
+            </button>
+          </div>
+        </div>
       </div>
 
       {/* Current Billing Period Card */}
@@ -145,7 +241,8 @@ export const DashboardPage = () => {
                       stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
                     )}
                   >
-                    {stat.change} from last period
+                    {stat.changeType === 'positive' ? '+' : '-'}
+                    {stat.change}% from last period
                   </p>
                 )}
               </div>
