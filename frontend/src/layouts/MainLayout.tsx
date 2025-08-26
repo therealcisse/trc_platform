@@ -170,7 +170,9 @@ export const MainLayout = () => {
                       {isSidebarCollapsed && (
                         <div className="absolute left-full ml-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
                           <div className="py-2 px-3 border-b border-gray-200 dark:border-gray-700">
-                            <p className="text-sm font-semibold text-gray-900 dark:text-white">{item.name}</p>
+                            <p className="text-sm font-semibold text-gray-900 dark:text-white">
+                              {item.name}
+                            </p>
                           </div>
                           <div className="py-2">
                             {item.children.map((child) => (
