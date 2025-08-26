@@ -17,7 +17,7 @@ interface AuthContextType {
   logout: () => Promise<void>;
   changePassword: (data: ChangePasswordData) => Promise<void>;
   verifyEmail: (token: string) => Promise<void>;
-  resendVerificationEmail: (email: string) => Promise<void>;
+  resendVerificationEmail: () => Promise<void>;
   refreshUser: () => Promise<void>;
 }
 
@@ -99,8 +99,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await refreshUser();
   };
 
-  const resendVerificationEmail = async (email: string) => {
-    await authService.resendVerificationEmail(email);
+  const resendVerificationEmail = async () => {
+    await authService.resendVerificationEmail();
   };
 
   const refreshUser = async () => {

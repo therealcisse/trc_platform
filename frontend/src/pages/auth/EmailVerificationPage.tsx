@@ -31,11 +31,14 @@ export const EmailVerificationPage = () => {
       setStatus('success');
 
       // Redirect to dashboard after 3 seconds if authenticated
-      if (isAuthenticated) {
-        setTimeout(() => {
+      setTimeout(() => {
+        if (isAuthenticated) {
           navigate('/dashboard');
-        }, 3000);
-      }
+        } else {
+          navigate('/login');
+        }
+      }, 3000);
+
     } catch (error: any) {
       setStatus('error');
       const message =

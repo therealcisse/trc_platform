@@ -22,7 +22,12 @@ export const DashboardPage = () => {
   const [isRefreshing, setIsRefreshing] = useState(false);
   const [nextRefreshIn, setNextRefreshIn] = useState(REFRESH_INTERVAL / 1000);
 
-  const { data: currentPeriod, isLoading: periodLoading, isFetching: periodFetching, refetch: refetchPeriod } = useQuery({
+  const {
+    data: currentPeriod,
+    isLoading: periodLoading,
+    isFetching: periodFetching,
+    refetch: refetchPeriod,
+  } = useQuery({
     queryKey: ['billing', 'current'],
     queryFn: billingService.getCurrentPeriod,
     refetchInterval: REFRESH_INTERVAL, // Automatic refetch every 5 minutes
@@ -39,7 +44,12 @@ export const DashboardPage = () => {
     enabled: !!currentPeriod,
   });
 
-  const { data: usageSummary, isLoading: usageLoading, isFetching: usageFetching, refetch: refetchUsage } = useQuery({
+  const {
+    data: usageSummary,
+    isLoading: usageLoading,
+    isFetching: usageFetching,
+    refetch: refetchUsage,
+  } = useQuery({
     queryKey: ['usage', 'summary'],
     queryFn: billingService.getUsageSummary,
     refetchInterval: REFRESH_INTERVAL, // Automatic refetch every 5 minutes
@@ -292,7 +302,7 @@ export const DashboardPage = () => {
               </div>
             </Link>
           )}
-          
+
           <Link
             to="/tokens"
             className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
@@ -364,7 +374,7 @@ export const DashboardPage = () => {
       ['Last 7 Days', usageSummary?.last7Days || 0, 'Weekly'],
       ['This Month', usageSummary?.thisMonth || 0, 'Monthly'],
     ];
-    
+
     return [
       headers.join(','),
       ...rows.map(row => row.join(','))

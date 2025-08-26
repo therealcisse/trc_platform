@@ -64,7 +64,7 @@ export const EmailVerificationBanner = () => {
     setResendSuccess(false);
 
     try {
-      await authService.resendVerificationEmail(user.email);
+      await authService.resendVerificationEmail();
 
       // Update cooldown
       localStorage.setItem('banner_verification_last_request', Date.now().toString());

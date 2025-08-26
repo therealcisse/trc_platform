@@ -1,9 +1,9 @@
 import { useState, useEffect } from 'react';
 import { Link } from 'react-router-dom';
-import { useForm } from 'react-hook-form';
-import { zodResolver } from '@hookform/resolvers/zod';
-import { z } from 'zod';
 import { EnvelopeIcon, ClockIcon, ExclamationTriangleIcon } from '@heroicons/react/24/outline';
+import { authService } from '../../services/auth.service';
+import { useAuth } from '../../contexts/AuthContext';
+import { AxiosError } from 'axios';
 
 // Get max attempts from environment variable with default of 3
 const MAX_VERIFICATION_ATTEMPTS = import.meta.env.VITE_MAX_VERIFICATION_ATTEMPTS
@@ -14,39 +14,23 @@ const COOLDOWN_SECONDS = 60; // 60 seconds between requests
 const STORAGE_KEY_ATTEMPTS = 'email_verification_attempts';
 const STORAGE_KEY_LAST_REQUEST = 'email_verification_last_request';
 
-const resendSchema = z.object({
-  email: z.string().email('Invalid email address'),
-});
-
-type ResendFormData = z.infer<typeof resendSchema>;
-
 interface VerificationAttempts {
   count: number;
-  email: string;
   resetAt: number; // Timestamp when attempts reset (24 hours after first attempt)
 }
 
 export const ResendVerificationPage = () => {
+  const { user } = useAuth();
   const [status, setStatus] = useState<'idle' | 'success' | 'error'>('idle');
   const [message, setMessage] = useState<string>('');
   const [cooldownRemaining, setCooldownRemaining] = useState<number>(0);
   const [attemptsRemaining, setAttemptsRemaining] = useState<number>(MAX_VERIFICATION_ATTEMPTS);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
-  const {
-    register,
-    handleSubmit,
-    formState: { errors, isSubmitting },
-    watch,
-  } = useForm<ResendFormData>({
-    resolver: zodResolver(resendSchema),
-  });
-
-  const watchedEmail = watch('email');
-
-  // Check cooldown on mount and email change
+  // Check cooldown on mount
   useEffect(() => {
-    checkCooldownAndAttempts(watchedEmail);
-  }, [watchedEmail]);
+    checkCooldownAndAttempts();
+  }, []);
 
   // Update cooldown timer
   useEffect(() => {
@@ -58,7 +42,7 @@ export const ResendVerificationPage = () => {
     }
   }, [cooldownRemaining]);
 
-  const checkCooldownAndAttempts = (email?: string) => {
+  const checkCooldownAndAttempts = () => {
     // Check last request time for cooldown
     const lastRequest = localStorage.getItem(STORAGE_KEY_LAST_REQUEST);
     if (lastRequest) {
@@ -67,44 +51,31 @@ export const ResendVerificationPage = () => {
       setCooldownRemaining(remainingCooldown);
     }
 
-    // Check attempts for the email
-    if (email) {
-      const attemptsData = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
-      if (attemptsData) {
-        const attempts: VerificationAttempts = JSON.parse(attemptsData);
+    // Check attempts
+    const attemptsData = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
+    if (attemptsData) {
+      const attempts: VerificationAttempts = JSON.parse(attemptsData);
 
-        // Reset attempts after 24 hours
-        if (Date.now() > attempts.resetAt) {
-          localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
-          setAttemptsRemaining(MAX_VERIFICATION_ATTEMPTS);
-        } else if (attempts.email === email) {
-          setAttemptsRemaining(Math.max(0, MAX_VERIFICATION_ATTEMPTS - attempts.count));
-        } else {
-          // Different email, reset count
-          setAttemptsRemaining(MAX_VERIFICATION_ATTEMPTS);
-        }
+      // Reset attempts after 24 hours
+      if (Date.now() > attempts.resetAt) {
+        localStorage.removeItem(STORAGE_KEY_ATTEMPTS);
+        setAttemptsRemaining(MAX_VERIFICATION_ATTEMPTS);
+      } else {
+        setAttemptsRemaining(Math.max(0, MAX_VERIFICATION_ATTEMPTS - attempts.count));
       }
     }
   };
 
-  const updateAttempts = (email: string) => {
+  const updateAttempts = () => {
     const attemptsData = localStorage.getItem(STORAGE_KEY_ATTEMPTS);
     let attempts: VerificationAttempts;
 
     if (attemptsData) {
       attempts = JSON.parse(attemptsData);
-      if (attempts.email !== email) {
-        // Different email, start fresh
-        attempts = {
-          count: 1,
-          email,
-          resetAt: Date.now() + 24 * 60 * 60 * 1000, // 24 hours from now
-        };
-      } else if (Date.now() > attempts.resetAt) {
+      if (Date.now() > attempts.resetAt) {
         // Reset period expired
         attempts = {
           count: 1,
-          email,
           resetAt: Date.now() + 24 * 60 * 60 * 1000,
         };
       } else {
@@ -115,7 +86,6 @@ export const ResendVerificationPage = () => {
       // First attempt
       attempts = {
         count: 1,
-        email,
         resetAt: Date.now() + 24 * 60 * 60 * 1000,
       };
     }
@@ -124,7 +94,7 @@ export const ResendVerificationPage = () => {
     setAttemptsRemaining(Math.max(0, MAX_VERIFICATION_ATTEMPTS - attempts.count));
   };
 
-  const onSubmit = async (data: ResendFormData) => {
+  const handleResendEmail = async () => {
     if (cooldownRemaining > 0) {
       setStatus('error');
       setMessage(
@@ -141,38 +111,39 @@ export const ResendVerificationPage = () => {
       return;
     }
 
+    setIsSubmitting(true);
     try {
       setStatus('idle');
       setMessage('');
 
       // Call the API to resend verification email
-      const response = await fetch(
-        `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/customers/resend-verification`,
-        {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          credentials: 'include',
-          body: JSON.stringify({ email: data.email }),
-        }
-      );
-
-      if (!response.ok) {
-        const error = await response.json();
-        throw new Error(error.detail || 'Failed to resend verification email');
-      }
+      await authService.resendVerificationEmail();
 
       // Update attempts and cooldown
-      updateAttempts(data.email);
+      updateAttempts();
       localStorage.setItem(STORAGE_KEY_LAST_REQUEST, Date.now().toString());
       setCooldownRemaining(COOLDOWN_SECONDS);
 
       setStatus('success');
       setMessage('Verification email sent! Please check your inbox and spam folder.');
-    } catch (error: any) {
+    } catch (error) {
       setStatus('error');
-      setMessage(error.message || 'Failed to resend verification email. Please try again.');
+      if (error instanceof AxiosError) {
+        const errorCode = error.response?.data?.code;
+        const errorDetail = error.response?.data?.detail;
+
+        if (errorCode === 'email_already_verified') {
+          setMessage('Your email is already verified. You can now access all features.');
+        } else if (errorDetail) {
+          setMessage(errorDetail);
+        } else {
+          setMessage('Failed to resend verification email. Please try again.');
+        }
+      } else {
+        setMessage('Failed to resend verification email. Please try again.');
+      }
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -187,7 +158,7 @@ export const ResendVerificationPage = () => {
             Resend Verification Email
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Enter your email address to receive a new verification link
+            Click the button below to receive a new verification link at {user?.email || 'your email'}
           </p>
         </div>
 
@@ -226,40 +197,19 @@ export const ResendVerificationPage = () => {
           </div>
         )}
 
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-          <div>
-            <label
-              htmlFor="email"
-              className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-2"
-            >
-              Email address
-            </label>
-            <input
-              {...register('email')}
-              type="email"
-              autoComplete="email"
-              className="w-full px-4 py-2 border border-gray-300 dark:border-gray-700 rounded-lg focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-800 dark:text-white"
-              placeholder="you@example.com"
-            />
-            {errors.email && (
-              <p className="mt-1 text-sm text-red-600 dark:text-red-400">{errors.email.message}</p>
-            )}
-          </div>
-
-          <button
-            type="submit"
-            disabled={isButtonDisabled}
-            className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-          >
-            {isSubmitting
-              ? 'Sending...'
-              : cooldownRemaining > 0
-                ? `Wait ${cooldownRemaining}s`
-                : attemptsRemaining <= 0
-                  ? 'Max attempts reached'
-                  : 'Send Verification Email'}
-          </button>
-        </form>
+        <button
+          onClick={handleResendEmail}
+          disabled={isButtonDisabled}
+          className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+        >
+          {isSubmitting
+            ? 'Sending...'
+            : cooldownRemaining > 0
+              ? `Wait ${cooldownRemaining}s`
+              : attemptsRemaining <= 0
+                ? 'Max attempts reached'
+                : 'Send Verification Email'}
+        </button>
 
         <div className="mt-6 text-center space-y-2">
           <p className="text-sm text-gray-600 dark:text-gray-400">
