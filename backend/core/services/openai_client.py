@@ -350,8 +350,9 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                         ],
                     },
                 ],
-                "max_tokens": 100,  # Math answers are typically short
-                "temperature": 0,  # Use deterministic output for math
+                # "max_tokens": 100,  # Math answers are typically short
+                # "temperature": 0,  # Use deterministic output for math
+                "temperature": 1,  # Use deterministic output for math
             }
 
             # Make the API call

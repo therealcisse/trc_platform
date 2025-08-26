@@ -1,3 +1,5 @@
+import logging
+import time
 from datetime import timedelta
 
 from django.conf import settings
@@ -8,6 +10,7 @@ from django.db.models import Count
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import DestroyAPIView
+from rest_framework.parsers import FileUploadParser, MultiPartParser
 from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
@@ -15,7 +18,9 @@ from rest_framework.views import APIView
 
 from core.models import Settings
 from core.permissions import IsEmailVerified
-from usage.models import BillingPeriod, RequestLog
+from core.services import openai_client
+from core.services.exceptions import OpenAIError
+from usage.models import BillingPeriod, RequestLog, RequestImage
 from usage.serializers import CurrentBillingPeriodSerializer
 from usage.utils import get_or_create_current_billing_period
 
@@ -27,6 +32,8 @@ from .serializers import (
     LoginSerializer,
     RegisterSerializer,
 )
+
+logger = logging.getLogger(__name__)
 
 
 class RegisterView(APIView):
@@ -574,3 +581,166 @@ class BillingPeriodDetailView(APIView):
                 },
             }
         )
+
+
+class TestSolveView(APIView):
+    """Session-authenticated endpoint for testing the image solver without API tokens."""
+    permission_classes = [IsAuthenticated, IsEmailVerified]
+    parser_classes = [MultiPartParser, FileUploadParser]
+
+    def post(self, request: Request) -> Response:
+        """Process an image using session authentication for testing."""
+        # Start timer
+        start_time = time.time()
+
+        # Get authenticated user from session
+        user = request.user
+
+        # Get image from request
+        if "file" in request.FILES:
+            # multipart/form-data
+            image_file = request.FILES["file"]
+            image_bytes = image_file.read()
+        elif request.content_type == "application/octet-stream":
+            # Raw binary upload
+            image_bytes = request.body
+        else:
+            return Response(
+                {"detail": "No image provided"}, 
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Validate image size (max 10MB for test requests)
+        max_size_bytes = 10 * 1024 * 1024  # 10MB
+        if len(image_bytes) > max_size_bytes:
+            return Response(
+                {"detail": "Image size exceeds 10MB limit"},
+                status=status.HTTP_400_BAD_REQUEST
+            )
+
+        # Get settings
+        app_settings = Settings.get_settings()
+
+        # Process image
+        try:
+            # Use the same OpenAI client as the main solve endpoint
+            result = openai_client.solve_image(
+                image_bytes,
+                model=app_settings.openai_model,
+                timeout=app_settings.openai_timeout_s,
+                return_dict=True,
+            )
+
+            # Calculate duration
+            duration_ms = int((time.time() - start_time) * 1000)
+
+            # Get current billing period
+            billing_period = get_or_create_current_billing_period(user)
+
+            # Log request with special service name to distinguish test requests
+            request_log = RequestLog.objects.create(
+                user=user,
+                token=None,  # No token for test requests
+                billing_period=billing_period,
+                service="customers.test_solve",  # Different service name
+                duration_ms=duration_ms,
+                request_bytes=len(image_bytes),
+                response_bytes=len(str(result["result"])),
+                status="success",
+                request_id=getattr(request, "request_id", None),
+                result=str(result["result"]),  # Store the result
+            )
+
+            # Save image if feature is enabled
+            if settings.SAVE_REQUEST_IMAGES:
+                # Check size limit
+                max_saved_size = settings.MAX_SAVED_IMAGE_SIZE_MB * 1024 * 1024
+                if len(image_bytes) <= max_saved_size:
+                    try:
+                        # Detect MIME type from request
+                        mime_type = "image/jpeg"  # Default
+                        if "file" in request.FILES:
+                            content_type = request.FILES["file"].content_type
+                            if content_type:
+                                mime_type = content_type
+
+                        RequestImage.create_from_bytes(
+                            request_log=request_log,
+                            image_bytes=image_bytes,
+                            mime_type=mime_type
+                        )
+                    except Exception as e:
+                        # Log error but don't fail the request
+                        logger.error(
+                            f"Failed to save image for test request {getattr(request, 'request_id', 'unknown')}: {e}"
+                        )
+
+            # Update billing period totals (test requests are also billed)
+            billing_period.total_requests += 1
+            billing_period.total_cost_cents += app_settings.cost_per_request_cents
+            billing_period.save(update_fields=["total_requests", "total_cost_cents", "updated_at"])
+
+            # Return response
+            return Response(
+                {
+                    "request_id": getattr(request, "request_id", None),
+                    "result": result["result"],
+                    "model": result["model"],
+                    "duration_ms": duration_ms,
+                    "is_test": True,  # Indicate this was a test request
+                }
+            )
+
+        except OpenAIError as e:
+            # Calculate duration
+            duration_ms = int((time.time() - start_time) * 1000)
+
+            # Get current billing period
+            billing_period = get_or_create_current_billing_period(user)
+
+            # Log error
+            request_log = RequestLog.objects.create(
+                user=user,
+                token=None,
+                billing_period=billing_period,
+                service="customers.test_solve",
+                duration_ms=duration_ms,
+                request_bytes=len(image_bytes),
+                response_bytes=0,
+                status="error",
+                error_code=e.error_code.value,
+                request_id=getattr(request, "request_id", None),
+                result=None,
+            )
+
+            # Save image even for errors if feature is enabled
+            if settings.SAVE_REQUEST_IMAGES:
+                max_saved_size = settings.MAX_SAVED_IMAGE_SIZE_MB * 1024 * 1024
+                if len(image_bytes) <= max_saved_size:
+                    try:
+                        mime_type = "image/jpeg"  # Default
+                        if "file" in request.FILES:
+                            content_type = request.FILES["file"].content_type
+                            if content_type:
+                                mime_type = content_type
+
+                        RequestImage.create_from_bytes(
+                            request_log=request_log,
+                            image_bytes=image_bytes,
+                            mime_type=mime_type
+                        )
+                    except Exception as save_error:
+                        logger.error(
+                            f"Failed to save image for failed test request {getattr(request, 'request_id', 'unknown')}: {save_error}"
+                        )
+
+            # Update billing period totals (charge even for errors)
+            billing_period.total_requests += 1
+            billing_period.total_cost_cents += app_settings.cost_per_request_cents
+            billing_period.save(update_fields=["total_requests", "total_cost_cents", "updated_at"])
+
+            # Return error
+            return Response(
+                {"detail": str(e), "code": e.error_code.value},
+                status=status.HTTP_500_INTERNAL_SERVER_ERROR,
+            )

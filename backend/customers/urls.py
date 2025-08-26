@@ -12,6 +12,7 @@ from .views import (
     LogoutView,
     RegisterView,
     ResendVerificationEmailView,
+    TestSolveView,
     UsageRequestsView,
     UsageSummaryView,
     VerifyEmailView,
@@ -27,6 +28,7 @@ urlpatterns = [
     path("password/change", ChangePasswordView.as_view(), name="change-password"),
     path("tokens", ApiTokenView.as_view(), name="tokens"),
     path("tokens/<uuid:pk>", ApiTokenRevokeView.as_view(), name="token-revoke"),
+    path("test-solve", TestSolveView.as_view(), name="test-solve"),  # New test endpoint
     path("usage/requests", UsageRequestsView.as_view(), name="usage-requests"),
     path("usage/summary", UsageSummaryView.as_view(), name="usage-summary"),
     # Billing endpoints

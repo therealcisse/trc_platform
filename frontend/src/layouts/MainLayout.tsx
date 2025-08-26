@@ -11,6 +11,7 @@ import {
 import { useState } from 'react';
 import clsx from 'clsx';
 import { EmailVerificationBanner } from '../components/EmailVerificationBanner';
+import { ChatWidget } from '../components/chat/ChatWidget';
 
 export const MainLayout = () => {
   const { user, logout } = useAuth();
@@ -286,6 +287,9 @@ export const MainLayout = () => {
           </main>
         </div>
       </div>
+      
+      {/* Chat Widget */}
+      <ChatWidget />
     </div>
   );
 };
