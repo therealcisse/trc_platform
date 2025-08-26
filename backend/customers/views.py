@@ -241,71 +241,37 @@ class UsageSummaryView(APIView):
         week_ago = today - timedelta(days=7)
         month_start = today.replace(day=1)
 
-        # Get settings for cost calculation
-        settings = Settings.get_settings()
-        cost_per_request = settings.cost_per_request_cents
-
-        # Calculate periods
-        periods = []
-
         # Today
-        today_logs = RequestLog.objects.filter(user=request.user, request_ts__gte=today).aggregate(
-            count=Count("id")
-        )
-        periods.append(
-            {
-                "title": "Today",
-                "count": today_logs["count"] or 0,
-                "cost_cents": (today_logs["count"] or 0) * cost_per_request,
-            }
-        )
+        today_count = RequestLog.objects.filter(
+            user=request.user, request_ts__gte=today
+        ).count()
 
         # Yesterday
-        yesterday_logs = RequestLog.objects.filter(
+        yesterday_count = RequestLog.objects.filter(
             user=request.user, request_ts__gte=yesterday, request_ts__lt=today
-        ).aggregate(count=Count("id"))
-        periods.append(
-            {
-                "title": "Yesterday",
-                "count": yesterday_logs["count"] or 0,
-                "cost_cents": (yesterday_logs["count"] or 0) * cost_per_request,
-            }
-        )
+        ).count()
 
         # Last 7 days
-        week_logs = RequestLog.objects.filter(
+        last7_days_count = RequestLog.objects.filter(
             user=request.user, request_ts__gte=week_ago
-        ).aggregate(count=Count("id"))
-        periods.append(
-            {
-                "title": "Last 7 Days",
-                "count": week_logs["count"] or 0,
-                "cost_cents": (week_logs["count"] or 0) * cost_per_request,
-            }
-        )
+        ).count()
 
         # This month
-        month_logs = RequestLog.objects.filter(
+        this_month_count = RequestLog.objects.filter(
             user=request.user, request_ts__gte=month_start
-        ).aggregate(count=Count("id"))
-        periods.append(
-            {
-                "title": "This Month",
-                "count": month_logs["count"] or 0,
-                "cost_cents": (month_logs["count"] or 0) * cost_per_request,
-            }
-        )
+        ).count()
 
-        # Total
-        total_logs = RequestLog.objects.filter(user=request.user).aggregate(count=Count("id"))
-        total_count = total_logs["count"] or 0
-        total_cost = total_count * cost_per_request
+        # Get last request
+        last_request = RequestLog.objects.filter(user=request.user).order_by("-request_ts").first()
+        last_request_at = last_request.request_ts.isoformat() if last_request else None
 
         return Response(
             {
-                "total_requests": total_count,
-                "total_cost_cents": total_cost,
-                "by_period": periods,
+                "today": today_count,
+                "yesterday": yesterday_count,
+                "last7Days": last7_days_count,
+                "thisMonth": this_month_count,
+                "lastRequestAt": last_request_at,
             }
         )
 

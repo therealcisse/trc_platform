@@ -7,10 +7,14 @@ import {
   CurrencyEuroIcon,
   ServerIcon,
   ArrowPathIcon,
+  DocumentTextIcon,
+  DocumentArrowDownIcon,
+  KeyIcon,
 } from '@heroicons/react/24/outline';
 import clsx from 'clsx';
 import { formatCurrency, formatNumber } from '../utils/currency';
 import { useEffect, useState } from 'react';
+import { Link } from 'react-router-dom';
 
 const REFRESH_INTERVAL = 5 * 60 * 1000; // 5 minutes as specified in UI.md
 
@@ -257,7 +261,7 @@ export const DashboardPage = () => {
       </div>
 
       {/* Usage Summary */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 mb-8">
         <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Usage Summary</h3>
         <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {usageStats.map((stat) => (
@@ -271,6 +275,108 @@ export const DashboardPage = () => {
           ))}
         </div>
       </div>
+
+      {/* Quick Actions */}
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6">
+        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+          {currentPeriod && (
+            <Link
+              to={`/billing-history/${currentPeriod.id}`}
+              className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+            >
+              <DocumentTextIcon className="h-10 w-10 text-primary-600 dark:text-primary-400" />
+              <div>
+                <p className="font-medium text-gray-900 dark:text-white">View Current Period</p>
+                <p className="text-sm text-gray-500 dark:text-gray-400">See detailed requests</p>
+              </div>
+            </Link>
+          )}
+          
+          <Link
+            to="/tokens"
+            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+          >
+            <KeyIcon className="h-10 w-10 text-green-600 dark:text-green-400" />
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">API Tokens</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage authentication</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/usage"
+            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+          >
+            <ChartBarIcon className="h-10 w-10 text-blue-600 dark:text-blue-400" />
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Usage Details</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Analyze your API usage</p>
+            </div>
+          </Link>
+
+          <Link
+            to="/billing-history"
+            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+          >
+            <CurrencyEuroIcon className="h-10 w-10 text-yellow-600 dark:text-yellow-400" />
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Billing History</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">View all periods</p>
+            </div>
+          </Link>
+
+          <button
+            onClick={() => {
+              // Generate and download CSV report
+              const csvContent = generateUsageReport();
+              downloadCSV(csvContent, `usage-report-${format(new Date(), 'yyyy-MM-dd')}.csv`);
+            }}
+            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+          >
+            <DocumentArrowDownIcon className="h-10 w-10 text-purple-600 dark:text-purple-400" />
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Download Report</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Export usage data</p>
+            </div>
+          </button>
+
+          <Link
+            to="/account"
+            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+          >
+            <ServerIcon className="h-10 w-10 text-gray-600 dark:text-gray-400" />
+            <div>
+              <p className="font-medium text-gray-900 dark:text-white">Account Settings</p>
+              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account</p>
+            </div>
+          </Link>
+        </div>
+      </div>
     </div>
   );
+
+  function generateUsageReport() {
+    const headers = ['Date', 'Requests', 'Type'];
+    const rows = [
+      ['Today', usageSummary?.today || 0, 'Daily'],
+      ['Yesterday', usageSummary?.yesterday || 0, 'Daily'],
+      ['Last 7 Days', usageSummary?.last7Days || 0, 'Weekly'],
+      ['This Month', usageSummary?.thisMonth || 0, 'Monthly'],
+    ];
+    
+    return [
+      headers.join(','),
+      ...rows.map(row => row.join(','))
+    ].join('\n');
+  }
+
+  function downloadCSV(content: string, filename: string) {
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    const link = document.createElement('a');
+    link.href = URL.createObjectURL(blob);
+    link.download = filename;
+    link.click();
+    URL.revokeObjectURL(link.href);
+  }
 };
