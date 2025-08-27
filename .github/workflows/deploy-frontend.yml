@@ -48,7 +48,7 @@ jobs:
           apiToken: ${{ secrets.CLOUDFLARE_API_TOKEN }}
           accountId: ${{ secrets.CLOUDFLARE_ACCOUNT_ID }}
           workingDirectory: frontend
-          command: npm exec wrangler deploy
+          command: deploy
 
       - name: Create deployment summary
         if: success()
