@@ -1,5 +1,10 @@
 import { useState, useRef, useCallback, useEffect } from 'react';
-import { ChatBubbleOvalLeftEllipsisIcon, XMarkIcon, PaperAirplaneIcon, PhotoIcon } from '@heroicons/react/24/outline';
+import {
+  ChatBubbleOvalLeftEllipsisIcon,
+  XMarkIcon,
+  PaperAirplaneIcon,
+  PhotoIcon,
+} from '@heroicons/react/24/outline';
 import { AnimatePresence, motion } from 'framer-motion';
 import clsx from 'clsx';
 import { testSolveService } from '../../services/testSolve.service';
@@ -49,7 +54,7 @@ export const ChatWidget = () => {
         content: 'Please select a valid image file',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
       return;
     }
 
@@ -62,12 +67,12 @@ export const ChatWidget = () => {
         content: 'Image size must be less than 10MB',
         timestamp: new Date(),
       };
-      setMessages(prev => [...prev, errorMessage]);
+      setMessages((prev) => [...prev, errorMessage]);
       return;
     }
 
     setSelectedImage(file);
-    
+
     // Create preview
     const reader = new FileReader();
     reader.onloadend = () => {
@@ -87,7 +92,7 @@ export const ChatWidget = () => {
       imageUrl: imagePreview || undefined,
       timestamp: new Date(),
     };
-    setMessages(prev => [...prev, userMessage]);
+    setMessages((prev) => [...prev, userMessage]);
 
     // Add loading message
     const loadingMessage: Message = {
@@ -97,7 +102,7 @@ export const ChatWidget = () => {
       timestamp: new Date(),
       isLoading: true,
     };
-    setMessages(prev => [...prev, loadingMessage]);
+    setMessages((prev) => [...prev, loadingMessage]);
 
     // Clear selected image
     const imageToProcess = selectedImage;
@@ -111,10 +116,10 @@ export const ChatWidget = () => {
 
     try {
       const response = await testSolveService.solveImage(imageToProcess);
-      
+
       // Remove loading message and add result
-      setMessages(prev => {
-        const filtered = prev.filter(m => !m.isLoading);
+      setMessages((prev) => {
+        const filtered = prev.filter((m) => !m.isLoading);
         const resultMessage: Message = {
           id: (Date.now() + 2).toString(),
           type: 'system',
@@ -125,8 +130,8 @@ export const ChatWidget = () => {
       });
     } catch (error: any) {
       // Remove loading message and add error
-      setMessages(prev => {
-        const filtered = prev.filter(m => !m.isLoading);
+      setMessages((prev) => {
+        const filtered = prev.filter((m) => !m.isLoading);
         const errorMessage: Message = {
           id: (Date.now() + 2).toString(),
           type: 'error',
@@ -223,7 +228,7 @@ export const ChatWidget = () => {
             </div>
 
             {/* Messages Area */}
-            <div 
+            <div
               className="flex-1 overflow-y-auto p-4 space-y-4"
               onDragOver={handleDragOver}
               onDrop={handleDrop}
@@ -246,17 +251,17 @@ export const ChatWidget = () => {
                     <div
                       className={clsx(
                         'max-w-[80%] rounded-lg p-3',
-                        message.type === 'user' 
-                          ? 'bg-primary-600 text-white' 
+                        message.type === 'user'
+                          ? 'bg-primary-600 text-white'
                           : message.type === 'error'
-                          ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300'
-                          : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
+                            ? 'bg-red-100 dark:bg-red-900/20 text-red-700 dark:text-red-300'
+                            : 'bg-gray-100 dark:bg-gray-800 text-gray-900 dark:text-gray-100'
                       )}
                     >
                       {message.imageUrl && (
-                        <img 
-                          src={message.imageUrl} 
-                          alt="User upload" 
+                        <img
+                          src={message.imageUrl}
+                          alt="User upload"
                           className="rounded-lg mb-2 max-w-full"
                         />
                       )}
@@ -266,9 +271,7 @@ export const ChatWidget = () => {
                           <span className="text-sm">{message.content}</span>
                         </div>
                       ) : (
-                        <p className="text-sm whitespace-pre-wrap break-words">
-                          {message.content}
-                        </p>
+                        <p className="text-sm whitespace-pre-wrap break-words">{message.content}</p>
                       )}
                       <p className="text-xs mt-1 opacity-70">
                         {message.timestamp.toLocaleTimeString()}
@@ -284,9 +287,9 @@ export const ChatWidget = () => {
             <div className="border-t border-gray-200 dark:border-gray-700 p-4">
               {imagePreview && (
                 <div className="mb-3 relative">
-                  <img 
-                    src={imagePreview} 
-                    alt="Selected" 
+                  <img
+                    src={imagePreview}
+                    alt="Selected"
                     className="h-20 w-20 object-cover rounded-lg"
                   />
                   <button
@@ -304,7 +307,7 @@ export const ChatWidget = () => {
                   </button>
                 </div>
               )}
-              
+
               <div className="flex items-center space-x-2">
                 <input
                   ref={fileInputRef}
@@ -320,7 +323,7 @@ export const ChatWidget = () => {
                 >
                   <PhotoIcon className="h-5 w-5" />
                 </label>
-                
+
                 <button
                   onClick={handleSend}
                   disabled={!selectedImage || isProcessing}
@@ -335,7 +338,7 @@ export const ChatWidget = () => {
                   {!isProcessing && <PaperAirplaneIcon className="h-4 w-4" />}
                 </button>
               </div>
-              
+
               <p className="text-xs text-gray-500 dark:text-gray-400 mt-2 text-center">
                 Test requests count towards your usage
               </p>

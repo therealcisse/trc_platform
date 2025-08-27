@@ -22,7 +22,6 @@ export const BillingPage = () => {
     queryFn: () => billingService.getBillingPeriods(statusFilter || undefined),
   });
 
-
   const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
       case PaymentStatus.PAID:

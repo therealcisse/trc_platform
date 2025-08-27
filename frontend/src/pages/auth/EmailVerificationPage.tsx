@@ -38,7 +38,6 @@ export const EmailVerificationPage = () => {
           navigate('/login');
         }
       }, 3000);
-
     } catch (error: any) {
       setStatus('error');
       const message =

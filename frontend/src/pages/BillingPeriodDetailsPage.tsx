@@ -30,7 +30,6 @@ export const BillingPeriodDetailsPage = () => {
   const period = data?.period;
   const requests = data?.requests;
 
-
   const getStatusIcon = (status: PaymentStatus) => {
     switch (status) {
       case PaymentStatus.PAID:

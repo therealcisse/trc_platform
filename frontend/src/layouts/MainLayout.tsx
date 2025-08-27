@@ -287,7 +287,7 @@ export const MainLayout = () => {
           </main>
         </div>
       </div>
-      
+
       {/* Chat Widget */}
       <ChatWidget />
     </div>

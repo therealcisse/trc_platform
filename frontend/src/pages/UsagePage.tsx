@@ -50,7 +50,6 @@ export const UsagePage = () => {
     return 'text-gray-600 dark:text-gray-400';
   };
 
-
   const exportData = () => {
     if (!data?.results) return;
 

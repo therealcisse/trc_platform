@@ -158,7 +158,8 @@ export const ResendVerificationPage = () => {
             Resend Verification Email
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Click the button below to receive a new verification link at {user?.email || 'your email'}
+            Click the button below to receive a new verification link at{' '}
+            {user?.email || 'your email'}
           </p>
         </div>
 

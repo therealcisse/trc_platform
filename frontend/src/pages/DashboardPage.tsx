@@ -39,7 +39,7 @@ export const DashboardPage = () => {
     queryFn: async () => {
       const periods = await billingService.getBillingPeriods();
       // Find the previous non-current period
-      return periods.find(p => !p.isCurrent) || null;
+      return periods.find((p) => !p.isCurrent) || null;
     },
     enabled: !!currentPeriod,
   });
@@ -85,7 +85,6 @@ export const DashboardPage = () => {
     setTimeout(() => setIsRefreshing(false), 500);
   };
 
-
   // Calculate percentage changes
   const calculateChange = (current: number, previous: number) => {
     if (!previous || previous === 0) return null;
@@ -106,10 +105,7 @@ export const DashboardPage = () => {
     previousPeriod?.totalCostCents || 0
   );
 
-  const todayVsYesterday = calculateChange(
-    usageSummary?.today || 0,
-    usageSummary?.yesterday || 0
-  );
+  const todayVsYesterday = calculateChange(usageSummary?.today || 0, usageSummary?.yesterday || 0);
 
   const stats = [
     {
@@ -176,7 +172,10 @@ export const DashboardPage = () => {
                   Refreshing...
                 </span>
               ) : (
-                <span>Next refresh in {Math.floor(nextRefreshIn / 60)}:{String(nextRefreshIn % 60).padStart(2, '0')}</span>
+                <span>
+                  Next refresh in {Math.floor(nextRefreshIn / 60)}:
+                  {String(nextRefreshIn % 60).padStart(2, '0')}
+                </span>
               )}
             </div>
             <button
@@ -375,10 +374,7 @@ export const DashboardPage = () => {
       ['This Month', usageSummary?.thisMonth || 0, 'Monthly'],
     ];
 
-    return [
-      headers.join(','),
-      ...rows.map(row => row.join(','))
-    ].join('\n');
+    return [headers.join(','), ...rows.map((row) => row.join(','))].join('\n');
   }
 
   function downloadCSV(content: string, filename: string) {

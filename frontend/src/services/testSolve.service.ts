@@ -18,7 +18,7 @@ export const testSolveService = {
         'Content-Type': 'multipart/form-data',
       },
     });
-    
+
     return data;
   },
 };
