@@ -67,11 +67,20 @@ python_files = ["test_*.py", "*_test.py", "tests.py"]
 addopts = "-ra -q --strict-markers"
 testpaths = ["tests"]
 
+[tool.uv.workspace]
+members = [
+    ".",
+]
+
+[tool.uv.sources]
+image-solve-backend = { workspace = true }
+
 [dependency-groups]
 dev = [
     "black>=25.1.0",
     "django-stubs>=5.2.2",
     "djangorestframework-stubs>=3.16.1",
+    "image-solve-backend",
     "model-bakery>=1.20.5",
     "mypy>=1.17.1",
     "pytest>=8.4.1",

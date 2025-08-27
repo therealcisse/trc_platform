@@ -10,6 +10,12 @@ class Settings(models.Model):
     cost_per_request_cents = models.IntegerField(default=100)
     openai_model = models.CharField(max_length=100, default="gpt-vision")
     openai_timeout_s = models.IntegerField(default=30)
+    app_domain = models.URLField(
+        max_length=255,
+        blank=True,
+        help_text="Frontend application domain for email verification links (e.g., https://app.example.com). If empty, uses the backend domain.",
+        verbose_name="Application Domain",
+    )
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

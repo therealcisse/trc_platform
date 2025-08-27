@@ -69,7 +69,13 @@ WSGI_APPLICATION = "config.wsgi.application"
 
 # Database
 DATABASE_URL = os.environ.get("DATABASE_URL", "postgres://postgres:postgres@localhost:5432/app")
-DATABASES = {"default": dj_database_url.parse(DATABASE_URL)}
+DATABASES = {
+    "default": dj_database_url.parse(
+        DATABASE_URL,
+        conn_max_age=0,
+        ssl_require= not DEBUG,
+    )
+}
 
 
 # Password validation & hashing
@@ -127,6 +133,18 @@ EMAIL_HOST_USER = os.environ.get("EMAIL_HOST_USER", "")
 EMAIL_HOST_PASSWORD = os.environ.get("EMAIL_HOST_PASSWORD", "")
 EMAIL_USE_TLS = os.environ.get("EMAIL_USE_TLS", "false").lower() == "true"
 EMAIL_USE_SSL = os.environ.get("EMAIL_USE_SSL", "false").lower() == "true"
+
+# Production email settings via Resend SMTP
+if os.getenv("ENV") == "production":
+    EMAIL_BACKEND = "django.core.mail.backends.smtp.EmailBackend"
+    EMAIL_HOST = "smtp.resend.com"
+    EMAIL_PORT = 587
+    EMAIL_USE_TLS = True
+    EMAIL_USE_SSL = False
+    EMAIL_HOST_USER = "resend"
+    EMAIL_HOST_PASSWORD = os.getenv("RESEND_API_KEY", "")
+    DEFAULT_FROM_EMAIL = "Amadou Cisse <no-reply@send.youtoogroup.com>"
+    SERVER_EMAIL = "no-reply@send.youtoogroupn.com"
 
 # CORS settings
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
