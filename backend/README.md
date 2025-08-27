@@ -363,7 +363,53 @@ The `bootstrap_demo` command creates:
 - Web UI Port: 1080
 - View sent emails at http://localhost:1080
 
-## Deployment Considerations
+## Deployment
+
+### Heroku Deployment
+
+The backend is configured for easy deployment to Heroku. Here's a quick guide:
+
+1. **Install Heroku CLI**:
+```bash
+brew install heroku/brew/heroku
+```
+
+2. **Create and configure Heroku app**:
+```bash
+# Login to Heroku
+heroku login
+
+# Create app
+heroku create your-app-name
+
+# Add PostgreSQL
+heroku addons:create heroku-postgresql:essential-0
+
+# Configure environment variables
+heroku config:set DJANGO_SECRET_KEY='your-secret-key'
+heroku config:set DJANGO_DEBUG=0
+heroku config:set ENV=production
+heroku config:set ALLOWED_HOSTS=your-app.herokuapp.com
+heroku config:set OPENAI_API_KEY='your-openai-key'
+heroku config:set RESEND_API_KEY='your-resend-key'
+# See .env.example for all variables
+```
+
+3. **Deploy**:
+```bash
+git push heroku main
+```
+
+4. **Post-deployment**:
+```bash
+# Create superuser
+heroku run python manage.py createsuperuser
+
+# Check logs
+heroku logs --tail
+```
+
+For detailed deployment instructions, see [HEROKU_DEPLOYMENT.md](./HEROKU_DEPLOYMENT.md).
 
 ### Production Checklist
 - Set `DJANGO_DEBUG=0`
@@ -374,7 +420,7 @@ The `bootstrap_demo` command creates:
 - Set `USE_MOCK_OPENAI=false`
 - Enable HTTPS and security headers
 - Configure proper CORS origins
-- Set up monitoring and logging
+- Set up monitoring and logging (Sentry recommended)
 - Configure database backups
 
 ### Security Notes
