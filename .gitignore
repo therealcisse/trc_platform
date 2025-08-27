@@ -64,9 +64,6 @@ dmypy.json
 # ruff
 .ruff_cache/
 
-# uv
-uv.lock
-
 # ========================================
 # Node.js / React Frontend
 # ========================================
