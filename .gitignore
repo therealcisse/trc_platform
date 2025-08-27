@@ -94,7 +94,6 @@ pnpm-debug.log*
 lerna-debug.log*
 
 # Package manager files
-package-lock.json
 yarn.lock
 pnpm-lock.yaml
 
