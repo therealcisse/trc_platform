@@ -250,7 +250,7 @@ export const MainLayout = () => {
 
             {/* User section */}
             <div className="border-t border-gray-200 dark:border-gray-800 p-4">
-              <div className="flex items-center">
+              <div className="flex items-center gap-2">
                 <div className="flex-shrink-0">
                   <div className="h-8 w-8 rounded-full bg-primary-500 flex items-center justify-center">
                     <span className="text-white text-sm font-medium">
@@ -259,7 +259,7 @@ export const MainLayout = () => {
                   </div>
                 </div>
                 {!isSidebarCollapsed && (
-                  <div className="ml-3 flex-1">
+                  <div className="ml-3 min-w-0 flex-1">
                     <p className="text-sm font-medium text-gray-700 dark:text-gray-300 truncate">
                       {user?.email}
                     </p>
@@ -268,7 +268,7 @@ export const MainLayout = () => {
                 <button
                   onClick={handleLogout}
                   className={clsx(
-                    'p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800',
+                    'p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0',
                     isSidebarCollapsed ? 'ml-0' : 'ml-2'
                   )}
                   title="Logout"
