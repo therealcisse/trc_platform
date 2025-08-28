@@ -10,15 +10,11 @@ import type {
 
 export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {
-    clearAuthCookies();
-
     const { data } = await http.post('/customers/login', credentials);
     return data;
   },
 
   async register(credentials: RegisterCredentials): Promise<void> {
-    clearAuthCookies();
-
     const { password, confirmPassword, inviteCode } = credentials;
     if (password !== confirmPassword) {
       throw new Error('Passwords do not match');
