@@ -56,8 +56,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const login = async (credentials: LoginCredentials) => {
-    const userData = await authService.login(credentials);
-    setUser(userData);
+    await authService.login(credentials);
     // Refresh user data to ensure we have the latest information
     await refreshUser();
     navigate('/dashboard');
