@@ -30,15 +30,26 @@ export const authService = {
   async logout(): Promise<void> {
     try {
       const csrftoken = getCSRFToken();
+      // The Django backend will handle cookie deletion in the response
       await http.post('/customers/logout', null, {
         withCredentials: true,
         headers: { 'X-CSRFToken': csrftoken },
       });
+    } catch (error) {
+      // Even if the logout request fails, we should still clean up locally
+      console.error('Logout request failed:', error);
     } finally {
-      // Clear cookies even if the logout request fails
-      // This ensures local cleanup happens regardless
+      // Clear all client-side state
+      // This ensures local cleanup happens regardless of server response
       queryClient.clear();
+
+      // Clear auth cookies as a fallback
+      // The Django backend already does this, but we ensure cleanup on client
       clearAuthCookies();
+
+      // Force redirect to login page
+      // This ensures the user can't stay on protected pages
+      window.location.href = '/login';
     }
   },
 
