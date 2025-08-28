@@ -155,10 +155,12 @@ if os.getenv("ENV") == "production":
     EMAIL_HOST_USER = "resend"
     EMAIL_HOST_PASSWORD = os.getenv("RESEND_API_KEY", "")
     DEFAULT_FROM_EMAIL = "Amadou Cisse <no-reply@send.youtoogroup.com>"
-    SERVER_EMAIL = "no-reply@send.youtoogroupn.com"
+    SERVER_EMAIL = "no-reply@send.youtoogroup.com"
 
 # CORS settings
+CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",")
 CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
+
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_HEADERS = [
     "accept",
@@ -171,9 +173,6 @@ CORS_ALLOW_HEADERS = [
     "x-csrftoken",
     "x-requested-with",
 ]
-
-# CSRF settings - trust the same origins as CORS
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",")
 
 # REST Framework settings
 REST_FRAMEWORK = {
@@ -203,7 +202,7 @@ REST_FRAMEWORK = {
 
 # Spectacular settings for API documentation
 SPECTACULAR_SETTINGS = {
-    "TITLE": "Image Solve Platform API",
+    "TITLE": "TRC Platform API",
     "DESCRIPTION": "API for image processing with AI",
     "VERSION": "1.0.0",
     "SERVE_INCLUDE_SCHEMA": False,
@@ -223,19 +222,26 @@ SAVE_REQUEST_IMAGES = os.environ.get("SAVE_REQUEST_IMAGES", "false").lower() == 
 MAX_SAVED_IMAGE_SIZE_MB = int(os.environ.get("MAX_SAVED_IMAGE_SIZE_MB", "10"))
 IMAGE_RETENTION_DAYS = int(os.environ.get("IMAGE_RETENTION_DAYS", "30"))
 
-# Session settings
-SESSION_COOKIE_HTTPONLY = False
+
+# Session and CSRF
+SESSION_COOKIE_HTTPONLY = True
 CSRF_COOKIE_HTTPONLY = False
-SESSION_COOKIE_SECURE = not DEBUG
-SESSION_COOKIE_SAMESITE = "None"
+
+if DEBUG:
+    # Dev: use same site via Vite proxy or accept non-Secure cookies
+    SESSION_COOKIE_SAMESITE = "Lax"
+    CSRF_COOKIE_SAMESITE = "Lax"
+    SESSION_COOKIE_SECURE = False
+    CSRF_COOKIE_SECURE = False
+else:
+    # Prod: cross site friendly, requires HTTPS
+    SESSION_COOKIE_SAMESITE = "None"
+    CSRF_COOKIE_SAMESITE = "None"
+    SESSION_COOKIE_SECURE = True
+    CSRF_COOKIE_SECURE = True
+
 SESSION_COOKIE_NAME = "sessionid"
 SESSION_ENGINE = "django.contrib.sessions.backends.db"
-
-CSRF_TRUSTED_ORIGINS = os.environ.get("CSRF_TRUSTED_ORIGINS", "http://localhost:5173").split(",")
-CORS_ALLOWED_ORIGINS = os.environ.get("CORS_ALLOWED_ORIGINS", "http://localhost:5173").split(",")
-CORS_ALLOW_CREDENTIALS = True
-CSRF_COOKIE_SECURE = not DEBUG
-CSRF_COOKIE_SAMESITE = "None"
 
 # Security headers for production
 if not DEBUG:
