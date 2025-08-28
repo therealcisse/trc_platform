@@ -38,8 +38,8 @@ jobs:
       - name: Build application
         working-directory: frontend
         env:
-          VITE_API_URL: ${{ env.VITE_API_URL }}
-          VITE_MAX_VERIFICATION_ATTEMPTS: ${{ env.VITE_MAX_VERIFICATION_ATTEMPTS }}
+          VITE_API_URL: ${{ vars.VITE_API_URL }}
+          VITE_MAX_VERIFICATION_ATTEMPTS: ${{ vars.VITE_MAX_VERIFICATION_ATTEMPTS }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages
