@@ -154,18 +154,20 @@ export const DashboardPage = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-8">
-        <div className="flex items-start justify-between">
+      <div className="mb-6 sm:mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900 dark:text-white">Dashboard</h1>
-            <p className="text-gray-600 dark:text-gray-400 mt-2">
+            <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+              Dashboard
+            </h1>
+            <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
               Welcome back! Here's an overview of your API usage.
             </p>
           </div>
-          <div className="flex items-center space-x-4">
-            <div className="text-sm text-gray-500 dark:text-gray-400">
+          <div className="flex items-center space-x-2 sm:space-x-4">
+            <div className="hidden sm:block text-sm text-gray-500 dark:text-gray-400">
               {isRefreshing ? (
                 <span className="flex items-center text-primary-600 dark:text-primary-400">
                   <ArrowPathIcon className="h-4 w-4 mr-1 animate-spin" />
@@ -197,21 +199,23 @@ export const DashboardPage = () => {
 
       {/* Current Billing Period Card */}
       {currentPeriod && (
-        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-2xl p-6 mb-8 text-white">
-          <div className="flex justify-between items-start">
+        <div className="bg-gradient-to-r from-primary-500 to-primary-600 rounded-xl sm:rounded-2xl p-4 sm:p-6 mb-6 sm:mb-8 text-white">
+          <div className="flex flex-col sm:flex-row sm:justify-between sm:items-start gap-4">
             <div>
-              <p className="text-primary-100 text-sm font-medium">Current Billing Period</p>
-              <h2 className="text-2xl font-bold mt-1">
+              <p className="text-primary-100 text-xs sm:text-sm font-medium">
+                Current Billing Period
+              </p>
+              <h2 className="text-xl sm:text-2xl font-bold mt-1">
                 {currentPeriod.periodLabel ||
                   format(new Date(currentPeriod.periodStart), 'MMMM yyyy')}
               </h2>
-              <p className="text-primary-100 text-sm mt-2">
+              <p className="text-primary-100 text-xs sm:text-sm mt-2">
                 {format(new Date(currentPeriod.periodStart), 'MMM d')} -{' '}
                 {format(new Date(currentPeriod.periodEnd), 'MMM d, yyyy')}
               </p>
             </div>
-            <div className="text-right">
-              <p className="text-primary-100 text-sm font-medium">Status</p>
+            <div className="sm:text-right">
+              <p className="text-primary-100 text-xs sm:text-sm font-medium">Status</p>
               <span
                 className={clsx(
                   'inline-flex items-center px-3 py-1 rounded-full text-sm font-medium mt-1',
@@ -229,16 +233,18 @@ export const DashboardPage = () => {
       )}
 
       {/* Stats Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6 mb-6 sm:mb-8">
         {stats.map((stat) => (
           <div
             key={stat.name}
-            className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6"
+            className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 sm:p-6"
           >
             <div className="flex items-center justify-between">
               <div className="flex-1">
-                <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.name}</p>
-                <p className="text-2xl font-bold text-gray-900 dark:text-white mt-2">
+                <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                  {stat.name}
+                </p>
+                <p className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mt-2">
                   {stat.isCurrency
                     ? formatCurrency(stat.value as number)
                     : stat.isTime
@@ -250,7 +256,7 @@ export const DashboardPage = () => {
                 {stat.change && (
                   <p
                     className={clsx(
-                      'text-sm font-medium mt-2',
+                      'text-xs sm:text-sm font-medium mt-2',
                       stat.changeType === 'positive' ? 'text-green-600' : 'text-red-600'
                     )}
                   >
@@ -270,68 +276,90 @@ export const DashboardPage = () => {
       </div>
 
       {/* Usage Summary */}
-      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-6 mb-8">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Usage Summary</h3>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
+      <div className="bg-white dark:bg-gray-900 rounded-xl shadow-sm border border-gray-200 dark:border-gray-800 p-4 sm:p-6 mb-6 sm:mb-8">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Usage Summary
+        </h3>
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 sm:gap-6">
           {usageStats.map((stat) => (
             <div key={stat.label}>
-              <p className="text-sm font-medium text-gray-600 dark:text-gray-400">{stat.label}</p>
-              <p className="text-2xl font-bold text-gray-900 dark:text-white mt-1">
+              <p className="text-xs sm:text-sm font-medium text-gray-600 dark:text-gray-400">
+                {stat.label}
+              </p>
+              <p className="text-lg sm:text-2xl font-bold text-gray-900 dark:text-white mt-1">
                 {formatNumber(stat.value)}
               </p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-1">requests</p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-1">requests</p>
             </div>
           ))}
         </div>
       </div>
 
       {/* Quick Actions */}
-      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-6">
-        <h3 className="text-lg font-semibold text-gray-900 dark:text-white mb-4">Quick Actions</h3>
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="bg-gradient-to-br from-gray-50 to-gray-100 dark:from-gray-800 dark:to-gray-900 rounded-xl p-4 sm:p-6">
+        <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white mb-4">
+          Quick Actions
+        </h3>
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 sm:gap-4">
           {currentPeriod && (
             <Link
               to={`/billing-history/${currentPeriod.id}`}
-              className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+              className="flex items-center space-x-3 p-3 sm:p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all sm:hover:scale-105 border border-gray-200 dark:border-gray-700"
             >
-              <DocumentTextIcon className="h-10 w-10 text-primary-600 dark:text-primary-400" />
-              <div>
-                <p className="font-medium text-gray-900 dark:text-white">View Current Period</p>
-                <p className="text-sm text-gray-500 dark:text-gray-400">See detailed requests</p>
+              <DocumentTextIcon className="h-8 sm:h-10 w-8 sm:w-10 text-primary-600 dark:text-primary-400 flex-shrink-0" />
+              <div className="min-w-0 flex-1">
+                <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                  View Current Period
+                </p>
+                <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                  See detailed requests
+                </p>
               </div>
             </Link>
           )}
 
           <Link
             to="/tokens"
-            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+            className="flex items-center space-x-3 p-3 sm:p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all sm:hover:scale-105 border border-gray-200 dark:border-gray-700"
           >
-            <KeyIcon className="h-10 w-10 text-green-600 dark:text-green-400" />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">API Tokens</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Manage authentication</p>
+            <KeyIcon className="h-8 sm:h-10 w-8 sm:w-10 text-green-600 dark:text-green-400 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                API Tokens
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                Manage authentication
+              </p>
             </div>
           </Link>
 
           <Link
             to="/usage"
-            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+            className="flex items-center space-x-3 p-3 sm:p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all sm:hover:scale-105 border border-gray-200 dark:border-gray-700"
           >
-            <ChartBarIcon className="h-10 w-10 text-blue-600 dark:text-blue-400" />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">Usage Details</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Analyze your API usage</p>
+            <ChartBarIcon className="h-8 sm:h-10 w-8 sm:w-10 text-blue-600 dark:text-blue-400 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                Usage Details
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                Analyze your API usage
+              </p>
             </div>
           </Link>
 
           <Link
             to="/billing-history"
-            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+            className="flex items-center space-x-3 p-3 sm:p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all sm:hover:scale-105 border border-gray-200 dark:border-gray-700"
           >
-            <CurrencyEuroIcon className="h-10 w-10 text-yellow-600 dark:text-yellow-400" />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">Billing History</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">View all periods</p>
+            <CurrencyEuroIcon className="h-8 sm:h-10 w-8 sm:w-10 text-yellow-600 dark:text-yellow-400 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                Billing History
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                View all periods
+              </p>
             </div>
           </Link>
 
@@ -341,23 +369,31 @@ export const DashboardPage = () => {
               const csvContent = generateUsageReport();
               downloadCSV(csvContent, `usage-report-${format(new Date(), 'yyyy-MM-dd')}.csv`);
             }}
-            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+            className="flex items-center space-x-3 p-3 sm:p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all sm:hover:scale-105 border border-gray-200 dark:border-gray-700"
           >
-            <DocumentArrowDownIcon className="h-10 w-10 text-purple-600 dark:text-purple-400" />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">Download Report</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Export usage data</p>
+            <DocumentArrowDownIcon className="h-8 sm:h-10 w-8 sm:w-10 text-purple-600 dark:text-purple-400 flex-shrink-0" />
+            <div className="min-w-0 flex-1 text-left">
+              <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                Download Report
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                Export usage data
+              </p>
             </div>
           </button>
 
           <Link
             to="/account"
-            className="flex items-center space-x-3 p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all hover:scale-105 border border-gray-200 dark:border-gray-700"
+            className="flex items-center space-x-3 p-3 sm:p-4 bg-white dark:bg-gray-900 rounded-lg hover:shadow-md transition-all sm:hover:scale-105 border border-gray-200 dark:border-gray-700"
           >
-            <ServerIcon className="h-10 w-10 text-gray-600 dark:text-gray-400" />
-            <div>
-              <p className="font-medium text-gray-900 dark:text-white">Account Settings</p>
-              <p className="text-sm text-gray-500 dark:text-gray-400">Manage your account</p>
+            <ServerIcon className="h-8 sm:h-10 w-8 sm:w-10 text-gray-600 dark:text-gray-400 flex-shrink-0" />
+            <div className="min-w-0 flex-1">
+              <p className="font-medium text-sm sm:text-base text-gray-900 dark:text-white truncate">
+                Account Settings
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-400">
+                Manage your account
+              </p>
             </div>
           </Link>
         </div>

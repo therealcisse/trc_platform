@@ -87,18 +87,20 @@ export const TokensPage = () => {
   }
 
   return (
-    <div className="p-8">
+    <div className="p-4 sm:p-6 lg:p-8">
       {/* Header */}
-      <div className="mb-8 flex justify-between items-center">
+      <div className="mb-6 sm:mb-8 flex flex-col sm:flex-row sm:justify-between sm:items-center gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-gray-900 dark:text-white">API Tokens</h1>
-          <p className="text-gray-600 dark:text-gray-400 mt-2">
+          <h1 className="text-2xl sm:text-3xl font-bold text-gray-900 dark:text-white">
+            API Tokens
+          </h1>
+          <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400 mt-2">
             Manage your API authentication tokens
           </p>
         </div>
         <button
           onClick={() => setIsModalOpen(true)}
-          className="flex items-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors"
+          className="flex items-center justify-center px-4 py-2 bg-primary-600 hover:bg-primary-700 text-white rounded-lg transition-colors w-full sm:w-auto"
         >
           <PlusIcon className="h-5 w-5 mr-2" />
           Create Token
@@ -106,16 +108,18 @@ export const TokensPage = () => {
       </div>
 
       {/* Active Tokens */}
-      <div className="mb-8">
-        <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+      <div className="mb-6 sm:mb-8">
+        <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
           Active Tokens ({activeTokens.length})
         </h2>
-        <div className="grid gap-4">
+        <div className="grid gap-3 sm:gap-4">
           {activeTokens.length === 0 ? (
-            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-8 text-center">
-              <KeyIcon className="h-12 w-12 text-gray-400 mx-auto mb-4" />
-              <p className="text-gray-600 dark:text-gray-400">No active tokens</p>
-              <p className="text-sm text-gray-500 dark:text-gray-500 mt-2">
+            <div className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6 sm:p-8 text-center">
+              <KeyIcon className="h-10 sm:h-12 w-10 sm:w-12 text-gray-400 mx-auto mb-4" />
+              <p className="text-sm sm:text-base text-gray-600 dark:text-gray-400">
+                No active tokens
+              </p>
+              <p className="text-xs sm:text-sm text-gray-500 dark:text-gray-500 mt-2">
                 Create your first API token to get started
               </p>
             </div>
@@ -123,30 +127,32 @@ export const TokensPage = () => {
             activeTokens.map((token) => (
               <div
                 key={token.id}
-                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-6"
+                className="bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6"
               >
-                <div className="flex items-center justify-between">
-                  <div className="flex-1">
-                    <div className="flex items-center">
-                      <KeyIcon className="h-5 w-5 text-gray-400 mr-3" />
-                      <h3 className="text-lg font-semibold text-gray-900 dark:text-white">
+                <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-3">
+                  <div className="flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <KeyIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                      <h3 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
                         {token.name}
                       </h3>
-                      <span className="ml-3 px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-sm font-mono">
+                      <span className="px-2 py-1 bg-gray-100 dark:bg-gray-800 text-gray-600 dark:text-gray-400 rounded text-xs sm:text-sm font-mono">
                         {token.tokenPrefix}...
                       </span>
                     </div>
-                    <div className="mt-2 flex items-center space-x-6 text-sm text-gray-500 dark:text-gray-500">
-                      <span>Created {format(new Date(token.createdAt), 'PPP')}</span>
+                    <div className="mt-2 flex flex-col sm:flex-row sm:items-center gap-2 sm:gap-4 text-xs sm:text-sm text-gray-500 dark:text-gray-500">
+                      <span>Created {format(new Date(token.createdAt), 'PP')}</span>
                       {token.lastUsedAt && (
-                        <span>Last used {format(new Date(token.lastUsedAt), 'PPP')}</span>
+                        <span className="hidden sm:inline">
+                          Last used {format(new Date(token.lastUsedAt), 'PP')}
+                        </span>
                       )}
-                      {!token.lastUsedAt && <span>Never used</span>}
+                      {!token.lastUsedAt && <span className="hidden sm:inline">Never used</span>}
                     </div>
                   </div>
                   <button
                     onClick={() => handleRevokeToken(token.id)}
-                    className="p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
+                    className="self-end sm:self-auto p-2 text-red-600 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-lg transition-colors"
                   >
                     <TrashIcon className="h-5 w-5" />
                   </button>
@@ -160,26 +166,26 @@ export const TokensPage = () => {
       {/* Revoked Tokens */}
       {revokedTokens.length > 0 && (
         <div>
-          <h2 className="text-xl font-semibold text-gray-900 dark:text-white mb-4">
+          <h2 className="text-lg sm:text-xl font-semibold text-gray-900 dark:text-white mb-4">
             Revoked Tokens ({revokedTokens.length})
           </h2>
-          <div className="grid gap-4">
+          <div className="grid gap-3 sm:gap-4">
             {revokedTokens.map((token) => (
               <div
                 key={token.id}
-                className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-800 p-6 opacity-60"
+                className="bg-gray-50 dark:bg-gray-900/50 rounded-xl border border-gray-200 dark:border-gray-800 p-4 sm:p-6 opacity-60"
               >
-                <div className="flex items-center">
-                  <KeyIcon className="h-5 w-5 text-gray-400 mr-3" />
-                  <h3 className="text-lg font-semibold text-gray-700 dark:text-gray-300 line-through">
+                <div className="flex flex-wrap items-center gap-2">
+                  <KeyIcon className="h-5 w-5 text-gray-400 flex-shrink-0" />
+                  <h3 className="text-base sm:text-lg font-semibold text-gray-700 dark:text-gray-300 line-through">
                     {token.name}
                   </h3>
-                  <span className="ml-3 px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-sm">
+                  <span className="px-2 py-1 bg-red-100 dark:bg-red-900/20 text-red-600 dark:text-red-400 rounded text-xs sm:text-sm">
                     Revoked
                   </span>
                 </div>
-                <div className="mt-2 text-sm text-gray-500 dark:text-gray-500">
-                  Revoked on {format(new Date(token.revokedAt!), 'PPP')}
+                <div className="mt-2 text-xs sm:text-sm text-gray-500 dark:text-gray-500">
+                  Revoked on {format(new Date(token.revokedAt!), 'PP')}
                 </div>
               </div>
             ))}
@@ -190,9 +196,9 @@ export const TokensPage = () => {
       {/* Create Token Modal */}
       {isModalOpen && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center p-4 z-50">
-          <div className="bg-white dark:bg-gray-900 rounded-2xl shadow-xl w-full max-w-md">
-            <div className="p-6">
-              <h2 className="text-2xl font-bold text-gray-900 dark:text-white mb-4">
+          <div className="bg-white dark:bg-gray-900 rounded-xl sm:rounded-2xl shadow-xl w-full max-w-md max-h-[90vh] overflow-y-auto">
+            <div className="p-4 sm:p-6">
+              <h2 className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white mb-4">
                 {newTokenResponse ? 'Token Created Successfully' : 'Create New Token'}
               </h2>
 
