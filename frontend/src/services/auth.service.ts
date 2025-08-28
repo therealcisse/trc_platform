@@ -1,6 +1,6 @@
 import { http } from '../lib/http';
 import { queryClient } from '../lib/queryClient';
-import { clearAuthCookies, getCSRFToken } from '../lib/csrf';
+import { clearAuthCookies, getCSRFToken, setCSRFToken } from '../lib/csrf';
 import type {
   User,
   LoginCredentials,
@@ -11,6 +11,15 @@ import type {
 export const authService = {
   async login(credentials: LoginCredentials): Promise<User> {
     const { data } = await http.post('/customers/login', credentials);
+
+    // Store CSRF token if returned by backend
+    if (data.csrfToken) {
+      setCSRFToken(data.csrfToken);
+      // Remove token from response to match User interface
+      const { csrfToken, ...userData } = data;
+      return userData;
+    }
+
     return data;
   },
 
@@ -49,7 +58,7 @@ export const authService = {
 
       // Force redirect to login page
       // This ensures the user can't stay on protected pages
-      window.location.href = '/login';
+      // window.location.href = '/login';
     }
   },
 

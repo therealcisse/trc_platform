@@ -2,12 +2,29 @@
  * CSRF Token Management Utilities
  */
 
-// Cache the CSRF token for the session to avoid repeated cookie parsing
+// Cache the CSRF token for the session
 let cachedCSRFToken: string | null = null;
 
+// Storage key for persisting CSRF token across page reloads
+const CSRF_STORAGE_KEY = 'csrfToken';
+
 /**
- * Get CSRF token from cookie
- * Django sets the CSRF token in a cookie named 'csrftoken'
+ * Set CSRF token from backend response
+ * This is used when the backend sends the token in the response body
+ */
+export function setCSRFToken(token: string): void {
+  cachedCSRFToken = token;
+  // Also store in sessionStorage for persistence across page reloads
+  try {
+    sessionStorage.setItem(CSRF_STORAGE_KEY, token);
+  } catch (e) {
+    console.warn('Failed to store CSRF token in sessionStorage:', e);
+  }
+}
+
+/**
+ * Get CSRF token
+ * First checks memory cache, then sessionStorage, then cookies as fallback
  */
 export function getCSRFToken(): string | null {
   // Return cached value if available
@@ -15,6 +32,18 @@ export function getCSRFToken(): string | null {
     return cachedCSRFToken;
   }
 
+  // Try to get from sessionStorage
+  try {
+    const storedToken = sessionStorage.getItem(CSRF_STORAGE_KEY);
+    if (storedToken) {
+      cachedCSRFToken = storedToken;
+      return storedToken;
+    }
+  } catch (e) {
+    console.warn('Failed to read CSRF token from sessionStorage:', e);
+  }
+
+  // Fallback to cookie (for same-origin deployments or development)
   const name = 'csrftoken';
   let cookieValue = null;
 
@@ -30,16 +59,22 @@ export function getCSRFToken(): string | null {
     }
   }
 
-  // Cache the token if found
+  // Cache the token if found in cookies
   if (cookieValue) {
     cachedCSRFToken = cookieValue;
+    // Store in sessionStorage for consistency
+    try {
+      sessionStorage.setItem(CSRF_STORAGE_KEY, cookieValue);
+    } catch (e) {
+      // Ignore storage errors
+    }
   }
 
   return cookieValue;
 }
 
 /**
- * Clear all authentication-related cookies
+ * Clear all authentication-related cookies and tokens
  * Useful for complete logout cleanup
  *
  * Note: The Django backend already handles cookie deletion on logout,
@@ -48,6 +83,13 @@ export function getCSRFToken(): string | null {
 export function clearAuthCookies(): void {
   // Clear the cached CSRF token
   cachedCSRFToken = null;
+
+  // Clear from sessionStorage
+  try {
+    sessionStorage.removeItem(CSRF_STORAGE_KEY);
+  } catch (e) {
+    // Ignore storage errors
+  }
 
   // Get current domain and protocol
   const isSecure = window.location.protocol === 'https:';
@@ -96,22 +138,10 @@ export function clearAuthCookies(): void {
 }
 
 /**
- * Check if CSRF token exists (with caching)
+ * Check if CSRF token exists
  */
 export function hasCSRFToken(): boolean {
-  // First check cache
-  if (cachedCSRFToken) {
-    return true;
-  }
-
-  // Then check cookie
-  const token = getCSRFToken();
-  if (token) {
-    cachedCSRFToken = token;
-    return true;
-  }
-
-  return false;
+  return getCSRFToken() !== null;
 }
 
 /**
@@ -120,19 +150,27 @@ export function hasCSRFToken(): boolean {
 export async function bootstrapCsrf(): Promise<void> {
   try {
     const { default: axios } = await import('axios');
-    await axios.get(`${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/csrf/`, {
-      withCredentials: true,
-    });
+    const response = await axios.get(
+      `${import.meta.env.VITE_API_URL || 'http://localhost:8000/api'}/auth/csrf/`,
+      {
+        withCredentials: true,
+      }
+    );
 
-    // Clear cache to force re-read from cookie
-    cachedCSRFToken = null;
-
-    // Try to read and cache the new token
-    const newToken = getCSRFToken();
-    if (newToken) {
-      console.log('CSRF token successfully bootstrapped');
+    // Get token from response body
+    const token = response.data?.csrfToken;
+    if (token) {
+      setCSRFToken(token);
+      console.log('CSRF token successfully bootstrapped from response');
     } else {
-      console.warn('CSRF bootstrap completed but token not found in cookies');
+      // Fallback: try to read from cookie
+      cachedCSRFToken = null;
+      const cookieToken = getCSRFToken();
+      if (cookieToken) {
+        console.log('CSRF token found in cookies');
+      } else {
+        console.warn('CSRF bootstrap completed but token not found');
+      }
     }
   } catch (error) {
     console.error('Failed to bootstrap CSRF token:', error);

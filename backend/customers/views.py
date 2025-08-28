@@ -6,6 +6,7 @@ from django.conf import settings
 from django.contrib.auth import login, logout
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
+from django.middleware.csrf import get_token
 from django.db.models import Count
 from django.utils import timezone
 from rest_framework import status
@@ -78,11 +79,15 @@ class LoginView(APIView):
         user = serializer.validated_data["user"]
 
         login(request, user)
+        
+        # Get CSRF token for the session
+        csrf_token = get_token(request)
 
         return Response(
             {
                 "id": str(user.id),
                 "email": user.email,
+                "csrfToken": csrf_token,  # Include CSRF token in response
             }
         )
 
@@ -92,12 +97,17 @@ class CurrentUserView(APIView):
 
     def get(self, request: Request) -> Response:
         user = request.user
+        
+        # Get CSRF token for the session
+        csrf_token = get_token(request)
+        
         return Response(
             {
                 "id": str(user.id),
                 "email": user.email,
                 "isEmailVerified": user.is_email_verified,
                 "dateJoined": user.date_joined.isoformat(),
+                "csrfToken": csrf_token,  # Include CSRF token in response
             }
         )
 

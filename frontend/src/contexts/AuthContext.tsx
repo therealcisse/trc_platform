@@ -6,6 +6,7 @@ import {
   type ChangePasswordData,
 } from '../types/auth';
 import { authService } from '../services/auth.service';
+import { setCSRFToken } from '../lib/csrf';
 import { useNavigate } from 'react-router-dom';
 
 interface AuthContextType {
@@ -46,8 +47,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
 
   const checkAuth = async () => {
     try {
-      const userData = await authService.getCurrentUser();
-      setUser(userData);
+      const response = await authService.getCurrentUser();
+      // Handle CSRF token if present in response
+      if ((response as any).csrfToken) {
+        setCSRFToken((response as any).csrfToken);
+        const { csrfToken, ...userData } = response as any;
+        setUser(userData);
+      } else {
+        setUser(response);
+      }
     } catch (error) {
       setUser(null);
     } finally {
@@ -103,8 +111,15 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
   };
 
   const refreshUser = async () => {
-    const userData = await authService.getCurrentUser();
-    setUser(userData);
+    const response = await authService.getCurrentUser();
+    // Handle CSRF token if present in response
+    if ((response as any).csrfToken) {
+      setCSRFToken((response as any).csrfToken);
+      const { csrfToken, ...userData } = response as any;
+      setUser(userData);
+    } else {
+      setUser(response);
+    }
   };
 
   const value: AuthContextType = {
