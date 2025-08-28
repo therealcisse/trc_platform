@@ -57,7 +57,7 @@ export const RegisterPage = () => {
             Create an account
           </h1>
           <p className="text-gray-600 dark:text-gray-400">
-            Get started with your API platform account
+            Get started with your TRC platform account
           </p>
         </div>
 
