@@ -32,6 +32,7 @@ from .serializers import (
     LoginSerializer,
     RegisterSerializer,
 )
+from config import settings
 from .utils import (
     build_verification_url,
     send_verification_email_html,
@@ -107,8 +108,18 @@ class LogoutView(APIView):
     def post(self, request: Request) -> Response:
         logout(request)
         resp: Response = Response(status=status.HTTP_204_NO_CONTENT)
+
         resp.delete_cookie("sessionid")
         resp.delete_cookie("csrftoken")
+
+        # Remove the cookie on the client. Attributes must match.
+        resp.delete_cookie(
+            key=settings.SESSION_COOKIE_NAME,                       # "sessionid" by default
+            path=getattr(settings, "SESSION_COOKIE_PATH", "/"),
+            domain=getattr(settings, "SESSION_COOKIE_DOMAIN", None),
+            samesite=getattr(settings, "SESSION_COOKIE_SAMESITE", None),
+        )
+
         return resp
 
 
