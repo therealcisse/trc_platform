@@ -7,6 +7,10 @@ import { ReactQueryDevtools } from '@tanstack/react-query-devtools';
 import { ErrorBoundary } from 'react-error-boundary';
 import { queryClient } from './lib/queryClient';
 
+// Display git commit hash on startup
+const gitCommitHash = import.meta.env.VITE_GIT_COMMIT_HASH || 'local';
+console.log(`Application started - Git commit: ${gitCommitHash}`);
+
 createRoot(document.getElementById('root')!).render(
   <StrictMode>
     <ErrorBoundary fallback={<p>Something went wrong.</p>}>
