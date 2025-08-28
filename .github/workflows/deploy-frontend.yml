@@ -40,6 +40,7 @@ jobs:
         env:
           VITE_API_URL: ${{ vars.VITE_API_URL }}
           VITE_MAX_VERIFICATION_ATTEMPTS: ${{ vars.VITE_MAX_VERIFICATION_ATTEMPTS }}
+          VITE_GIT_COMMIT_HASH: ${{ github.sha }}
         run: npm run build
 
       - name: Deploy to Cloudflare Pages

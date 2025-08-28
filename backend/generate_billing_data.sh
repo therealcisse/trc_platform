@@ -145,7 +145,7 @@ if [ ! -f "manage.py" ]; then
 fi
 
 # Build the Django command
-CMD="uv run python manage.py generate_billing_data"
+CMD="python manage.py generate_billing_data"
 CMD="$CMD --month $MONTH --year $YEAR"
 CMD="$CMD --user-email \"$USER_EMAIL\""
 CMD="$CMD --min-requests-per-day $MIN_REQUESTS"
