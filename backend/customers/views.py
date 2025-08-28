@@ -2,7 +2,6 @@ import logging
 import time
 from datetime import timedelta
 
-from django.views.decorators.csrf import ensure_csrf_cookie
 from django.conf import settings
 from django.contrib.auth import login, logout
 from django.core.mail import send_mail
@@ -72,7 +71,6 @@ class RegisterView(APIView):
 class LoginView(APIView):
     permission_classes = [AllowAny]
 
-    @ensure_csrf_cookie
     def post(self, request: Request) -> Response:
         serializer = LoginSerializer(data=request.data)
         serializer.is_valid(raise_exception=True)
