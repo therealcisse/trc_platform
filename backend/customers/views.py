@@ -7,7 +7,6 @@ from django.contrib.auth import login, logout
 from django.core.mail import send_mail
 from django.core.signing import BadSignature, SignatureExpired, TimestampSigner
 from django.middleware.csrf import get_token
-from django.db.models import Count
 from django.utils import timezone
 from rest_framework import status
 from rest_framework.generics import DestroyAPIView
@@ -17,11 +16,12 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
+from config import settings
 from core.models import Settings
 from core.permissions import IsEmailVerified
 from core.services import openai_client
 from core.services.exceptions import OpenAIError
-from usage.models import BillingPeriod, RequestLog, RequestImage
+from usage.models import BillingPeriod, RequestImage, RequestLog
 from usage.serializers import CurrentBillingPeriodSerializer
 from usage.utils import get_or_create_current_billing_period
 
@@ -33,7 +33,6 @@ from .serializers import (
     LoginSerializer,
     RegisterSerializer,
 )
-from config import settings
 from .utils import (
     build_verification_url,
     send_verification_email_html,
@@ -79,7 +78,7 @@ class LoginView(APIView):
         user = serializer.validated_data["user"]
 
         login(request, user)
-        
+
         # Get CSRF token for the session
         csrf_token = get_token(request)
 
@@ -97,10 +96,10 @@ class CurrentUserView(APIView):
 
     def get(self, request: Request) -> Response:
         user = request.user
-        
+
         # Get CSRF token for the session
         csrf_token = get_token(request)
-        
+
         return Response(
             {
                 "id": str(user.id),
@@ -124,7 +123,7 @@ class LogoutView(APIView):
 
         # Remove the cookie on the client. Attributes must match.
         resp.delete_cookie(
-            key=settings.SESSION_COOKIE_NAME,                       # "sessionid" by default
+            key=settings.SESSION_COOKIE_NAME,  # "sessionid" by default
             path=getattr(settings, "SESSION_COOKIE_PATH", "/"),
             domain=getattr(settings, "SESSION_COOKIE_DOMAIN", None),
             samesite=getattr(settings, "SESSION_COOKIE_SAMESITE", None),
@@ -207,8 +206,7 @@ class ResendVerificationEmailView(APIView):
                 fail_silently=False,
             )
             return Response(
-                {"detail": "Verification email sent successfully"},
-                status=status.HTTP_200_OK
+                {"detail": "Verification email sent successfully"}, status=status.HTTP_200_OK
             )
         except Exception:
             return Response(
@@ -313,9 +311,7 @@ class UsageSummaryView(APIView):
         month_start = today.replace(day=1)
 
         # Today
-        today_count = RequestLog.objects.filter(
-            user=request.user, request_ts__gte=today
-        ).count()
+        today_count = RequestLog.objects.filter(user=request.user, request_ts__gte=today).count()
 
         # Yesterday
         yesterday_count = RequestLog.objects.filter(
@@ -453,6 +449,7 @@ class BillingPeriodDetailView(APIView):
 
 class TestSolveView(APIView):
     """Session-authenticated endpoint for testing the image solver without API tokens."""
+
     permission_classes = [IsAuthenticated, IsEmailVerified]
     parser_classes = [MultiPartParser, FileUploadParser]
 
@@ -473,17 +470,13 @@ class TestSolveView(APIView):
             # Raw binary upload
             image_bytes = request.body
         else:
-            return Response(
-                {"detail": "No image provided"},
-                status=status.HTTP_400_BAD_REQUEST
-            )
+            return Response({"detail": "No image provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Validate image size (max 10MB for test requests)
         max_size_bytes = 10 * 1024 * 1024  # 10MB
         if len(image_bytes) > max_size_bytes:
             return Response(
-                {"detail": "Image size exceeds 10MB limit"},
-                status=status.HTTP_400_BAD_REQUEST
+                {"detail": "Image size exceeds 10MB limit"}, status=status.HTTP_400_BAD_REQUEST
             )
 
         # Get settings
@@ -533,9 +526,7 @@ class TestSolveView(APIView):
                                 mime_type = content_type
 
                         RequestImage.create_from_bytes(
-                            request_log=request_log,
-                            image_bytes=image_bytes,
-                            mime_type=mime_type
+                            request_log=request_log, image_bytes=image_bytes, mime_type=mime_type
                         )
                     except Exception as e:
                         # Log error but don't fail the request
@@ -593,9 +584,7 @@ class TestSolveView(APIView):
                                 mime_type = content_type
 
                         RequestImage.create_from_bytes(
-                            request_log=request_log,
-                            image_bytes=image_bytes,
-                            mime_type=mime_type
+                            request_log=request_log, image_bytes=image_bytes, mime_type=mime_type
                         )
                     except Exception as save_error:
                         logger.error(

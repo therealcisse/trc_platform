@@ -1,4 +1,3 @@
-
 from typing import Any
 
 from django.contrib import admin
@@ -10,9 +9,16 @@ from .models import Settings
 
 @admin.register(Settings)
 class SettingsAdmin(admin.ModelAdmin):
-    list_display = ["display_title", "cost_per_request_cents", "openai_model", "openai_timeout_s", "app_domain", "updated_at"]
+    list_display = [
+        "display_title",
+        "cost_per_request_cents",
+        "openai_model",
+        "openai_timeout_s",
+        "app_domain",
+        "updated_at",
+    ]
     list_display_links = ["display_title"]  # Make the title clickable
-    
+
     fieldsets = [
         (
             "API Settings",
@@ -39,10 +45,13 @@ class SettingsAdmin(admin.ModelAdmin):
 
     def display_title(self, obj: Settings) -> str:
         """Display a clickable title for the settings."""
-        return format_html('<strong>Click here to edit settings</strong>')
+        return format_html("<strong>Click here to edit settings</strong>")
+
     display_title.short_description = "Settings"
 
-    def changelist_view(self, request: HttpRequest, extra_context: dict[str, Any] | None = None) -> Any:
+    def changelist_view(
+        self, request: HttpRequest, extra_context: dict[str, Any] | None = None
+    ) -> Any:
         """Redirect directly to the edit page if a Settings instance exists."""
         if Settings.objects.exists():
             settings = Settings.objects.first()

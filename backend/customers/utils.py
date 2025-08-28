@@ -1,6 +1,5 @@
 """Utility functions for the customers app."""
 
-from urllib.parse import urljoin, urlparse, parse_qs, urlencode
 
 from django.core.signing import TimestampSigner
 from rest_framework.request import Request
@@ -11,39 +10,39 @@ from core.models import Settings
 def build_verification_url(request: Request, user_email: str) -> str:
     """
     Build a verification URL using the configured app domain.
-    
+
     Args:
         request: The current request object
         user_email: The email address to create a verification token for
-    
+
     Returns:
         The complete verification URL
     """
     # Generate the verification token
     signer = TimestampSigner()
     token = signer.sign(user_email)
-    
+
     # Get the app domain from settings
     settings = Settings.get_settings()
-    
+
     if settings.app_domain:
         # Use the configured frontend domain
-        base_url = settings.app_domain.rstrip('/')
+        base_url = settings.app_domain.rstrip("/")
         verification_url = f"{base_url}/verify-email?token={token}"
     else:
         # Fall back to the current request domain (backward compatibility)
         verification_url = f"{request.build_absolute_uri('/verify-email')}?token={token}"
-    
+
     return verification_url
 
 
 def send_verification_email_html(verification_url: str) -> str:
     """
     Generate the HTML content for verification emails.
-    
+
     Args:
         verification_url: The verification URL to include in the email
-    
+
     Returns:
         HTML string for the email body
     """
@@ -120,10 +119,10 @@ def send_verification_email_html(verification_url: str) -> str:
 def send_verification_email_plain(verification_url: str) -> str:
     """
     Generate the plain text content for verification emails.
-    
+
     Args:
         verification_url: The verification URL to include in the email
-    
+
     Returns:
         Plain text string for the email body
     """

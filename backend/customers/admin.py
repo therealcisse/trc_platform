@@ -1,4 +1,3 @@
-
 from django.contrib import admin, messages
 from django.contrib.auth.admin import UserAdmin as BaseUserAdmin
 from django.db.models import QuerySet

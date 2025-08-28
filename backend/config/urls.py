@@ -1,13 +1,12 @@
 from django.conf import settings
 from django.conf.urls.static import static
 from django.contrib import admin
-from django.http import HttpResponse, JsonResponse
+from django.http import JsonResponse
 from django.middleware.csrf import get_token
 from django.urls import include, path
 from django.views.decorators.csrf import ensure_csrf_cookie
 from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 from rest_framework.request import Request
-from rest_framework.response import Response
 
 from core.views import healthz
 
@@ -16,10 +15,12 @@ from core.views import healthz
 def csrf_bootstrap(request: Request) -> JsonResponse:
     """Return CSRF token in response body for cross-origin requests."""
     token = get_token(request)
-    response = JsonResponse({'csrfToken': token})
+    response = JsonResponse({"csrfToken": token})
     # Allow frontend to read the response
-    response['Access-Control-Allow-Origin'] = settings.CORS_ALLOWED_ORIGINS[0] if settings.CORS_ALLOWED_ORIGINS else '*'
-    response['Access-Control-Allow-Credentials'] = 'true'
+    response["Access-Control-Allow-Origin"] = (
+        settings.CORS_ALLOWED_ORIGINS[0] if settings.CORS_ALLOWED_ORIGINS else "*"
+    )
+    response["Access-Control-Allow-Credentials"] = "true"
     return response
 
 

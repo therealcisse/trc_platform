@@ -1,10 +1,9 @@
 """Management command to set the application domain for email verification."""
 
-from django.core.management.base import BaseCommand, CommandError
-from django.core.validators import URLValidator
 from django.core.exceptions import ValidationError
+from django.core.management.base import BaseCommand, CommandError
 
-from core.models import Settings
+from core.models import FlexibleURLValidator, Settings
 
 
 class Command(BaseCommand):
@@ -25,7 +24,7 @@ class Command(BaseCommand):
 
     def handle(self, *args, **options):
         settings = Settings.get_settings()
-        
+
         if options["clear"]:
             settings.app_domain = ""
             settings.save()
@@ -35,24 +34,26 @@ class Command(BaseCommand):
                 )
             )
             return
-        
+
         domain = options.get("domain")
-        
+
         if not domain:
             # Show current setting
             if settings.app_domain:
                 self.stdout.write(f"Current app domain: {settings.app_domain}")
             else:
-                self.stdout.write("No app domain set. Using backend domain for verification emails.")
+                self.stdout.write(
+                    "No app domain set. Using backend domain for verification emails."
+                )
             return
-        
+
         # Validate URL
-        validator = URLValidator()
+        validator = FlexibleURLValidator()
         try:
             validator(domain)
         except ValidationError:
             raise CommandError(f"Invalid URL format: {domain}")
-        
+
         # Ensure it's HTTPS in production
         if not domain.startswith("https://") and not domain.startswith("http://localhost"):
             self.stdout.write(
@@ -60,19 +61,17 @@ class Command(BaseCommand):
                     "Warning: Using non-HTTPS URL. Consider using HTTPS for production."
                 )
             )
-        
+
         # Update setting
         settings.app_domain = domain
         settings.save()
-        
+
         self.stdout.write(
             self.style.SUCCESS(
                 f"App domain set to: {domain}\n"
                 f"Email verification links will now use this domain."
             )
         )
-        
+
         # Show example URL
-        self.stdout.write(
-            f"\nExample verification URL:\n  {domain}/verify-email?token=<token>"
-        )
+        self.stdout.write(f"\nExample verification URL:\n  {domain}/verify-email?token=<token>")
