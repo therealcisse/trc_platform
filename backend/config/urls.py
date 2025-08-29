@@ -35,6 +35,7 @@ urlpatterns = [
     # API endpoints
     path("api/customers/", include("customers.urls")),
     path("api/core/", include("core.urls")),
+    path("api/v2/core/", include("core.urls_optimized")),  # Optimized
     path("api/usage/", include("usage.urls")),
     path("api/auth/csrf/", csrf_bootstrap),
 ]

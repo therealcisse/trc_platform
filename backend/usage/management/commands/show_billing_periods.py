@@ -53,71 +53,71 @@ class Command(BaseCommand):
 
         # Build the query
         queryset = BillingPeriod.objects.filter(user=user)
-        
+
         if current_only:
             queryset = queryset.filter(is_current=True)
-        
+
         if status_filter:
             queryset = queryset.filter(payment_status=status_filter)
-        
+
         # Get the billing periods
         periods = queryset.order_by("-period_start")
-        
+
         if not periods.exists():
             self.stdout.write(self.style.WARNING(f"No billing periods found for {email}"))
             return
-        
+
         # Display header
         self.stdout.write("")
         self.stdout.write(self.style.SUCCESS(f"Billing Periods for {email}"))
         self.stdout.write("=" * 80)
-        
+
         # Calculate totals
         total_stats = periods.aggregate(
             total_requests=Sum("total_requests"),
             total_cost=Sum("total_cost_cents"),
             total_paid=Sum("paid_amount_cents"),
         )
-        
+
         # Display each period
         for period in periods:
             self._display_period(period, verbose)
-        
+
         # Display summary
         self.stdout.write("=" * 80)
         self.stdout.write(self.style.SUCCESS("Summary:"))
         self.stdout.write(f"  Total periods: {periods.count()}")
         self.stdout.write(f"  Total requests: {total_stats['total_requests'] or 0:,}")
         self.stdout.write(f"  Total cost: ${(total_stats['total_cost'] or 0) / 100:,.2f}")
-        if total_stats['total_paid']:
+        if total_stats["total_paid"]:
             self.stdout.write(f"  Total paid: ${total_stats['total_paid'] / 100:,.2f}")
-        
+
         # Payment status breakdown
         status_counts = {}
         for status, label in BillingPeriod.PAYMENT_STATUS_CHOICES:
             count = periods.filter(payment_status=status).count()
             if count > 0:
                 status_counts[label] = count
-        
+
         if status_counts:
             self.stdout.write("\nPayment Status Breakdown:")
             for label, count in status_counts.items():
                 self.stdout.write(f"  {label}: {count}")
-    
+
     def _display_period(self, period: BillingPeriod, verbose: bool) -> None:
         """Display a single billing period."""
         # Main period info
         self.stdout.write("")
         self.stdout.write(f"Period: {period.period_label}")
         self.stdout.write(f"  Date range: {period.period_start} to {period.period_end}")
-        
+
         if period.is_current:
             self.stdout.write(self.style.WARNING("  Status: CURRENT PERIOD"))
-        
+
         # Usage stats
         self.stdout.write(f"  Requests: {period.total_requests:,}")
         self.stdout.write(f"  Cost: ${period.total_cost_cents / 100:.2f}")
-        
+
         # Payment status with color coding
         status_display = f"  Payment status: {period.get_payment_status_display()}"
         if period.payment_status == "paid":
@@ -128,7 +128,7 @@ class Command(BaseCommand):
             self.stdout.write(self.style.WARNING(status_display))
         else:
             self.stdout.write(status_display)
-        
+
         # Verbose details
         if verbose:
             if period.paid_at:
@@ -139,7 +139,7 @@ class Command(BaseCommand):
                 self.stdout.write(f"  Payment reference: {period.payment_reference}")
             if period.payment_notes:
                 self.stdout.write(f"  Notes: {period.payment_notes}")
-            
+
             # Show related request count
             request_count = period.requests.count()
             if request_count > 0:

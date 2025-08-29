@@ -37,6 +37,7 @@ INSTALLED_APPS = [
 MIDDLEWARE = [
     "django.middleware.security.SecurityMiddleware",
     "whitenoise.middleware.WhiteNoiseMiddleware",
+    "django.middleware.gzip.GZipMiddleware",  # Add GZip compression for responses
     "corsheaders.middleware.CorsMiddleware",
     "django.contrib.sessions.middleware.SessionMiddleware",
     "django.middleware.common.CommonMiddleware",
@@ -73,10 +74,18 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "postgres://postgres:postgres@loca
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
-        conn_max_age=0,
+        conn_max_age=600,  # Connection pooling: keep connections alive for 10 minutes
+        conn_health_checks=True,  # Enable connection health checks
         ssl_require=not DEBUG,
     )
 }
+
+# Database connection pooling settings for production
+if not DEBUG:
+    DATABASES["default"]["OPTIONS"] = {
+        "connect_timeout": 10,
+        "options": "-c statement_timeout=30000",  # 30 second statement timeout
+    }
 
 
 # Password validation & hashing
@@ -222,6 +231,28 @@ SAVE_REQUEST_IMAGES = os.environ.get("SAVE_REQUEST_IMAGES", "false").lower() == 
 MAX_SAVED_IMAGE_SIZE_MB = int(os.environ.get("MAX_SAVED_IMAGE_SIZE_MB", "10"))
 IMAGE_RETENTION_DAYS = int(os.environ.get("IMAGE_RETENTION_DAYS", "30"))
 
+# Cache configuration (using local memory cache for zero-cost optimization)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000,
+            "CULL_FREQUENCY": 3,  # Cull 1/3 of entries when MAX_ENTRIES is reached
+        },
+        "KEY_PREFIX": "imagesolve",
+        "TIMEOUT": 300,  # Default 5 minutes
+    },
+    "tokens": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "token-cache",
+        "OPTIONS": {
+            "MAX_ENTRIES": 500,
+        },
+        "KEY_PREFIX": "tok",
+        "TIMEOUT": 600,  # 10 minutes for token cache
+    },
+}
 
 # Session and CSRF
 SESSION_COOKIE_HTTPONLY = True

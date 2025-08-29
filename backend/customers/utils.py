@@ -1,6 +1,5 @@
 """Utility functions for the customers app."""
 
-
 from django.core.signing import TimestampSigner
 from rest_framework.request import Request
 

@@ -16,7 +16,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from config import settings
 from core.models import Settings
 from core.permissions import IsEmailVerified
 from core.services import openai_client
