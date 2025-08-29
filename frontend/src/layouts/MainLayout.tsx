@@ -21,10 +21,12 @@ export const MainLayout = () => {
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [expandedItems, setExpandedItems] = useState<string[]>(['Billing', 'Account']);
+  const [activeDropdown, setActiveDropdown] = useState<string | null>(null);
 
   // Close mobile sidebar on route change
   useEffect(() => {
     setIsMobileSidebarOpen(false);
+    setActiveDropdown(null); // Close dropdown on navigation
   }, [location]);
 
   // Close mobile sidebar on window resize to desktop
@@ -37,6 +39,21 @@ export const MainLayout = () => {
     window.addEventListener('resize', handleResize);
     return () => window.removeEventListener('resize', handleResize);
   }, []);
+
+  // Close dropdown when clicking outside
+  useEffect(() => {
+    const handleClickOutside = (event: MouseEvent) => {
+      const target = event.target as HTMLElement;
+      if (!target.closest('.sidebar-dropdown-container')) {
+        setActiveDropdown(null);
+      }
+    };
+
+    if (activeDropdown) {
+      document.addEventListener('click', handleClickOutside);
+      return () => document.removeEventListener('click', handleClickOutside);
+    }
+  }, [activeDropdown]);
 
   const handleLogout = async () => {
     try {
@@ -135,7 +152,7 @@ export const MainLayout = () => {
         {/* Sidebar - Desktop */}
         <div
           className={clsx(
-            'hidden md:block bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 relative',
+            'hidden md:block bg-white dark:bg-gray-900 border-r border-gray-200 dark:border-gray-800 transition-all duration-300 relative overflow-visible',
             isSidebarCollapsed ? 'w-16' : 'w-64'
           )}
         >
@@ -162,7 +179,7 @@ export const MainLayout = () => {
             </svg>
           </button>
 
-          <div className="flex flex-col h-full">
+          <div className="flex flex-col h-full overflow-hidden">
             {/* Logo/Brand */}
             <div className="flex items-center justify-center h-16 px-4 border-b border-gray-200 dark:border-gray-800">
               {isSidebarCollapsed && !isMobileSidebarOpen ? (
@@ -177,21 +194,30 @@ export const MainLayout = () => {
             </div>
 
             {/* Navigation */}
-            <nav className="flex-1 px-2 py-4 space-y-1 overflow-y-auto">
+            <nav className={clsx(
+              "flex-1 px-2 py-4 space-y-1",
+              isSidebarCollapsed ? "overflow-visible" : "overflow-y-auto"
+            )}>
               {navigation.map((item) => (
                 <div key={item.name}>
                   {item.children ? (
-                    <div className="relative group">
+                    <div className="relative group sidebar-dropdown-container">
                       <button
-                        onClick={() =>
-                          (!isSidebarCollapsed || isMobileSidebarOpen) && toggleExpanded(item.name)
-                        }
+                        onClick={() => {
+                          if (isSidebarCollapsed && !isMobileSidebarOpen) {
+                            // When collapsed, toggle dropdown menu
+                            setActiveDropdown(activeDropdown === item.name ? null : item.name);
+                          } else {
+                            // When expanded, toggle accordion
+                            toggleExpanded(item.name);
+                          }
+                        }}
                         className={clsx(
                           'w-full flex items-center justify-between px-2 py-2 text-sm font-medium rounded-md transition-colors',
                           item.children.some((child) => child.isPage(location.pathname))
                             ? 'bg-primary-50 text-primary-700 dark:bg-primary-900/20 dark:text-primary-400'
                             : 'text-gray-700 hover:bg-gray-100 dark:text-gray-300 dark:hover:bg-gray-800',
-                          isSidebarCollapsed && !isMobileSidebarOpen && 'cursor-pointer'
+                          'cursor-pointer'
                         )}
                       >
                         <div className="flex items-center">
@@ -212,9 +238,9 @@ export const MainLayout = () => {
                           />
                         )}
                       </button>
-                      {/* Hover menu for collapsed state (desktop only) */}
-                      {isSidebarCollapsed && !isMobileSidebarOpen && (
-                        <div className="hidden md:block absolute left-full ml-2 bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all duration-200 z-50">
+                      {/* Dropdown menu for collapsed state (desktop only) */}
+                      {isSidebarCollapsed && activeDropdown === item.name ? (
+                        <div className="absolute left-full ml-2 top-0 min-w-[200px] bg-white dark:bg-gray-800 border border-gray-200 dark:border-gray-700 rounded-lg shadow-lg z-[100]">
                           <div className="py-2 px-3 border-b border-gray-200 dark:border-gray-700">
                             <p className="text-sm font-semibold text-gray-900 dark:text-white">
                               {item.name}
@@ -240,7 +266,7 @@ export const MainLayout = () => {
                             ))}
                           </div>
                         </div>
-                      )}
+                      ) : null}
                       {(!isSidebarCollapsed || isMobileSidebarOpen) &&
                         expandedItems.includes(item.name) && (
                           <div className="ml-8 mt-1 space-y-1">
@@ -314,16 +340,15 @@ export const MainLayout = () => {
                     </p>
                   </div>
                 )}
-                <button
-                  onClick={handleLogout}
-                  className={clsx(
-                    'p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0',
-                    isSidebarCollapsed && !isMobileSidebarOpen ? 'ml-0' : 'ml-2'
-                  )}
-                  title="Logout"
-                >
-                  <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
-                </button>
+                {(!isSidebarCollapsed || isMobileSidebarOpen) && (
+                  <button
+                    onClick={handleLogout}
+                    className="p-1 rounded-md hover:bg-gray-100 dark:hover:bg-gray-800 flex-shrink-0 ml-2"
+                    title="Logout"
+                  >
+                    <ArrowRightOnRectangleIcon className="h-5 w-5 text-gray-500" />
+                  </button>
+                )}
               </div>
             </div>
           </div>
