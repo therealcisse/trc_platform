@@ -34,8 +34,7 @@ urlpatterns = [
     path("api/docs/", SpectacularSwaggerView.as_view(url_name="schema"), name="swagger-ui"),
     # API endpoints
     path("api/customers/", include("customers.urls")),
-    path("api/core/", include("core.urls")),
-    path("api/v2/core/", include("core.urls_optimized")),  # Optimized
+    path("api/core/", include("core.urls")),  # Using optimized implementation
     path("api/usage/", include("usage.urls")),
     path("api/auth/csrf/", csrf_bootstrap),
 ]
