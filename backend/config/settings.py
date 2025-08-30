@@ -84,7 +84,6 @@ DATABASES = {
 if not DEBUG:
     DATABASES["default"]["OPTIONS"] = {
         "connect_timeout": 10,
-        "options": "-c statement_timeout=30000",  # 30 second statement timeout
     }
 
 
