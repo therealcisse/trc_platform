@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Simulations Index</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            padding: 40px 20px;
+        }
+
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            overflow: hidden;
+        }
+
+        .header {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            padding: 40px;
+            text-align: center;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            font-weight: 700;
+            margin-bottom: 10px;
+            text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+        }
+
+        .subtitle {
+            font-size: 1.1rem;
+            opacity: 0.95;
+        }
+
+        .content {
+            padding: 40px;
+        }
+
+        .stats {
+            background: #f8f9fa;
+            border-radius: 12px;
+            padding: 20px;
+            margin-bottom: 30px;
+            text-align: center;
+        }
+
+        .stats-text {
+            color: #555;
+            font-size: 1rem;
+        }
+
+        .stats-number {
+            font-size: 2rem;
+            font-weight: 700;
+            color: #667eea;
+            margin-top: 5px;
+        }
+
+        ul {
+            list-style: none;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 12px;
+        }
+
+        li {
+            background: #f8f9fa;
+            border-radius: 8px;
+            transition: all 0.3s ease;
+            border: 2px solid transparent;
+        }
+
+        li:hover {
+            background: white;
+            border-color: #667eea;
+            transform: translateY(-2px);
+            box-shadow: 0 4px 12px rgba(102, 126, 234, 0.2);
+        }
+
+        a {
+            display: block;
+            padding: 16px;
+            color: #333;
+            text-decoration: none;
+            font-weight: 500;
+            text-align: center;
+            font-size: 0.95rem;
+            transition: color 0.3s ease;
+        }
+
+        li:hover a {
+            color: #667eea;
+        }
+
+        @media (max-width: 640px) {
+            .container {
+                border-radius: 0;
+                box-shadow: none;
+            }
+
+            body {
+                padding: 0;
+                background: white;
+            }
+
+            h1 {
+                font-size: 2rem;
+            }
+
+            ul {
+                grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+                gap: 8px;
+            }
+
+            .content {
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>Simulations Index</h1>
+            <p class="subtitle">Interactive validation challenges</p>
+        </div>
+        <div class="content">
+            <div class="stats">
+                <p class="stats-text">Total Simulations</p>
+                <p class="stats-number">27</p>
+            </div>
+            <ul>
+            <li><a href="./pages/000__a10.html">000__a10</a></li>
+            <li><a href="./pages/001_a8.html">001_a8</a></li>
+            <li><a href="./pages/002_a14.html">002_a14</a></li>
+            <!-- <li><a href="./pages/003_a7.html">003_a7</a></li> -->
+            <!-- <li><a href="./pages/004_a8.html">004_a8</a></li> -->
+            <!-- <li><a href="./pages/005_a8.html">005_a8</a></li> -->
+            <!-- <li><a href="./pages/006_a14.html">006_a14</a></li> -->
+            <!-- <li><a href="./pages/007_a9.html">007_a9</a></li> -->
+            <!-- <li><a href="./pages/008_a12.html">008_a12</a></li> -->
+            <!-- <li><a href="./pages/009_a3.html">009_a3</a></li> -->
+            <!-- <li><a href="./pages/010_a3.html">010_a3</a></li> -->
+            <!-- <li><a href="./pages/011_a18.html">011_a18</a></li> -->
+            <!-- <li><a href="./pages/012_a13.html">012_a13</a></li> -->
+            <!-- <li><a href="./pages/013_a11.html">013_a11</a></li> -->
+            <!-- <li><a href="./pages/014_a7.html">014_a7</a></li> -->
+            <!-- <li><a href="./pages/015_a11.html">015_a11</a></li> -->
+            <!-- <li><a href="./pages/016_a10.html">016_a10</a></li> -->
+            <!-- <li><a href="./pages/017_a5.html">017_a5</a></li> -->
+            <!-- <li><a href="./pages/018_a11.html">018_a11</a></li> -->
+            <!-- <li><a href="./pages/019_a10.html">019_a10</a></li> -->
+            <!-- <li><a href="./pages/020_a9.html">020_a9</a></li> -->
+            <!-- <li><a href="./pages/021_a10.html">021_a10</a></li> -->
+            <!-- <li><a href="./pages/022_a12.html">022_a12</a></li> -->
+            <!-- <li><a href="./pages/023_a17.html">023_a17</a></li> -->
+            <!-- <li><a href="./pages/024_a16.html">024_a16</a></li> -->
+            <!-- <li><a href="./pages/025_a10.html">025_a10</a></li> -->
+            <!-- <li><a href="./pages/026_a6.html">026_a6</a></li> -->
+            </ul>
+        </div>
+    </div>
+</body>
+</html>
