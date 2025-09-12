@@ -1,9 +1,9 @@
 import 'webextension-polyfill';
-import { ConfigService } from './services/config';
+import { ConfigService } from '@extension/shared';
 import { emailCommandHandler } from './commands/email';
 import { offersCommandHandler } from './commands/offers';
 import { buyOfferCommandHandler } from './commands/buyOffer';
-import type { BackgroundCommands, CommandResponse } from '@extension/types';
+import type { BackgroundCommands, CommandResponse } from '@extension/shared';
 
 // Initialize background service
 async function init() {
@@ -219,10 +219,14 @@ init();
  */
 async function processImageAPI(imageData: string): Promise<{ result: string }> {
   const backendUrl = process.env['CEB_TRC_BACKEND_URL'];
-  const backendToken = process.env['CEB_TRC_BACKEND_TOKEN'];
+  const config = await ConfigService.getConfig();
 
-  if (!backendUrl || !backendToken) {
-    throw new Error('Missing required environment variables: CEB_TRC_BACKEND_URL or CEB_TRC_BACKEND_TOKEN');
+  if (!backendUrl) {
+    throw new Error('Missing required environment variable: CEB_TRC_BACKEND_URL');
+  }
+
+  if (!config.token) {
+    throw new Error('API token not configured. Please set your API token in the extension options.');
   }
 
   console.log('[Background] Processing image via API...');
@@ -239,7 +243,7 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
   const response = await fetch(`${backendUrl}/api/core/solve`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${backendToken}`,
+      'Authorization': `Bearer ${config.token}`,
     },
     body: formData,
   });

@@ -7,15 +7,9 @@ import {
   waitForSelector,
   clickWithVerification,
   sleep,
-  Product
-
+  Product,
 } from '@src/lib';
-import type {
-  Matcher,
-  ExecutionContext,
-  ExecutionResult,
-  OffersSelectors
-} from '@src/types';
+import type { Matcher, ExecutionContext, ExecutionResult, OffersSelectors } from '@src/types';
 
 /**
  * Offers Matcher - Detects offer pages and triggers offer processing
@@ -28,15 +22,15 @@ class OffersMatcher implements Matcher {
 
   urlPatterns = [
     'https://auktion.hansemerkur.de/browse/search/*',
-    'https://auktion.hansemerkur.de/karte_sofortkauf.html'
+    'https://auktion.hansemerkur.de/karte_sofortkauf.html',
   ];
 
   domPreconditions = [
     {
       selector: 'body',
       shouldExist: true,
-      timeout: 5000
-    }
+      timeout: 5000,
+    },
   ];
 
   async run(): Promise<void> {
@@ -73,7 +67,6 @@ class OffersMatcher implements Matcher {
         log.push('Browse offers page detected');
         await this.handleBrowseOffers(config, log);
       }
-
     } catch (error) {
       log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
       console.error('[OffersMatcher] Error:', error);
@@ -86,9 +79,12 @@ class OffersMatcher implements Matcher {
       const randomMinutes = Math.floor(Math.random() * 30) + 20; // 20-50 minutes
       log.push(`Email mode: Will refresh in ${randomMinutes} minutes`).write();
 
-      setTimeout(() => {
-        window.location.reload();
-      }, randomMinutes * 60 * 1000);
+      setTimeout(
+        () => {
+          window.location.reload();
+        },
+        randomMinutes * 60 * 1000,
+      );
 
       return;
     }
@@ -100,8 +96,8 @@ class OffersMatcher implements Matcher {
         offerPopup: '.leaflet-popup-content a',
         browseList: '',
         buyButton: '',
-        titleLink: ''
-      }
+        titleLink: '',
+      },
     });
 
     if (response.success) {
@@ -122,8 +118,8 @@ class OffersMatcher implements Matcher {
         offerPopup: '',
         browseList: 'div.browse_list .row',
         buyButton: '.buy_now a.btn',
-        titleLink: '.title a'
-      }
+        titleLink: '.title a',
+      },
     });
 
     if (response.success) {
@@ -183,11 +179,10 @@ checkAndRun();
 
 // Monitor for dynamic content changes (for map offers)
 if (window.location.href.includes('karte_sofortkauf.html')) {
-  const observer = new MutationObserver((mutationList) => {
+  const observer = new MutationObserver(mutationList => {
     // Look for map tiles being loaded
-    const hasMapTiles = mutationList.some(m =>
-      m.target.nodeName === 'IMG' &&
-      (m.target as HTMLElement).className === 'leaflet-tile leaflet-tile-loaded'
+    const hasMapTiles = mutationList.some(
+      m => m.target.nodeName === 'IMG' && (m.target as HTMLElement).className === 'leaflet-tile leaflet-tile-loaded',
     );
 
     if (hasMapTiles) {
@@ -199,7 +194,7 @@ if (window.location.href.includes('karte_sofortkauf.html')) {
   observer.observe(document.body, {
     attributes: true,
     childList: true,
-    subtree: true
+    subtree: true,
   });
 }
 
@@ -210,7 +205,7 @@ export default offersMatcher;
  */
 export async function executeOffersWorkflow(
   context: ExecutionContext,
-  selectors: OffersSelectors
+  selectors: OffersSelectors,
 ): Promise<ExecutionResult> {
   const log = new Log('offers-executor');
   const startTime = Date.now();
@@ -224,7 +219,7 @@ export async function executeOffersWorkflow(
     // Check if this is a managed tab
     const isManagedResponse = await sendBackgroundCommand('tab.manage', {
       action: 'isManaged',
-      tabId: context.tabId
+      tabId: context.tabId,
     });
 
     if (!isManagedResponse.data) {
@@ -233,7 +228,7 @@ export async function executeOffersWorkflow(
         success: false,
         matcherId: context.matcherId,
         executorName: 'offers',
-        error: 'Tab is not managed'
+        error: 'Tab is not managed',
       };
     }
 
@@ -281,7 +276,7 @@ export async function executeOffersWorkflow(
                 // Open in new managed tab
                 await sendBackgroundCommand('tab.manage', {
                   action: 'open',
-                  url: popupLink.href
+                  url: popupLink.href,
                 });
               } else {
                 log.push('Dry run: Would open offer in new tab');
@@ -294,7 +289,6 @@ export async function executeOffersWorkflow(
             errors.push(error as Error);
           }
         }
-
       } catch (error) {
         log.push(`Error in map offers processing: ${error}`);
         errors.push(error as Error);
@@ -350,7 +344,7 @@ export async function executeOffersWorkflow(
           if (!context.dryRun) {
             await sendBackgroundCommand('tab.manage', {
               action: 'open',
-              url: buyButton.href
+              url: buyButton.href,
             });
           } else {
             log.push('Dry run: Would open offer in new tab');
@@ -364,10 +358,9 @@ export async function executeOffersWorkflow(
           log.push('Closing current tab after processing offers');
           await sendBackgroundCommand('tab.manage', {
             action: 'close',
-            tabId: context.tabId
+            tabId: context.tabId,
           });
         }
-
       } catch (error) {
         log.push(`Error in browse offers processing: ${error}`);
         errors.push(error as Error);
@@ -383,17 +376,16 @@ export async function executeOffersWorkflow(
       data: {
         processedCount,
         openedOffers,
-        pageType: currentUrl.includes('karte_sofortkauf.html') ? 'map' : 'browse'
+        pageType: currentUrl.includes('karte_sofortkauf.html') ? 'map' : 'browse',
       },
       telemetry: {
         startTime,
         endTime: Date.now(),
         domOperations: processedCount * 2, // Click and open
         networkRequests: processedCount,
-        errors
-      }
+        errors,
+      },
     };
-
   } catch (error) {
     log.push(`Fatal error: ${error}`).write();
     console.error('[OffersExecutor] Fatal error:', error);
@@ -408,8 +400,8 @@ export async function executeOffersWorkflow(
         endTime: Date.now(),
         domOperations: processedCount * 2,
         networkRequests: processedCount,
-        errors: [...errors, error as Error]
-      }
+        errors: [...errors, error as Error],
+      },
     };
   }
 }

@@ -10,7 +10,7 @@ import type {
   TelemetryEvent,
   LogEntry,
   LocalDate as LocalDateType,
-  Product as ProductInterface
+  Product as ProductInterface,
 } from '@extension/types';
 
 // LocalDate utility class
@@ -57,7 +57,7 @@ export class Log {
     const entry: LogEntry = {
       type: this.type,
       messages: this.messages,
-      timestamp: new LocalDate().toString()
+      timestamp: new LocalDate().toString(),
     };
 
     const logMessage = `${entry.timestamp} [${entry.type}] ${entry.messages.join(' | ')}`;
@@ -65,7 +65,7 @@ export class Log {
 
     await chrome.runtime.sendMessage({
       action: 'log',
-      text: `[${entry.type}] ${entry.messages.join(' | ')}`
+      text: `[${entry.type}] ${entry.messages.join(' | ')}`,
     });
   }
 }
@@ -90,7 +90,7 @@ export function getActiveMatchers(): Matcher[] {
 // Background communication
 export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
   command: T,
-  payload: BackgroundCommands[T]
+  payload: BackgroundCommands[T],
 ): Promise<CommandResponse<T>> {
   const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
@@ -99,7 +99,7 @@ export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
       type: command,
       payload,
       timestamp: Date.now(),
-      requestId
+      requestId,
     });
 
     return response as CommandResponse<T>;
@@ -108,7 +108,7 @@ export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId
+      requestId,
     };
   }
 }
@@ -117,12 +117,12 @@ export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
 export async function injectExecutor(
   tabId: number,
   executorName: string,
-  context: ExecutionContext
+  context: ExecutionContext,
 ): Promise<ExecutionResult> {
   try {
     const response = await sendBackgroundCommand('executor.run', {
       executorName,
-      context
+      context,
     });
 
     if (!response.success) {
@@ -136,16 +136,13 @@ export async function injectExecutor(
       success: false,
       matcherId: context.matcherId,
       executorName,
-      error: error instanceof Error ? error.message : 'Unknown error'
+      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
 
 // DOM utilities
-export async function waitForSelector(
-  selector: string,
-  options: WaitOptions = {}
-): Promise<Element> {
+export async function waitForSelector(selector: string, options: WaitOptions = {}): Promise<Element> {
   const { timeout = 10000, interval = 100, visible = false } = options;
   const startTime = Date.now();
 
@@ -172,10 +169,7 @@ export async function waitForSelector(
   });
 }
 
-export async function clickWithVerification(
-  element: Element,
-  options: ClickOptions = {}
-): Promise<boolean> {
+export async function clickWithVerification(element: Element, options: ClickOptions = {}): Promise<boolean> {
   const { delay = 0, verify = true, scroll = true } = options;
 
   try {
@@ -215,7 +209,7 @@ export async function safeNavigate(url: string): Promise<void> {
   try {
     await sendBackgroundCommand('tab.manage', {
       action: 'open',
-      url
+      url,
     });
   } catch (error) {
     console.error('[Extension] Error navigating to URL:', error);
@@ -240,7 +234,7 @@ export function logEvent(event: TelemetryEvent): void {
         try {
           await chrome.runtime.sendMessage({
             action: 'telemetry',
-            events
+            events,
           });
         } catch (error) {
           console.error('[Extension] Error sending telemetry:', error);
@@ -259,9 +253,9 @@ export function trackError(error: Error, context?: any): void {
     metadata: {
       message: error.message,
       stack: error.stack,
-      context
+      context,
     },
-    timestamp: Date.now()
+    timestamp: Date.now(),
   });
 }
 
@@ -310,7 +304,6 @@ export async function assertValidTimeOfDay(config: any): Promise<void> {
     await sleep(60000); // Wait 1 minute
   }
 }
-
 
 // Product utility class for parsing and validating products
 export class Product implements ProductInterface {
@@ -444,7 +437,7 @@ export function openAllSimulationLinks(): void {
     // Collect all valid hrefs
     const hrefs: string[] = [];
 
-    links.forEach((link) => {
+    links.forEach(link => {
       if (link instanceof HTMLAnchorElement) {
         const href = link.href;
 
@@ -490,9 +483,12 @@ export function openAllSimulationLinks(): void {
     });
 
     // Log completion after all tabs should be opened
-    setTimeout(() => {
-      console.log('[CEB] Finished opening all simulation links');
-    }, hrefs.length * 150 + 500);
+    setTimeout(
+      () => {
+        console.log('[CEB] Finished opening all simulation links');
+      },
+      hrefs.length * 150 + 500,
+    );
   };
 
   // Wait for DOM to be ready
@@ -538,7 +534,7 @@ export async function processImage(): Promise<void> {
     // Send message to background script to process the image
     // This bypasses CORS completely as the background script makes the API call
     const response = await sendBackgroundCommand('image.solve', {
-      imageData: imageDataUrl
+      imageData: imageDataUrl,
     });
 
     if (!response.success) {
@@ -571,7 +567,6 @@ export async function processImage(): Promise<void> {
     }
 
     console.log('[CEB] Image processing completed successfully');
-
   } catch (error) {
     console.error('[CEB] Error processing image:', error);
 
@@ -581,7 +576,6 @@ export async function processImage(): Promise<void> {
       resultDiv.className = 'result error show';
       resultDiv.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
-
   }
 }
 
@@ -664,9 +658,10 @@ function extractNumericAnswer(result: string): string {
   // The correct answer format follows the pattern in the HTML files
 
   // Remove any markdown or formatting
-  let cleanResult = result.replace(/```[\s\S]*?```/g, '')  // Remove code blocks
-                          .replace(/[*_~`]/g, '')          // Remove markdown formatting
-                          .trim();
+  let cleanResult = result
+    .replace(/```[\s\S]*?```/g, '') // Remove code blocks
+    .replace(/[*_~`]/g, '') // Remove markdown formatting
+    .trim();
 
   // Try to extract numbers that match the expected format
   // Look for patterns like "answer is X", "= X", "result: X", etc.

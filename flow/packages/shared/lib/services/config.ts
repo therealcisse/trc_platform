@@ -1,9 +1,10 @@
-import type { ExtensionStorage } from '@extension/types';
+import type { ExtensionStorage } from '../app/types.js';
 
 /**
  * Default configuration for the extension
  */
-const DEFAULT_CONFIG: ExtensionStorage['config'] = {
+export const DEFAULT_CONFIG: ExtensionStorage['config'] = {
+  token: '', // API token
   operationalHours: {
     0: { enabled: false, min: 0, max: 0 }, // Sunday
     1: { enabled: true, min: 8, max: 17 }, // Monday
@@ -11,7 +12,7 @@ const DEFAULT_CONFIG: ExtensionStorage['config'] = {
     3: { enabled: true, min: 8, max: 17 }, // Wednesday
     4: { enabled: true, min: 8, max: 17 }, // Thursday
     5: { enabled: true, min: 8, max: 17 }, // Friday
-    6: { enabled: false, min: 0, max: 0 }  // Saturday
+    6: { enabled: false, min: 0, max: 0 }, // Saturday
   },
   emailMode: true,
   emailRefreshMin: 30,
@@ -19,7 +20,7 @@ const DEFAULT_CONFIG: ExtensionStorage['config'] = {
   timerMode: false,
   randomDelay: {
     min: 5,
-    max: 30
+    max: 30,
   },
   // Product strategies
   animals: true, // Enable animal insurance products
@@ -32,7 +33,7 @@ const DEFAULT_CONFIG: ExtensionStorage['config'] = {
 
   people: true, // Enable people insurance products
   peopleTimerMin: 20, // Minimum delay in seconds for people products
-  peopleTimerMax: 60 // Maximum delay in seconds for people products
+  peopleTimerMax: 60, // Maximum delay in seconds for people products
 };
 
 /**
@@ -51,7 +52,7 @@ export class ConfigService {
       if (!storage.config) {
         await chrome.storage.sync.set({
           config: DEFAULT_CONFIG,
-          enabled: true
+          enabled: true,
         });
 
         console.log('[Config] Initialized default configuration');
@@ -76,7 +77,7 @@ export class ConfigService {
   static async updateConfig(updates: Partial<ExtensionStorage['config']>): Promise<void> {
     const currentConfig = await this.getConfig();
     await chrome.storage.sync.set({
-      config: { ...currentConfig, ...updates }
+      config: { ...currentConfig, ...updates },
     });
   }
 
@@ -95,4 +96,3 @@ export class ConfigService {
     await chrome.storage.sync.set({ enabled });
   }
 }
-

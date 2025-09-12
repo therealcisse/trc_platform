@@ -5,15 +5,10 @@ import {
   sendBackgroundCommand,
   Log,
   sleep,
-  Product
-
+  Product,
 } from '@src/lib';
 import type { Matcher } from '@src/types';
-import type {
-  ExecutionContext,
-  ExecutionResult,
-  BuyOfferSelectors
-} from '@src/types';
+import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@src/types';
 
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
@@ -24,21 +19,19 @@ class BuyOfferMatcher implements Matcher {
   enabled = true;
   priority = 20; // Higher priority than email/offers
 
-  urlPatterns = [
-    'https://auktion.hansemerkur.de/buy_now/id/*'
-  ];
+  urlPatterns = ['https://auktion.hansemerkur.de/buy_now/id/*'];
 
   domPreconditions = [
     {
       selector: '#page_buy_now h2',
       shouldExist: true,
-      timeout: 5000
+      timeout: 5000,
     },
     {
       selector: '#buyFormBtn',
       shouldExist: true,
-      timeout: 5000
-    }
+      timeout: 5000,
+    },
   ];
 
   async run(): Promise<void> {
@@ -82,7 +75,7 @@ class BuyOfferMatcher implements Matcher {
       // Check if this product is already being purchased
       const buyingStateResponse = await sendBackgroundCommand('state.buying', {
         action: 'check',
-        key: product.text
+        key: product.text,
       });
 
       if (buyingStateResponse.data?.buying) {
@@ -91,7 +84,7 @@ class BuyOfferMatcher implements Matcher {
         // Close duplicate tab
         await sendBackgroundCommand('tab.manage', {
           action: 'close',
-          tabId: window.tabId
+          tabId: window.tabId,
         });
 
         return;
@@ -117,7 +110,7 @@ class BuyOfferMatcher implements Matcher {
         action: 'mark',
         key: product.text,
         id: randomId,
-        timeout
+        timeout,
       });
 
       log.push(`Starting purchase process (ID: ${randomId}, delay: ${delaySeconds}s)`);
@@ -128,8 +121,8 @@ class BuyOfferMatcher implements Matcher {
         delay: delaySeconds,
         selectors: {
           productTitle: '#page_buy_now h2',
-          buyFormButton: '#buyFormBtn'
-        }
+          buyFormButton: '#buyFormBtn',
+        },
       });
 
       if (response.success) {
@@ -140,10 +133,9 @@ class BuyOfferMatcher implements Matcher {
         // Clear buying state on failure
         await sendBackgroundCommand('state.buying', {
           action: 'clear',
-          key: product.text
+          key: product.text,
         });
       }
-
     } catch (error) {
       log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
       console.error('[BuyOfferMatcher] Error:', error);
@@ -187,7 +179,7 @@ export default buyOfferMatcher;
  */
 export async function executeBuyOfferWorkflow(
   context: ExecutionContext,
-  selectors: BuyOfferSelectors
+  selectors: BuyOfferSelectors,
 ): Promise<ExecutionResult> {
   const log = new Log('buy-offer-executor');
   const startTime = Date.now();
@@ -199,7 +191,7 @@ export async function executeBuyOfferWorkflow(
     // Get product title for validation
     const titleElement = await waitForSelector(selectors.productTitle, {
       timeout: 5000,
-      visible: true
+      visible: true,
     });
 
     const productText = titleElement.textContent || '';
@@ -214,7 +206,7 @@ export async function executeBuyOfferWorkflow(
     // Get buy button
     const buyButton = await waitForSelector(selectors.buyFormButton, {
       timeout: 5000,
-      visible: true
+      visible: true,
     });
 
     if (!buyButton) {
@@ -224,25 +216,24 @@ export async function executeBuyOfferWorkflow(
     // Check buying state again (prevent race conditions)
     const buyingStateResponse = await sendBackgroundCommand('state.buying', {
       action: 'check',
-      key: product.text
+      key: product.text,
     });
 
     // Handle if another tab started buying this product
-    if (buyingStateResponse.data?.buying &&
-        buyingStateResponse.data.id !== context.productId) {
+    if (buyingStateResponse.data?.buying && buyingStateResponse.data.id !== context.productId) {
       log.push(`Another tab is buying this product (ID: ${buyingStateResponse.data.id})`);
 
       // Close this tab
       await sendBackgroundCommand('tab.manage', {
         action: 'close',
-        tabId: context.tabId
+        tabId: context.tabId,
       });
 
       return {
         success: false,
         matcherId: context.matcherId,
         executorName: 'buyOffer',
-        error: 'Duplicate purchase attempt'
+        error: 'Duplicate purchase attempt',
       };
     }
 
@@ -268,7 +259,7 @@ export async function executeBuyOfferWorkflow(
       await clickWithVerification(buyButton, {
         delay: 200,
         verify: true,
-        scroll: true
+        scroll: true,
       });
 
       // Wait for form submission
@@ -286,17 +277,16 @@ export async function executeBuyOfferWorkflow(
       data: {
         productId: context.productId,
         product: product.toString(),
-        appliedDelay: delay
+        appliedDelay: delay,
       },
       telemetry: {
         startTime,
         endTime: Date.now(),
         domOperations: 2, // Title check and buy click
         networkRequests: 2, // State check and buy submit
-        errors
-      }
+        errors,
+      },
     };
-
   } catch (error) {
     log.push(`Fatal error: ${error}`).write();
     console.error('[BuyOfferExecutor] Fatal error:', error);
@@ -309,7 +299,7 @@ export async function executeBuyOfferWorkflow(
         if (product.valid) {
           await sendBackgroundCommand('state.buying', {
             action: 'clear',
-            key: product.text
+            key: product.text,
           });
         }
       }
@@ -327,8 +317,8 @@ export async function executeBuyOfferWorkflow(
         endTime: Date.now(),
         domOperations: 1,
         networkRequests: 1,
-        errors: [...errors, error as Error]
-      }
+        errors: [...errors, error as Error],
+      },
     };
   }
 }

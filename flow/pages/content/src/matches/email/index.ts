@@ -1,20 +1,15 @@
 import {
-    registerMatcher,
-    sendBackgroundCommand,
-    Log,
+  registerMatcher,
+  sendBackgroundCommand,
+  Log,
   waitForSelector,
   clickWithVerification,
   safeNavigate,
   random,
   sleep,
-
 } from '@src/lib';
 import type { Matcher } from '@src/types';
-import type {
-  ExecutionContext,
-  ExecutionResult,
-  EmailSelectors
-} from '@src/types';
+import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@src/types';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing
@@ -25,17 +20,14 @@ class EmailMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = [
-    'https://outlook.office.com/mail/*',
-    'https://outlook.office.com.mcas.ms/mail/*'
-  ];
+  urlPatterns = ['https://outlook.office.com/mail/*', 'https://outlook.office.com.mcas.ms/mail/*'];
 
   domPreconditions = [
     {
       selector: '[aria-label*="HanseMerkur"]',
       shouldExist: true,
-      timeout: 5000
-    }
+      timeout: 5000,
+    },
   ];
 
   async run(): Promise<void> {
@@ -64,8 +56,8 @@ class EmailMatcher implements Matcher {
         selectors: {
           unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
           emailBody: '#x_body a',
-          markAsReadButton: 'span'
-        }
+          markAsReadButton: 'span',
+        },
       });
 
       if (response.success) {
@@ -73,7 +65,6 @@ class EmailMatcher implements Matcher {
       } else {
         log.push(`Email executor failed: ${response.error}`).write();
       }
-
     } catch (error) {
       log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
       console.error('[EmailMatcher] Error:', error);
@@ -127,7 +118,7 @@ export default emailMatcher;
  */
 export async function executeEmailWorkflow(
   context: ExecutionContext,
-  selectors: EmailSelectors
+  selectors: EmailSelectors,
 ): Promise<ExecutionResult> {
   const log = new Log('email-executor');
   const startTime = Date.now();
@@ -194,7 +185,7 @@ export async function executeEmailWorkflow(
             // Find link in email body
             const linkElement = await waitForSelector(selectors.emailBody, {
               timeout: 3000,
-              visible: true
+              visible: true,
             });
 
             if (linkElement instanceof HTMLAnchorElement) {
@@ -213,7 +204,7 @@ export async function executeEmailWorkflow(
                   // Open link in new managed tab
                   await sendBackgroundCommand('tab.manage', {
                     action: 'open',
-                    url: href
+                    url: href,
                   });
                 } else {
                   log.push('Dry run: Would open link in new tab');
@@ -232,7 +223,6 @@ export async function executeEmailWorkflow(
           // Small delay between emails
           await sleep(500);
         }
-
       } catch (error) {
         log.push(`Error in email processing: ${error}`);
         errors.push(error as Error);
@@ -244,9 +234,7 @@ export async function executeEmailWorkflow(
       try {
         // Find the mark as read button (contains specific text)
         const buttons = Array.from(document.querySelectorAll(selector));
-        const markAsReadBtn = buttons.find(btn =>
-          btn.textContent?.includes('Gelesen/Ungelesen')
-        );
+        const markAsReadBtn = buttons.find(btn => btn.textContent?.includes('Gelesen/Ungelesen'));
 
         if (markAsReadBtn instanceof HTMLElement) {
           if (!context.dryRun) {
@@ -271,17 +259,16 @@ export async function executeEmailWorkflow(
       data: {
         processedCount,
         visitedUrls: Object.keys(visitedUrls),
-        refreshSeconds: randomRefreshSeconds
+        refreshSeconds: randomRefreshSeconds,
       },
       telemetry: {
         startTime,
         endTime: Date.now(),
         domOperations: processedCount * 3, // Open, read link, mark as read
         networkRequests: processedCount,
-        errors
-      }
+        errors,
+      },
     };
-
   } catch (error) {
     log.push(`Fatal error: ${error}`).write();
     console.error('[EmailExecutor] Fatal error:', error);
@@ -296,8 +283,8 @@ export async function executeEmailWorkflow(
         endTime: Date.now(),
         domOperations: processedCount * 3,
         networkRequests: processedCount,
-        errors: [...errors, error as Error]
-      }
+        errors: [...errors, error as Error],
+      },
     };
   }
 }

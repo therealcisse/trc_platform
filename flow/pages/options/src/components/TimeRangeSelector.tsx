@@ -34,7 +34,7 @@ const TimeRangeSelector: FC<TimeRangeSelectorProps> = ({ value, onChange, classN
           type="checkbox"
           checked={enabled}
           onChange={handleToggle}
-          className="form-checkbox h-5 w-5 text-primary-600 rounded border-gray-300 focus:ring-primary-500"
+          className="form-checkbox text-primary-600 focus:ring-primary-500 h-5 w-5 rounded border-gray-300"
         />
         <span className="ml-2">Enabled</span>
       </label>
@@ -44,9 +44,8 @@ const TimeRangeSelector: FC<TimeRangeSelectorProps> = ({ value, onChange, classN
           value={min}
           onChange={handleMinChange}
           disabled={!enabled}
-          className="form-select rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:bg-gray-100"
-        >
-          {hours.map((hour) => (
+          className="form-select focus:border-primary-500 focus:ring-primary-500 rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:outline-none disabled:bg-gray-100">
+          {hours.map(hour => (
             <option key={hour} value={hour}>
               {hour.toString().padStart(2, '0')}:00
             </option>
@@ -59,9 +58,8 @@ const TimeRangeSelector: FC<TimeRangeSelectorProps> = ({ value, onChange, classN
           value={max}
           onChange={handleMaxChange}
           disabled={!enabled}
-          className="form-select rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:border-primary-500 focus:outline-none focus:ring-primary-500 disabled:bg-gray-100"
-        >
-          {hours.map((hour) => (
+          className="form-select focus:border-primary-500 focus:ring-primary-500 rounded-md border-gray-300 py-2 pl-3 pr-10 text-base focus:outline-none disabled:bg-gray-100">
+          {hours.map(hour => (
             <option key={hour} value={hour}>
               {hour.toString().padStart(2, '0')}:00
             </option>

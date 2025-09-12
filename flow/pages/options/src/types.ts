@@ -1,4 +1,4 @@
-import type { ExtensionStorage } from '@extension/types';
+import type { ExtensionStorage } from '@extension/shared';
 
 export type DayConfig = {
   enabled: boolean;
@@ -14,16 +14,8 @@ export type OptionsFormData = ExtensionStorage['config'] & {
   enabled: boolean;
 };
 
-export const DAYS_OF_WEEK = [
-  'Sunday',
-  'Monday',
-  'Tuesday',
-  'Wednesday',
-  'Thursday',
-  'Friday',
-  'Saturday',
-] as const;
+export const DAYS_OF_WEEK = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
-export type DayOfWeek = typeof DAYS_OF_WEEK[number];
+export type DayOfWeek = (typeof DAYS_OF_WEEK)[number];
 
 export const DEFAULT_TIMEZONE = Intl.DateTimeFormat().resolvedOptions().timeZone;

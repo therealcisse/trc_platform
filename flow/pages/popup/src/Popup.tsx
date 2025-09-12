@@ -1,61 +1,66 @@
 import '@src/Popup.css';
-import { t } from '@extension/i18n';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { exampleThemeStorage } from '@extension/storage';
-import { cn, ErrorDisplay, LoadingSpinner, ToggleButton } from '@extension/ui';
+import { useState, useEffect } from 'react';
+import { withErrorBoundary, withSuspense, ConfigService } from '@extension/shared';
+import { cn, ErrorDisplay, LoadingSpinner } from '@extension/ui';
 
-const notificationOptions = {
-  type: 'basic',
-  iconUrl: chrome.runtime.getURL('icon-34.png'),
-  title: 'Injecting content script error',
-  message: 'You cannot inject script here!',
-} as const;
+const PowerIcon = ({ className }: { className?: string }) => (
+  <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="currentColor" className={className}>
+    <path
+      fillRule="evenodd"
+      d="M12 2.25a.75.75 0 01.75.75v9a.75.75 0 01-1.5 0V3a.75.75 0 01.75-.75zM6.166 5.106a.75.75 0 010 1.06 8.25 8.25 0 1011.668 0 .75.75 0 111.06-1.06c3.808 3.807 3.808 9.98 0 13.788-3.807 3.808-9.98 3.808-13.788 0-3.808-3.807-3.808-9.98 0-13.788a.75.75 0 011.06 0z"
+      clipRule="evenodd"
+    />
+  </svg>
+);
 
 const Popup = () => {
-  const { isLight } = useStorage(exampleThemeStorage);
-  const logo = isLight ? 'popup/logo_vertical.svg' : 'popup/logo_vertical_dark.svg';
+  const [enabled, setEnabled] = useState(true);
+  const [loading, setLoading] = useState(true);
 
-  const goGithubSite = () => chrome.tabs.create(PROJECT_URL_OBJECT);
+  useEffect(() => {
+    const loadState = async () => {
+      try {
+        const isEnabled = await ConfigService.isEnabled();
+        setEnabled(isEnabled);
+      } catch (error) {
+        console.error('Error loading extension state:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
 
-  const injectContentScript = async () => {
-    const [tab] = await chrome.tabs.query({ currentWindow: true, active: true });
+    loadState();
+  }, []);
 
-    if (tab.url!.startsWith('about:') || tab.url!.startsWith('chrome:')) {
-      chrome.notifications.create('inject-error', notificationOptions);
+  const toggleEnabled = async () => {
+    try {
+      await ConfigService.setEnabled(!enabled);
+      setEnabled(!enabled);
+    } catch (error) {
+      console.error('Error toggling extension state:', error);
     }
-
-    await chrome.scripting
-      .executeScript({
-        target: { tabId: tab.id! },
-        files: ['/content-runtime/example.iife.js', '/content-runtime/all.iife.js'],
-      })
-      .catch(err => {
-        // Handling errors related to other paths
-        if (err.message.includes('Cannot access a chrome:// URL')) {
-          chrome.notifications.create('inject-error', notificationOptions);
-        }
-      });
   };
 
+  if (loading) {
+    return (
+      <div className="App flex items-center justify-center bg-white">
+        <LoadingSpinner />
+      </div>
+    );
+  }
+
   return (
-    <div className={cn('App', isLight ? 'bg-slate-50' : 'bg-gray-800')}>
-      <header className={cn('App-header', isLight ? 'text-gray-900' : 'text-gray-100')}>
-        <button onClick={goGithubSite}>
-          <img src={chrome.runtime.getURL(logo)} className="App-logo" alt="logo" />
-        </button>
-        <p>
-          Edit <code>pages/popup/src/Popup.tsx</code>
-        </p>
+    <div className="App bg-white">
+      <div className="App-content">
+        <h1 className="Title text-gray-900">TRC Platform Extension</h1>
+
         <button
-          className={cn(
-            'mt-4 rounded px-4 py-1 font-bold shadow hover:scale-105',
-            isLight ? 'bg-blue-200 text-black' : 'bg-gray-700 text-white',
-          )}
-          onClick={injectContentScript}>
-          {t('injectButton')}
+          onClick={toggleEnabled}
+          className={cn('PowerButton', enabled ? 'bg-green-500 text-white' : 'bg-red-500 text-white')}
+          title={enabled ? 'Click to disable' : 'Click to enable'}>
+          <PowerIcon />
         </button>
-        <ToggleButton>{t('toggleTheme')}</ToggleButton>
-      </header>
+      </div>
     </div>
   );
 };

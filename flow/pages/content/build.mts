@@ -9,34 +9,33 @@ const srcDir = resolve(rootDir, 'src');
 const matchesDir = resolve(srcDir, 'matches');
 
 const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, entry]) => {
-    console.log('Building $name')
+  console.log('Building $name');
 
-    return withPageConfig({
-        mode: IS_DEV ? 'development' : undefined,
-        resolve: {
-            alias: {
-                '@src': srcDir,
-            },
-        },
-        publicDir: resolve(rootDir, 'public'),
-        plugins: [IS_DEV && makeEntryPointPlugin()],
-        build: {
-            lib: {
-                name: name,
-                formats: ['iife'],
-                entry,
-                fileName: name,
-            },
-            outDir: resolve(rootDir, '..', '..', 'dist', 'content'),
-        },
-    })
-  },
-);
+  return withPageConfig({
+    mode: IS_DEV ? 'development' : undefined,
+    resolve: {
+      alias: {
+        '@src': srcDir,
+      },
+    },
+    publicDir: resolve(rootDir, 'public'),
+    plugins: [IS_DEV && makeEntryPointPlugin()],
+    build: {
+      lib: {
+        name: name,
+        formats: ['iife'],
+        entry,
+        fileName: name,
+      },
+      outDir: resolve(rootDir, '..', '..', 'dist', 'content'),
+    },
+  });
+});
 
 const builds = configs.map(async config => {
-    //@ts-expect-error This is hidden property into vite's resolveConfig()
-    config.configFile = false;
-    await build(config);
+  //@ts-expect-error This is hidden property into vite's resolveConfig()
+  config.configFile = false;
+  await build(config);
 });
 
 await Promise.all(builds);

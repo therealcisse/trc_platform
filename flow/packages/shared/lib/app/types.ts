@@ -28,6 +28,9 @@ export interface ExecutionContext {
 }
 
 export interface ExecutionConfig {
+  // API Authentication
+  token?: string;
+
   operationalHours?: OperationalHours;
   emailMode?: boolean;
   emailRefreshMin?: number;
