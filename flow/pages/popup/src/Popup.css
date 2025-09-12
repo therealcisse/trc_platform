@@ -1,13 +1,18 @@
 .App {
   width: 320px;
+  height: 200px;
   padding: 1rem;
+  display: flex;
+  flex-direction: column;
 }
 
 .App-content {
   display: flex;
   flex-direction: column;
   align-items: center;
+  justify-content: center;
   gap: 1.5rem;
+  flex: 1;
 }
 
 .Title {

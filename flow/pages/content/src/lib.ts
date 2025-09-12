@@ -11,7 +11,7 @@ import type {
   LogEntry,
   LocalDate as LocalDateType,
   Product as ProductInterface,
-} from '@extension/types';
+} from '@extension/shared/app/types';
 
 // LocalDate utility class
 export class LocalDate implements LocalDateType {

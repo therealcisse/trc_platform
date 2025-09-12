@@ -4,6 +4,7 @@ import type {
   ExecutionContext
 } from '@extension/types';
 import type { MessageHandler } from '../types';
+import { ConfigService } from '@extension/shared';
 
 /**
  * Offers command handler - Manages offers workflow execution
@@ -23,17 +24,18 @@ export const offersCommandHandler: MessageHandler<'offers.clickProductLink'> = a
     const tabId = sender.tab.id;
 
     // Get extension configuration
-    const storage = await chrome.storage.sync.get(['config', 'enabled']);
+    const [config, enabled] = await Promise.all([
+      ConfigService.getConfig(),
+      ConfigService.isEnabled()
+    ]);
 
-    if (!storage.enabled) {
+    if (!enabled) {
       return {
         success: false,
         error: 'Extension is disabled',
         requestId: `offers-${Date.now()}`
       };
     }
-
-    const config = storage.config || {};
 
     // Create execution context
     const context: ExecutionContext = {

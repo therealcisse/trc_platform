@@ -36,6 +36,8 @@ export const DEFAULT_CONFIG: ExtensionStorage['config'] = {
   peopleTimerMax: 60, // Maximum delay in seconds for people products
 };
 
+import { extensionConfigStorage } from '@extension/storage';
+
 /**
  * Config service for managing extension configuration
  */
@@ -46,17 +48,10 @@ export class ConfigService {
   static async init(): Promise<void> {
     try {
       // Get current storage state
-      const storage = await chrome.storage.sync.get(['config', 'enabled']);
+      const storage = await extensionConfigStorage.get();
 
-      // Set defaults if not exists
-      if (!storage.config) {
-        await chrome.storage.sync.set({
-          config: DEFAULT_CONFIG,
-          enabled: true,
-        });
-
-        console.log('[Config] Initialized default configuration');
-      }
+      // Storage is initialized with defaults in extensionConfigStorage
+      console.log('[Config] Configuration checked');
     } catch (error) {
       console.error('[Config] Error initializing configuration:', error);
       throw error;
@@ -67,32 +62,29 @@ export class ConfigService {
    * Get current configuration
    */
   static async getConfig(): Promise<ExtensionStorage['config']> {
-    const storage = await chrome.storage.sync.get(['config']);
-    return storage.config || DEFAULT_CONFIG;
+    const storage = await extensionConfigStorage.get();
+    return storage.config;
   }
 
   /**
    * Update configuration
    */
   static async updateConfig(updates: Partial<ExtensionStorage['config']>): Promise<void> {
-    const currentConfig = await this.getConfig();
-    await chrome.storage.sync.set({
-      config: { ...currentConfig, ...updates },
-    });
+    await extensionConfigStorage.updateConfig(updates);
   }
 
   /**
    * Check if extension is enabled
    */
   static async isEnabled(): Promise<boolean> {
-    const storage = await chrome.storage.sync.get(['enabled']);
-    return storage.enabled ?? true; // Default to enabled
+    const storage = await extensionConfigStorage.get();
+    return storage.enabled;
   }
 
   /**
    * Set extension enabled state
    */
   static async setEnabled(enabled: boolean): Promise<void> {
-    await chrome.storage.sync.set({ enabled });
+    await extensionConfigStorage.toggleEnabled();
   }
 }

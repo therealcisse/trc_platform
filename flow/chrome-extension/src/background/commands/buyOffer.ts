@@ -4,6 +4,7 @@ import type {
   ExecutionContext
 } from '@extension/types';
 import type { MessageHandler } from '../types';
+import { ConfigService } from '@extension/shared';
 
 /**
  * Buy Offer command handler - Manages purchase workflow execution
@@ -23,17 +24,18 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
     const tabId = sender.tab.id;
 
     // Get extension configuration
-    const storage = await chrome.storage.sync.get(['config', 'enabled']);
+    const [config, enabled] = await Promise.all([
+      ConfigService.getConfig(),
+      ConfigService.isEnabled()
+    ]);
 
-    if (!storage.enabled) {
+    if (!enabled) {
       return {
         success: false,
         error: 'Extension is disabled',
         requestId: `buyOffer-${Date.now()}`
       };
     }
-
-    const config = storage.config || {};
 
     // Create execution context
     const context: ExecutionContext = {

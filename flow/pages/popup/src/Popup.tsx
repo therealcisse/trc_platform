@@ -52,7 +52,7 @@ const Popup = () => {
   return (
     <div className="App bg-white">
       <div className="App-content">
-        <h1 className="Title text-gray-900">TRC Platform Extension</h1>
+        {/* <h1 className="Title text-gray-900">TRC Platform Extension</h1> */}
 
         <button
           onClick={toggleEnabled}
