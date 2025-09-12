@@ -37,10 +37,10 @@ const manifest = {
     service_worker: 'background.js',
     type: 'module',
   },
-  action: {
-    default_popup: 'popup/index.html',
-    default_icon: 'icon-34.png',
-  },
+  // action: {
+  //   default_popup: 'popup/index.html',
+  //   default_icon: 'icon-34.png',
+  // },
   // chrome_url_overrides: {
   //   newtab: 'new-tab/index.html',
   // },
@@ -49,12 +49,24 @@ const manifest = {
   },
   content_scripts: [
     {
-      matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-      js: ['content/all.iife.js'],
+      matches: ['https://outlook.office.com/mail/*', 'https://outlook.office.com.mcas.ms/mail/*'],
+      js: ['content/email.iife.js'],
+      run_at: 'document_end'
     },
     {
-      matches: ['https://example.com/*'],
-      js: ['content/example.iife.js'],
+      matches: ['https://auktion.hansemerkur.de/karte_sofortkauf.html', 'https://auktion.hansemerkur.de/browse/search/*'],
+      js: ['content/offers.iife.js'],
+      run_at: 'document_end'
+    },
+    {
+      matches: ['https://auktion.hansemerkur.de/buy_now/id/*'],
+      js: ['content/buyOffer.iife.js'],
+      run_at: 'document_end'
+    },
+    {
+      matches: ['http://localhost:8082/pages/*'],
+      js: ['content/solver.iife.js'],
+      run_at: 'document_end'
     },
     // {
     //   matches: ['http://localhost:8082/'],

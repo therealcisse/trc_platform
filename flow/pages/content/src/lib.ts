@@ -1,3 +1,427 @@
+import type {
+  Matcher,
+  BackgroundCommands,
+  CommandResponse,
+  ExecutionContext,
+  ExecutionResult,
+  ExecutionConfig,
+  WaitOptions,
+  ClickOptions,
+  TelemetryEvent,
+  LogEntry,
+  LocalDate as LocalDateType,
+  Product as ProductInterface
+} from '@extension/types';
+
+// LocalDate utility class
+export class LocalDate implements LocalDateType {
+  private localDate: Date;
+
+  constructor() {
+    const d = new Date();
+    this.localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60 * 1000);
+  }
+
+  toString(): string {
+    return this.localDate.toISOString().split('Z')[0];
+  }
+
+  getHours(): number {
+    return this.localDate.getHours();
+  }
+
+  getMinutes(): number {
+    return this.localDate.getMinutes();
+  }
+
+  getDay(): number {
+    return this.localDate.getDay();
+  }
+}
+
+// Logging utility
+export class Log {
+  private type: string;
+  private messages: string[] = [];
+
+  constructor(type: string) {
+    this.type = type;
+  }
+
+  push(message: string): this {
+    this.messages.push(message);
+    return this;
+  }
+
+  async write(): Promise<void> {
+    const entry: LogEntry = {
+      type: this.type,
+      messages: this.messages,
+      timestamp: new LocalDate().toString()
+    };
+
+    const logMessage = `${entry.timestamp} [${entry.type}] ${entry.messages.join(' | ')}`;
+    console.log(`[Extension] ${logMessage}`);
+
+    await chrome.runtime.sendMessage({
+      action: 'log',
+      text: `[${entry.type}] ${entry.messages.join(' | ')}`
+    });
+  }
+}
+
+// Matcher registry
+const matcherRegistry = new Map<string, Matcher>();
+
+export function registerMatcher(matcher: Matcher): void {
+  console.log(`[Extension] Registering matcher: ${matcher.name}`);
+  matcherRegistry.set(matcher.id, matcher);
+}
+
+export function unregisterMatcher(matcherId: string): void {
+  console.log(`[Extension] Unregistering matcher: ${matcherId}`);
+  matcherRegistry.delete(matcherId);
+}
+
+export function getActiveMatchers(): Matcher[] {
+  return Array.from(matcherRegistry.values()).filter(m => m.enabled);
+}
+
+// Background communication
+export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
+  command: T,
+  payload: BackgroundCommands[T]
+): Promise<CommandResponse<T>> {
+  const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
+
+  try {
+    const response = await chrome.runtime.sendMessage({
+      type: command,
+      payload,
+      timestamp: Date.now(),
+      requestId
+    });
+
+    return response as CommandResponse<T>;
+  } catch (error) {
+    console.error(`[Extension] Error sending background command ${command}:`, error);
+    return {
+      success: false,
+      error: error instanceof Error ? error.message : 'Unknown error',
+      requestId
+    };
+  }
+}
+
+// Content script injection
+export async function injectExecutor(
+  tabId: number,
+  executorName: string,
+  context: ExecutionContext
+): Promise<ExecutionResult> {
+  try {
+    const response = await sendBackgroundCommand('executor.run', {
+      executorName,
+      context
+    });
+
+    if (!response.success) {
+      throw new Error(response.error || 'Executor injection failed');
+    }
+
+    return response.data as ExecutionResult;
+  } catch (error) {
+    console.error(`[Extension] Error injecting executor ${executorName}:`, error);
+    return {
+      success: false,
+      matcherId: context.matcherId,
+      executorName,
+      error: error instanceof Error ? error.message : 'Unknown error'
+    };
+  }
+}
+
+// DOM utilities
+export async function waitForSelector(
+  selector: string,
+  options: WaitOptions = {}
+): Promise<Element> {
+  const { timeout = 10000, interval = 100, visible = false } = options;
+  const startTime = Date.now();
+
+  return new Promise((resolve, reject) => {
+    const check = () => {
+      const element = document.querySelector(selector);
+
+      if (element) {
+        if (!visible || isElementVisible(element)) {
+          resolve(element);
+          return;
+        }
+      }
+
+      if (Date.now() - startTime > timeout) {
+        reject(new Error(`Timeout waiting for selector: ${selector}`));
+        return;
+      }
+
+      setTimeout(check, interval);
+    };
+
+    check();
+  });
+}
+
+export async function clickWithVerification(
+  element: Element,
+  options: ClickOptions = {}
+): Promise<boolean> {
+  const { delay = 0, verify = true, scroll = true } = options;
+
+  try {
+    if (!(element instanceof HTMLElement)) {
+      throw new Error('Element is not clickable');
+    }
+
+    // Scroll into view if needed
+    if (scroll) {
+      element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      await sleep(200); // Wait for scroll
+    }
+
+    // Add delay if specified
+    if (delay > 0) {
+      await sleep(delay);
+    }
+
+    // Click the element
+    element.click();
+
+    // Verify click if needed
+    if (verify) {
+      // Check if element is still in DOM (might be removed after click)
+      await sleep(100);
+      return !document.contains(element) || element.getAttribute('data-clicked') === 'true';
+    }
+
+    return true;
+  } catch (error) {
+    console.error('[Extension] Error clicking element:', error);
+    return false;
+  }
+}
+
+export async function safeNavigate(url: string): Promise<void> {
+  try {
+    await sendBackgroundCommand('tab.manage', {
+      action: 'open',
+      url
+    });
+  } catch (error) {
+    console.error('[Extension] Error navigating to URL:', error);
+    throw error;
+  }
+}
+
+// Telemetry
+const telemetryQueue: TelemetryEvent[] = [];
+let telemetryTimer: ReturnType<typeof setTimeout> | null = null;
+
+export function logEvent(event: TelemetryEvent): void {
+  telemetryQueue.push(event);
+
+  // Batch send telemetry events
+  if (!telemetryTimer) {
+    telemetryTimer = setTimeout(async () => {
+      if (telemetryQueue.length > 0) {
+        const events = [...telemetryQueue];
+        telemetryQueue.length = 0;
+
+        try {
+          await chrome.runtime.sendMessage({
+            action: 'telemetry',
+            events
+          });
+        } catch (error) {
+          console.error('[Extension] Error sending telemetry:', error);
+        }
+      }
+      telemetryTimer = null;
+    }, 1000);
+  }
+}
+
+export function trackError(error: Error, context?: any): void {
+  console.error('[Extension] Tracked error:', error, context);
+
+  logEvent({
+    eventName: 'error',
+    metadata: {
+      message: error.message,
+      stack: error.stack,
+      context
+    },
+    timestamp: Date.now()
+  });
+}
+
+// Helper functions
+function isElementVisible(element: Element): boolean {
+  if (!(element instanceof HTMLElement)) return false;
+
+  const rect = element.getBoundingClientRect();
+  const style = window.getComputedStyle(element);
+
+  return (
+    rect.width > 0 &&
+    rect.height > 0 &&
+    style.display !== 'none' &&
+    style.visibility !== 'hidden' &&
+    style.opacity !== '0'
+  );
+}
+
+export function sleep(ms: number): Promise<void> {
+  return new Promise(resolve => setTimeout(resolve, ms));
+}
+
+export function random(min: number, max: number): number {
+  return Math.floor(Math.random() * (max - min + 1) + min);
+}
+
+// Check if current time is within operational hours
+export function isValidTimeOfDay(config: any): boolean {
+  const now = new LocalDate();
+  const hh = now.getHours();
+  const day = now.getDay();
+
+  const operationalHours = config.operationalHours?.[day];
+  if (!operationalHours?.enabled) {
+    return false;
+  }
+
+  // Check if within operational hours
+  return hh >= operationalHours.min && hh < operationalHours.max;
+}
+
+export async function assertValidTimeOfDay(config: any): Promise<void> {
+  while (!isValidTimeOfDay(config)) {
+    console.log('[Extension] Invalid time of day, waiting...');
+    await sleep(60000); // Wait 1 minute
+  }
+}
+
+
+// Product utility class for parsing and validating products
+export class Product implements ProductInterface {
+  valid: boolean = false;
+  text: string;
+  name?: string;
+  insuredType?: string;
+  insuredAge?: number;
+  meta: Record<string, any> = {};
+
+  constructor(text: string) {
+    this.text = text;
+    this.parse();
+  }
+
+  private parse(): void {
+    const match = this.text.match(/([^:]+).* (?:(\S+)\s+Alter|Alter\s+(\S+)): (\d+)/);
+    if (!match) {
+      console.log(`[Extension] Failed matching: ${this.text}`);
+      this.valid = false;
+      return;
+    }
+
+    this.name = match[1];
+    this.insuredType = match[2] || match[3];
+    this.insuredAge = parseInt(match[4]);
+    this.meta = {};
+
+    if (isNaN(this.insuredAge)) {
+      console.log(`[Extension] Failed parsing age: ${match[4]}`);
+      this.valid = false;
+      return;
+    }
+
+    // Special handling for KV-Voll Arbeitnehmer KW
+    if (this.name === 'KV-Voll Arbeitnehmer KW') {
+      this.meta.aboveIncomeLimit = false;
+
+      if (this.text.match(/Tätigkeit:\sAngestellter/)) {
+        this.meta.aboveIncomeLimit = true;
+      }
+
+      // Check if JAEG is present above income threshold
+      const jaegMatch = this.text.match(/(\S+) JAEG/);
+      if (jaegMatch) {
+        this.meta.aboveIncomeLimit = jaegMatch[1] === 'über';
+      }
+    }
+
+    this.valid = true;
+  }
+
+  isAllowed(config: ExecutionConfig): { allowed: boolean; delay: number } {
+    const result = { allowed: false, delay: 0 };
+    if (!this.valid) {
+      return result;
+    }
+
+    const useAnimals = config.animals;
+    const useCancer = config.cancer;
+    const usePeople = config.people;
+
+    // Animal insurance products
+    if (useAnimals && this.name === 'Tier KV KW') {
+      if (this.insuredType === 'Hund' && this.insuredAge <= 3) {
+        result.allowed = true;
+        result.delay = random(config.animalTimerMin, config.animalTimerMax);
+        return result;
+      }
+    }
+
+    // Cancer scan products
+    if (useCancer && this.name === 'Krebs-Scan KW') {
+      result.allowed = true;
+      result.delay = random(config.cancerTimerMin, config.cancerTimerMax);
+      return result;
+    }
+
+    // People insurance products
+    if (usePeople) {
+      const delay = random(config.peopleTimerMin, config.peopleTimerMax);
+      if (this.insuredAge <= 60) {
+        switch (this.name) {
+          case 'KV-Voll Selbstständige KW':
+            result.allowed = true;
+            result.delay = delay;
+            return result;
+          case 'KV-Voll Arbeitnehmer KW':
+            result.allowed = this.meta.aboveIncomeLimit;
+            result.delay = delay;
+            return result;
+        }
+      }
+    }
+
+    return result;
+  }
+
+  toString(): string {
+    if (!this.valid) {
+      return 'Invalid Product';
+    }
+
+    return JSON.stringify({
+      name: this.name,
+      insuredType: this.insuredType,
+      insuredAge: this.insuredAge,
+      meta: this.meta,
+    });
+  }
+}
 
 /**
  * Opens all simulation links found on the page in new tabs
@@ -113,8 +537,7 @@ export async function processImage(): Promise<void> {
 
     // Send message to background script to process the image
     // This bypasses CORS completely as the background script makes the API call
-    const response = await chrome.runtime.sendMessage({
-      type: 'PROCESS_IMAGE',
+    const response = await sendBackgroundCommand('image.solve', {
       imageData: imageDataUrl
     });
 
@@ -158,6 +581,7 @@ export async function processImage(): Promise<void> {
       resultDiv.className = 'result error show';
       resultDiv.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
     }
+
   }
 }
 
