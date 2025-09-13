@@ -1,7 +1,7 @@
 import { createStorage, StorageEnum, ExtensionStorageType, ExtensionStateType } from '../base/index.js';
 import type { ExecutionConfig } from '@extension/types';
 
-const DEFAULT_CONFIG: ExtensionStateType = {
+export const DEFAULT_CONFIG: ExtensionStateType = {
   enabled: true,
   config: {
     operationalHours: {
