@@ -1,23 +1,8 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
-import {
-    PROJECT_URL_OBJECT,
-    useStorage,
-    withErrorBoundary,
-    withSuspense,
-} from '@extension/shared';
-import {
-    extensionConfigStorage,
-} from '@extension/storage';
-import {
-    cn,
-    ErrorDisplay,
-    LoadingSpinner,
-    ToggleButton,
-    Input,
-    Label,
-    Switch,
-} from '@extension/ui';
+import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { extensionConfigStorage } from '@extension/storage';
+import { cn, ErrorDisplay, LoadingSpinner, ToggleButton, Input, Label, Switch } from '@extension/ui';
 
 const ProductStrategySection = ({
   title,

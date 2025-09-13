@@ -8,14 +8,8 @@ import {
   random,
   sleep,
 } from '@src/lib';
-import type {
-    Matcher,
-} from '@extension/types';
-import type {
-    ExecutionContext,
-    ExecutionResult,
-    EmailSelectors,
-} from '@extension/types';
+import type { Matcher } from '@extension/types';
+import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing

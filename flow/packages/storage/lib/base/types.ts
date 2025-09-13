@@ -60,7 +60,6 @@ export interface ExtensionStateType {
 }
 
 export type ExtensionStorageType = BaseStorageType<ExtensionStateType> & {
-  toggleEnabled(): Promise<void>
-  updateConfig(updates: Partial<ExecutionConfig>): Promise<void>
+  toggleEnabled(): Promise<void>;
+  updateConfig(updates: Partial<ExecutionConfig>): Promise<void>;
 };
-

@@ -7,14 +7,8 @@ import {
   sleep,
   Product,
 } from '@src/lib';
-import type {
-    Matcher,
-} from '@extension/types';
-import type {
-    ExecutionContext,
-    ExecutionResult,
-    BuyOfferSelectors,
-} from '@extension/types';
+import type { Matcher } from '@extension/types';
+import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@extension/types';
 
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
