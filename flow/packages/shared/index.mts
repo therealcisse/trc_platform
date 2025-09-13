@@ -1,4 +1,3 @@
-export * from './lib/app/index.js';
 export * from './lib/services/index.js';
 export * from './lib/hooks/index.js';
 export * from './lib/hoc/index.js';

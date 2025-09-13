@@ -1,21 +1,7 @@
-import { createStorage, StorageEnum } from '../base/index.js';
-import type { ExecutionConfig } from '@extension/shared/app/types';
+import { createStorage, StorageEnum, ExtensionStorageType, ExtensionStateType } from '../base/index.js';
+import type { ExecutionConfig } from '@extension/types';
 
-export interface ConfigState {
-  config: ExecutionConfig;
-  enabled: boolean;
-}
-
-export interface ConfigStorage {
-  get: () => Promise<ConfigState>;
-  set: (value: ConfigState | ((prev: ConfigState) => ConfigState)) => Promise<void>;
-  getSnapshot: () => ConfigState | null;
-  subscribe: (listener: () => void) => () => void;
-  toggleEnabled: () => Promise<void>;
-  updateConfig: (updates: Partial<ExecutionConfig>) => Promise<void>;
-}
-
-const DEFAULT_CONFIG: ConfigState = {
+const DEFAULT_CONFIG: ExtensionStateType = {
   enabled: true,
   config: {
     operationalHours: {
@@ -50,12 +36,12 @@ const DEFAULT_CONFIG: ConfigState = {
   },
 };
 
-const storage = createStorage<ConfigState>('extension-config-storage-key', DEFAULT_CONFIG, {
+const storage = createStorage<ExtensionStateType>('extension-config-storage-key', DEFAULT_CONFIG, {
   storageEnum: StorageEnum.Sync,
   liveUpdate: true,
 });
 
-export const extensionConfigStorage: ConfigStorage = {
+export const extensionConfigStorage: ExtensionStorageType = {
   ...storage,
   toggleEnabled: async () => {
     await storage.set(currentState => ({

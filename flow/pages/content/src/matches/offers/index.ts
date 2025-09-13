@@ -9,7 +9,12 @@ import {
   sleep,
   Product,
 } from '@src/lib';
-import type { Matcher, ExecutionContext, ExecutionResult, OffersSelectors } from '@src/types';
+import type {
+    Matcher,
+    ExecutionContext,
+    ExecutionResult,
+    OffersSelectors,
+} from '@extension/types';
 
 /**
  * Offers Matcher - Detects offer pages and triggers offer processing

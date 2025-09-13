@@ -1,4 +1,5 @@
 import type { StorageEnum } from './index.js';
+import type { ExecutionConfig } from '@extension/types';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
 
@@ -52,3 +53,14 @@ export interface ThemeStateType {
 export type ThemeStorageType = BaseStorageType<ThemeStateType> & {
   toggle: () => Promise<void>;
 };
+
+export interface ExtensionStateType {
+  config: ExecutionConfig;
+  enabled: boolean;
+}
+
+export type ExtensionStorageType = BaseStorageType<ExtensionStateType> & {
+  toggleEnabled(): Promise<void>
+  updateConfig(updates: Partial<ExecutionConfig>): Promise<void>
+};
+

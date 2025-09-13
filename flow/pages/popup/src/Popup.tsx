@@ -34,7 +34,7 @@ const Popup = () => {
 
   const toggleEnabled = async () => {
     try {
-      await ConfigService.setEnabled(!enabled);
+      await ConfigService.toggleEnabled();
       setEnabled(!enabled);
     } catch (error) {
       console.error('Error toggling extension state:', error);
