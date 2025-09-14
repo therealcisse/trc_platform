@@ -100,7 +100,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (seconds)</label>
                       <input
                         type="number"
                         value={config.emailRefreshMin || 30}
@@ -110,7 +110,7 @@ const Options = () => {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (seconds)</label>
                       <input
                         type="number"
                         value={config.emailRefreshMax || 60}
@@ -137,7 +137,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (seconds)</label>
                       <input
                         type="number"
                         value={config.inboxRefreshMin || 30}
@@ -147,7 +147,7 @@ const Options = () => {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (seconds)</label>
                       <input
                         type="number"
                         value={config.inboxRefreshMax || 60}
