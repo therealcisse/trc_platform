@@ -81,6 +81,86 @@ const Options = () => {
               </div>
             </section>
 
+            {/* Message Monitoring */}
+            <section>
+              <h2 className="mb-4 text-xl font-medium">Message Monitoring</h2>
+              <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
+                {/* Email Mode */}
+                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Email Monitoring</h3>
+                      <p className="text-sm text-gray-400">Monitor emails for new offers</p>
+                    </div>
+                    <Switch
+                      checked={config.emailMode || false}
+                      onCheckedChange={() => handleConfigToggle('emailMode')}
+                      className="SwitchRoot"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (minutes)</label>
+                      <input
+                        type="number"
+                        value={config.emailRefreshMin || 30}
+                        disabled={!config.emailMode}
+                        onChange={e => extensionConfigStorage.updateConfig({ emailRefreshMin: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (minutes)</label>
+                      <input
+                        type="number"
+                        value={config.emailRefreshMax || 60}
+                        disabled={!config.emailMode}
+                        onChange={e => extensionConfigStorage.updateConfig({ emailRefreshMax: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+
+                {/* Inbox Mode */}
+                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">Inbox Monitoring</h3>
+                      <p className="text-sm text-gray-400">Monitor inbox for new offers</p>
+                    </div>
+                    <Switch
+                      checked={config.inboxMode || false}
+                      onCheckedChange={() => handleConfigToggle('inboxMode')}
+                      className="SwitchRoot"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (minutes)</label>
+                      <input
+                        type="number"
+                        value={config.inboxRefreshMin || 30}
+                        disabled={!config.inboxMode}
+                        onChange={e => extensionConfigStorage.updateConfig({ inboxRefreshMin: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (minutes)</label>
+                      <input
+                        type="number"
+                        value={config.inboxRefreshMax || 60}
+                        disabled={!config.inboxMode}
+                        onChange={e => extensionConfigStorage.updateConfig({ inboxRefreshMax: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </section>
+
             {/* Operational Hours */}
             <section>
               <h2 className="mb-4 text-xl font-medium">Operational Hours</h2>
