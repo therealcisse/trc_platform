@@ -5,13 +5,13 @@ export const DEFAULT_CONFIG: ExtensionStateType = {
   enabled: true,
   config: {
     operationalHours: {
-      0: { enabled: false, min: 0, max: 0 }, // Sunday
+      0: { enabled: false, min: 8, max: 17 }, // Sunday
       1: { enabled: true, min: 8, max: 17 }, // Monday
       2: { enabled: true, min: 8, max: 17 }, // Tuesday
       3: { enabled: true, min: 8, max: 17 }, // Wednesday
       4: { enabled: true, min: 8, max: 17 }, // Thursday
       5: { enabled: true, min: 8, max: 17 }, // Friday
-      6: { enabled: false, min: 0, max: 0 }, // Saturday
+      6: { enabled: false, min: 8, max: 17 }, // Saturday
     },
     emailMode: true,
     emailRefreshMin: 30,
@@ -37,7 +37,7 @@ export const DEFAULT_CONFIG: ExtensionStateType = {
 };
 
 const storage = createStorage<ExtensionStateType>('extension-config-storage-key', DEFAULT_CONFIG, {
-  storageEnum: StorageEnum.Sync,
+  storageEnum: StorageEnum.Local,
   liveUpdate: true,
 });
 

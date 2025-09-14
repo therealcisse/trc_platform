@@ -82,6 +82,32 @@ async function handleMessage(
                         });
                     });
 
+      case 'extension.log':
+        console.log(`[Extension] ${message.payload.text}`);
+        return { success: true, requestId: `log-${Date.now()}` };
+
+      case 'extension.telemetry':
+        // Store telemetry events
+        const { events } = message.payload;
+        events.forEach(event => {
+          console.log(`[Telemetry] ${event.eventName}:`, event);
+        });
+        return { success: true, requestId: `telemetry-${Date.now()}` };
+
+      case 'extension.isEnabled':
+        return {
+          success: true,
+          data: await ConfigService.isEnabled(),
+          requestId: `enabled-${Date.now()}`
+        };
+
+      case 'extension.getConfig':
+        return {
+          success: true,
+          data: await ConfigService.getConfig(),
+          requestId: `config-${Date.now()}`
+        };
+
       default:
         throw new Error(`Unknown command type: ${String(message.type)}`);
     }
@@ -223,7 +249,10 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
 
   if (!backendUrl) {
     throw new Error('Missing required environment variable: CEB_TRC_BACKEND_URL');
-  }
+  } else {
+            console.log('[CEB] sending requests to backend:', backendUrl);
+
+        }
 
   if (!config.token) {
     throw new Error('API token not configured. Please set your API token in the extension options.');

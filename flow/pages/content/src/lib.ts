@@ -63,8 +63,7 @@ export class Log {
     const logMessage = `${entry.timestamp} [${entry.type}] ${entry.messages.join(' | ')}`;
     console.log(`[Extension] ${logMessage}`);
 
-    await chrome.runtime.sendMessage({
-      action: 'log',
+    await sendBackgroundCommand('extension.log', {
       text: `[${entry.type}] ${entry.messages.join(' | ')}`,
     });
   }
@@ -232,10 +231,7 @@ export function logEvent(event: TelemetryEvent): void {
         telemetryQueue.length = 0;
 
         try {
-          await chrome.runtime.sendMessage({
-            action: 'telemetry',
-            events,
-          });
+          await sendBackgroundCommand('extension.telemetry', { events });
         } catch (error) {
           console.error('[Extension] Error sending telemetry:', error);
         }

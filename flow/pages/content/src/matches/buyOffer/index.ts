@@ -40,14 +40,15 @@ class BuyOfferMatcher implements Matcher {
 
     try {
       // Check if extension is enabled
-      const enabledResponse = await chrome.runtime.sendMessage({ action: 'isEnabled' });
-      if (!enabledResponse) {
+      const enabledResponse = await sendBackgroundCommand('extension.isEnabled', {});
+      if (!enabledResponse.success || !enabledResponse.data) {
         log.push('Extension disabled').write();
         return;
       }
 
       // Get configuration
-      const config = await chrome.runtime.sendMessage({ action: 'config' });
+      const configResponse = await sendBackgroundCommand('extension.getConfig', {});
+      const config = configResponse.data;
       if (!config) {
         log.push('No configuration found').write();
         return;
@@ -120,8 +121,8 @@ class BuyOfferMatcher implements Matcher {
         productId: randomId,
         delay: delaySeconds,
         selectors: {
-          productTitle: '#page_buy_now h2',
-          buyFormButton: '#buyFormBtn',
+          productTitle: 'h1.item_title',
+          buyFormButton: 'div.buy_now a[role="button"]',
         },
       });
 

@@ -21,8 +21,9 @@ class OffersMatcher implements Matcher {
   priority = 10;
 
   urlPatterns = [
-    'https://auktion.hansemerkur.de/browse/search/*',
-    'https://auktion.hansemerkur.de/karte_sofortkauf.html',
+    // 'https://auktion.hansemerkur.de/browse/search/*',
+    // 'https://auktion.hansemerkur.de/karte_sofortkauf.html',
+    'https://auktion.hansemerkur.de/item.php',
   ];
 
   domPreconditions = [
@@ -39,14 +40,15 @@ class OffersMatcher implements Matcher {
 
     try {
       // Check if extension is enabled
-      const enabledResponse = await chrome.runtime.sendMessage({ action: 'isEnabled' });
-      if (!enabledResponse) {
+      const enabledResponse = await sendBackgroundCommand('extension.isEnabled', {});
+      if (!enabledResponse.success || !enabledResponse.data) {
         log.push('Extension disabled').write();
         return;
       }
 
       // Get configuration
-      const config = await chrome.runtime.sendMessage({ action: 'config' });
+      const configResponse = await sendBackgroundCommand('extension.getConfig', {});
+      const config = configResponse.data;
       if (!config) {
         log.push('No configuration found').write();
         return;
@@ -64,6 +66,9 @@ class OffersMatcher implements Matcher {
         log.push('Map offers page detected');
         await this.handleMapOffers(config, log);
       } else if (currentUrl.includes('browse/search')) {
+        log.push('Browse offers page detected');
+        await this.handleBrowseOffers(config, log);
+      } else if (currentUrl.includes('item.php')) {
         log.push('Browse offers page detected');
         await this.handleBrowseOffers(config, log);
       }
@@ -238,6 +243,8 @@ export async function executeOffersWorkflow(
     if (currentUrl.includes('karte_sofortkauf.html')) {
       await processMapOffers();
     } else if (currentUrl.includes('browse/search')) {
+      await processBrowseOffers();
+    } else if (currentUrl.includes('item.php')) {
       await processBrowseOffers();
     }
 

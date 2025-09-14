@@ -49,20 +49,27 @@ const manifest = {
   },
   content_scripts: [
     {
-      matches: ['https://outlook.office.com/mail/*', 'https://outlook.office.com.mcas.ms/mail/*'],
+      matches: [
+        'https://outlook.office.com/mail/*',
+        'https://outlook.office.com.mcas.ms/mail/*',
+      ],
       js: ['content/email.iife.js'],
       run_at: 'document_end'
     },
     {
-      matches: ['https://auktion.hansemerkur.de/karte_sofortkauf.html', 'https://auktion.hansemerkur.de/browse/search/*'],
+      matches: [
+        // 'https://auktion.hansemerkur.de/karte_sofortkauf.html',
+        // 'https://auktion.hansemerkur.de/browse/search/*',
+        'https://auktion.hansemerkur.de/item.php',
+      ],
       js: ['content/offers.iife.js'],
       run_at: 'document_end'
     },
-    {
-      matches: ['https://auktion.hansemerkur.de/buy_now/id/*'],
-      js: ['content/buyOffer.iife.js'],
-      run_at: 'document_end'
-    },
+    // {
+    //   matches: ['https://auktion.hansemerkur.de/buy_now/id/*'],
+    //   js: ['content/buyOffer.iife.js'],
+    //   run_at: 'document_end'
+    // },
     {
       matches: ['http://localhost:8082/pages/*'],
       js: ['content/solver.iife.js'],
