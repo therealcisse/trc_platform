@@ -218,7 +218,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Timer (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Min Timer (seconds)</label>
                       <input
                         type="number"
                         value={config.animalTimerMin || 10}
@@ -228,7 +228,7 @@ const Options = () => {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Timer (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Max Timer (seconds)</label>
                       <input
                         type="number"
                         value={config.animalTimerMax || 30}
