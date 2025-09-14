@@ -35,13 +35,11 @@ export interface ExecutionConfig {
   emailMode?: boolean;
   emailRefreshMin?: number;
   emailRefreshMax?: number;
-  timerMode?: boolean;
-  
+
   // Inbox mode configuration
   inboxMode?: boolean;
   inboxRefreshMin?: number;
   inboxRefreshMax?: number;
-  randomDelay?: DelayConfig;
   products?: ProductConfig[];
 
   // Animal insurance product strategy
