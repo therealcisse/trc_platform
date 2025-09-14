@@ -8,7 +8,7 @@ import {
   random,
   sleep,
 } from '@src/lib';
-import type { Matcher } from '@extension/types';
+import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
 
 /**
@@ -36,19 +36,23 @@ class EmailMatcher implements Matcher {
 
     try {
       // Get configuration and check if enabled
-      const configResponse = await sendBackgroundCommand('extension.getConfig', {});
-      const config = configResponse.data;
-      if (!config) {
+      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
+        config: ExecutionConfig;
+        enabled: boolean;
+      }>;
+
+      const result = configResponse.data;
+      if (!result) {
         log.push('No configuration found').write();
         return;
       }
 
-      if (!config.enabled) {
+      if (!result.enabled) {
         log.push('Extension disabled').write();
         return;
       }
 
-      if (!config.emailMode) {
+      if (!result.config.emailMode) {
         log.push('Email mode disabled').write();
         return;
       }
@@ -96,8 +100,7 @@ function checkAndRun() {
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => emailMatcher.run());
     } else {
-      // Small delay to ensure everything is ready
-      setTimeout(() => emailMatcher.run(), 1000);
+      setTimeout(() => emailMatcher.run(), 0);
     }
   }
 }
@@ -142,13 +145,13 @@ export async function executeEmailWorkflow(
     const randomRefreshSeconds = random(refreshMin, refreshMax);
     log.push(`Will refresh in ${randomRefreshSeconds}s`);
 
-    setTimeout(() => {
-      if (!context.dryRun) {
-        window.location.reload();
-      } else {
-        log.push('Dry run: Would reload page').write();
-      }
-    }, randomRefreshSeconds * 1000);
+    // setTimeout(() => {
+    //   if (!context.dryRun) {
+    //     window.location.reload();
+    //   } else {
+    //     log.push('Dry run: Would reload page').write();
+    //   }
+    // }, randomRefreshSeconds * 1000);
 
     // Process emails
     await processEmails();
@@ -183,7 +186,7 @@ export async function executeEmailWorkflow(
           }
 
           // Wait for email content to load
-          await sleep(1000);
+          // await sleep(1000);
 
           try {
             // Find link in email body
@@ -225,7 +228,7 @@ export async function executeEmailWorkflow(
           }
 
           // Small delay between emails
-          await sleep(500);
+          // await sleep(500);
         }
       } catch (error) {
         log.push(`Error in email processing: ${error}`);

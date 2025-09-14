@@ -90,7 +90,7 @@ export function getActiveMatchers(): Matcher[] {
 export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
   command: T,
   payload: BackgroundCommands[T],
-): Promise<CommandResponse<T>> {
+): Promise<CommandResponse> {
   const requestId = `${Date.now()}-${Math.random().toString(36).substr(2, 9)}`;
 
   try {
@@ -101,7 +101,7 @@ export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
       requestId,
     });
 
-    return response as CommandResponse<T>;
+    return response as CommandResponse;
   } catch (error) {
     console.error(`[Extension] Error sending background command ${command}:`, error);
     return {

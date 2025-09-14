@@ -7,7 +7,7 @@ import {
   sleep,
   Product,
 } from '@src/lib';
-import type { Matcher } from '@extension/types';
+import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@extension/types';
 
 /**
@@ -40,14 +40,17 @@ class BuyOfferMatcher implements Matcher {
 
     try {
       // Get configuration and check if enabled
-      const configResponse = await sendBackgroundCommand('extension.getConfig', {});
-      const config = configResponse.data;
-      if (!config) {
+      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
+        config: ExecutionConfig;
+        enabled: boolean;
+      }>;
+      const result = configResponse.data;
+      if (!result) {
         log.push('No configuration found').write();
         return;
       }
 
-      if (!config.enabled) {
+      if (!result.enabled) {
         log.push('Extension disabled').write();
         return;
       }
@@ -90,7 +93,7 @@ class BuyOfferMatcher implements Matcher {
       }
 
       // Validate product against configuration
-      const { allowed, delay } = product.isAllowed(config);
+      const { allowed, delay } = product.isAllowed(result.config);
       if (!allowed) {
         log.push('Product not allowed by configuration').write();
         return;
@@ -238,14 +241,12 @@ export async function executeBuyOfferWorkflow(
 
     // Check configuration again
     const config = context.config || {};
-    const { allowed } = product.isAllowed(config);
+    const { allowed, delay = 0 } = product.isAllowed(config);
 
     if (!allowed) {
       throw new Error('Product not allowed by configuration');
     }
 
-    // Apply delay if specified
-    const delay = context.delay || 0;
     if (delay > 0) {
       log.push(`Waiting ${delay} seconds before purchase`);
       await sleep(delay * 1000);

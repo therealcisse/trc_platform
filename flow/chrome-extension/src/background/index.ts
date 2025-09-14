@@ -97,7 +97,10 @@ async function handleMessage(
       case 'extension.getConfig':
         return {
           success: true,
-          data: await ConfigService.getConfig(),
+          data: {
+                        config: await ConfigService.getConfig(),
+                        enabled: await ConfigService.isEnabled(),
+                    },
           requestId: `config-${Date.now()}`
         };
 

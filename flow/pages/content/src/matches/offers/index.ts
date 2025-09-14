@@ -9,7 +9,14 @@ import {
   sleep,
   Product,
 } from '@src/lib';
-import type { Matcher, ExecutionContext, ExecutionResult, OffersSelectors } from '@extension/types';
+import type {
+  Matcher,
+  ExecutionContext,
+  ExecutionResult,
+  OffersSelectors,
+  ExecutionConfig,
+  CommandResponse,
+} from '@extension/types';
 
 /**
  * Offers Matcher - Detects offer pages and triggers offer processing
@@ -40,21 +47,24 @@ class OffersMatcher implements Matcher {
 
     try {
       // Get configuration and check if enabled
-      const configResponse = await sendBackgroundCommand('extension.getConfig', {});
-      const config = configResponse.data;
-      if (!config) {
+      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
+        config: ExecutionConfig;
+        enabled: boolean;
+      }>;
+      const result = configResponse.data;
+      if (!result) {
         log.push('No configuration found').write();
         return;
       }
 
-      if (!config.enabled) {
+      if (!result.enabled) {
         log.push('Extension disabled').write();
         return;
       }
 
       // Check operational hours if not in email mode
-      if (!config.emailMode) {
-        await assertValidTimeOfDay(config);
+      if (!result.config.emailMode) {
+        await assertValidTimeOfDay(result.config);
       }
 
       const currentUrl = window.location.href;
@@ -62,13 +72,13 @@ class OffersMatcher implements Matcher {
       // Determine which type of offers page we're on
       if (currentUrl.includes('karte_sofortkauf.html')) {
         log.push('Map offers page detected');
-        await this.handleMapOffers(config, log);
+        await this.handleMapOffers(result.config, log);
       } else if (currentUrl.includes('browse/search')) {
         log.push('Browse offers page detected');
-        await this.handleBrowseOffers(config, log);
+        await this.handleBrowseOffers(result.config, log);
       } else if (currentUrl.includes('item.php')) {
         log.push('Browse offers page detected');
-        await this.handleBrowseOffers(config, log);
+        await this.handleBrowseOffers(result.config, log);
       }
     } catch (error) {
       log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
@@ -172,7 +182,7 @@ function checkAndRun() {
       document.addEventListener('DOMContentLoaded', () => offersMatcher.run());
     } else {
       // Small delay to ensure everything is ready
-      setTimeout(() => offersMatcher.run(), 1000);
+      setTimeout(() => offersMatcher.run(), 0);
     }
   }
 }

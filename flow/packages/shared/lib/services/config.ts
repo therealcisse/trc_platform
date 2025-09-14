@@ -38,6 +38,14 @@ export class ConfigService {
   }
 
   /**
+   * Check if extension is enabled
+   */
+  static async isEnabled(): Promise<boolean> {
+    const storage = await extensionConfigStorage.get();
+    return storage.enabled;
+  }
+
+  /**
    * Set extension enabled state
    */
   static async toggleEnabled(): Promise<void> {
