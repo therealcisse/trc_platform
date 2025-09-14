@@ -39,18 +39,16 @@ class BuyOfferMatcher implements Matcher {
     log.push('Buy offer matcher activated');
 
     try {
-      // Check if extension is enabled
-      const enabledResponse = await sendBackgroundCommand('extension.isEnabled', {});
-      if (!enabledResponse.success || !enabledResponse.data) {
-        log.push('Extension disabled').write();
-        return;
-      }
-
-      // Get configuration
+      // Get configuration and check if enabled
       const configResponse = await sendBackgroundCommand('extension.getConfig', {});
       const config = configResponse.data;
       if (!config) {
         log.push('No configuration found').write();
+        return;
+      }
+
+      if (!config.enabled) {
+        log.push('Extension disabled').write();
         return;
       }
 

@@ -154,7 +154,6 @@ export interface BackgroundCommands {
   'state.buying': BuyingStateCommand;
   'extension.log': { text: string };
   'extension.telemetry': { events: TelemetryEvent[] };
-  'extension.isEnabled': Record<string, never>;
   'extension.getConfig': Record<string, never>;
 }
 

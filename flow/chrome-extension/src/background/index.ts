@@ -94,13 +94,6 @@ async function handleMessage(
         });
         return { success: true, requestId: `telemetry-${Date.now()}` };
 
-      case 'extension.isEnabled':
-        return {
-          success: true,
-          data: await ConfigService.isEnabled(),
-          requestId: `enabled-${Date.now()}`
-        };
-
       case 'extension.getConfig':
         return {
           success: true,
