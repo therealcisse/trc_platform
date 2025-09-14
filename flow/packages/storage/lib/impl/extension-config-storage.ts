@@ -16,6 +16,11 @@ export const DEFAULT_CONFIG: ExtensionStateType = {
     emailMode: true,
     emailRefreshMin: 30,
     emailRefreshMax: 60,
+    
+    // Inbox mode defaults
+    inboxMode: true,
+    inboxRefreshMin: 30,
+    inboxRefreshMax: 60,
     timerMode: false,
     randomDelay: {
       min: 5,
