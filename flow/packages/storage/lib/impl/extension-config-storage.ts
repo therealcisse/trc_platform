@@ -5,7 +5,7 @@ export const DEFAULT_CONFIG: ExtensionStateType = {
   enabled: true,
   config: {
     operationalHours: {
-      0: { enabled: false, min: 8, max: 17 }, // Sunday
+      0: { enabled: true, min: 8, max: 17 }, // Sunday
       1: { enabled: true, min: 8, max: 17 }, // Monday
       2: { enabled: true, min: 8, max: 17 }, // Tuesday
       3: { enabled: true, min: 8, max: 17 }, // Wednesday
