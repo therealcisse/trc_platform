@@ -1,8 +1,11 @@
-import type { ValueOrUpdateType } from './base/index.js';
+// Re-export types from validation
+export type {
+  ValidatedExecutionConfig,
+  ValidatedBuyingOffer,
+  ValidatedLogEntry,
+  ValidatedProductStrategy,
+  ValidatedExtensionStorage,
+} from './validation/storage.js';
 
-export type BaseStorageType<D> = {
-  get: () => Promise<D>;
-  set: (value: ValueOrUpdateType<D>) => Promise<void>;
-  getSnapshot: () => D | null;
-  subscribe: (listener: () => void) => () => void;
-};
+// Re-export types from base
+export type * from './base/types.js';

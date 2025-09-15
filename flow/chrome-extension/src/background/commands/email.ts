@@ -3,7 +3,7 @@ import type {
   CommandResponse,
   ExecutionContext
 } from '@extension/types';
-import type { MessageHandler } from '../types';
+import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 
 /**

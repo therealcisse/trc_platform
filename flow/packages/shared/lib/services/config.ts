@@ -51,4 +51,18 @@ export class ConfigService {
   static async toggleEnabled(): Promise<void> {
     await extensionConfigStorage.toggleEnabled();
   }
+
+  /**
+   * Get product strategies
+   */
+  static async getProductStrategies(): Promise<ExtensionStorage['productStrategies']> {
+    return extensionConfigStorage.productStrategies.get();
+  }
+
+  /**
+   * Update product strategies
+   */
+  static async setProductStrategies(strategies: ExtensionStorage['productStrategies']): Promise<void> {
+    await extensionConfigStorage.productStrategies.set(strategies);
+  }
 }

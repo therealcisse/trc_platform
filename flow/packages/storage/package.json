@@ -22,7 +22,8 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
-    "@extension/types": "workspace:*"
+    "@extension/types": "workspace:*",
+    "zod": "^4.1.8"
   },
   "devDependencies": {
     "@extension/tsconfig": "workspace:*"

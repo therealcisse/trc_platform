@@ -3,7 +3,7 @@ import type {
   CommandResponse,
   ExecutionContext
 } from '@extension/types';
-import type { MessageHandler } from '../types';
+import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 
 /**
@@ -47,9 +47,8 @@ export const offersCommandHandler: MessageHandler<'offers.clickProductLink'> = a
       dryRun: false
     };
 
-    // First ensure product strategies are loaded
-    const strategies = await chrome.storage.local.get(['productStrategies']);
-    const productStrategies = strategies.productStrategies || [];
+    // Get product strategies from ConfigService
+    const productStrategies = await ConfigService.getProductStrategies();
 
     // Inject and execute the offers workflow
     const result = await chrome.scripting.executeScript({

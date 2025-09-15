@@ -3,7 +3,13 @@ import { ConfigService } from '@extension/shared';
 import { emailCommandHandler } from './commands/email';
 import { offersCommandHandler } from './commands/offers';
 import { buyOfferCommandHandler } from './commands/buyOffer';
-import type { BackgroundCommands, CommandResponse } from '@extension/shared';
+import type { BackgroundCommands, CommandResponse } from '@extension/types';
+import { extensionConfigStorage } from '@extension/storage';
+import { TabManagementService, BuyingStateService } from '@extension/shared';
+
+// Service instances
+const tabService = new TabManagementService(extensionConfigStorage);
+const buyingService = new BuyingStateService(extensionConfigStorage);
 
 // Initialize background service
 async function init() {
@@ -126,7 +132,7 @@ async function handleTabManagement(
         if (!payload.url) {
           throw new Error('URL required for open action');
         }
-        const tab = await chrome.tabs.create({ url: payload.url });
+        const tab = await tabService.openTab(payload.url, payload.action === 'manage');
         return {
           success: true,
           data: { tabId: tab.id },
@@ -138,7 +144,7 @@ async function handleTabManagement(
         if (!tabId) {
           throw new Error('Tab ID required for close action');
         }
-        await chrome.tabs.remove(tabId);
+        await tabService.closeTab(tabId);
         return {
           success: true,
           requestId
@@ -148,9 +154,40 @@ async function handleTabManagement(
         if (!payload.tabId) {
           throw new Error('Tab ID required for reload action');
         }
-        await chrome.tabs.reload(payload.tabId);
+        await tabService.reloadTab(payload.tabId);
         return {
           success: true,
+          requestId
+        };
+
+      case 'manage':
+        if (!payload.tabId) {
+          throw new Error('Tab ID required for manage action');
+        }
+        await tabService.markManaged(payload.tabId);
+        return {
+          success: true,
+          requestId
+        };
+
+      case 'unmanage':
+        if (!payload.tabId) {
+          throw new Error('Tab ID required for unmanage action');
+        }
+        await tabService.unmarkManaged(payload.tabId);
+        return {
+          success: true,
+          requestId
+        };
+
+      case 'isManaged':
+        if (!payload.tabId) {
+          throw new Error('Tab ID required for isManaged action');
+        }
+        const isManaged = await tabService.isManaged(payload.tabId);
+        return {
+          success: true,
+          data: { isManaged },
           requestId
         };
 
@@ -174,47 +211,27 @@ async function handleBuyingState(
   const requestId = `state-${Date.now()}`;
 
   try {
-    const storage = await chrome.storage.local.get(['buyingOffers']);
-    const buyingOffers = storage.buyingOffers || {};
-
     switch (payload.action) {
       case 'mark':
         if (!payload.id || !payload.timeout) {
           throw new Error('ID and timeout required for mark action');
         }
-        buyingOffers[payload.key] = {
-          id: payload.id,
-          timeout: payload.timeout
-        };
-        await chrome.storage.local.set({ buyingOffers });
+        await buyingService.markBuying(payload.key, payload.id, payload.timeout);
         return {
           success: true,
           requestId
         };
 
       case 'check':
-        const entry = buyingOffers[payload.key];
-        if (!entry || Date.now() > entry.timeout) {
-          // Remove expired entry
-          if (entry) {
-            delete buyingOffers[payload.key];
-            await chrome.storage.local.set({ buyingOffers });
-          }
-          return {
-            success: true,
-            data: { buying: false },
-            requestId
-          };
-        }
+        const buyingState = await buyingService.isBuying(payload.key);
         return {
           success: true,
-          data: { buying: true, id: entry.id },
+          data: buyingState,
           requestId
         };
 
       case 'clear':
-        delete buyingOffers[payload.key];
-        await chrome.storage.local.set({ buyingOffers });
+        await buyingService.clearBuying(payload.key);
         return {
           success: true,
           requestId

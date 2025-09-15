@@ -1,5 +1,6 @@
 import type { StorageEnum } from './index.js';
-import type { ExecutionConfig } from '@extension/types';
+import type { ExecutionConfig, ExtensionStorage } from '@extension/types';
+import type { ValidatedBuyingOffer, ValidatedLogEntry, ValidatedProductStrategy } from '../validation/storage.js';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
 
@@ -59,7 +60,39 @@ export interface ExtensionStateType {
   enabled: boolean;
 }
 
-export type ExtensionStorageType = BaseStorageType<ExtensionStateType> & {
+export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
+  // Core methods
   toggleEnabled(): Promise<void>;
   updateConfig(updates: Partial<ExecutionConfig>): Promise<void>;
+
+  // Buying state namespace
+  buyingState: {
+    markBuying(key: string, id: string, timeout: number): Promise<void>;
+    checkBuying(key: string): Promise<{ buying: boolean; id?: string }>;
+    clearBuying(key: string): Promise<void>;
+    clearExpired(): Promise<void>;
+    getBuyingOffer(key: string): Promise<ValidatedBuyingOffer | undefined>;
+  };
+
+  // Tab management namespace
+  tabManagement: {
+    markManaged(tabId: number): Promise<void>;
+    unmarkManaged(tabId: number): Promise<void>;
+    isManaged(tabId: number): Promise<boolean>;
+    getAllManagedTabs(): Promise<number[]>;
+  };
+
+  // Logs namespace
+  logs: {
+    addLog(message: string): Promise<void>;
+    getLogs(): Promise<ValidatedLogEntry[]>;
+    clearLogs(): Promise<void>;
+  };
+
+  // Product strategies namespace
+  productStrategies: {
+    get(): Promise<ValidatedProductStrategy[]>;
+    set(strategies: ValidatedProductStrategy[]): Promise<void>;
+    clear(): Promise<void>;
+  };
 };

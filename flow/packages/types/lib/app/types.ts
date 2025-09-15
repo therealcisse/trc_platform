@@ -103,6 +103,12 @@ export interface ProductPattern {
   delay?: DelayConfig;
 }
 
+export interface StoredProductStrategy {
+  id: string;
+  name: string;
+  patterns: ProductPattern[];
+}
+
 export interface ProductConfig {
   text: string;
   insuredType: string;
@@ -257,10 +263,13 @@ export interface ClickOptions {
 export interface ExtensionStorage {
   enabled: boolean;
   config: ExecutionConfig;
-  logs: string[];
+  logs: {
+    timestamp: number;
+    message: string;
+  }[];
   managedTabs: Record<number, number>;
   buyingOffers: Record<string, BuyingOffer>;
-  productStrategies: ProductStrategy[];
+  productStrategies: StoredProductStrategy[];
 }
 
 export interface BuyingOffer {
@@ -275,3 +284,36 @@ export type LocalDate = {
   getMinutes(): number;
   getDay(): number;
 };
+
+// Message handler type
+export type MessageHandler<T extends keyof BackgroundCommands> = (
+  payload: BackgroundCommands[T],
+  sender: chrome.runtime.MessageSender,
+) => Promise<CommandResponse>;
+
+// Message handler registry
+export interface MessageHandlerRegistry {
+  handlers: Map<keyof BackgroundCommands, MessageHandler<any>>;
+  register<T extends keyof BackgroundCommands>(command: T, handler: MessageHandler<T>): void;
+  handle(
+    message: { type: keyof BackgroundCommands; payload: any },
+    sender: chrome.runtime.MessageSender,
+  ): Promise<CommandResponse>;
+}
+
+// Tab management service interface
+export interface TabManagementService {
+  openTab(url: string, managedTab?: boolean): Promise<chrome.tabs.Tab>;
+  closeTab(tabId: number): Promise<void>;
+  reloadTab(tabId: number): Promise<void>;
+  isManaged(tabId: number): Promise<boolean>;
+  markManaged(tabId: number): void;
+  unmarkManaged(tabId: number): void;
+}
+
+// Buying state service interface
+export interface BuyingStateService {
+  markBuying(key: string, id: string, timeout: number): Promise<void>;
+  isBuying(key: string): Promise<{ buying: boolean; id?: string }>;
+  clearExpired(): Promise<void>;
+}
