@@ -65,4 +65,36 @@ export class ConfigService {
   static async setProductStrategies(strategies: ExtensionStorage['productStrategies']): Promise<void> {
     await extensionConfigStorage.productStrategies.set(strategies);
   }
+
+  /**
+   * Start a new flow or check if it already exists
+   * @returns true if flow already exists, false if newly added
+   */
+  static async startFlow(flow: ExtensionStorage['flows'][string]): Promise<boolean> {
+    const exists = await extensionConfigStorage.flows.startFlow(flow);
+
+    // Log flow events
+    await extensionConfigStorage.logs.addLog(
+      exists
+        ? `[Flow] Skipped existing flow ${flow.id} (${flow.source})`
+        : `[Flow] Started new flow ${flow.id} (${flow.source}) for ${flow.href}`,
+    );
+
+    return exists;
+  }
+
+  /**
+   * Get flow by ID
+   */
+  static async getFlow(id: string): Promise<ExtensionStorage['flows'][string] | undefined> {
+    return extensionConfigStorage.flows.getFlow(id);
+  }
+
+  /**
+   * Mark a flow as done
+   */
+  static async doneFlow(id: string): Promise<void> {
+    await extensionConfigStorage.flows.doneFlow(id);
+    await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
+  }
 }

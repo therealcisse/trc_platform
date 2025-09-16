@@ -3,7 +3,14 @@ import { ConfigService } from '@extension/shared';
 import { emailCommandHandler } from './commands/email';
 import { offersCommandHandler } from './commands/offers';
 import { buyOfferCommandHandler } from './commands/buyOffer';
-import type { BackgroundCommands, CommandResponse } from '@extension/types';
+import {
+    FlowUtils,
+} from '@extension/types';
+import type {
+    FlowPayload,
+    BackgroundCommands,
+    CommandResponse,
+} from '@extension/types';
 import { extensionConfigStorage } from '@extension/storage';
 import { TabManagementService, BuyingStateService } from '@extension/shared';
 
@@ -75,15 +82,17 @@ async function handleMessage(
         return handleBuyingState(message.payload);
 
       case 'image.solve':
+        const requestId = `state-${Date.now()}`;
         return processImageAPI(message.payload.imageData)
                     .then(result => {
                         console.log('[Background] Successfully processed image');
-                        return ({ success: true, result: result.result });
+                        return ({ success: true, result: result.result, requestId });
                     })
                     .catch(error => {
                         console.error('[Background] Error processing image:', error);
                         return ({
                             success: false,
+                            requestId,
                             error: error instanceof Error ? error.message : 'Unknown error'
                         });
                     });
@@ -100,15 +109,40 @@ async function handleMessage(
         });
         return { success: true, requestId: `telemetry-${Date.now()}` };
 
-      case 'extension.getConfig':
+case 'extension.getConfig':
         return {
           success: true,
           data: {
-                        config: await ConfigService.getConfig(),
-                        enabled: await ConfigService.isEnabled(),
-                    },
+            config: await ConfigService.getConfig(),
+            enabled: await ConfigService.isEnabled(),
+          },
           requestId: `config-${Date.now()}`
         };
+
+      case 'extension.startFlow': {
+        const payload = message.payload as FlowPayload;
+        const flow =
+          payload.type === 'email'
+            ? FlowUtils.email(payload.id, payload.title, payload.href)
+            : FlowUtils.inbox(payload.id, payload.requestTimestamp, payload.title, payload.href);
+
+        const existed = await ConfigService.startFlow(flow);
+        return {
+          success: true,
+          data: existed,
+          requestId: `flow-start-${Date.now()}`,
+        };
+      }
+
+      case 'extension.getFlow': {
+        const { id } = message.payload as { id: string };
+        const flow = await ConfigService.getFlow(id);
+        return {
+          success: true,
+          data: flow,
+          requestId: `flow-get-${Date.now()}`,
+        };
+      }
 
       default:
         throw new Error(`Unknown command type: ${String(message.type)}`);
@@ -305,30 +339,3 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
   return data;
 }
 
-/**
- * Listen for messages from content scripts
- */
-// chrome.runtime.onMessage.addListener((request: any, sender: chrome.runtime.MessageSender, sendResponse) => {
-//   console.log('[Background] Received message:', request.type, 'from tab:', sender.tab?.id);
-//
-//   if (request.type === 'PROCESS_IMAGE') {
-//     // Process the image asynchronously
-//     processImageAPI(request.imageData)
-//       .then(result => {
-//         console.log('[Background] Successfully processed image');
-//         sendResponse({ success: true, result: result.result });
-//       })
-//       .catch(error => {
-//         console.error('[Background] Error processing image:', error);
-//         sendResponse({
-//           success: false,
-//           error: error instanceof Error ? error.message : 'Unknown error'
-//         });
-//       });
-//
-//     // Return true to indicate we'll send a response asynchronously
-//     return true;
-//   }
-//
-//   return false;
-// });

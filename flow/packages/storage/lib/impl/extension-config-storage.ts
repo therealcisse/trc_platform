@@ -1,5 +1,5 @@
 import { createStorage, StorageEnum, ExtensionStorageType } from '../base/index.js';
-import type { ExecutionConfig, ExtensionStorage } from '@extension/types';
+import type { ExecutionConfig, ExtensionStorage, Flow } from '@extension/types';
 import {
   validateStorageData,
   ExtensionStorageSchema,
@@ -50,6 +50,7 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
   managedTabs: {},
   buyingOffers: {},
   productStrategies: [],
+  flows: {},
 };
 
 const storage = createStorage<ExtensionStorage>('extension-config-storage-key', DEFAULT_CONFIG, {
@@ -59,6 +60,76 @@ const storage = createStorage<ExtensionStorage>('extension-config-storage-key', 
 
 export const extensionConfigStorage: ExtensionStorageType = {
   ...storage,
+
+  // Flow management namespace
+  flows: {
+    async cleanupOldFlows(): Promise<void> {
+      const dayAgo = Date.now() - 24 * 60 * 60 * 1000;
+      const removed: string[] = [];
+
+      await storage.set(currentState => {
+        const newFlows = { ...currentState.flows };
+        for (const [id, flow] of Object.entries(newFlows)) {
+          if (flow.timestamp < dayAgo) {
+            removed.push(id);
+            delete newFlows[id];
+          }
+        }
+        return validateStorageData(ExtensionStorageSchema, {
+          ...currentState,
+          flows: newFlows,
+        });
+      });
+
+      if (removed.length > 0) {
+        await extensionConfigStorage.logs.addLog(
+          `[Flow] Cleaned up ${removed.length} old flows: ${removed.join(', ')}`,
+        );
+      }
+    },
+
+    async startFlow(flow: Flow): Promise<boolean> {
+      // Trigger cleanup
+      void this.cleanupOldFlows();
+
+      const current = await storage.get();
+      if (current.flows[flow.id]) {
+        return true;
+      }
+
+      await storage.set(currentState =>
+        validateStorageData(ExtensionStorageSchema, {
+          ...currentState,
+          flows: {
+            ...currentState.flows,
+            [flow.id]: flow,
+          },
+        }),
+      );
+      return false;
+    },
+
+    async doneFlow(id: string): Promise<void> {
+      await storage.set(currentState => {
+        const flow = currentState.flows[id];
+        if (flow) {
+          return validateStorageData(ExtensionStorageSchema, {
+            ...currentState,
+            flows: {
+              ...currentState.flows,
+              [id]: { ...flow, status: 'done' },
+            },
+          });
+        }
+        return currentState;
+      });
+    },
+
+    async getFlow(id: string): Promise<Flow | undefined> {
+      const current = await storage.get();
+      return current.flows[id];
+    },
+  },
 
   // Core methods
   toggleEnabled: async () => {

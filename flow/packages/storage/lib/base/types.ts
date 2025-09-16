@@ -1,5 +1,5 @@
 import type { StorageEnum } from './index.js';
-import type { ExecutionConfig, ExtensionStorage } from '@extension/types';
+import type { ExecutionConfig, ExtensionStorage, Flow } from '@extension/types';
 import type { ValidatedBuyingOffer, ValidatedLogEntry, ValidatedProductStrategy } from '../validation/storage.js';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
@@ -94,5 +94,12 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
     get(): Promise<ValidatedProductStrategy[]>;
     set(strategies: ValidatedProductStrategy[]): Promise<void>;
     clear(): Promise<void>;
+  };
+
+  flows: {
+    cleanupOldFlows(): Promise<void>;
+    startFlow(flow: Flow): Promise<boolean>;
+    doneFlow(id: string): Promise<void>;
+    getFlow(id: string): Promise<Flow | undefined>;
   };
 };

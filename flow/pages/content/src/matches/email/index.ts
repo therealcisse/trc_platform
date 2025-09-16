@@ -10,6 +10,7 @@ import {
 } from '@src/lib';
 import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
+import { FlowUtils } from '@extension/types';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing
@@ -145,13 +146,13 @@ export async function executeEmailWorkflow(
     const randomRefreshSeconds = random(refreshMin, refreshMax);
     log.push(`Will refresh in ${randomRefreshSeconds}s`);
 
-    // setTimeout(() => {
-    //   if (!context.dryRun) {
-    //     window.location.reload();
-    //   } else {
-    //     log.push('Dry run: Would reload page').write();
-    //   }
-    // }, randomRefreshSeconds * 1000);
+    setTimeout(() => {
+      if (!context.dryRun) {
+        window.location.reload();
+      } else {
+        log.push('Dry run: Would reload page').write();
+      }
+    }, randomRefreshSeconds * 1000);
 
     // Process emails
     await processEmails();
@@ -186,7 +187,7 @@ export async function executeEmailWorkflow(
           }
 
           // Wait for email content to load
-          // await sleep(1000);
+          await sleep(1000);
 
           try {
             // Find link in email body
@@ -197,6 +198,34 @@ export async function executeEmailWorkflow(
 
             if (linkElement instanceof HTMLAnchorElement) {
               const href = linkElement.href;
+              const title = linkElement.textContent ?? '';
+              let id: string;
+
+              try {
+                // Parse ID from path as per requirement
+                id = FlowUtils.parseIDFromPath(href);
+              } catch (e) {
+                const errorMsg = `[Flow] Failed to parse ID from ${href}: ${e}`;
+                log.push(errorMsg);
+                await sendBackgroundCommand('extension.log', { text: errorMsg });
+                continue;
+              }
+
+              // Start flow and check if it already exists
+              const startFlowResult = await sendBackgroundCommand('extension.startFlow', {
+                type: 'email',
+                id,
+                title,
+                href,
+              });
+
+              if (startFlowResult.success && startFlowResult.data === true) {
+                // Flow already exists, skip this link
+                const skipMsg = `[Flow] Skipping email with existing flow: ${id}`;
+                log.push(skipMsg);
+                await sendBackgroundCommand('extension.log', { text: skipMsg });
+                continue;
+              }
 
               // Check if we've already visited this URL
               if (!visitedUrls[href]) {

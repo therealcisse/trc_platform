@@ -40,6 +40,16 @@ export const LogEntrySchema = z.object({
   message: z.string(),
 });
 
+export const FlowSchema = z.object({
+  id: z.string(),
+  timestamp: z.number(),
+  requestTimestamp: z.number(),
+  status: z.enum(['running', 'done']),
+  source: z.enum(['email', 'inbox']),
+  title: z.string(),
+  href: z.string(),
+});
+
 export const ProductPatternSchema = z.object({
   insuredType: z.string().optional(),
   insuredAge: z
@@ -73,6 +83,7 @@ export const ExtensionStorageSchema = z.object({
   managedTabs: z.record(z.number(), z.number()),
   buyingOffers: z.record(z.string(), BuyingOfferSchema),
   productStrategies: z.array(StoredProductStrategySchema),
+  flows: z.record(z.string(), FlowSchema),
 });
 
 export function validateStorageData<T>(schema: z.ZodSchema<T>, data: unknown): T {
@@ -84,4 +95,5 @@ export type ValidatedExecutionConfig = z.infer<typeof ExecutionConfigSchema>;
 export type ValidatedBuyingOffer = z.infer<typeof BuyingOfferSchema>;
 export type ValidatedLogEntry = z.infer<typeof LogEntrySchema>;
 export type ValidatedProductStrategy = z.infer<typeof ProductStrategySchema>;
+export type ValidatedFlow = z.infer<typeof FlowSchema>;
 export type ValidatedExtensionStorage = z.infer<typeof ExtensionStorageSchema>;

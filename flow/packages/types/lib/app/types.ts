@@ -153,6 +153,23 @@ export interface CommandResponse<T = any> {
 }
 
 // Background command definitions
+export interface EmailFlowPayload {
+  type: 'email';
+  id: string;
+  title: string;
+  href: string;
+}
+
+export interface InboxFlowPayload {
+  type: 'inbox';
+  id: string;
+  requestTimestamp: number;
+  title: string;
+  href: string;
+}
+
+export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
+
 export interface BackgroundCommands {
   'email.openUnreadAndClickLink': EmailCommand;
   'offers.clickProductLink': OffersCommand;
@@ -164,6 +181,9 @@ export interface BackgroundCommands {
   'extension.log': { text: string };
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
+  'image.solve': { imageData: string };
+  'extension.startFlow': FlowPayload;
+  'extension.getFlow': { id: string };
 }
 
 export interface EmailCommand {
@@ -260,6 +280,18 @@ export interface ClickOptions {
 }
 
 // Storage types
+export interface Flow {
+  id: string;
+  timestamp: number;
+  requestTimestamp: number;
+  status: 'running' | 'done';
+  source: 'email' | 'inbox';
+  title: string;
+  href: string;
+}
+
+export type FlowState = Record<string, Flow>;
+
 export interface ExtensionStorage {
   enabled: boolean;
   config: ExecutionConfig;
@@ -270,6 +302,7 @@ export interface ExtensionStorage {
   managedTabs: Record<number, number>;
   buyingOffers: Record<string, BuyingOffer>;
   productStrategies: StoredProductStrategy[];
+  flows: FlowState;
 }
 
 export interface BuyingOffer {
