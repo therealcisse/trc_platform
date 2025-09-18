@@ -4,6 +4,7 @@ import { emailCommandHandler } from './commands/email';
 import { itemCommandHandler } from './commands/item';
 import { myOfferCommandHandler } from './commands/myOffer';
 import { buyOfferCommandHandler } from './commands/buyOffer';
+import { BackgroundLoggerService } from './services/logger-service';
 import type {
     FlowPayload,
     BackgroundCommands,
@@ -103,7 +104,8 @@ async function handleMessage(
                     });
 
       case 'extension.log':
-        console.log(`[Extension] ${message.payload.text}`);
+        // Store logs in background LogManager
+        BackgroundLoggerService.handleLogMessage(message.payload);
         return { success: true, requestId: 'log' };
 
       case 'extension.telemetry':
@@ -148,6 +150,31 @@ async function handleMessage(
           requestId: id,
         };
       }
+
+      case 'logs.query':
+        // Handle log queries from content scripts or popup
+        try {
+          const result = BackgroundLoggerService.queryLogs(message.payload);
+          return { 
+            success: true, 
+            data: result,
+            requestId: 'logs-query' 
+          };
+        } catch (error) {
+          return {
+            success: false,
+            error: error instanceof Error ? error.message : 'Unknown error',
+            requestId: 'logs-query'
+          };
+        }
+
+      case 'logs.stats':
+        // Get log statistics
+        return {
+          success: true,
+          data: BackgroundLoggerService.getLogStats(),
+          requestId: 'logs-stats'
+        };
 
       default:
         throw new Error(`Unknown command type: ${String(message.type)}`);

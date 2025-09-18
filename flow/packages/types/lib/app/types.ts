@@ -169,7 +169,13 @@ export interface BackgroundCommands {
   'executor.run': ExecutorRequest;
   'tab.manage': TabManagementCommand;
   'state.buying': BuyingStateCommand;
-  'extension.log': { text: string };
+  'extension.log': {
+    matcherId: string;
+    flowId?: string;
+    messages: Array<{ message: string; timestamp: number; level: 'info' | 'warn' | 'error' | 'debug' }>;
+    metadata?: Record<string, any>;
+    timestamp: number;
+  };
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
   'item.clickProductLink': ItemCommand;
@@ -177,6 +183,13 @@ export interface BackgroundCommands {
   'image.solve': { imageData: string };
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
+  'logs.query': {
+    action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline' | 'clearOldLogs';
+    flowId?: string;
+    matcherId?: string;
+    olderThanMs?: number;
+  };
+  'logs.stats': {};
 }
 
 export interface EmailCommand {

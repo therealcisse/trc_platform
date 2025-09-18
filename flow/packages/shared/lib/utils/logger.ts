@@ -16,7 +16,7 @@ interface LogStorage {
   matcherIndex: Map<string, string[]>;
 }
 
-class LogManager {
+export class LogManager {
   private static instance: LogManager;
   private storage: LogStorage = {
     entries: new Map(),
@@ -269,6 +269,81 @@ export class FlowLog {
 
   static cleanupOldLogs(olderThanMs?: number): void {
     LogManager.getInstance().clearOldLogs(olderThanMs);
+  }
+
+  /**
+   * Query logs from background script
+   * These methods work in background context or via message passing
+   */
+  static async queryLogs(params: {
+    action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline';
+    flowId?: string;
+    matcherId?: string;
+  }): Promise<LogEntry[] | string> {
+    // Check if we're in background context
+    if (typeof chrome !== 'undefined' && !chrome.runtime?.sendMessage) {
+      // We're in background - use LogManager directly
+      const logManager = LogManager.getInstance();
+      switch (params.action) {
+        case 'getAllLogs':
+          return logManager.getAllLogs();
+        case 'getFlowLogs':
+          return logManager.getLogsByFlowId(params.flowId!);
+        case 'getMatcherLogs':
+          return logManager.getLogsByMatcherId(params.matcherId!);
+        case 'exportFlowTimeline':
+          return FlowLog.exportFlowTimeline(params.flowId!);
+        default:
+          throw new Error(`Unknown action: ${params.action}`);
+      }
+    }
+
+    // We're in content script - send message to background
+    if (chrome?.runtime?.sendMessage) {
+      const response = await chrome.runtime.sendMessage({
+        type: 'logs.query',
+        payload: params,
+      });
+
+      if (response.success) {
+        return response.data;
+      }
+      throw new Error(response.error);
+    }
+
+    // Fallback to local LogManager (won't have all logs)
+    return LogManager.getInstance().getAllLogs();
+  }
+
+  /**
+   * Get log statistics (works from any context)
+   */
+  static async getStats(): Promise<{
+    totalLogs: number;
+    logsByLevel: Record<string, number>;
+    logsByMatcher: Record<string, number>;
+    oldestLog: Date | null;
+    newestLog: Date | null;
+  }> {
+    if (typeof chrome !== 'undefined' && chrome.runtime?.sendMessage) {
+      const response = await chrome.runtime.sendMessage({
+        type: 'logs.stats',
+        payload: {},
+      });
+
+      if (response.success) {
+        return response.data;
+      }
+    }
+
+    // Fallback for background context or no messaging
+    return {
+      totalLogs: 0,
+      logsByLevel: {},
+      logsByMatcher: {},
+      oldestLog: null,
+      newestLog: null,
+    };
   }
 }
 
