@@ -77,10 +77,6 @@ const manifest = {
     //   matches: ['http://localhost:8082/'],
     //   js: ['content/simulations.iife.js'],
     // },
-    {
-      matches: ['http://localhost:8082/pages/*'],
-      js: ['content/solver.iife.js'],
-    },
     // {
     //   matches: ['http://*/*', 'https://*/*', '<all_urls>'],
     //   js: ['content-ui/all.iife.js'],

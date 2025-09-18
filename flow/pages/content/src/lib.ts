@@ -4,13 +4,11 @@ import type {
   CommandResponse,
   ExecutionContext,
   ExecutionResult,
-  ExecutionConfig,
   WaitOptions,
   ClickOptions,
   TelemetryEvent,
   LogEntry,
   LocalDate as LocalDateType,
-  Product as ProductInterface,
 } from '@extension/types';
 
 // LocalDate utility class
@@ -298,117 +296,6 @@ export async function assertValidTimeOfDay(config: any): Promise<void> {
   while (!isValidTimeOfDay(config)) {
     console.log('[Extension] Invalid time of day, waiting...');
     await sleep(60000); // Wait 1 minute
-  }
-}
-
-// Product utility class for parsing and validating products
-export class Product implements ProductInterface {
-  valid: boolean = false;
-  text: string;
-  name?: string;
-  insuredType?: string;
-  insuredAge?: number;
-  meta: Record<string, any> = {};
-
-  constructor(text: string) {
-    this.text = text;
-    this.parse();
-  }
-
-  private parse(): void {
-    const match = this.text.match(/([^:]+).* (?:(\S+)\s+Alter|Alter\s+(\S+)): (\d+)/);
-    if (!match) {
-      console.log(`[Extension] Failed matching: ${this.text}`);
-      this.valid = false;
-      return;
-    }
-
-    this.name = match[1];
-    this.insuredType = match[2] || match[3];
-    this.insuredAge = parseInt(match[4]);
-    this.meta = {};
-
-    if (isNaN(this.insuredAge)) {
-      console.log(`[Extension] Failed parsing age: ${match[4]}`);
-      this.valid = false;
-      return;
-    }
-
-    // Special handling for KV-Voll Arbeitnehmer KW
-    if (this.name === 'KV-Voll Arbeitnehmer KW') {
-      this.meta.aboveIncomeLimit = false;
-
-      if (this.text.match(/Tätigkeit:\sAngestellter/)) {
-        this.meta.aboveIncomeLimit = true;
-      }
-
-      // Check if JAEG is present above income threshold
-      const jaegMatch = this.text.match(/(\S+) JAEG/);
-      if (jaegMatch) {
-        this.meta.aboveIncomeLimit = jaegMatch[1] === 'über';
-      }
-    }
-
-    this.valid = true;
-  }
-
-  isAllowed(config: ExecutionConfig): { allowed: boolean; delay: number } {
-    const result = { allowed: false, delay: 0 };
-    if (!this.valid) {
-      return result;
-    }
-
-    const useAnimals = config.animals;
-    const useCancer = config.cancer;
-    const usePeople = config.people;
-
-    // Animal insurance products
-    if (useAnimals && this.name === 'Tier KV KW') {
-      if (this.insuredType === 'Hund' && this.insuredAge <= 3) {
-        result.allowed = true;
-        result.delay = random(config.animalTimerMin, config.animalTimerMax);
-        return result;
-      }
-    }
-
-    // Cancer scan products
-    if (useCancer && this.name === 'Krebs-Scan KW') {
-      result.allowed = true;
-      result.delay = random(config.cancerTimerMin, config.cancerTimerMax);
-      return result;
-    }
-
-    // People insurance products
-    if (usePeople) {
-      const delay = random(config.peopleTimerMin, config.peopleTimerMax);
-      if (this.insuredAge <= 60) {
-        switch (this.name) {
-          case 'KV-Voll Selbstständige KW':
-            result.allowed = true;
-            result.delay = delay;
-            return result;
-          case 'KV-Voll Arbeitnehmer KW':
-            result.allowed = this.meta.aboveIncomeLimit;
-            result.delay = delay;
-            return result;
-        }
-      }
-    }
-
-    return result;
-  }
-
-  toString(): string {
-    if (!this.valid) {
-      return 'Invalid Product';
-    }
-
-    return JSON.stringify({
-      name: this.name,
-      insuredType: this.insuredType,
-      insuredAge: this.insuredAge,
-      meta: this.meta,
-    });
   }
 }
 

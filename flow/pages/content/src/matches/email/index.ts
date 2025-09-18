@@ -10,7 +10,7 @@ import {
 } from '@src/lib';
 import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
-import { FlowUtils } from '@extension/types';
+import { FlowUtils } from '@extension/shared';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing
@@ -118,8 +118,6 @@ new MutationObserver(() => {
     checkAndRun();
   }
 }).observe(document, { subtree: true, childList: true });
-
-export default emailMatcher;
 
 /**
  * Email Executor - Processes unread emails by opening them and clicking links

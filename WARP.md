@@ -324,6 +324,7 @@ Editor/Agent Notes
 - Node: >=22.15.1; package manager: pnpm@10.11.0. Run commands from repo root with -C to target subprojects.
 - Tests discovery (pytest): backend/pyproject.toml config; run specific test with -k or node selection (file::TestClass::test_name).
 - Husky/lint-staged (flow): Prettier + ESLint run on staged files.
+- Type Synchronization: When modifying types in packages/types, update corresponding Zod schemas in packages/storage/lib/validation/storage.ts to maintain type consistency.
 
 Cursor/Copilot Rules
 - No .cursor or Copilot rules detected in this repo at time of writing. If added later (e.g., .cursor/rules/, .cursorrules, .github/copilot-instructions.md), mirror their key points here.

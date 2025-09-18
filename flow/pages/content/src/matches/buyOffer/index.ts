@@ -1,7 +1,7 @@
 import { registerMatcher, waitForSelector, clickWithVerification, sendBackgroundCommand, Log, sleep } from '@src/lib';
-import { ProductFactory } from '@src/factory/ProductFactory';
-import { isInvalidProduct } from '@src/types';
-import { FlowUtils, type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
+import { FlowUtils, ProductFactory } from '@extension/shared';
+import { isInvalidProduct } from '@extension/types';
+import { type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@extension/types';
 
 /**
@@ -179,8 +179,6 @@ function checkAndRun() {
 
 // Check on initial load
 checkAndRun();
-
-export default buyOfferMatcher;
 
 /**
  * Buy Offer Executor - Executes purchase workflow after validation and delay

@@ -3,16 +3,17 @@ import { ConfigService } from '@extension/shared';
 import { emailCommandHandler } from './commands/email';
 import { itemCommandHandler } from './commands/item';
 import { buyOfferCommandHandler } from './commands/buyOffer';
-import {
-    FlowUtils,
-} from '@extension/types';
 import type {
     FlowPayload,
     BackgroundCommands,
     CommandResponse,
 } from '@extension/types';
 import { extensionConfigStorage } from '@extension/storage';
-import { TabManagementService, BuyingStateService } from '@extension/shared';
+import {
+  FlowUtils,
+  TabManagementService,
+  BuyingStateService,
+} from '@extension/shared';
 
 // Service instances
 const tabService = new TabManagementService(extensionConfigStorage);

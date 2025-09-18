@@ -11,17 +11,23 @@ import {
 
 import type { StoredProductStrategy } from '@extension/types';
 
+export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
+  enabled: false,
+  min: 8,
+  max: 17,
+} as const;
+
 export const DEFAULT_CONFIG: ExtensionStorage = {
   enabled: true,
   config: {
     operationalHours: {
-      0: { enabled: true, min: 8, max: 17 }, // Sunday
-      1: { enabled: true, min: 8, max: 17 }, // Monday
-      2: { enabled: true, min: 8, max: 17 }, // Tuesday
-      3: { enabled: true, min: 8, max: 17 }, // Wednesday
-      4: { enabled: true, min: 8, max: 17 }, // Thursday
-      5: { enabled: true, min: 8, max: 17 }, // Friday
-      6: { enabled: true, min: 8, max: 17 }, // Saturday
+      Sunday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
+      Monday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
+      Tuesday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
+      Wednesday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
+      Thursday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
+      Friday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
+      Saturday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
     },
     emailMode: true,
     emailRefreshMin: 30,
@@ -36,14 +42,17 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     animals: true,
     animalTimerMin: 10,
     animalTimerMax: 30,
+    animalProcessingTimeSeconds: 0,
 
     cancer: true,
     cancerTimerMin: 15,
     cancerTimerMax: 45,
+    cancerProcessingTimeSeconds: 0,
 
     people: true,
     peopleTimerMin: 20,
     peopleTimerMax: 60,
+    peopleProcessingTimeSeconds: 0,
   },
   // Initialize empty storage collections
   logs: [],

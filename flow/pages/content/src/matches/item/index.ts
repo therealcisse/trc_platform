@@ -8,8 +8,8 @@ import {
   clickWithVerification,
   sleep,
 } from '@src/lib';
-import { ProductFactory } from '@src/factory/ProductFactory';
-import { isInvalidProduct } from '@src/types';
+import { ProductFactory, FlowUtils } from '@extension/shared';
+import { isInvalidProduct } from '@extension/types';
 import type {
   Matcher,
   ExecutionContext,
@@ -19,7 +19,6 @@ import type {
   CommandResponse,
 } from '@extension/types';
 
-import { Flow, FlowUtils } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 
 /**
@@ -155,8 +154,6 @@ checkAndRun();
 //     childList: true,
 //     subtree: true,
 // });
-
-export default itemMatcher;
 
 /**
  * Item Executor - Processes item pages by identifying and clicking valid products

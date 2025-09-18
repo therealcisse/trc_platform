@@ -1,32 +1,26 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { extensionConfigStorage } from '@extension/storage';
+import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { type ExecutionConfig, type OperationalHours } from '@extension/types';
 import { Fragment } from 'react';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
-const DAYS = [
-  { value: 0, label: 'Sunday' },
-  { value: 1, label: 'Monday' },
-  { value: 2, label: 'Tuesday' },
-  { value: 3, label: 'Wednesday' },
-  { value: 4, label: 'Thursday' },
-  { value: 5, label: 'Friday' },
-  { value: 6, label: 'Saturday' },
-];
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+
+type DayName = (typeof DAYS)[number];
 
 const Options = () => {
   const { enabled, config } = useStorage(extensionConfigStorage);
 
   const handleOperationalHoursChange = (
-    day: number,
-    field: keyof (typeof config.operationalHours)[number],
+    day: DayName,
+    field: keyof (typeof config.operationalHours)[string],
     value: boolean | number,
   ) => {
     const currentHours = config.operationalHours || {};
-    const currentDayConfig = currentHours[day] || { enabled: false, min: 8, max: 17 };
+    const currentDayConfig = currentHours[day] || DEFAULT_OPERATIONAL_HOURS_CONFIG;
 
     extensionConfigStorage.updateConfig({
       operationalHours: {
@@ -167,21 +161,21 @@ const Options = () => {
               <div className="rounded-lg bg-gray-800 p-6">
                 <div className="flex flex-col items-center space-y-4">
                   {DAYS.map(day => {
-                    const dayConfig = config.operationalHours?.[day.value] || { enabled: false, min: 8, max: 17 };
+                    const dayConfig = config.operationalHours?.[day] || DEFAULT_OPERATIONAL_HOURS_CONFIG;
                     return (
-                      <div key={day.value} className="flex w-full items-center justify-center gap-6">
+                      <div key={day} className="flex w-full items-center justify-center gap-6">
                         <div className="flex w-36 items-center justify-between">
-                          <span className="text-gray-300">{day.label}</span>
+                          <span className="text-gray-300">{day}</span>
                           <Switch
                             checked={dayConfig.enabled}
-                            onCheckedChange={checked => handleOperationalHoursChange(day.value, 'enabled', checked)}
+                            onCheckedChange={checked => handleOperationalHoursChange(day, 'enabled', checked)}
                             className="ml-4"
                           />
                         </div>
                         <div className="flex items-center gap-3">
                           <Select
                             value={dayConfig.min}
-                            onChange={value => handleOperationalHoursChange(day.value, 'min', Number(value))}
+                            onChange={value => handleOperationalHoursChange(day, 'min', Number(value))}
                             disabled={!dayConfig.enabled}
                             options={HOURS.map(hour => ({ value: hour, label: `${hour}:00` }))}
                             className="w-24 border-gray-600 bg-gray-700 text-gray-100"
@@ -189,7 +183,7 @@ const Options = () => {
                           <span className="text-gray-400">to</span>
                           <Select
                             value={dayConfig.max}
-                            onChange={value => handleOperationalHoursChange(day.value, 'max', Number(value))}
+                            onChange={value => handleOperationalHoursChange(day, 'max', Number(value))}
                             disabled={!dayConfig.enabled}
                             options={HOURS.map(hour => ({ value: hour, label: `${hour}:00` }))}
                             className="w-24 border-gray-600 bg-gray-700 text-gray-100"
@@ -237,43 +231,21 @@ const Options = () => {
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
-                  </div>
-                </div>
-
-                {/* Cancer */}
-                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Cancer Scan</h3>
-                    <Switch
-                      checked={config.cancer || false}
-                      onCheckedChange={() => handleConfigToggle('cancer')}
-                      className="SwitchRoot"
-                    />
-                  </div>
-                  <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Timer (minutes)</label>
+                      <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
                       <input
                         type="number"
-                        value={config.cancerTimerMin || 15}
-                        disabled={!config.cancer}
-                        onChange={e => extensionConfigStorage.updateConfig({ cancerTimerMin: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Timer (minutes)</label>
-                      <input
-                        type="number"
-                        value={config.cancerTimerMax || 45}
-                        disabled={!config.cancer}
-                        onChange={e => extensionConfigStorage.updateConfig({ cancerTimerMax: Number(e.target.value) })}
+                        min="0"
+                        value={config.animalProcessingTimeSeconds || 0}
+                        disabled={!config.animals}
+                        onChange={e =>
+                          extensionConfigStorage.updateConfig({ animalProcessingTimeSeconds: Number(e.target.value) })
+                        }
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
                   </div>
                 </div>
-
                 {/* People */}
                 <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex items-center justify-between">
@@ -302,6 +274,65 @@ const Options = () => {
                         value={config.peopleTimerMax || 60}
                         disabled={!config.people}
                         onChange={e => extensionConfigStorage.updateConfig({ peopleTimerMax: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={config.peopleProcessingTimeSeconds || 0}
+                        disabled={!config.people}
+                        onChange={e =>
+                          extensionConfigStorage.updateConfig({ peopleProcessingTimeSeconds: Number(e.target.value) })
+                        }
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {/* Cancer */}
+                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
+                  <div className="flex items-center justify-between">
+                    <h3 className="font-medium">Cancer Insurance</h3>
+                    <Switch
+                      checked={config.people || false}
+                      onCheckedChange={() => handleConfigToggle('cancer')}
+                      className="SwitchRoot"
+                    />
+                  </div>
+                  <div className="space-y-3">
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Min Timer (minutes)</label>
+                      <input
+                        type="number"
+                        value={config.cancerTimerMin || 20}
+                        disabled={!config.cancer}
+                        onChange={e => extensionConfigStorage.updateConfig({ cancerTimerMin: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Max Timer (minutes)</label>
+                      <input
+                        type="number"
+                        value={config.cancerTimerMax || 60}
+                        disabled={!config.cancer}
+                        onChange={e => extensionConfigStorage.updateConfig({ cancerTimerMax: Number(e.target.value) })}
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={config.cancerProcessingTimeSeconds || 0}
+                        disabled={!config.cancer}
+                        onChange={e =>
+                          extensionConfigStorage.updateConfig({ cancerProcessingTimeSeconds: Number(e.target.value) })
+                        }
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>

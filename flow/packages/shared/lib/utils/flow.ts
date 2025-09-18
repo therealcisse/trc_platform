@@ -1,4 +1,4 @@
-import type { Flow } from './types.ts';
+import type { Flow } from '@extension/types';
 
 export class FlowUtils {
   static parseIDFromTitle(title: string): string {

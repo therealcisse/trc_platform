@@ -28,6 +28,7 @@ const configs = Object.entries(getContentScriptEntries(matchesDir)).map(([name, 
         fileName: name,
       },
       outDir: resolve(rootDir, '..', '..', 'dist', 'content'),
+      emptyOutDir: false,
     },
   });
 });
