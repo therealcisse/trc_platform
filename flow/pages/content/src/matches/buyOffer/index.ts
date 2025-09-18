@@ -3,12 +3,11 @@ import {
   waitForSelector,
   clickWithVerification,
   sendBackgroundCommand,
-  Log,
   sleep,
   fetchImageAsBlob,
   extractNumericAnswer,
 } from '@src/lib';
-import { FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
+import { Log, FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
 import { isInvalidProduct } from '@extension/types';
 import { type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
@@ -49,57 +48,77 @@ class BuyOfferMatcher implements Matcher {
   ];
 
   async run(): Promise<void> {
-    const log = new Log('buy-offer-matcher');
-    log.push('Buy offer matcher activated');
+    const currentUrl = window.location.href;
+    const flowId = FlowUtils.parseIDFromHref(currentUrl);
+    const log = Log.withFlow(MATCHER_IDS.BUY_OFFER, flowId);
+    log.info('🔄 Buy offer matcher activated');
+    log.debug('Current URL', { url: currentUrl, flowId });
 
     try {
       // Get configuration and check if enabled
+      log.debug('Fetching extension configuration');
       const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
         config: ExecutionConfig;
         enabled: boolean;
       }>;
       const result = configResponse.data;
       if (!result) {
-        log.push('No configuration found').write();
+        log.warn('No configuration found - extension may not be initialized');
+        await log.write();
         return;
       }
 
       if (!result.enabled) {
-        log.push('Extension disabled').write();
+        log.info('Extension is currently disabled');
+        await log.write();
         return;
       }
 
+      log.info('Extension enabled, proceeding with buy offer detection');
+
       // Get product title
+      log.debug('Looking for product title element');
       const titleElement = document.querySelector('#page_buy_now h2');
       if (!titleElement) {
-        log.push('Product title not found').write();
+        log.warn('Product title not found - page may not be fully loaded');
+        await log.write();
         return;
       }
 
       const productText = titleElement.textContent || '';
-      log.push(`Found product: ${productText}`);
+      log.info(`Product detected: "${productText}"`);
 
       // Parse and validate product
+      log.debug('Parsing product with factory');
       const product = ProductFactory.parse(result.config, productText);
 
       if (isInvalidProduct(product)) {
-        log.push(`Invalid product format: ${product.error}`).write();
+        log.warn(`Invalid product format: ${product.error}`, { productText });
+        await log.write();
         return;
       }
 
-      log.push(`Product details: ${JSON.stringify(product)}`);
+      log.info('Product parsed successfully');
+      log.debug(`Product details`, {
+        name: product.name,
+        type: product.type,
+        allowed: product.allowed,
+        delay: product.delay,
+      });
 
-      const currentUrl = window.location.href;
-      const flowId = FlowUtils.parseIDFromHref(currentUrl);
+      // flowId already extracted at the start
 
       // Check if this flow is already being purchased
+      log.info('Checking if flow is already being purchased');
       const buyingStateResponse = await sendBackgroundCommand('state.buying', {
         action: 'check',
         flowId,
       });
 
       if (buyingStateResponse.data?.buying) {
-        log.push(`Already buying this flow (ID: ${flowId})`).write();
+        log.info(`Flow ${flowId} is already being purchased by another tab`);
+        log.debug('Closing this duplicate tab');
+        await log.write();
 
         // Close duplicate tab
         await sendBackgroundCommand('tab.manage', {
@@ -113,7 +132,8 @@ class BuyOfferMatcher implements Matcher {
       // Product is already validated by factory
       const { allowed, delay } = { allowed: product.allowed, delay: product.delay };
       if (!allowed) {
-        log.push('Product not allowed by configuration').write();
+        log.info('Product not allowed by current configuration', { product: product.name });
+        await log.write();
         return;
       }
 
@@ -123,15 +143,19 @@ class BuyOfferMatcher implements Matcher {
       const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
 
       // Mark flow as being purchased
+      log.info('Marking flow as being purchased to prevent duplicates');
       await sendBackgroundCommand('state.buying', {
         action: 'mark',
         flowId,
         timeout,
       });
 
-      log.push(`Starting purchase process (Flow ID: ${flowId}, delay: ${delaySeconds}s)`);
+      log.info(`🎯 Starting purchase process for flow ${flowId}`);
+      log.info(`Applied delay: ${delaySeconds} seconds`);
+      log.debug(`Timeout set to: ${new Date(timeout).toISOString()}`);
 
       // Send command to execute purchase
+      log.info('Triggering buy offer executor');
       const response = await sendBackgroundCommand('buyOffer.execute', {
         id: flowId,
         delay: delaySeconds,
@@ -144,18 +168,27 @@ class BuyOfferMatcher implements Matcher {
       });
 
       if (response.success) {
-        log.push('Buy offer executor triggered successfully').write();
+        log.info('✅ Buy offer executor triggered successfully');
+        log.debug('Executor response', { data: response.data });
       } else {
-        log.push(`Buy offer executor failed: ${response.error}`).write();
+        log.error(`❌ Buy offer executor failed: ${response.error}`);
+        log.debug('Clearing buying state after executor failure');
 
         // Clear buying state on failure
         await sendBackgroundCommand('state.buying', {
           action: 'clear',
           flowId,
         });
+        log.info('Buying state cleared');
       }
+
+      await log.write();
     } catch (error) {
-      log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
+      log.error(`❌ Critical error in buy offer matcher: ${error instanceof Error ? error.message : 'Unknown error'}`, {
+        error,
+        stack: error instanceof Error ? error.stack : undefined,
+      });
+      await log.write();
       console.error('[BuyOfferMatcher] Error:', error);
     }
   }
@@ -190,21 +223,22 @@ function checkAndRun() {
 // Check on initial load
 checkAndRun();
 
-/**
- * Buy Offer Executor - Executes purchase workflow after validation and delay
- */
 export async function executeBuyOfferWorkflow(
   context: ExecutionContext,
   selectors: BuyOfferSelectors,
 ): Promise<ExecutionResult> {
-  const log = new Log('buy-offer-executor');
+  const log = Log.withFlow(context.matcherId, context.flowId);
+  log
+    .info(`Starting buy offer workflow for tab ${context.tabId}`)
+    .setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
 
   try {
-    log.push(`Starting buy offer workflow for tab ${context.tabId}`);
+    log.info('Validating preconditions for buy offer workflow');
 
     // Wait for and focus captcha input first
+    log.debug('Waiting for captcha input element');
     const inputElement = (await waitForSelector(selectors.input, {
       timeout: 5000,
       visible: true,
@@ -213,26 +247,34 @@ export async function executeBuyOfferWorkflow(
     if (!inputElement) {
       throw new Error('Captcha input not found');
     }
+    log.info('Captcha input element found and ready');
 
     // Focus the input
     inputElement.focus();
+    log.debug('Captcha input focused');
 
     // Get product title for validation
+    log.debug('Retrieving product title for validation');
     const titleElement = await waitForSelector(selectors.productTitle, {
       timeout: 5000,
       visible: true,
     });
 
     const productText = titleElement.textContent || '';
+    log.info(`Product found: "${productText}"`);
+
     const product = ProductFactory.parse(context.config || {}, productText);
 
     if (isInvalidProduct(product)) {
+      log.error(`Invalid product format: ${product.error}`, { productText });
       throw new Error(product.error);
     }
 
-    log.push(`Product details: ${JSON.stringify(product)}`);
+    log.info('Product validated successfully');
+    log.debug(`Product details: ${JSON.stringify(product)}`);
 
     // Get buy button
+    log.debug('Locating buy button');
     const buyButton = await waitForSelector(selectors.buyFormButton, {
       timeout: 5000,
       visible: true,
@@ -241,8 +283,10 @@ export async function executeBuyOfferWorkflow(
     if (!buyButton) {
       throw new Error('Buy button not found');
     }
+    log.info('Buy button found and ready');
 
     // Check buying state (prevent race conditions)
+    log.info('Checking buying state to prevent race conditions');
     const buyingStateResponse = await sendBackgroundCommand('state.buying', {
       action: 'check',
       flowId: context.flowId,
@@ -250,7 +294,8 @@ export async function executeBuyOfferWorkflow(
 
     // Handle if another tab started buying this flow
     if (buyingStateResponse.data?.buying) {
-      log.push('Another tab is already buying this flow');
+      log.warn('Another tab is already buying this flow');
+      log.info('Closing duplicate tab to prevent double purchase');
 
       // Close this tab
       await sendBackgroundCommand('tab.manage', {
@@ -270,35 +315,43 @@ export async function executeBuyOfferWorkflow(
     const { allowed, delay } = { allowed: product.allowed, delay: product.delay };
 
     if (!allowed) {
+      log.warn('Product not allowed by configuration', { product: product.name });
       throw new Error('Product not allowed by configuration');
     }
 
     if (delay > 0) {
-      log.push(`Waiting ${delay} seconds before purchase`);
+      log.info(`Applying configured delay of ${delay} seconds before purchase`);
       await sleep(delay * 1000);
+      log.debug('Delay period completed');
     }
 
     const currentUrl = window.location.href;
 
     // After delay, validate flow
+    log.debug('Validating flow after delay');
     const id = FlowUtils.parseIDFromPath(currentUrl);
     const flow = await ConfigService.getFlow(id);
     if (!flow) {
+      log.error('Flow not found after delay', { flowId: id });
       throw new Error('Flow not found');
     }
+    log.info('Flow validation successful');
 
     // Process captcha
-    log.push('Processing captcha image');
+    log.info('Starting captcha processing');
     const imgElement = (await waitForSelector(selectors.img, {
       timeout: 5000,
       visible: true,
     })) as HTMLImageElement;
 
     if (!imgElement || !imgElement.src) {
+      log.error('Captcha image not found or invalid');
       throw new Error('Captcha image not found or invalid');
     }
+    log.debug(`Captcha image source: ${imgElement.src.substring(0, 50)}...`);
 
     // Convert image to blob
+    log.info('Converting captcha image to blob for processing');
     const imageBlob = await fetchImageAsBlob(imgElement.src);
     const reader = new FileReader();
     const imageDataUrl = await new Promise<string>((resolve, reject) => {
@@ -306,20 +359,26 @@ export async function executeBuyOfferWorkflow(
       reader.onerror = reject;
       reader.readAsDataURL(imageBlob);
     });
+    log.debug('Image conversion successful');
 
     // Send to API for processing
+    log.info('Sending captcha to API for solving');
     const imageResponse = await sendBackgroundCommand('image.solve', {
       imageData: imageDataUrl,
     });
 
     if (!imageResponse.success || !imageResponse.data?.result) {
+      log.error('Failed to process captcha', { error: imageResponse.error });
       throw new Error(imageResponse.error || 'Failed to process captcha');
     }
 
     // Extract and input the answer
     const answer = extractNumericAnswer(imageResponse.data.result);
+    log.info(`Captcha solved successfully: ${answer}`);
+
     inputElement.value = answer;
     inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+    log.debug('Answer entered into captcha field');
 
     // Calculate remaining time
     const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
@@ -329,14 +388,16 @@ export async function executeBuyOfferWorkflow(
     );
 
     if (remainingTime > 0) {
-      log.push(`Waiting ${remainingTime} seconds for remaining processing time`);
+      log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
       await sleep(remainingTime * 1000);
+      log.debug('Processing time wait completed');
     }
 
     // Execute purchase
-    log.push('Executing purchase');
+    log.info('EXECUTING FINAL PURCHASE');
 
     if (!context.dryRun) {
+      log.info('Clicking buy button to complete purchase');
       await clickWithVerification(buyButton, {
         delay: 200,
         verify: true,
@@ -344,11 +405,27 @@ export async function executeBuyOfferWorkflow(
       });
 
       // Wait for form submission
+      log.debug('Waiting for form submission to complete');
       await sleep(500);
+
+      // Mark flow as done
+      log.info('Purchase completed successfully, marking flow as done');
+      await ConfigService.doneFlow(context.flowId);
+      log.info(`Flow ${context.flowId} marked as completed`);
+
+      // Clear buying state on success
+      log.debug('Clearing buying state');
+      await sendBackgroundCommand('state.buying', {
+        action: 'clear',
+        flowId: context.flowId,
+      });
+      log.info('Buying state cleared successfully');
     } else {
-      log.push('Dry run: Would click buy button');
+      log.debug('Dry run: Would click buy button');
+      log.info('Dry run: Would mark flow as done');
     }
 
+    log.info(`✅ Buy offer workflow completed successfully for flow ${context.flowId}`);
     await log.write();
 
     return {
@@ -361,6 +438,7 @@ export async function executeBuyOfferWorkflow(
         appliedDelay: delay,
         captchaProcessed: true,
         answer,
+        completedAt: Date.now(),
       },
       telemetry: {
         startTime,
@@ -371,27 +449,37 @@ export async function executeBuyOfferWorkflow(
       },
     };
   } catch (error) {
-    log.push(`Fatal error: ${error}`).write();
+    log.error(`❌ Fatal error in buy offer workflow: ${error}`, {
+      stack: error instanceof Error ? error.stack : undefined,
+      flowId: context.flowId,
+      url: context.url,
+    });
+    await log.write();
     console.error('[BuyOfferExecutor] Fatal error:', error);
 
-    // Track specific error types
+    // Track specific error types for better debugging
     if (error instanceof Error) {
       errors.push(error);
       if (error.message.includes('captcha')) {
-        log.push('Captcha processing failed');
+        log.error('Captcha processing failure - may need manual intervention');
       } else if (error.message.includes('flow')) {
-        log.push('Flow validation failed');
+        log.error('Flow validation failure - flow may have expired or been processed');
+      } else if (error.message.includes('button')) {
+        log.error('UI interaction failure - page structure may have changed');
       }
     }
 
     // Clear buying state on failure
     try {
+      log.debug('Attempting to clear buying state after error');
       await sendBackgroundCommand('state.buying', {
         action: 'clear',
         flowId: context.flowId,
       });
+      log.info('Buying state cleared after error');
     } catch (cleanupError) {
       console.error('[BuyOfferExecutor] Error clearing buying state:', cleanupError);
+      log.error('Failed to clear buying state', { error: cleanupError });
       if (cleanupError instanceof Error) {
         errors.push(cleanupError);
       }
@@ -412,7 +500,6 @@ export async function executeBuyOfferWorkflow(
     };
   }
 }
-
 // Export for background script to inject
 if (typeof window !== 'undefined') {
   (window as any).__buyOfferExecutor = executeBuyOfferWorkflow;

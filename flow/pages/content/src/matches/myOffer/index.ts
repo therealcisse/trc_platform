@@ -1,14 +1,13 @@
 import {
   registerMatcher,
   sendBackgroundCommand,
-  Log,
   isValidTimeOfDay,
   assertValidTimeOfDay,
   waitForSelector,
   clickWithVerification,
   sleep,
 } from '@src/lib';
-import { ProductFactory, FlowUtils } from '@extension/shared';
+import { ProductFactory, FlowUtils, Log } from '@extension/shared';
 import { isInvalidProduct } from '@extension/types';
 import type {
   Matcher,
@@ -42,8 +41,10 @@ class MyOfferMatcher implements Matcher {
   ];
 
   async run(): Promise<void> {
-    const log = new Log('myOffer-matcher');
-    log.push('MyOffer matcher activated');
+    const currentUrl = window.location.href;
+    const id = FlowUtils.parseIDFromHref(currentUrl);
+    const log = Log.withFlow(MATCHER_IDS.MY_OFFER, id);
+    log.info('MyOffer matcher activated');
 
     try {
       // Get configuration and check if enabled
@@ -53,21 +54,23 @@ class MyOfferMatcher implements Matcher {
       }>;
       const result = configResponse.data;
       if (!result) {
-        log.push('No configuration found').write();
+        log.warn('No configuration found');
+        await log.write();
         return;
       }
 
       if (!result.enabled) {
-        log.push('Extension disabled').write();
+        log.info('Extension disabled');
+        await log.write();
         return;
       }
 
-      const currentUrl = window.location.href;
-      const id = FlowUtils.parseIDFromHref(currentUrl);
+      // id already extracted at the start
 
       await this.handleBrowseMyOffer(result.config, id, log);
     } catch (error) {
-      log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
+      log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
+      await log.write();
       console.error('[MyOfferMatcher] Error:', error);
     }
   }
@@ -84,10 +87,11 @@ class MyOfferMatcher implements Matcher {
     });
 
     if (response.success) {
-      log.push('Browse myOffer executor triggered successfully').write();
+      log.info('Browse myOffer executor triggered successfully');
     } else {
-      log.push(`Browse myOffer executor failed: ${response.error}`).write();
+      log.error(`Browse myOffer executor failed: ${response.error}`);
     }
+    await log.write();
   }
 
   private setupAutoRefresh(config: any): void {
@@ -145,13 +149,15 @@ export async function executeMyOfferWorkflow(
   context: ExecutionContext,
   selectors: MyOfferSelectors,
 ): Promise<ExecutionResult> {
-  const log = new Log('myOffer-executor');
+  const log = Log.withFlow(context.matcherId, context.flowId);
+  log
+    .info(`Starting myOffer workflow for tab ${context.tabId}`)
+    .setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
+  let processedCount = 0;
 
   try {
-    log.push(`Starting myOffer workflow for tab ${context.tabId}`);
-
     // Check if this is a managed tab
     const isManagedResponse = await sendBackgroundCommand('tab.manage', {
       action: 'isManaged',
@@ -159,7 +165,8 @@ export async function executeMyOfferWorkflow(
     });
 
     if (!isManagedResponse.data) {
-      log.push('Tab is not managed, skipping').write();
+      log.warn('Tab is not managed, skipping');
+      await log.write();
       return {
         success: false,
         matcherId: context.matcherId,
@@ -173,7 +180,7 @@ export async function executeMyOfferWorkflow(
     const flow = await ConfigService.getFlow(id);
 
     if (!flow) {
-      console.log('Flow not found');
+      log.warn('Flow not found');
     } else {
       await processMyOffer();
     }
@@ -185,39 +192,39 @@ export async function executeMyOfferWorkflow(
         const titleLink = document.querySelector(selectors.titleLink) as HTMLElement;
 
         if (!itemLlink) {
-          log.push('No item link found, skipping');
+          log.info('No item link found, skipping');
           return;
         }
 
         if (!titleLink) {
-          log.push('No title found, skipping');
+          log.info('No title found, skipping');
           return;
         }
 
         const productText = titleLink.textContent ?? '';
 
-        log.push(`Product: ${productText}`);
+        log.info(`Product: ${productText}`);
 
         const config = context.config || {};
         const product = ProductFactory.parse(config, productText);
 
         if (isInvalidProduct(product)) {
-          log.push(`Invalid product format: ${product.error}`);
+          log.warn(`Invalid product format: ${product.error}`);
           return;
         }
 
-        log.push(`Product details: ${JSON.stringify(product)}`);
+        log.debug(`Product details: ${JSON.stringify(product)}`);
 
         // Product is already validated by factory
         const { allowed } = { allowed: product.allowed };
 
         if (!allowed) {
-          log.push('Product not allowed by configuration, skipping');
+          log.info('Product not allowed by configuration, skipping');
           return;
         }
 
         // Open the myOffer
-        log.push(`Opening myOffer: ${itemLlink.href}`);
+        log.info(`Opening myOffer: ${itemLlink.href}`);
 
         if (!context.dryRun) {
           let id: string;
@@ -227,9 +234,8 @@ export async function executeMyOfferWorkflow(
             // Parse ID from path as per requirement
             id = FlowUtils.parseIDFromPath(href);
           } catch (e) {
-            const errorMsg = `[Flow] Failed to parse ID from ${href}: ${e}`;
-            log.push(errorMsg);
-            await sendBackgroundCommand('extension.log', { text: errorMsg });
+            const errorMsg = `Failed to parse ID from ${href}: ${e}`;
+            log.error(errorMsg);
           }
 
           let requestTimestampText = (document.querySelector(selectors.requestTimestampElement) as HTMLElement)
@@ -247,15 +253,13 @@ export async function executeMyOfferWorkflow(
 
           if (startFlowResult.success && startFlowResult.data === true) {
             // Flow already exists, skip this link
-            const skipMsg = `[Flow] Skipping email with existing flow: ${id}`;
-            log.push(skipMsg);
-            await sendBackgroundCommand('extension.log', { text: skipMsg });
+            log.info(`Skipping myOffer with existing flow: ${id}`);
           }
         } else {
-          log.push('Dry run: Would open myOffer in new tab');
+          log.debug('Dry run: Would open myOffer in new tab');
         }
       } catch (error) {
-        log.push(`Error in browse myOffer processing: ${error}`);
+        log.error(`Error in browse myOffer processing: ${error}`);
         errors.push(error as Error);
       }
     }
@@ -276,7 +280,8 @@ export async function executeMyOfferWorkflow(
       },
     };
   } catch (error) {
-    log.push(`Fatal error: ${error}`).write();
+    log.error(`Fatal error: ${error}`, { stack: error instanceof Error ? error.stack : undefined });
+    await log.write();
     console.error('[MyOfferExecutor] Fatal error:', error);
 
     return {

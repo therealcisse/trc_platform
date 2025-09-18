@@ -1,3 +1,4 @@
+export * from './logger.js';
 export * from './ProductFactory.js';
 export * from './flow.js';
 export * from './helpers.js';

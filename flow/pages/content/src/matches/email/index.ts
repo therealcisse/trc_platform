@@ -1,7 +1,6 @@
 import {
   registerMatcher,
   sendBackgroundCommand,
-  Log,
   waitForSelector,
   clickWithVerification,
   safeNavigate,
@@ -11,7 +10,7 @@ import {
 import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
-import { FlowUtils } from '@extension/shared';
+import { FlowUtils, Log } from '@extension/shared';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing
@@ -33,8 +32,9 @@ class EmailMatcher implements Matcher {
   ];
 
   async run(): Promise<void> {
-    const log = new Log('email-matcher');
-    log.push('Email matcher activated');
+    // Email doesn't have flowId initially
+    const log = new Log(MATCHER_IDS.EMAIL);
+    log.info('Email matcher activated');
 
     try {
       // Get configuration and check if enabled
@@ -45,21 +45,25 @@ class EmailMatcher implements Matcher {
 
       const result = configResponse.data;
       if (!result) {
-        log.push('No configuration found').write();
+        log.warn('No configuration found');
+        await log.write();
         return;
       }
 
       if (!result.enabled) {
-        log.push('Extension disabled').write();
+        log.info('Extension disabled');
+        await log.write();
         return;
       }
 
       if (!result.config.emailMode) {
-        log.push('Email mode disabled').write();
+        log.info('Email mode disabled');
+        await log.write();
         return;
       }
 
-      log.push('Triggering email executor').write();
+      log.info('Triggering email executor');
+      await log.write();
 
       // Send command to background to run email executor
       const response = await sendBackgroundCommand('email.openUnreadAndClickLink', {
@@ -71,12 +75,15 @@ class EmailMatcher implements Matcher {
       });
 
       if (response.success) {
-        log.push('Email executor triggered successfully').write();
+        log.info('Email executor triggered successfully');
+        await log.write();
       } else {
-        log.push(`Email executor failed: ${response.error}`).write();
+        log.error(`Email executor failed: ${response.error}`);
+        await log.write();
       }
     } catch (error) {
-      log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
+      log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
+      await log.write();
       console.error('[EmailMatcher] Error:', error);
     }
   }
@@ -127,15 +134,15 @@ export async function executeEmailWorkflow(
   context: ExecutionContext,
   selectors: EmailSelectors,
 ): Promise<ExecutionResult> {
-  const log = new Log('email-executor');
+  // Email executor doesn't have flowId initially
+  const log = new Log(context.matcherId);
+  log.info(`Starting email workflow for tab ${context.tabId}`);
   const startTime = Date.now();
   const errors: Error[] = [];
   let processedCount = 0;
   const visitedUrls: Record<string, boolean> = {};
 
   try {
-    log.push(`Starting email workflow for tab ${context.tabId}`);
-
     // Get configuration
     const config = context.config || {};
     const refreshMin = config.emailRefreshMin || 30;
@@ -143,13 +150,14 @@ export async function executeEmailWorkflow(
 
     // Setup refresh timer
     const randomRefreshSeconds = random(refreshMin, refreshMax);
-    log.push(`Will refresh in ${randomRefreshSeconds}s`);
+    log.info(`Will refresh in ${randomRefreshSeconds}s`);
 
-    setTimeout(() => {
+    setTimeout(async () => {
       if (!context.dryRun) {
         window.location.reload();
       } else {
-        log.push('Dry run: Would reload page').write();
+        log.debug('Dry run: Would reload page');
+        await log.write();
       }
     }, randomRefreshSeconds * 1000);
 
@@ -160,14 +168,15 @@ export async function executeEmailWorkflow(
       try {
         // Find all unread emails
         const emails = document.querySelectorAll(selectors.unreadEmail);
-        log.push(`Found ${emails.length} unread emails`);
+        log.info(`Found ${emails.length} unread emails`);
 
         if (emails.length === 0) {
           // Wait and check again
           await sleep(500);
           const retriedEmails = document.querySelectorAll(selectors.unreadEmail);
           if (retriedEmails.length === 0) {
-            log.push('No unread emails found after retry').write();
+            log.info('No unread emails found after retry');
+            await log.write();
             return;
           }
         }
@@ -176,11 +185,11 @@ export async function executeEmailWorkflow(
         for (const email of emails) {
           if (!(email instanceof HTMLElement)) continue;
 
-          log.push(`Processing email ${processedCount + 1}`);
+          log.info(`Processing email ${processedCount + 1}`);
 
           // Click to open the email
           if (context.dryRun) {
-            log.push('Dry run: Would click email');
+            log.debug('Dry run: Would click email');
           } else {
             await clickWithVerification(email, { delay: 100 });
           }
@@ -204,9 +213,8 @@ export async function executeEmailWorkflow(
                 // Parse ID from path as per requirement
                 id = FlowUtils.parseIDFromPath(href);
               } catch (e) {
-                const errorMsg = `[Flow] Failed to parse ID from ${href}: ${e}`;
-                log.push(errorMsg);
-                await sendBackgroundCommand('extension.log', { text: errorMsg });
+                const errorMsg = `Failed to parse ID from ${href}: ${e}`;
+                log.error(errorMsg);
                 continue;
               }
 
@@ -220,11 +228,16 @@ export async function executeEmailWorkflow(
 
               if (startFlowResult.success && startFlowResult.data === true) {
                 // Flow already exists, skip this link
-                const skipMsg = `[Flow] Skipping email with existing flow: ${id}`;
-                log.push(skipMsg);
-                await sendBackgroundCommand('extension.log', { text: skipMsg });
+                // Create a new log with flowId for this specific email
+                const flowLog = Log.withFlow(context.matcherId, id);
+                flowLog.info(`Skipping email with existing flow: ${id}`);
+                await flowLog.write();
                 continue;
               }
+
+              // Create a new log with flowId for this specific email flow
+              const flowLog = Log.withFlow(context.matcherId, id);
+              flowLog.info(`Processing new email flow`, { href, title });
 
               // Check if we've already visited this URL
               if (!visitedUrls[href]) {
@@ -233,7 +246,7 @@ export async function executeEmailWorkflow(
                 // Mark email as read
                 await markEmailAsRead(selectors.markAsReadButton);
 
-                log.push(`Opening link: ${href}`);
+                flowLog.info(`Opening link: ${href}`);
 
                 if (!context.dryRun) {
                   // Open link in new managed tab
@@ -242,16 +255,18 @@ export async function executeEmailWorkflow(
                     url: href,
                   });
                 } else {
-                  log.push('Dry run: Would open link in new tab');
+                  flowLog.debug('Dry run: Would open link in new tab');
                 }
 
+                await flowLog.write();
                 processedCount++;
               } else {
-                log.push('Link already visited, skipping');
+                flowLog.info('Link already visited, skipping');
+                await flowLog.write();
               }
             }
           } catch (error) {
-            log.push(`Error processing email content: ${error}`);
+            log.error(`Error processing email content: ${error}`);
             errors.push(error as Error);
           }
 
@@ -259,7 +274,7 @@ export async function executeEmailWorkflow(
           // await sleep(500);
         }
       } catch (error) {
-        log.push(`Error in email processing: ${error}`);
+        log.error(`Error in email processing: ${error}`);
         errors.push(error as Error);
       }
     }
@@ -274,13 +289,13 @@ export async function executeEmailWorkflow(
         if (markAsReadBtn instanceof HTMLElement) {
           if (!context.dryRun) {
             await clickWithVerification(markAsReadBtn, { delay: 100 });
-            log.push('Marked email as read');
+            log.info('Marked email as read');
           } else {
-            log.push('Dry run: Would mark email as read');
+            log.debug('Dry run: Would mark email as read');
           }
         }
       } catch (error) {
-        log.push(`Error marking email as read: ${error}`);
+        log.warn(`Error marking email as read: ${error}`);
         // Non-critical error, continue
       }
     }
@@ -305,7 +320,8 @@ export async function executeEmailWorkflow(
       },
     };
   } catch (error) {
-    log.push(`Fatal error: ${error}`).write();
+    log.error(`Fatal error: ${error}`, { stack: error instanceof Error ? error.stack : undefined });
+    await log.write();
     console.error('[EmailExecutor] Fatal error:', error);
 
     return {

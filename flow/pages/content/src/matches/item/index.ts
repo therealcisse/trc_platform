@@ -1,7 +1,6 @@
 import {
   registerMatcher,
   sendBackgroundCommand,
-  Log,
   isValidTimeOfDay,
   assertValidTimeOfDay,
   waitForSelector,
@@ -20,7 +19,7 @@ import type {
 } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
 
-import { ConfigService } from '@extension/shared';
+import { ConfigService, Log } from '@extension/shared';
 
 /**
  * Item Matcher - Detects item pages and triggers item processing
@@ -42,8 +41,10 @@ class ItemMatcher implements Matcher {
   ];
 
   async run(): Promise<void> {
-    const log = new Log('item-matcher');
-    log.push('Item matcher activated');
+    const currentUrl = window.location.href;
+    const id = FlowUtils.parseIDFromHref(currentUrl);
+    const log = Log.withFlow(MATCHER_IDS.ITEM, id);
+    log.info('Item matcher activated');
 
     try {
       // Get configuration and check if enabled
@@ -53,21 +54,23 @@ class ItemMatcher implements Matcher {
       }>;
       const result = configResponse.data;
       if (!result) {
-        log.push('No configuration found').write();
+        log.warn('No configuration found');
+        await log.write();
         return;
       }
 
       if (!result.enabled) {
-        log.push('Extension disabled').write();
+        log.info('Extension disabled');
+        await log.write();
         return;
       }
 
-      const currentUrl = window.location.href;
-      const id = FlowUtils.parseIDFromHref(currentUrl);
+      // id already extracted at the start
 
       await this.handleBrowseItem(result.config, id, log);
     } catch (error) {
-      log.push(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`).write();
+      log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
+      await log.write();
       console.error('[ItemMatcher] Error:', error);
     }
   }
@@ -83,10 +86,11 @@ class ItemMatcher implements Matcher {
     });
 
     if (response.success) {
-      log.push('Browse item executor triggered successfully').write();
+      log.info('Browse item executor triggered successfully');
     } else {
-      log.push(`Browse item executor failed: ${response.error}`).write();
+      log.error(`Browse item executor failed: ${response.error}`);
     }
+    await log.write();
   }
 
   private setupAutoRefresh(config: any): void {
@@ -144,16 +148,15 @@ export async function executeItemWorkflow(
   context: ExecutionContext,
   selectors: ItemSelectors,
 ): Promise<ExecutionResult> {
-  const log = new Log('item-executor');
+  const log = Log.withFlow(context.matcherId, context.flowId);
+  log.info(`Starting item workflow for tab ${context.tabId}`).setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
 
   try {
-    log.push(`Starting item workflow for tab ${context.tabId}`);
-
     // Check if we're in operation hours
     if (!isValidTimeOfDay(context.config)) {
-      log.push('Outside operation hours, scheduling reload at next minute mark');
+      log.warn('Outside operation hours, scheduling reload at next minute mark');
 
       // Calculate time until next minute
       const now = new Date();
@@ -169,6 +172,7 @@ export async function executeItemWorkflow(
         window.location.reload();
       }, delay + 100);
 
+      await log.write();
       return {
         success: false,
         matcherId: context.matcherId,
@@ -191,7 +195,8 @@ export async function executeItemWorkflow(
     });
 
     if (!isManagedResponse.data) {
-      log.push('Tab is not managed, skipping').write();
+      log.warn('Tab is not managed, skipping');
+      await log.write();
       return {
         success: false,
         matcherId: context.matcherId,
@@ -205,7 +210,7 @@ export async function executeItemWorkflow(
     const flow = await ConfigService.getFlow(id);
 
     if (!flow) {
-      console.log('Flow not found');
+      log.warn('Flow not found');
     } else {
       await processItem();
     }
@@ -217,39 +222,39 @@ export async function executeItemWorkflow(
         const titleLink = document.querySelector(selectors.titleLink) as HTMLElement;
 
         if (!buyButton) {
-          log.push('No buy button found, skipping');
+          log.info('No buy button found, skipping');
           return;
         }
 
         if (!titleLink) {
-          log.push('No title found, skipping');
+          log.info('No title found, skipping');
           return;
         }
 
         const productText = titleLink.textContent ?? '';
 
-        log.push(`Product: ${productText}`);
+        log.info(`Product: ${productText}`);
 
         const config = context.config || {};
         const product = ProductFactory.parse(config, productText);
 
         if (isInvalidProduct(product)) {
-          log.push(`Invalid product format: ${product.error}`);
+          log.warn(`Invalid product format: ${product.error}`);
           return;
         }
 
-        log.push(`Product details: ${JSON.stringify(product)}`);
+        log.debug(`Product details: ${JSON.stringify(product)}`);
 
         // Product is already validated by factory
         const { allowed } = { allowed: product.allowed };
 
         if (!allowed) {
-          log.push('Product not allowed by configuration, skipping');
+          log.info('Product not allowed by configuration, skipping');
           return;
         }
 
         // Open the item
-        log.push(`Opening item: ${buyButton.href}`);
+        log.info(`Opening item: ${buyButton.href}`);
 
         if (!context.dryRun) {
           await sendBackgroundCommand('tab.manage', {
@@ -257,10 +262,10 @@ export async function executeItemWorkflow(
             url: buyButton.href,
           });
         } else {
-          log.push('Dry run: Would open item in new tab');
+          log.debug('Dry run: Would open item in new tab');
         }
       } catch (error) {
-        log.push(`Error in browse item processing: ${error}`);
+        log.error(`Error in browse item processing: ${error}`);
         errors.push(error as Error);
       }
     }
@@ -281,7 +286,8 @@ export async function executeItemWorkflow(
       },
     };
   } catch (error) {
-    log.push(`Fatal error: ${error}`).write();
+    log.error(`Fatal error: ${error}`, { stack: error instanceof Error ? error.stack : undefined });
+    await log.write();
     console.error('[ItemExecutor] Fatal error:', error);
 
     return {

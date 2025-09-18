@@ -7,7 +7,6 @@ import type {
   WaitOptions,
   ClickOptions,
   TelemetryEvent,
-  LogEntry,
   LocalDate as LocalDateType,
 } from '@extension/types';
 
@@ -34,36 +33,6 @@ export class LocalDate implements LocalDateType {
 
   getDay(): number {
     return this.localDate.getDay();
-  }
-}
-
-// Logging utility
-export class Log {
-  private type: string;
-  private messages: string[] = [];
-
-  constructor(type: string) {
-    this.type = type;
-  }
-
-  push(message: string): this {
-    this.messages.push(message);
-    return this;
-  }
-
-  async write(): Promise<void> {
-    const entry: LogEntry = {
-      type: this.type,
-      messages: this.messages,
-      timestamp: new LocalDate().toString(),
-    };
-
-    const logMessage = `${entry.timestamp} [${entry.type}] ${entry.messages.join(' | ')}`;
-    console.log(`[Extension] ${logMessage}`);
-
-    await sendBackgroundCommand('extension.log', {
-      text: `[${entry.type}] ${entry.messages.join(' | ')}`,
-    });
   }
 }
 
@@ -106,34 +75,6 @@ export async function sendBackgroundCommand<T extends keyof BackgroundCommands>(
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
       requestId,
-    };
-  }
-}
-
-// Content script injection
-export async function injectExecutor(
-  tabId: number,
-  executorName: string,
-  context: ExecutionContext,
-): Promise<ExecutionResult> {
-  try {
-    const response = await sendBackgroundCommand('executor.run', {
-      executorName,
-      context,
-    });
-
-    if (!response.success) {
-      throw new Error(response.error || 'Executor injection failed');
-    }
-
-    return response.data as ExecutionResult;
-  } catch (error) {
-    console.error(`[Extension] Error injecting executor ${executorName}:`, error);
-    return {
-      success: false,
-      matcherId: context.matcherId,
-      executorName,
-      error: error instanceof Error ? error.message : 'Unknown error',
     };
   }
 }
