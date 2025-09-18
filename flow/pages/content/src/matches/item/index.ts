@@ -150,6 +150,39 @@ export async function executeItemWorkflow(
   try {
     log.push(`Starting item workflow for tab ${context.tabId}`);
 
+    // Check if we're in operation hours
+    if (!isValidTimeOfDay(context.config)) {
+      log.push('Outside operation hours, scheduling reload at next minute mark');
+
+      // Calculate time until next minute
+      const now = new Date();
+      const nextMinute = new Date(now);
+      nextMinute.setMinutes(now.getMinutes() + 1);
+      nextMinute.setSeconds(0);
+      nextMinute.setMilliseconds(0);
+
+      const delay = nextMinute.getTime() - now.getTime();
+
+      // Schedule reload at exact minute mark
+      setTimeout(() => {
+        window.location.reload();
+      }, delay + 100);
+
+      return {
+        success: false,
+        matcherId: context.matcherId,
+        executorName: 'item',
+        error: 'Outside operation hours, scheduled reload',
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          domOperations: 0,
+          networkRequests: 0,
+          errors,
+        },
+      };
+    }
+
     // Check if this is a managed tab
     const isManagedResponse = await sendBackgroundCommand('tab.manage', {
       action: 'isManaged',
