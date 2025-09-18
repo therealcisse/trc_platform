@@ -35,7 +35,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
         error: 'Extension is disabled',
         requestId: `buyOffer-${Date.now()}`
       };
-    } 
+    }
 
     const flow = await ConfigService.getFlow(payload.id)
 
@@ -84,8 +84,11 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       args: [
         JSON.stringify(context),
         JSON.stringify(payload.selectors || {
-          productTitle: '#page_buy_now h2',
-          buyFormButton: '#buyFormBtn'
+          input: '#captcha_code',           // Captcha input field
+          img: '#page_buy_now_captcha label img', // Captcha image
+          productTitle: '.col-sm-9 h2',     // Product title heading
+          buyFormButton: 'button[role="action"]' // Buy button
+
         })
       ]
     });

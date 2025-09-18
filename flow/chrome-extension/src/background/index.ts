@@ -109,7 +109,7 @@ async function handleMessage(
         });
         return { success: true, requestId: `telemetry-${Date.now()}` };
 
-case 'extension.getConfig':
+      case 'extension.getConfig':
         return {
           success: true,
           data: {

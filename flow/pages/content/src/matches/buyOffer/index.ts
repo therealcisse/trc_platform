@@ -23,12 +23,22 @@ class BuyOfferMatcher implements Matcher {
 
   domPreconditions = [
     {
-      selector: '#page_buy_now h2',
+      selector: '.col-sm-9 h2',
       shouldExist: true,
       timeout: 5000,
     },
     {
-      selector: '#buyFormBtn',
+      selector: 'button[role="action"]',
+      shouldExist: true,
+      timeout: 5000,
+    },
+    {
+      selector: '#captcha_code',
+      shouldExist: true,
+      timeout: 5000,
+    },
+    {
+      selector: '#page_buy_now_captcha label img',
       shouldExist: true,
       timeout: 5000,
     },
