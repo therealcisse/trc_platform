@@ -136,25 +136,6 @@ function checkAndRun() {
 // Check on initial load
 checkAndRun();
 
-// // Monitor for dynamic content changes (for map item)
-// const observer = new MutationObserver(mutationList => {
-//     // Look for map tiles being loaded
-//     const hasMapTiles = mutationList.some(
-//         m => m.target.nodeName === 'IMG' && (m.target as HTMLElement).className === 'leaflet-tile leaflet-tile-loaded',
-//     );
-//
-//     if (hasMapTiles) {
-//         console.log('[ItemMatcher] Map tiles loaded, running matcher');
-//         itemMatcher.run();
-//     }
-// });
-//
-// observer.observe(document.body, {
-//     attributes: true,
-//     childList: true,
-//     subtree: true,
-// });
-
 /**
  * Item Executor - Processes item pages by identifying and clicking valid products
  */
@@ -165,8 +146,6 @@ export async function executeItemWorkflow(
   const log = new Log('item-executor');
   const startTime = Date.now();
   const errors: Error[] = [];
-  let processedCount = 0;
-  const openedItem: string[] = [];
 
   try {
     log.push(`Starting item workflow for tab ${context.tabId}`);
@@ -237,7 +216,6 @@ export async function executeItemWorkflow(
 
         // Open the item
         log.push(`Opening item: ${buyButton.href}`);
-        openedItem.push(buyButton.href);
 
         if (!context.dryRun) {
           await sendBackgroundCommand('tab.manage', {

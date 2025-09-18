@@ -2,6 +2,7 @@ import 'webextension-polyfill';
 import { ConfigService } from '@extension/shared';
 import { emailCommandHandler } from './commands/email';
 import { itemCommandHandler } from './commands/item';
+import { myOfferCommandHandler } from './commands/myOffer';
 import { buyOfferCommandHandler } from './commands/buyOffer';
 import type {
     FlowPayload,
@@ -72,6 +73,9 @@ async function handleMessage(
 
       case 'item.clickProductLink':
         return itemCommandHandler(message.payload, sender);
+
+      case 'myOffer.clickProductLink':
+        return myOfferCommandHandler(message.payload, sender);
 
       case 'buyOffer.execute':
         return buyOfferCommandHandler(message.payload, sender);

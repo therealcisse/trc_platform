@@ -141,7 +141,7 @@ export async function ensureBuyOfferExecutorLoaded(tabId: number): Promise<void>
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/executors/buyOffer.js'] // This would be the compiled JS file
+      files: ['content/buyOffer.iife.js'] // This would be the compiled JS file
     });
 
     console.log('[Background] Buy offer executor injected into tab', tabId);

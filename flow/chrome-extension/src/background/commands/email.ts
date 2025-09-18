@@ -38,7 +38,7 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
     }
 
     // Create execution context
-    const context: ExecutionContext = {
+    const context: Record<string, any> = {
       tabId,
       url: sender.tab.url || '',
       matcherId: 'email-matcher',
@@ -69,11 +69,16 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
           executorName: 'email'
         };
       },
-      args: [JSON.stringify(context), JSON.stringify(payload.selectors || {
-        unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
-        emailBody: '#x_body a',
-        markAsReadButton: 'span'
-      })]
+      args: [
+        JSON.stringify(context),
+        JSON.stringify(
+          payload.selectors || {
+            unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
+            emailBody: '#x_body a',
+            markAsReadButton: 'span',
+          },
+        ),
+      ]
     });
 
     // Extract result from script execution
@@ -124,7 +129,7 @@ export async function ensureEmailExecutorLoaded(tabId: number): Promise<void> {
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/executors/email.js'] // This would be the compiled JS file
+      files: ['content/email.iife.js'] // This would be the compiled JS file
     });
 
     console.log('[Background] Email executor injected into tab', tabId);

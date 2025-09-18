@@ -54,6 +54,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       url: sender.tab.url || '',
       matcherId: 'item-matcher',
       config,
+      flowId: flow.id,
       timeout: 30000, // 30 seconds timeout
       dryRun: false
     };
@@ -144,7 +145,7 @@ export async function ensureItemExecutorLoaded(tabId: number): Promise<void> {
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/executors/item.js'] // This would be the compiled JS file
+      files: ['content/item.iife.js'] // This would be the compiled JS file
     });
 
     console.log('[Background] item executor injected into tab', tabId);

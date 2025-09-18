@@ -173,6 +173,7 @@ export interface BackgroundCommands {
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
   'item.clickProductLink': ItemCommand;
+  'myOffer.clickProductLink': MyOfferCommand;
   'image.solve': { imageData: string };
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
@@ -198,6 +199,17 @@ export interface ItemCommand {
 export interface ItemSelectors {
   buyButton: string;
   titleLink: string;
+}
+
+export interface MyOfferCommand {
+  productStrategies?: ProductStrategy[];
+  id: string;
+  selectors?: MyOfferSelectors;
+}
+
+export interface MyOfferSelectors {
+  titleLink: string;
+  itemLink: string;
 }
 
 export interface BuyOfferCommand {
