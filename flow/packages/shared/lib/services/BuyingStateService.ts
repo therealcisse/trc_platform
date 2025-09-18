@@ -4,23 +4,23 @@ import type { BuyingStateService as IBuyingStateService } from '@extension/types
 export class BuyingStateService implements IBuyingStateService {
   constructor(private storage: ExtensionStorageType) {}
 
-  async markBuying(key: string, id: string, timeout: number): Promise<void> {
-    await this.storage.buyingState.markBuying(key, id, timeout);
+  async markBuying(flowId: string, timeout: number): Promise<void> {
+    await this.storage.buyingState.markBuying(flowId, timeout);
   }
 
-  async isBuying(key: string): Promise<{ buying: boolean; id?: string }> {
-    return this.storage.buyingState.checkBuying(key);
+  async isBuying(flowId: string): Promise<{ buying: boolean }> {
+    return this.storage.buyingState.checkBuying(flowId);
   }
 
   async clearExpired(): Promise<void> {
     await this.storage.buyingState.clearExpired();
   }
 
-  async getBuyingOffer(key: string) {
-    return this.storage.buyingState.getBuyingOffer(key);
+  async getBuyingOffer(flowId: string) {
+    return this.storage.buyingState.getBuyingOffer(flowId);
   }
 
-  async clearBuying(key: string): Promise<void> {
-    await this.storage.buyingState.clearBuying(key);
+  async clearBuying(flowId: string): Promise<void> {
+    await this.storage.buyingState.clearBuying(flowId);
   }
 }

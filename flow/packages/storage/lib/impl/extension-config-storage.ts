@@ -155,37 +155,37 @@ export const extensionConfigStorage: ExtensionStorageType = {
 
   // Buying state namespace
   buyingState: {
-    async markBuying(key: string, id: string, timeout: number) {
-      const offer = validateStorageData(BuyingOfferSchema, { id, timeout });
+    async markBuying(flowId: string, timeout: number) {
+      const offer = validateStorageData(BuyingOfferSchema, { id: flowId, timeout });
       await storage.set(currentState =>
         validateStorageData(ExtensionStorageSchema, {
           ...currentState,
           buyingOffers: {
             ...currentState.buyingOffers,
-            [key]: offer,
+            [flowId]: offer,
           },
         }),
       );
     },
 
-    async checkBuying(key: string) {
+    async checkBuying(flowId: string) {
       const current = await storage.get();
-      const offer = current.buyingOffers[key];
+      const offer = current.buyingOffers[flowId];
 
       if (!offer) return { buying: false };
 
       const validated = validateStorageData(BuyingOfferSchema, offer);
       if (Date.now() > validated.timeout) {
-        await this.clearBuying(key);
+        await this.clearBuying(flowId);
         return { buying: false };
       }
 
-      return { buying: true, id: validated.id };
+      return { buying: true };
     },
 
-    async clearBuying(key: string) {
+    async clearBuying(flowId: string) {
       await storage.set(currentState => {
-        const { [key]: _, ...remainingOffers } = currentState.buyingOffers;
+        const { [flowId]: _, ...remainingOffers } = currentState.buyingOffers;
         return validateStorageData(ExtensionStorageSchema, {
           ...currentState,
           buyingOffers: remainingOffers,
@@ -209,9 +209,9 @@ export const extensionConfigStorage: ExtensionStorageType = {
       });
     },
 
-    async getBuyingOffer(key: string) {
+    async getBuyingOffer(flowId: string) {
       const current = await storage.get();
-      const offer = current.buyingOffers[key];
+      const offer = current.buyingOffers[flowId];
       return offer ? validateStorageData(BuyingOfferSchema, offer) : undefined;
     },
   },

@@ -239,8 +239,7 @@ export interface TabManagementCommand {
 
 export interface BuyingStateCommand {
   action: 'mark' | 'check' | 'clear';
-  key: string;
-  id?: string;
+  flowId: string;
   timeout?: number;
 }
 
@@ -347,7 +346,9 @@ export interface TabManagementService {
 
 // Buying state service interface
 export interface BuyingStateService {
-  markBuying(key: string, id: string, timeout: number): Promise<void>;
-  isBuying(key: string): Promise<{ buying: boolean; id?: string }>;
+  markBuying(flowId: string, timeout: number): Promise<void>;
+  isBuying(flowId: string): Promise<{ buying: boolean }>;
+  clearBuying(flowId: string): Promise<void>;
   clearExpired(): Promise<void>;
+  getBuyingOffer(flowId: string): Promise<BuyingOffer | undefined>;
 }

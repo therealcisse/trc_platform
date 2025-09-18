@@ -84,14 +84,17 @@ class BuyOfferMatcher implements Matcher {
 
       log.push(`Product details: ${product.toString()}`);
 
-      // Check if this product is already being purchased
+      const currentUrl = window.location.href;
+      const flowId = FlowUtils.parseIDFromHref(currentUrl);
+
+      // Check if this flow is already being purchased
       const buyingStateResponse = await sendBackgroundCommand('state.buying', {
         action: 'check',
-        key: product.text,
+        flowId,
       });
 
       if (buyingStateResponse.data?.buying) {
-        log.push(`Already buying this product (ID: ${buyingStateResponse.data.id})`).write();
+        log.push(`Already buying this flow (ID: ${flowId})`).write();
 
         // Close duplicate tab
         await sendBackgroundCommand('tab.manage', {
@@ -109,31 +112,23 @@ class BuyOfferMatcher implements Matcher {
         return;
       }
 
-      // Generate random ID for this purchase attempt
-      const randomId = Math.random().toString(36).substring(7);
-
       // Calculate timeout (delay + extra headroom)
       const delaySeconds = delay || 0;
       const extraHeadroomSeconds = 30;
       const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
 
-      // Mark product as being purchased
+      // Mark flow as being purchased
       await sendBackgroundCommand('state.buying', {
         action: 'mark',
-        key: product.text,
-        id: randomId,
+        flowId,
         timeout,
       });
 
-      log.push(`Starting purchase process (ID: ${randomId}, delay: ${delaySeconds}s)`);
-
-      const currentUrl = window.location.href;
-      const id = FlowUtils.parseIDFromHref(currentUrl);
+      log.push(`Starting purchase process (Flow ID: ${flowId}, delay: ${delaySeconds}s)`);
 
       // Send command to execute purchase
       const response = await sendBackgroundCommand('buyOffer.execute', {
-        id,
-        productId: randomId,
+        id: flowId,
         delay: delaySeconds,
         selectors: {
           input: '#captcha_code',
@@ -151,7 +146,7 @@ class BuyOfferMatcher implements Matcher {
         // Clear buying state on failure
         await sendBackgroundCommand('state.buying', {
           action: 'clear',
-          key: product.text,
+          flowId,
         });
       }
     } catch (error) {
@@ -234,12 +229,12 @@ export async function executeBuyOfferWorkflow(
     // Check buying state again (prevent race conditions)
     const buyingStateResponse = await sendBackgroundCommand('state.buying', {
       action: 'check',
-      key: product.text,
+      flowId: context.id,
     });
 
-    // Handle if another tab started buying this product
-    if (buyingStateResponse.data?.buying && buyingStateResponse.data.id !== context.productId) {
-      log.push(`Another tab is buying this product (ID: ${buyingStateResponse.data.id})`);
+    // Handle if another tab started buying this flow
+    if (buyingStateResponse.data?.buying) {
+      log.push('Another tab is already buying this flow');
 
       // Close this tab
       await sendBackgroundCommand('tab.manage', {
@@ -251,7 +246,7 @@ export async function executeBuyOfferWorkflow(
         success: false,
         matcherId: context.matcherId,
         executorName: 'buyOffer',
-        error: 'Duplicate purchase attempt',
+        error: 'Duplicate purchase attempt for flow',
       };
     }
 
@@ -309,16 +304,10 @@ export async function executeBuyOfferWorkflow(
 
     // Clear buying state on failure
     try {
-      const titleElement = document.querySelector(selectors.productTitle);
-      if (titleElement) {
-        const product = new Product(titleElement.textContent || '');
-        if (product.valid) {
-          await sendBackgroundCommand('state.buying', {
-            action: 'clear',
-            key: product.text,
-          });
-        }
-      }
+      await sendBackgroundCommand('state.buying', {
+        action: 'clear',
+        flowId: context.id,
+      });
     } catch (cleanupError) {
       console.error('[BuyOfferExecutor] Error clearing buying state:', cleanupError);
     }

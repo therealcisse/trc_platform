@@ -240,24 +240,24 @@ async function handleTabManagement(
 
 // Handle buying state commands
 async function handleBuyingState(
-  payload: { action: string; key: string; id?: string; timeout?: number }
+  payload: { action: string; flowId: string; timeout?: number }
 ): Promise<CommandResponse> {
   const requestId = `state-${Date.now()}`;
 
   try {
     switch (payload.action) {
       case 'mark':
-        if (!payload.id || !payload.timeout) {
-          throw new Error('ID and timeout required for mark action');
+        if (!payload.timeout) {
+          throw new Error('Timeout required for mark action');
         }
-        await buyingService.markBuying(payload.key, payload.id, payload.timeout);
+        await buyingService.markBuying(payload.flowId, payload.timeout);
         return {
           success: true,
           requestId
         };
 
       case 'check':
-        const buyingState = await buyingService.isBuying(payload.key);
+        const buyingState = await buyingService.isBuying(payload.flowId);
         return {
           success: true,
           data: buyingState,
@@ -265,7 +265,7 @@ async function handleBuyingState(
         };
 
       case 'clear':
-        await buyingService.clearBuying(payload.key);
+        await buyingService.clearBuying(payload.flowId);
         return {
           success: true,
           requestId
