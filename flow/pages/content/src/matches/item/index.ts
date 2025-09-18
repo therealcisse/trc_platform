@@ -7,8 +7,9 @@ import {
   waitForSelector,
   clickWithVerification,
   sleep,
-  Product,
 } from '@src/lib';
+import { ProductFactory } from '@src/factory/ProductFactory';
+import { isInvalidProduct } from '@src/types';
 import type {
   Matcher,
   ExecutionContext,
@@ -19,6 +20,7 @@ import type {
 } from '@extension/types';
 
 import { Flow, FlowUtils } from '@extension/types';
+import { ConfigService } from '@extension/shared';
 
 /**
  * Item Matcher - Detects item pages and triggers item processing
@@ -190,10 +192,13 @@ export async function executeItemWorkflow(
 
     const currentUrl = window.location.href;
     const id = FlowUtils.parseIDFromHref(currentUrl);
+    const flow = await ConfigService.getFlow(id);
 
-    // check if flow exists
-
-    await processItem();
+    if (!flow) {
+      console.log('Flow not found');
+    } else {
+      await processItem();
+    }
 
     // Process browse item (list view)
     async function processItem(): Promise<void> {
@@ -215,17 +220,18 @@ export async function executeItemWorkflow(
 
         log.push(`Product: ${productText}`);
 
-        const product = new Product(productText);
-        if (!product.valid) {
-          log.push('Invalid product format, skipping');
+        const config = context.config || {};
+        const product = ProductFactory.parse(config, productText);
+
+        if (isInvalidProduct(product)) {
+          log.push(`Invalid product format: ${product.error}`);
           return;
         }
 
-        log.push(`Product details: ${product.toString()}`);
+        log.push(`Product details: ${JSON.stringify(product)}`);
 
-        // Check if product is allowed based on config
-        const config = context.config || {};
-        const { allowed } = product.isAllowed(config);
+        // Product is already validated by factory
+        const { allowed } = { allowed: product.allowed };
 
         if (!allowed) {
           log.push('Product not allowed by configuration, skipping');

@@ -21,6 +21,7 @@
     "type-check": "tsc --noEmit"
   },
   "dependencies": {
+    "@extension/shared": "workspace:*",
     "@extension/types": "workspace:*",
     "@extension/env": "workspace:*"
   },

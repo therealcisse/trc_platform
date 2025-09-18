@@ -1,12 +1,6 @@
-import {
-  registerMatcher,
-  waitForSelector,
-  clickWithVerification,
-  sendBackgroundCommand,
-  Log,
-  sleep,
-  Product,
-} from '@src/lib';
+import { registerMatcher, waitForSelector, clickWithVerification, sendBackgroundCommand, Log, sleep } from '@src/lib';
+import { ProductFactory } from '@src/factory/ProductFactory';
+import { isInvalidProduct } from '@src/types';
 import { FlowUtils, type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@extension/types';
 
@@ -76,13 +70,14 @@ class BuyOfferMatcher implements Matcher {
       log.push(`Found product: ${productText}`);
 
       // Parse and validate product
-      const product = new Product(productText);
-      if (!product.valid) {
-        log.push('Invalid product format, ignoring').write();
+      const product = ProductFactory.parse(result.config, productText);
+
+      if (isInvalidProduct(product)) {
+        log.push(`Invalid product format: ${product.error}`).write();
         return;
       }
 
-      log.push(`Product details: ${product.toString()}`);
+      log.push(`Product details: ${JSON.stringify(product)}`);
 
       const currentUrl = window.location.href;
       const flowId = FlowUtils.parseIDFromHref(currentUrl);
@@ -105,8 +100,8 @@ class BuyOfferMatcher implements Matcher {
         return;
       }
 
-      // Validate product against configuration
-      const { allowed, delay } = product.isAllowed(result.config);
+      // Product is already validated by factory
+      const { allowed, delay } = { allowed: product.allowed, delay: product.delay };
       if (!allowed) {
         log.push('Product not allowed by configuration').write();
         return;
@@ -208,13 +203,13 @@ export async function executeBuyOfferWorkflow(
     });
 
     const productText = titleElement.textContent || '';
-    const product = new Product(productText);
+    const product = ProductFactory.parse(context.config || {}, productText);
 
-    if (!product.valid) {
-      throw new Error('Invalid product format');
+    if (isInvalidProduct(product)) {
+      throw new Error(product.error);
     }
 
-    log.push(`Product details: ${product.toString()}`);
+    log.push(`Product details: ${JSON.stringify(product)}`);
 
     // Get buy button
     const buyButton = await waitForSelector(selectors.buyFormButton, {
@@ -250,9 +245,8 @@ export async function executeBuyOfferWorkflow(
       };
     }
 
-    // Check configuration again
-    const config = context.config || {};
-    const { allowed, delay = 0 } = product.isAllowed(config);
+    // Product is already validated by factory
+    const { allowed, delay } = { allowed: product.allowed, delay: product.delay };
 
     if (!allowed) {
       throw new Error('Product not allowed by configuration');
