@@ -1,8 +1,17 @@
-import { registerMatcher, waitForSelector, clickWithVerification, sendBackgroundCommand, Log, sleep } from '@src/lib';
-import { FlowUtils, ProductFactory } from '@extension/shared';
+import {
+  registerMatcher,
+  waitForSelector,
+  clickWithVerification,
+  sendBackgroundCommand,
+  Log,
+  sleep,
+  fetchImageAsBlob,
+  extractNumericAnswer,
+} from '@src/lib';
+import { FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
 import { isInvalidProduct } from '@extension/types';
 import { type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
-import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@extension/types';
+import type { ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
@@ -194,6 +203,19 @@ export async function executeBuyOfferWorkflow(
   try {
     log.push(`Starting buy offer workflow for tab ${context.tabId}`);
 
+    // Wait for and focus captcha input first
+    const inputElement = (await waitForSelector(selectors.input, {
+      timeout: 5000,
+      visible: true,
+    })) as HTMLInputElement;
+
+    if (!inputElement) {
+      throw new Error('Captcha input not found');
+    }
+
+    // Focus the input
+    inputElement.focus();
+
     // Get product title for validation
     const titleElement = await waitForSelector(selectors.productTitle, {
       timeout: 5000,
@@ -219,7 +241,7 @@ export async function executeBuyOfferWorkflow(
       throw new Error('Buy button not found');
     }
 
-    // Check buying state again (prevent race conditions)
+    // Check buying state (prevent race conditions)
     const buyingStateResponse = await sendBackgroundCommand('state.buying', {
       action: 'check',
       flowId: context.flowId,
@@ -255,6 +277,61 @@ export async function executeBuyOfferWorkflow(
       await sleep(delay * 1000);
     }
 
+    const currentUrl = window.location.href;
+
+    // After delay, validate flow
+    const id = FlowUtils.parseIDFromPath(currentUrl);
+    const flow = await ConfigService.getFlow(id);
+    if (!flow) {
+      throw new Error('Flow not found');
+    }
+
+    // Process captcha
+    log.push('Processing captcha image');
+    const imgElement = (await waitForSelector(selectors.img, {
+      timeout: 5000,
+      visible: true,
+    })) as HTMLImageElement;
+
+    if (!imgElement || !imgElement.src) {
+      throw new Error('Captcha image not found or invalid');
+    }
+
+    // Convert image to blob
+    const imageBlob = await fetchImageAsBlob(imgElement.src);
+    const reader = new FileReader();
+    const imageDataUrl = await new Promise<string>((resolve, reject) => {
+      reader.onloadend = () => resolve(reader.result as string);
+      reader.onerror = reject;
+      reader.readAsDataURL(imageBlob);
+    });
+
+    // Send to API for processing
+    const imageResponse = await sendBackgroundCommand('image.solve', {
+      imageData: imageDataUrl,
+    });
+
+    if (!imageResponse.success || !imageResponse.data?.result) {
+      throw new Error(imageResponse.error || 'Failed to process captcha');
+    }
+
+    // Extract and input the answer
+    const answer = extractNumericAnswer(imageResponse.data.result);
+    inputElement.value = answer;
+    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
+
+    // Calculate remaining time
+    const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
+      product,
+      flow.requestTimestamp,
+      context.config || {},
+    );
+
+    if (remainingTime > 0) {
+      log.push(`Waiting ${remainingTime} seconds for remaining processing time`);
+      await sleep(remainingTime * 1000);
+    }
+
     // Execute purchase
     log.push('Executing purchase');
 
@@ -281,18 +358,30 @@ export async function executeBuyOfferWorkflow(
         flowId: context.flowId,
         product: product.toString(),
         appliedDelay: delay,
+        captchaProcessed: true,
+        answer,
       },
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 2, // Title check and buy click
-        networkRequests: 2, // State check and buy submit
+        domOperations: 4, // Input, title, image, and buy click
+        networkRequests: 3, // State check, image processing, and buy submit
         errors,
       },
     };
   } catch (error) {
     log.push(`Fatal error: ${error}`).write();
     console.error('[BuyOfferExecutor] Fatal error:', error);
+
+    // Track specific error types
+    if (error instanceof Error) {
+      errors.push(error);
+      if (error.message.includes('captcha')) {
+        log.push('Captcha processing failed');
+      } else if (error.message.includes('flow')) {
+        log.push('Flow validation failed');
+      }
+    }
 
     // Clear buying state on failure
     try {
@@ -302,6 +391,9 @@ export async function executeBuyOfferWorkflow(
       });
     } catch (cleanupError) {
       console.error('[BuyOfferExecutor] Error clearing buying state:', cleanupError);
+      if (cleanupError instanceof Error) {
+        errors.push(cleanupError);
+      }
     }
 
     return {
@@ -312,9 +404,9 @@ export async function executeBuyOfferWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 1,
-        networkRequests: 1,
-        errors: [...errors, error as Error],
+        domOperations: errors.some(e => e.message.includes('not found')) ? 1 : 2,
+        networkRequests: errors.some(e => e.message.includes('API')) ? 1 : 2,
+        errors,
       },
     };
   }

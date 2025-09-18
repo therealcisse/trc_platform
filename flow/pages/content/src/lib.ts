@@ -504,7 +504,7 @@ async function fetchImageAsDataUrl(imageUrl: string): Promise<string> {
 /**
  * Fetches an image URL and returns it as a Blob
  */
-async function fetchImageAsBlob(imageUrl: string): Promise<Blob> {
+export async function fetchImageAsBlob(imageUrl: string): Promise<Blob> {
   try {
     // If it's a relative URL, convert to absolute
     const absoluteUrl = new URL(imageUrl, window.location.href).href;
@@ -536,7 +536,7 @@ async function fetchImageAsBlob(imageUrl: string): Promise<Blob> {
  * - "x = 10"
  * - "Result: 10"
  */
-function extractNumericAnswer(result: string): string {
+export function extractNumericAnswer(result: string): string {
   // First, try to find the answer pattern from the simulation page
   // The correct answer format follows the pattern in the HTML files
 
