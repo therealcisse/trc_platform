@@ -20,7 +20,7 @@ export interface ExecutionContext {
   tabId: number;
   url: string;
   matcherId: string;
-  productId?: string;
+  flowId: string;
   config?: ExecutionConfig;
   timeout?: number;
   retryOptions?: RetryOptions;
@@ -210,7 +210,6 @@ export interface ItemSelectors {
 
 export interface BuyOfferCommand {
   id: string;
-  productId?: string;
   delay?: number;
   selectors?: BuyOfferSelectors;
 }

@@ -229,7 +229,7 @@ export async function executeBuyOfferWorkflow(
     // Check buying state again (prevent race conditions)
     const buyingStateResponse = await sendBackgroundCommand('state.buying', {
       action: 'check',
-      flowId: context.id,
+      flowId: context.flowId,
     });
 
     // Handle if another tab started buying this flow
@@ -286,7 +286,7 @@ export async function executeBuyOfferWorkflow(
       matcherId: context.matcherId,
       executorName: 'buyOffer',
       data: {
-        productId: context.productId,
+        flowId: context.flowId,
         product: product.toString(),
         appliedDelay: delay,
       },
@@ -306,7 +306,7 @@ export async function executeBuyOfferWorkflow(
     try {
       await sendBackgroundCommand('state.buying', {
         action: 'clear',
-        flowId: context.id,
+        flowId: context.flowId,
       });
     } catch (cleanupError) {
       console.error('[BuyOfferExecutor] Error clearing buying state:', cleanupError);

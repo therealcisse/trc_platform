@@ -53,7 +53,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       tabId,
       url: sender.tab.url || '',
       matcherId: 'buy-offer-matcher',
-      productId: payload.productId,
+      flowId: payload.id,
       config,
       timeout: 60000, // 60 seconds timeout due to delay
       dryRun: false
