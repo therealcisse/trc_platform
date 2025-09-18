@@ -11,13 +11,14 @@ import {
 import { FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
 import { isInvalidProduct } from '@extension/types';
 import { type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
+import { MATCHER_IDS } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
  */
 class BuyOfferMatcher implements Matcher {
-  id = 'buy-offer-matcher';
+  id = MATCHER_IDS.BUY_OFFER;
   name = 'Buy Offer Workflow';
   enabled = true;
   priority = 20; // Higher priority than email/offers

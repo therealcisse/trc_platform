@@ -5,6 +5,7 @@ import type {
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
+import { MATCHER_IDS } from '@extension/types';
 
 /**
  * item command handler - Manages item workflow execution
@@ -33,7 +34,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: `item-${Date.now()}`
+        requestId: payload.id
       };
     }
 
@@ -43,7 +44,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       return {
         success: false,
         error: 'Flow not found',
-        requestId: `item-${Date.now()}`
+        requestId: payload.id
       };
 
     }
@@ -52,7 +53,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
     const context: ExecutionContext = {
       tabId,
       url: sender.tab.url || '',
-      matcherId: 'item-matcher',
+      matcherId: MATCHER_IDS.ITEM,
       config,
       flowId: flow.id,
       timeout: 30000, // 30 seconds timeout
@@ -115,7 +116,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: `item-${Date.now()}`
+      requestId: payload.id
     };
 
   } catch (error) {
@@ -124,7 +125,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: `item-${Date.now()}`
+      requestId: payload.id
     };
   }
 };

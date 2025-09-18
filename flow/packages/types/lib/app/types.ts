@@ -210,6 +210,7 @@ export interface MyOfferCommand {
 export interface MyOfferSelectors {
   titleLink: string;
   itemLink: string;
+  requestTimestampElement: string;
 }
 
 export interface BuyOfferCommand {

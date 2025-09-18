@@ -4,6 +4,7 @@ import type {
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
+import { MATCHER_IDS } from '@extension/types';
 
 /**
  * myOffer command handler - Manages myOffer workflow execution
@@ -32,7 +33,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: `myOffer-${Date.now()}`
+        requestId: payload.id
       };
     }
 
@@ -40,7 +41,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
     const context: Record<string, any> = {
       tabId,
       url: sender.tab.url || '',
-      matcherId: 'myOffer-matcher',
+      matcherId: MATCHER_IDS.MY_OFFER,
       config,
       timeout: 30000, // 30 seconds timeout
       dryRun: false
@@ -79,6 +80,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
         JSON.stringify(payload.selectors || {
           itemLink: '#my_area table.message_center_message td.content a',
           titleLink: 'h1.item_title',
+          requestTimestampElement: '.message_center_message thead tr td:last-child',
         }),
         JSON.stringify(productStrategies)
       ]
@@ -102,7 +104,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: `myOffer-${Date.now()}`
+      requestId: payload.id
     };
 
   } catch (error) {
@@ -111,7 +113,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: `myOffer-${Date.now()}`
+      requestId: payload.id
     };
   }
 };

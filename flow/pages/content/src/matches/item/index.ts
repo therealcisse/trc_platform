@@ -18,6 +18,7 @@ import type {
   ExecutionConfig,
   CommandResponse,
 } from '@extension/types';
+import { MATCHER_IDS } from '@extension/types';
 
 import { ConfigService } from '@extension/shared';
 
@@ -25,7 +26,7 @@ import { ConfigService } from '@extension/shared';
  * Item Matcher - Detects item pages and triggers item processing
  */
 class ItemMatcher implements Matcher {
-  id = 'item-matcher';
+  id = MATCHER_IDS.ITEM;
   name = 'Item Clicking Workflow';
   enabled = true;
   priority = 10;

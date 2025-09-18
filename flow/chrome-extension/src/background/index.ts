@@ -9,6 +9,7 @@ import type {
     BackgroundCommands,
     CommandResponse,
 } from '@extension/types';
+import { MATCHER_IDS } from '@extension/types';
 import { extensionConfigStorage } from '@extension/storage';
 import {
   FlowUtils,
@@ -48,7 +49,7 @@ function setupMessageHandlers() {
           sendResponse({
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
-            requestId: `error-${Date.now()}`
+            requestId: 'error'
           });
         });
 
@@ -87,24 +88,23 @@ async function handleMessage(
         return handleBuyingState(message.payload);
 
       case 'image.solve':
-        const requestId = `state-${Date.now()}`;
         return processImageAPI(message.payload.imageData)
                     .then(result => {
                         console.log('[Background] Successfully processed image');
-                        return ({ success: true, result: result.result, requestId });
+                        return ({ success: true, result: result.result, requestId: 'image' });
                     })
                     .catch(error => {
                         console.error('[Background] Error processing image:', error);
                         return ({
                             success: false,
-                            requestId,
+                            requestId: 'image',
                             error: error instanceof Error ? error.message : 'Unknown error'
                         });
                     });
 
       case 'extension.log':
         console.log(`[Extension] ${message.payload.text}`);
-        return { success: true, requestId: `log-${Date.now()}` };
+        return { success: true, requestId: 'log' };
 
       case 'extension.telemetry':
         // Store telemetry events
@@ -112,7 +112,7 @@ async function handleMessage(
         events.forEach(event => {
           console.log(`[Telemetry] ${event.eventName}:`, event);
         });
-        return { success: true, requestId: `telemetry-${Date.now()}` };
+        return { success: true, requestId: 'telemetry' };
 
       case 'extension.getConfig':
         return {
@@ -121,7 +121,7 @@ async function handleMessage(
             config: await ConfigService.getConfig(),
             enabled: await ConfigService.isEnabled(),
           },
-          requestId: `config-${Date.now()}`
+          requestId: 'config'
         };
 
       case 'extension.startFlow': {
@@ -135,7 +135,7 @@ async function handleMessage(
         return {
           success: true,
           data: existed,
-          requestId: `flow-start-${Date.now()}`,
+          requestId: payload.id,
         };
       }
 
@@ -145,7 +145,7 @@ async function handleMessage(
         return {
           success: true,
           data: flow,
-          requestId: `flow-get-${Date.now()}`,
+          requestId: id,
         };
       }
 
@@ -163,7 +163,7 @@ async function handleTabManagement(
   payload: { action: string; tabId?: number; url?: string },
   sender: chrome.runtime.MessageSender
 ): Promise<CommandResponse> {
-  const requestId = `tab-${Date.now()}`;
+  const requestId = 'tab';
 
   try {
     switch (payload.action) {
@@ -247,7 +247,7 @@ async function handleTabManagement(
 async function handleBuyingState(
   payload: { action: string; flowId: string; timeout?: number }
 ): Promise<CommandResponse> {
-  const requestId = `state-${Date.now()}`;
+  const requestId = payload.flowId;
 
   try {
     switch (payload.action) {

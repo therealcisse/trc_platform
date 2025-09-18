@@ -9,6 +9,7 @@ import {
   sleep,
 } from '@src/lib';
 import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
+import { MATCHER_IDS } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
 import { FlowUtils } from '@extension/shared';
 
@@ -16,7 +17,7 @@ import { FlowUtils } from '@extension/shared';
  * Email Matcher - Detects Outlook email pages and triggers email processing
  */
 class EmailMatcher implements Matcher {
-  id = 'email-matcher';
+  id = MATCHER_IDS.EMAIL;
   name = 'Email Clicking Workflow';
   enabled = true;
   priority = 10;

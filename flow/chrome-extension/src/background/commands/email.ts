@@ -5,6 +5,7 @@ import type {
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
+import { MATCHER_IDS } from '@extension/types';
 
 /**
  * Email command handler - Manages email workflow execution
@@ -41,7 +42,7 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
     const context: Record<string, any> = {
       tabId,
       url: sender.tab.url || '',
-      matcherId: 'email-matcher',
+      matcherId: MATCHER_IDS.EMAIL,
       config,
       timeout: 30000, // 30 seconds timeout
       dryRun: false

@@ -5,6 +5,7 @@ import type {
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
+import { MATCHER_IDS } from '@extension/types';
 
 /**
  * Buy Offer command handler - Manages purchase workflow execution
@@ -33,7 +34,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: `buyOffer-${Date.now()}`
+        requestId: payload.id
       };
     }
 
@@ -43,7 +44,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       return {
         success: false,
         error: 'Flow not found',
-        requestId: `item-${Date.now()}`
+        requestId: payload.id
       };
 
     }
@@ -52,7 +53,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
     const context: ExecutionContext = {
       tabId,
       url: sender.tab.url || '',
-      matcherId: 'buy-offer-matcher',
+      matcherId: MATCHER_IDS.BUY_OFFER,
       flowId: payload.id,
       config,
       timeout: 60000, // 60 seconds timeout due to delay
@@ -111,7 +112,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: `buyOffer-${Date.now()}`
+      requestId: payload.id
     };
 
   } catch (error) {
@@ -120,7 +121,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: `buyOffer-${Date.now()}`
+      requestId: payload.id
     };
   }
 };
