@@ -7,7 +7,7 @@ import {
   sleep,
   Product,
 } from '@src/lib';
-import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
+import { FlowUtils, type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, BuyOfferSelectors } from '@extension/types';
 
 /**
@@ -117,13 +117,19 @@ class BuyOfferMatcher implements Matcher {
 
       log.push(`Starting purchase process (ID: ${randomId}, delay: ${delaySeconds}s)`);
 
+      const currentUrl = window.location.href;
+      const id = FlowUtils.parseIDFromHref(currentUrl);
+
       // Send command to execute purchase
       const response = await sendBackgroundCommand('buyOffer.execute', {
+        id,
         productId: randomId,
         delay: delaySeconds,
         selectors: {
-          productTitle: 'h1.item_title',
-          buyFormButton: 'div.buy_now a[role="button"]',
+          input: '#captcha_code',
+          img: '#page_buy_now_captcha label img',
+          productTitle: '.col-sm-9 h2',
+          buyFormButton: 'button[role="action"]',
         },
       });
 

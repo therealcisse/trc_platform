@@ -537,11 +537,11 @@ export async function processImage(): Promise<void> {
       throw new Error(response.error || 'Failed to process image');
     }
 
-    console.log('[CEB] Received result from background:', response.result);
+    console.log('[CEB] Received result from background:', response.data);
 
     // Extract the numeric answer from the result
     // The API might return something like "The answer is 10" or just "10"
-    const result = extractNumericAnswer(response.result);
+    const result = extractNumericAnswer(response.data);
 
     console.log('[CEB] Extracted answer:', result);
 

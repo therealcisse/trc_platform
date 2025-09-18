@@ -35,6 +35,17 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
         error: 'Extension is disabled',
         requestId: `buyOffer-${Date.now()}`
       };
+    } 
+
+    const flow = await ConfigService.getFlow(payload.id)
+
+    if (!flow) {
+      return {
+        success: false,
+        error: 'Flow not found',
+        requestId: `item-${Date.now()}`
+      };
+
     }
 
     // Create execution context
@@ -43,7 +54,6 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       url: sender.tab.url || '',
       matcherId: 'buy-offer-matcher',
       productId: payload.productId,
-      delay: payload.delay,
       config,
       timeout: 60000, // 60 seconds timeout due to delay
       dryRun: false

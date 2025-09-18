@@ -58,11 +58,9 @@ const manifest = {
     },
     {
       matches: [
-        // 'https://auktion.hansemerkur.de/karte_sofortkauf.html',
-        // 'https://auktion.hansemerkur.de/browse/search/*',
         'https://auktion.hansemerkur.de/item.php',
       ],
-      js: ['content/offers.iife.js'],
+      js: ['content/item.iife.js'],
       run_at: 'document_end'
     },
     // {

@@ -172,7 +172,6 @@ export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
 
 export interface BackgroundCommands {
   'email.openUnreadAndClickLink': EmailCommand;
-  'offers.clickProductLink': OffersCommand;
   'buyOffer.execute': BuyOfferCommand;
   'matcher.register': MatcherRegistration;
   'executor.run': ExecutorRequest;
@@ -181,6 +180,7 @@ export interface BackgroundCommands {
   'extension.log': { text: string };
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
+  'item.clickProductLink': ItemCommand;
   'image.solve': { imageData: string };
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
@@ -197,26 +197,27 @@ export interface EmailSelectors {
   markAsReadButton: string;
 }
 
-export interface OffersCommand {
+export interface ItemCommand {
   productStrategies?: ProductStrategy[];
-  selectors?: OffersSelectors;
+  id: string;
+  selectors?: ItemSelectors;
 }
 
-export interface OffersSelectors {
-  offerMarkers: string;
-  offerPopup: string;
-  browseList: string;
+export interface ItemSelectors {
   buyButton: string;
   titleLink: string;
 }
 
 export interface BuyOfferCommand {
+  id: string;
   productId?: string;
   delay?: number;
   selectors?: BuyOfferSelectors;
 }
 
 export interface BuyOfferSelectors {
+  input: string;
+  img: string;
   productTitle: string;
   buyFormButton: string;
 }
