@@ -1,13 +1,5 @@
-import {
-  registerMatcher,
-  sendBackgroundCommand,
-  isValidTimeOfDay,
-  assertValidTimeOfDay,
-  waitForSelector,
-  clickWithVerification,
-  sleep,
-} from '@src/lib';
-import { ProductFactory, FlowUtils, Log } from '@extension/shared';
+import { registerMatcher, sendBackgroundCommand } from '@src/lib';
+import { ProductFactory, Log } from '@extension/shared';
 import { isInvalidProduct } from '@extension/types';
 import type {
   Matcher,
@@ -18,8 +10,6 @@ import type {
   CommandResponse,
 } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
-
-import { ConfigService } from '@extension/shared';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing
@@ -148,8 +138,9 @@ checkAndRun();
 export async function executeMyOfferWorkflow(
   context: ExecutionContext,
   selectors: MyOfferSelectors,
+  flowId: string,
 ): Promise<ExecutionResult> {
-  const log = Log.withFlow(context.matcherId, context.flowId);
+  const log = Log.withFlow(context.matcherId, flowId);
   log
     .info(`Starting myOffer workflow for tab ${context.tabId}`)
     .setMetadata({ tabId: context.tabId, url: context.url });
@@ -175,15 +166,7 @@ export async function executeMyOfferWorkflow(
       };
     }
 
-    const currentUrl = window.location.href;
-    const id = FlowUtils.parseIDFromHref(currentUrl);
-    const flow = await ConfigService.getFlow(id);
-
-    if (!flow) {
-      log.warn('Flow not found');
-    } else {
-      await processMyOffer();
-    }
+    await processMyOffer();
 
     // Process browse myOffer (list view)
     async function processMyOffer(): Promise<void> {
@@ -223,38 +206,16 @@ export async function executeMyOfferWorkflow(
           return;
         }
 
-        // Open the myOffer
-        log.info(`Opening myOffer: ${itemLlink.href}`);
+        const href = itemLlink.href;
+        log.info(`Opening myOffer: ${href}`);
 
         if (!context.dryRun) {
-          let id: string;
-          const href = itemLlink.href;
-
-          try {
-            // Parse ID from path as per requirement
-            id = FlowUtils.parseIDFromPath(href);
-          } catch (e) {
-            const errorMsg = `Failed to parse ID from ${href}: ${e}`;
-            log.error(errorMsg);
-          }
-
-          let requestTimestampText = (document.querySelector(selectors.requestTimestampElement) as HTMLElement)
-            .innerText;
-          let requestTimestamp: number = FlowUtils.parseDateToEpoch(requestTimestampText);
-
-          // Start flow and check if it already exists
-          const startFlowResult = await sendBackgroundCommand('extension.startFlow', {
-            type: 'inbox',
-            id: id,
-            title: productText,
-            requestTimestamp: requestTimestamp,
-            href,
+          // Open link in new managed tab
+          await sendBackgroundCommand('tab.manage', {
+            action: 'open',
+            url: href,
           });
-
-          if (startFlowResult.success && startFlowResult.data === true) {
-            // Flow already exists, skip this link
-            log.info(`Skipping myOffer with existing flow: ${id}`);
-          }
+          log.info(`Opened myOffer link in managed tab: ${href}`);
         } else {
           log.debug('Dry run: Would open myOffer in new tab');
         }

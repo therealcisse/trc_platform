@@ -1,23 +1,15 @@
-import {
-  registerMatcher,
-  sendBackgroundCommand,
-  waitForSelector,
-  clickWithVerification,
-  safeNavigate,
-  random,
-  sleep,
-} from '@src/lib';
+import { registerMatcher, sendBackgroundCommand, sleep } from '@src/lib';
 import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
 import type { ExecutionContext, ExecutionResult, InboxSelectors } from '@extension/types';
 import { FlowUtils, Log } from '@extension/shared';
 
 /**
- * Inbox Matcher - Detects Outlook inbox pages and triggers inbox processing
+ * Inbox Matcher - Monitors HanseMerkur inbox for new messages
  */
 class InboxMatcher implements Matcher {
   id = MATCHER_IDS.INBOX;
-  name = 'Inbox Clicking Workflow';
+  name = 'Inbox Link Monitor';
   enabled = true;
   priority = 10;
 
@@ -25,74 +17,123 @@ class InboxMatcher implements Matcher {
 
   domPreconditions = [
     {
-      selector: '[aria-label*="HanseMerkur"]',
+      selector: 'table',
       shouldExist: true,
       timeout: 5000,
     },
   ];
 
+  private schedulerInterval: NodeJS.Timeout | null = null;
+
   async run(): Promise<void> {
-    // Inbox doesn't have flowId initially
-    const log = new Log(MATCHER_IDS.EMAIL);
+    const log = new Log(MATCHER_IDS.INBOX);
     log.info('Inbox matcher activated');
 
     try {
-      // Get configuration and check if enabled
+      // Get configuration
       const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
         config: ExecutionConfig;
         enabled: boolean;
       }>;
 
       const result = configResponse.data;
-      if (!result) {
-        log.warn('No configuration found');
+      if (!result?.enabled || !result.config.inboxMode) {
+        log.info('Inbox monitoring disabled');
         await log.write();
         return;
       }
 
-      if (!result.enabled) {
-        log.info('Extension disabled');
-        await log.write();
-        return;
-      }
+      const config = result.config;
 
-      if (!result.config.inboxMode) {
-        log.info('Inbox mode disabled');
-        await log.write();
-        return;
-      }
+      // Check if we need to handle a scheduled reload
+      const shouldScanAfterReload = sessionStorage.getItem('inbox_scan_after_reload') === '1';
+      if (shouldScanAfterReload) {
+        sessionStorage.removeItem('inbox_scan_after_reload');
+        log.info('Performing post-reload scan');
 
-      log.info('Triggering inbox executor');
-      await log.write();
+        // Wait for configured delay
+        await sleep(config.inboxPostReloadDelayMs || 2000);
 
-      // Send command to background to run inbox executor
-      const response = await sendBackgroundCommand('inbox.openMyOfferLink', {
-        selectors: {},
-      });
-
-      if (response.success) {
-        log.info('Inbox executor triggered successfully');
-        await log.write();
+        // Trigger scan
+        await this.scanAndOpenLinks();
       } else {
-        log.error(`Inbox executor failed: ${response.error}`);
-        await log.write();
+        // Initial scan on page load
+        await this.scanAndOpenLinks();
       }
+
+      // Start reload scheduler
+      this.startReloadScheduler(config);
+
+      await log.write();
     } catch (error) {
       log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
       await log.write();
       console.error('[InboxMatcher] Error:', error);
     }
   }
+
+  private startReloadScheduler(config: ExecutionConfig): void {
+    const reloadSeconds = config.inboxReloadSeconds || [0, 5];
+    const log = new Log(MATCHER_IDS.INBOX);
+
+    // Clear any existing scheduler
+    if (this.schedulerInterval) {
+      clearInterval(this.schedulerInterval);
+    }
+
+    // Check every second
+    this.schedulerInterval = setInterval(() => {
+      const now = new Date();
+      const currentSecond = now.getSeconds();
+
+      if (reloadSeconds.includes(currentSecond)) {
+        log.info(`Scheduled reload at second ${currentSecond}`);
+
+        // Mark for post-reload scan
+        sessionStorage.setItem('inbox_scan_after_reload', '1');
+
+        // Reload the page
+        window.location.reload();
+      }
+    }, 1000);
+
+    log.info(`Reload scheduler started for seconds: ${reloadSeconds.join(', ')}`);
+  }
+
+  private async scanAndOpenLinks(): Promise<void> {
+    const log = new Log(MATCHER_IDS.INBOX);
+
+    try {
+      log.info('Scanning for new links');
+
+      // Just send the command to background - all processing happens there
+      const response = await sendBackgroundCommand('inbox.openMyOfferLink', {
+        selectors: {
+          titleLinks: 'table a[href*="show_message"]',
+          messageRow: 'tr',
+          requestTimestampElement: 'td:nth-child(3)', // Erhalten column
+        },
+      });
+
+      if (response.success) {
+        log.info('Link scan completed successfully', response.data);
+      } else {
+        log.error(`Link scan failed: ${response.error}`);
+      }
+    } catch (error) {
+      log.error(`Scan error: ${error}`);
+    }
+
+    await log.write();
+  }
 }
 
-// Register and run the matcher when content script loads
+// Register and run matcher
 const inboxMatcher = new InboxMatcher();
 
-// Check if current URL matches
 function checkAndRun() {
   const currentUrl = window.location.href;
   const matches = inboxMatcher.urlPatterns.some(pattern => {
-    // Convert simple wildcard pattern to regex
     const regex = new RegExp(pattern.replace(/\*/g, '.*'));
     return regex.test(currentUrl);
   });
@@ -101,7 +142,6 @@ function checkAndRun() {
     console.log('[InboxMatcher] URL matches, registering matcher');
     registerMatcher(inboxMatcher);
 
-    // Run the matcher after DOM is ready
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => inboxMatcher.run());
     } else {
@@ -114,30 +154,154 @@ function checkAndRun() {
 checkAndRun();
 
 /**
- * Inbox Executor - Processes unread inboxs by opening them and clicking links
+ * Inbox Executor - Extracts links with timestamps and returns them
  */
 export async function executeInboxWorkflow(
   context: ExecutionContext,
   selectors: InboxSelectors,
 ): Promise<ExecutionResult> {
-  // Inbox executor doesn't have flowId initially
   const log = new Log(context.matcherId);
-  log.info(`Starting inbox workflow for tab ${context.tabId}`);
+  log.info(`Extracting inbox links for tab ${context.tabId}`);
   const startTime = Date.now();
-  const errors: Error[] = [];
+  const visitedUrls: Record<string, boolean> = {};
 
   try {
-    // Get configuration
-    const config = context.config || {};
+    // Parse links from the page
+    const links = await parseInboxLinks(selectors);
+    log.info(`Found ${links.length} total links`);
 
-    // Process inboxs
-    await processInbox();
+    async function parseInboxLinks(
+      selectors: InboxSelectors,
+    ): Promise<Array<{ id: string; href: string; title: string; requestTimestamp: number }>> {
+      const links: Array<{ id: string; href: string; title: string; requestTimestamp: number }> = [];
+      const rows = document.querySelectorAll('tr');
 
-    async function processInbox(): Promise<void> {
-      // todo
+      for (const row of rows) {
+        // Find the title link in this row
+        const anchor = row.querySelector(selectors.titleLinks || 'a[href*="show_message"]') as HTMLAnchorElement;
+        if (!anchor || !anchor.href) continue;
+
+        const title = anchor.textContent?.trim() || '';
+
+        // Use FlowUtils to parse ID from title
+        let id: string;
+        try {
+          id = FlowUtils.parseIDFromTitle(title);
+        } catch (e) {
+          log.warn(`Failed to parse ID from title: ${title}`);
+          continue;
+        }
+
+        // Get request timestamp from Erhalten column (3rd column)
+        const timestampCell = row.querySelector('td:nth-child(3)') as HTMLElement;
+        if (!timestampCell) {
+          log.warn(`No timestamp cell found for row with title: ${title}`);
+          continue;
+        }
+
+        const timestampText = timestampCell.textContent?.trim() || '';
+        let requestTimestamp: number;
+        try {
+          requestTimestamp = FlowUtils.parseDateToEpoch(timestampText);
+        } catch (e) {
+          log.warn(`Failed to parse timestamp: ${timestampText}`);
+          continue;
+        }
+
+        links.push({
+          id,
+          href: anchor.href,
+          title,
+          requestTimestamp,
+        });
+      }
+
+      return links;
     }
 
-    // Mark inbox as read
+    // Sort links by requestTimestamp in descending order (newest first)
+    links.sort((a, b) => b.requestTimestamp - a.requestTimestamp);
+    log.info(`Sorted ${links.length} links by timestamp (newest first)`);
+
+    let openedCount = 0;
+    let skippedCount = 0;
+    const errors: string[] = [];
+
+    const maxLinks = context.config?.inboxMaxLinksPerScan || 10;
+    const interOpenDelay = context.config?.inboxInterOpenDelayMs || 400;
+
+    const linksToProcess = links.slice(0, maxLinks);
+    log.info(`Processing up to ${linksToProcess.length} links from ${links.length} total (newest first)`);
+
+    for (const link of linksToProcess) {
+      // Create flow-specific log for this link
+      const flowLog = Log.withFlow(MATCHER_IDS.INBOX, link.id);
+
+      try {
+        flowLog.info(`Processing inbox message: ${link.title}`, {
+          href: link.href,
+          requestTimestamp: link.requestTimestamp,
+        });
+
+        if (!context.dryRun) {
+          // Start flow for this link
+          const startFlowResponse = await sendBackgroundCommand('extension.startFlow', {
+            type: 'inbox',
+            id: link.id,
+            title: link.title,
+            requestTimestamp: link.requestTimestamp,
+            href: link.href,
+          });
+
+          if (startFlowResponse.success && startFlowResponse.data === true) {
+            // Flow already exists - this is our duplicate detection
+            flowLog.info(`Flow already exists, skipping`);
+            skippedCount++;
+            await flowLog.write();
+            continue;
+          }
+
+          flowLog.info(`Processing new inbox flow`, { href: link.href, link: link.title });
+
+          // Check if we've already visited this URL
+          if (!visitedUrls[link.href]) {
+            visitedUrls[link.href] = true;
+
+            flowLog.info(`Opening link: ${link.href}`);
+
+            if (!context.dryRun) {
+              // Open link in new managed tab
+              await sendBackgroundCommand('tab.manage', {
+                action: 'open',
+                url: link.href,
+              });
+            } else {
+              flowLog.debug('Dry run: Would open link in new tab');
+            }
+          } else {
+            flowLog.info('Link already visited, skipping');
+          }
+
+          // Flow created successfully - no need for separate tracking
+          openedCount++;
+          flowLog.info(`Flow started successfully`);
+        } else {
+          flowLog.debug('Dry run: Would start flow');
+        }
+
+        await flowLog.write();
+
+        // Delay between processing
+        if (interOpenDelay > 0 && linksToProcess.indexOf(link) < linksToProcess.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, interOpenDelay));
+        }
+      } catch (error) {
+        const errorMsg = `Error processing link: ${error}`;
+        flowLog.error(errorMsg);
+        await flowLog.write();
+        errors.push(errorMsg);
+      }
+    }
 
     await log.write();
 
@@ -145,19 +309,20 @@ export async function executeInboxWorkflow(
       success: true,
       matcherId: context.matcherId,
       executorName: 'inbox',
-      data: {},
+      data: {
+        links, // Return links with timestamps to background for processing
+      },
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 0,
+        domOperations: links.length,
         networkRequests: 0,
-        errors,
+        errors: [],
       },
     };
   } catch (error) {
     log.error(`Fatal error: ${error}`, { stack: error instanceof Error ? error.stack : undefined });
     await log.write();
-    console.error('[InboxExecutor] Fatal error:', error);
 
     return {
       success: false,
@@ -169,13 +334,13 @@ export async function executeInboxWorkflow(
         endTime: Date.now(),
         domOperations: 0,
         networkRequests: 0,
-        errors: [...errors, error as Error],
+        errors: [error as Error],
       },
     };
   }
 }
 
-// Export for background script to inject
+// Export for background script
 if (typeof window !== 'undefined') {
   (window as any).__inboxExecutor = executeInboxWorkflow;
 }

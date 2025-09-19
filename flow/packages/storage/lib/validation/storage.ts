@@ -38,12 +38,17 @@ export const StoredProductStrategySchema = z.object({
 export const ProductStrategySchema = StoredProductStrategySchema;
 
 export const ExecutionConfigSchema = z.object({
+  // Inbox mode configuration
+  inboxMode: z.boolean().optional(),
+  inboxReloadSeconds: z.array(z.number()).optional().default([0, 5]),
+  inboxPostReloadDelayMs: z.number().optional().default(2000),
+  inboxMaxLinksPerScan: z.number().optional().default(10),
+  inboxInterOpenDelayMs: z.number().optional().default(400),
   token: z.string().optional(),
   operationalHours: OperationalHoursSchema.optional(),
   emailMode: z.boolean().optional(),
   emailRefreshMin: z.number().optional(),
   emailRefreshMax: z.number().optional(),
-  inboxMode: z.boolean().optional(),
   products: z.array(ProductConfigSchema).optional(),
   animals: z.boolean().optional(),
   animalProcessingTimeSeconds: z.number().optional(),

@@ -1,7 +1,7 @@
 import type { Flow } from '@extension/types';
 
 export class FlowUtils {
-  parseDateToEpoch(dateStr: string): number {
+  static parseDateToEpoch(dateStr: string): number {
     // Example input: "15.09.2025 – 18:46:04"
     // Normalize dash and trim
     const normalized = dateStr.replace('–', '-').trim();

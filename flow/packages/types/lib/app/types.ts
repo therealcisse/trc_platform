@@ -20,13 +20,18 @@ export interface ExecutionContext {
   tabId: number;
   url: string;
   matcherId: string;
-  flowId: string;
   config?: ExecutionConfig;
   timeout?: number;
   dryRun?: boolean;
 }
 
 export interface ExecutionConfig {
+  // Inbox mode configuration
+  inboxMode?: boolean;
+  inboxReloadSeconds?: number[]; // [0, 5] means reload at 0 and 5 seconds of each minute
+  inboxPostReloadDelayMs?: number; // Delay after reload before scanning
+  inboxMaxLinksPerScan?: number; // Max links to open per scan
+  inboxInterOpenDelayMs?: number; // Delay between opening links
   // API Authentication
   token?: string;
 
@@ -35,8 +40,6 @@ export interface ExecutionConfig {
   emailRefreshMin?: number;
   emailRefreshMax?: number;
 
-  // Inbox mode configuration
-  inboxMode?: boolean;
   products?: ProductConfig[];
 
   // Animal insurance product strategy
@@ -69,6 +72,12 @@ export interface OperationalHours {
 export interface DelayConfig {
   min: number;
   max: number;
+}
+
+export interface InboxSelectors {
+  titleLinks?: string; // Selector for title column links
+  messageRow?: string; // Selector for message rows
+  requestTimestampElement?: string; // Selector for request timestamp (Erhalten column)
 }
 
 export interface ExecutionResult {
@@ -195,10 +204,8 @@ export interface EmailSelectors {
 }
 
 export interface InboxCommand {
-  selectors?: EmailSelectors;
+  selectors?: InboxSelectors;
 }
-
-export interface InboxSelectors {}
 
 export interface ItemCommand {
   productStrategies?: ProductStrategy[];

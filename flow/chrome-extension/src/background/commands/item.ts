@@ -55,10 +55,11 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.ITEM,
       config,
-      flowId: flow.id,
       timeout: 30000, // 30 seconds timeout
       dryRun: false
     };
+
+    const flowId = flow.id;
 
     // Get product strategies from ConfigService
     const productStrategies = await ConfigService.getProductStrategies();
@@ -66,7 +67,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
     // Inject and execute the item workflow
     const result = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (contextJson: string, selectorsJson: string, strategiesJson: string) => {
+      func: async (contextJson: string, selectorsJson: string, strategiesJson: string, flowId: string) => {
         // This runs in the content script context
         const context = JSON.parse(contextJson);
         const selectors = JSON.parse(selectorsJson);
@@ -76,7 +77,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
         if (typeof (window as any).__itemExecutor === 'function') {
           // Add strategies to context
           context.productStrategies = strategies;
-          return await (window as any).__itemExecutor(context, selectors);
+          return await (window as any).__itemExecutor(context, selectors, flowId);
         }
 
         // If not, we need to load it first
@@ -94,7 +95,8 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
           buyButton: '.buy_now a.btn',
           titleLink: 'h1.item_title',
         }),
-        JSON.stringify(productStrategies)
+        JSON.stringify(productStrategies),
+        flowId
       ]
     });
 

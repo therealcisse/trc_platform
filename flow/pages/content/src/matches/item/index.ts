@@ -147,8 +147,9 @@ checkAndRun();
 export async function executeItemWorkflow(
   context: ExecutionContext,
   selectors: ItemSelectors,
+  flowId: string,
 ): Promise<ExecutionResult> {
-  const log = Log.withFlow(context.matcherId, context.flowId);
+  const log = Log.withFlow(context.matcherId, flowId);
   log.info(`Starting item workflow for tab ${context.tabId}`).setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];

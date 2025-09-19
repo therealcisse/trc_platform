@@ -163,10 +163,10 @@ async function handleMessage(
         // Handle log queries from content scripts or popup
         try {
           const result = BackgroundLoggerService.queryLogs(message.payload);
-          return { 
-            success: true, 
+          return {
+            success: true,
             data: result,
-            requestId: 'logs-query' 
+            requestId: 'logs-query'
           };
         } catch (error) {
           return {
@@ -196,7 +196,7 @@ async function handleMessage(
 // Handle tab management commands
 async function handleTabManagement(
   payload: { action: string; tabId?: number; url?: string },
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> {
   const requestId = 'tab';
 
@@ -206,7 +206,7 @@ async function handleTabManagement(
         if (!payload.url) {
           throw new Error('URL required for open action');
         }
-        const tab = await tabService.openTab(payload.url, payload.action === 'manage');
+        const tab = await tabService.openTab(payload.url, true);
         return {
           success: true,
           data: { tabId: tab.id },

@@ -1,68 +1,60 @@
 import type {
   InboxCommand,
   CommandResponse,
-  ExecutionContext
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
-import { ConfigService } from '@extension/shared';
+import { ConfigService, Log } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 
 /**
- * Inbox command handler - Manages inbox workflow execution
+ * Main inbox command handler - processes all links in background
  */
 export const inboxCommandHandler: MessageHandler<'inbox.openMyOfferLink'> = async (
   payload: InboxCommand,
   sender: chrome.runtime.MessageSender
 ): Promise<CommandResponse> => {
   console.log('[Background] Inbox command received from tab:', sender.tab?.id);
+  const log = new Log(MATCHER_IDS.INBOX);
 
   try {
-    // Validate sender tab
     if (!sender.tab?.id) {
       throw new Error('No tab ID in sender');
     }
 
     const tabId = sender.tab.id;
 
-    // Get extension configuration
     const [config, enabled] = await Promise.all([
       ConfigService.getConfig(),
       ConfigService.isEnabled()
     ]);
 
-    if (!enabled) {
+    if (!enabled || !config.inboxMode) {
       return {
         success: false,
-        error: 'Extension is disabled',
+        error: 'Inbox mode is disabled',
         requestId: `inbox-${Date.now()}`
       };
     }
 
-    // Create execution context
     const context: Record<string, any> = {
       tabId,
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.INBOX,
       config,
-      timeout: 30000, // 30 seconds timeout
-      dryRun: false
+      timeout: 30000,
     };
 
-    // Inject and execute the inbox workflow
+    // Execute script to extract links from the page
     const result = await chrome.scripting.executeScript({
       target: { tabId },
       func: async (contextJson: string, selectorsJson: string) => {
-        // This runs in the content script context
         const context = JSON.parse(contextJson);
         const selectors = JSON.parse(selectorsJson);
 
-        // Check if executor is available
         if (typeof (window as any).__inboxExecutor === 'function') {
           return await (window as any).__inboxExecutor(context, selectors);
         }
 
-        // If not, we need to load it first
-        // In production, this would be injected via manifest
         return {
           success: false,
           error: 'Inbox executor not loaded',
@@ -72,39 +64,27 @@ export const inboxCommandHandler: MessageHandler<'inbox.openMyOfferLink'> = asyn
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(
-          payload.selectors || {
-            unreadInbox: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
-            inboxBody: '#x_body a',
-            markAsReadButton: 'span',
-          },
-        ),
+        JSON.stringify(payload.selectors || {
+          titleLinks: 'table a[href*="show_message"]',
+          messageRow: 'tr',
+          requestTimestampElement: 'td:nth-child(3)', // Erhalten column
+
+        })
       ]
     });
 
-    // Extract result from script execution
-    const executionResult = result[0]?.result;
-
-    if (!executionResult) {
-      throw new Error('No result from inbox executor');
-    }
-
-    // Log the execution
-    if (executionResult.success) {
-      console.log('[Background] Inbox workflow completed successfully:', executionResult.data);
-    } else {
-      console.error('[Background] Inbox workflow failed:', executionResult.error);
-    }
+    console.log('[Background] Inbox processing complete:', JSON.stringify(result));
 
     return {
-      success: executionResult.success,
-      data: executionResult,
-      error: executionResult.error,
+      success: true,
+      data: {},
       requestId: `inbox-${Date.now()}`
     };
 
   } catch (error) {
     console.error('[Background] Error handling inbox command:', error);
+    log.error(`Fatal error: ${error}`);
+    await log.write();
 
     return {
       success: false,

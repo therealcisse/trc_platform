@@ -223,8 +223,9 @@ checkAndRun();
 export async function executeBuyOfferWorkflow(
   context: ExecutionContext,
   selectors: BuyOfferSelectors,
+  flowId: string,
 ): Promise<ExecutionResult> {
-  const log = Log.withFlow(context.matcherId, context.flowId);
+  const log = Log.withFlow(context.matcherId, flowId);
   log
     .info(`Starting buy offer workflow for tab ${context.tabId}`)
     .setMetadata({ tabId: context.tabId, url: context.url });

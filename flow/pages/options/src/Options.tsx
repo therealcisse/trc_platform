@@ -133,6 +133,81 @@ const Options = () => {
                       className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
+
+                  {config.inboxMode && (
+                    <div className="space-y-3 border-t border-gray-700 pt-3">
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">Reload Seconds</label>
+                        <input
+                          type="text"
+                          value={(config.inboxReloadSeconds || [0, 5]).join(', ')}
+                          onChange={e => {
+                            const seconds = e.target.value
+                              .split(',')
+                              .map(s => parseInt(s.trim()))
+                              .filter(n => !isNaN(n) && n >= 0 && n < 60);
+                            extensionConfigStorage.updateConfig({ inboxReloadSeconds: seconds });
+                          }}
+                          placeholder="0, 5"
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">Comma-separated seconds (0-59) for reload timing</p>
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">Max Links per Scan</label>
+                        <input
+                          type="number"
+                          value={config.inboxMaxLinksPerScan || 10}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({
+                              inboxMaxLinksPerScan: parseInt(e.target.value) || 10,
+                            })
+                          }
+                          min="1"
+                          max="50"
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">Maximum number of links to process per scan</p>
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">Post-Reload Delay (ms)</label>
+                        <input
+                          type="number"
+                          value={config.inboxPostReloadDelayMs || 2000}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({
+                              inboxPostReloadDelayMs: parseInt(e.target.value) || 2000,
+                            })
+                          }
+                          min="500"
+                          max="10000"
+                          step="100"
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">Delay after reload before scanning</p>
+                      </div>
+
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">Inter-Open Delay (ms)</label>
+                        <input
+                          type="number"
+                          value={config.inboxInterOpenDelayMs || 400}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({
+                              inboxInterOpenDelayMs: parseInt(e.target.value) || 400,
+                            })
+                          }
+                          min="100"
+                          max="2000"
+                          step="100"
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">Delay between opening links</p>
+                      </div>
+                    </div>
+                  )}
                 </div>
               </div>
             </section>
