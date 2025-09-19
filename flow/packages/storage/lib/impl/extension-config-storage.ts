@@ -35,23 +35,15 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
 
     // Inbox mode defaults
     inboxMode: true,
-    inboxRefreshMin: 30,
-    inboxRefreshMax: 60,
 
     // Product strategies
     animals: true,
-    animalTimerMin: 10,
-    animalTimerMax: 30,
     animalProcessingTimeSeconds: 0,
 
     cancer: true,
-    cancerTimerMin: 15,
-    cancerTimerMax: 45,
     cancerProcessingTimeSeconds: 0,
 
     people: true,
-    peopleTimerMin: 20,
-    peopleTimerMax: 60,
     peopleProcessingTimeSeconds: 0,
   },
   // Initialize empty storage collections

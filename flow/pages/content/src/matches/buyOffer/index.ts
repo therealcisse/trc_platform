@@ -103,7 +103,6 @@ class BuyOfferMatcher implements Matcher {
         name: product.name,
         type: product.type,
         allowed: product.allowed,
-        delay: product.delay,
       });
 
       // flowId already extracted at the start
@@ -130,7 +129,7 @@ class BuyOfferMatcher implements Matcher {
       }
 
       // Product is already validated by factory
-      const { allowed, delay } = { allowed: product.allowed, delay: product.delay };
+      const { allowed } = { allowed: product.allowed };
       if (!allowed) {
         log.info('Product not allowed by current configuration', { product: product.name });
         await log.write();
@@ -138,7 +137,7 @@ class BuyOfferMatcher implements Matcher {
       }
 
       // Calculate timeout (delay + extra headroom)
-      const delaySeconds = delay || 0;
+      const delaySeconds = 0;
       const extraHeadroomSeconds = 30;
       const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
 
@@ -151,14 +150,12 @@ class BuyOfferMatcher implements Matcher {
       });
 
       log.info(`🎯 Starting purchase process for flow ${flowId}`);
-      log.info(`Applied delay: ${delaySeconds} seconds`);
       log.debug(`Timeout set to: ${new Date(timeout).toISOString()}`);
 
       // Send command to execute purchase
       log.info('Triggering buy offer executor');
       const response = await sendBackgroundCommand('buyOffer.execute', {
         id: flowId,
-        delay: delaySeconds,
         selectors: {
           input: '#captcha_code',
           img: '#page_buy_now_captcha label img',
@@ -312,27 +309,19 @@ export async function executeBuyOfferWorkflow(
     }
 
     // Product is already validated by factory
-    const { allowed, delay } = { allowed: product.allowed, delay: product.delay };
+    const { allowed } = { allowed: product.allowed };
 
     if (!allowed) {
       log.warn('Product not allowed by configuration', { product: product.name });
       throw new Error('Product not allowed by configuration');
     }
 
-    if (delay > 0) {
-      log.info(`Applying configured delay of ${delay} seconds before purchase`);
-      await sleep(delay * 1000);
-      log.debug('Delay period completed');
-    }
-
     const currentUrl = window.location.href;
 
-    // After delay, validate flow
-    log.debug('Validating flow after delay');
     const id = FlowUtils.parseIDFromPath(currentUrl);
     const flow = await ConfigService.getFlow(id);
     if (!flow) {
-      log.error('Flow not found after delay', { flowId: id });
+      log.error('Flow not found', { flowId: id });
       throw new Error('Flow not found');
     }
     log.info('Flow validation successful');
@@ -399,7 +388,6 @@ export async function executeBuyOfferWorkflow(
     if (!context.dryRun) {
       log.info('Clicking buy button to complete purchase');
       await clickWithVerification(buyButton, {
-        delay: 200,
         verify: true,
         scroll: true,
       });
@@ -435,7 +423,6 @@ export async function executeBuyOfferWorkflow(
       data: {
         flowId: context.flowId,
         product: product.toString(),
-        appliedDelay: delay,
         captchaProcessed: true,
         answer,
         completedAt: Date.now(),

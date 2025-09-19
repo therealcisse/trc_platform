@@ -19,7 +19,6 @@ export const ProductPatternSchema = z.object({
   insuredType: z.string().optional(),
   insuredAge: DelayConfigSchema.optional(),
   meta: z.record(z.string(), z.unknown()).optional(),
-  delay: DelayConfigSchema.optional(),
 });
 
 export const ProductConfigSchema = z.object({
@@ -27,7 +26,6 @@ export const ProductConfigSchema = z.object({
   insuredType: z.string(),
   insuredAge: DelayConfigSchema,
   meta: z.record(z.string(), z.unknown()).optional(),
-  delay: DelayConfigSchema.optional(),
 });
 
 export const StoredProductStrategySchema = z.object({
@@ -46,20 +44,12 @@ export const ExecutionConfigSchema = z.object({
   emailRefreshMin: z.number().optional(),
   emailRefreshMax: z.number().optional(),
   inboxMode: z.boolean().optional(),
-  inboxRefreshMin: z.number().optional(),
-  inboxRefreshMax: z.number().optional(),
   products: z.array(ProductConfigSchema).optional(),
   animals: z.boolean().optional(),
-  animalTimerMin: z.number().optional(),
-  animalTimerMax: z.number().optional(),
   animalProcessingTimeSeconds: z.number().optional(),
   cancer: z.boolean().optional(),
-  cancerTimerMin: z.number().optional(),
-  cancerTimerMax: z.number().optional(),
   cancerProcessingTimeSeconds: z.number().optional(),
   people: z.boolean().optional(),
-  peopleTimerMin: z.number().optional(),
-  peopleTimerMax: z.number().optional(),
   peopleProcessingTimeSeconds: z.number().optional(),
 });
 

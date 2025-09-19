@@ -27,10 +27,6 @@ export class ProductFactory {
           insuredType,
           insuredAge,
           allowed: true,
-          delay: Math.floor(
-            Math.random() * ((config.animalTimerMax || 0) - (config.animalTimerMin || 0) + 1) +
-              (config.animalTimerMin || 0),
-          ),
         };
       }
     }
@@ -41,20 +37,11 @@ export class ProductFactory {
         type: 'CANCER',
         name,
         allowed: true,
-        delay: Math.floor(
-          Math.random() * ((config.cancerTimerMax || 0) - (config.cancerTimerMin || 0) + 1) +
-            (config.cancerTimerMin || 0),
-        ),
       };
     }
 
     // People insurance products
     if (config.people && typeof insuredAge === 'number' && insuredAge <= 60) {
-      const delay = Math.floor(
-        Math.random() * ((config.peopleTimerMax || 0) - (config.peopleTimerMin || 0) + 1) +
-          (config.peopleTimerMin || 0),
-      );
-
       switch (name) {
         case 'KV-Voll Selbstständige KW':
           return {
@@ -62,7 +49,6 @@ export class ProductFactory {
             name,
             insuredAge,
             allowed: true,
-            delay,
           };
 
         case 'KV-Voll Arbeitnehmer KW':
@@ -71,7 +57,6 @@ export class ProductFactory {
             name,
             insuredAge,
             allowed: meta.aboveIncomeLimit || false,
-            delay,
             aboveIncomeLimit: meta.aboveIncomeLimit,
           };
       }

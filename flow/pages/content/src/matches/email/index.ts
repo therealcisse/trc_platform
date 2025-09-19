@@ -191,7 +191,7 @@ export async function executeEmailWorkflow(
           if (context.dryRun) {
             log.debug('Dry run: Would click email');
           } else {
-            await clickWithVerification(email, { delay: 100 });
+            await clickWithVerification(email, {});
           }
 
           // Wait for email content to load
@@ -288,7 +288,7 @@ export async function executeEmailWorkflow(
 
         if (markAsReadBtn instanceof HTMLElement) {
           if (!context.dryRun) {
-            await clickWithVerification(markAsReadBtn, { delay: 100 });
+            await clickWithVerification(markAsReadBtn, {});
             log.info('Marked email as read');
           } else {
             log.debug('Dry run: Would mark email as read');

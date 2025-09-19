@@ -133,28 +133,6 @@ const Options = () => {
                       className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
-                  <div className="space-y-3">
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (seconds)</label>
-                      <input
-                        type="number"
-                        value={config.inboxRefreshMin || 30}
-                        disabled={!config.inboxMode}
-                        onChange={e => extensionConfigStorage.updateConfig({ inboxRefreshMin: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (seconds)</label>
-                      <input
-                        type="number"
-                        value={config.inboxRefreshMax || 60}
-                        disabled={!config.inboxMode}
-                        onChange={e => extensionConfigStorage.updateConfig({ inboxRefreshMax: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>
                 </div>
               </div>
             </section>
@@ -173,7 +151,7 @@ const Options = () => {
                           <Switch
                             checked={dayConfig.enabled}
                             onCheckedChange={checked => handleOperationalHoursChange(day, 'enabled', checked)}
-                            className="ml-4"
+                            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                           />
                         </div>
                         <div className="flex items-center gap-3">
@@ -216,26 +194,6 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Timer (seconds)</label>
-                      <input
-                        type="number"
-                        value={config.animalTimerMin || 10}
-                        disabled={!config.animals}
-                        onChange={e => extensionConfigStorage.updateConfig({ animalTimerMin: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Timer (seconds)</label>
-                      <input
-                        type="number"
-                        value={config.animalTimerMax || 30}
-                        disabled={!config.animals}
-                        onChange={e => extensionConfigStorage.updateConfig({ animalTimerMax: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
                       <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
                       <input
                         type="number"
@@ -262,26 +220,6 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Timer (minutes)</label>
-                      <input
-                        type="number"
-                        value={config.peopleTimerMin || 20}
-                        disabled={!config.people}
-                        onChange={e => extensionConfigStorage.updateConfig({ peopleTimerMin: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Timer (minutes)</label>
-                      <input
-                        type="number"
-                        value={config.peopleTimerMax || 60}
-                        disabled={!config.people}
-                        onChange={e => extensionConfigStorage.updateConfig({ peopleTimerMax: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
                       <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
                       <input
                         type="number"
@@ -307,26 +245,6 @@ const Options = () => {
                     />
                   </div>
                   <div className="space-y-3">
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Timer (minutes)</label>
-                      <input
-                        type="number"
-                        value={config.cancerTimerMin || 20}
-                        disabled={!config.cancer}
-                        onChange={e => extensionConfigStorage.updateConfig({ cancerTimerMin: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Timer (minutes)</label>
-                      <input
-                        type="number"
-                        value={config.cancerTimerMax || 60}
-                        disabled={!config.cancer}
-                        onChange={e => extensionConfigStorage.updateConfig({ cancerTimerMax: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
                     <div>
                       <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
                       <input

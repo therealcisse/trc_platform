@@ -17,7 +17,7 @@ export async function setupItemPage(browser: MockBrowser) {
     buyButton.className = 'btn';
     buyButton.href = 'https://auktion.hansemerkur.de/buy_now/id/123';
     buyButton.textContent = 'Buy Now';
-    
+
     const buyContainer = document.createElement('div');
     buyContainer.className = 'buy_now';
     buyContainer.appendChild(buyButton);
@@ -34,7 +34,6 @@ export const mockProduct: Product = {
   insuredType: 'Hund',
   insuredAge: 2,
   allowed: true,
-  delay: 0,
 };
 
 /**
@@ -55,8 +54,6 @@ export const mockConfig: ExecutionConfig = {
   enabled: true,
   token: 'test-token',
   animals: true,
-  animalTimerMin: 0,
-  animalTimerMax: 5,
   animalProcessingTimeSeconds: 30,
 };
 

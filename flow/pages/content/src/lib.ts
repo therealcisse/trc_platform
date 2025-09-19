@@ -108,7 +108,7 @@ export async function waitForSelector(selector: string, options: WaitOptions = {
 }
 
 export async function clickWithVerification(element: Element, options: ClickOptions = {}): Promise<boolean> {
-  const { delay = 0, verify = true, scroll = true } = options;
+  const { verify = true, scroll = true } = options;
 
   try {
     if (!(element instanceof HTMLElement)) {
@@ -119,11 +119,6 @@ export async function clickWithVerification(element: Element, options: ClickOpti
     if (scroll) {
       element.scrollIntoView({ behavior: 'smooth', block: 'center' });
       await sleep(200); // Wait for scroll
-    }
-
-    // Add delay if specified
-    if (delay > 0) {
-      await sleep(delay);
     }
 
     // Click the element

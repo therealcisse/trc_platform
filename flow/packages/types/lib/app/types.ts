@@ -23,7 +23,6 @@ export interface ExecutionContext {
   flowId: string;
   config?: ExecutionConfig;
   timeout?: number;
-  retryOptions?: RetryOptions;
   dryRun?: boolean;
 }
 
@@ -38,8 +37,6 @@ export interface ExecutionConfig {
 
   // Inbox mode configuration
   inboxMode?: boolean;
-  inboxRefreshMin?: number;
-  inboxRefreshMax?: number;
   products?: ProductConfig[];
 
   // Animal insurance product strategy
@@ -74,12 +71,6 @@ export interface DelayConfig {
   max: number;
 }
 
-export interface RetryOptions {
-  maxAttempts: number;
-  delayMs: number;
-  backoffMultiplier?: number;
-}
-
 export interface ExecutionResult {
   success: boolean;
   matcherId: string;
@@ -103,7 +94,6 @@ export interface ProductPattern {
   insuredType?: string;
   insuredAge?: { min: number; max: number };
   meta?: Record<string, any>;
-  delay?: DelayConfig;
 }
 
 export interface StoredProductStrategy {
@@ -117,7 +107,6 @@ export interface ProductConfig {
   insuredType: string;
   insuredAge: { min: number; max: number };
   meta?: Record<string, any>;
-  delay?: DelayConfig;
 }
 
 export interface ProductMetadata {
@@ -236,7 +225,6 @@ export interface MyOfferSelectors {
 
 export interface BuyOfferCommand {
   id: string;
-  delay?: number;
   selectors?: BuyOfferSelectors;
 }
 
@@ -299,7 +287,6 @@ export interface WaitOptions {
 }
 
 export interface ClickOptions {
-  delay?: number;
   verify?: boolean;
   scroll?: boolean;
 }
@@ -385,7 +372,6 @@ export type ProductType = 'PEOPLE' | 'ANIMAL' | 'CANCER' | 'INVALID';
 interface BaseValidProduct {
   name: string;
   allowed: boolean;
-  delay: number;
 }
 
 // People product interface
@@ -413,7 +399,6 @@ export interface InvalidProduct {
   name: string;
   allowed: false;
   error: string;
-  delay?: never;
 }
 
 // Union type of all possible products
