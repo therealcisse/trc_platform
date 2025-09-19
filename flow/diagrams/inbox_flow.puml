@@ -1,0 +1,111 @@
+@startuml Inbox_Flow
+!include styles.puml
+
+title Flow Route 2: Inbox → MyOffer → Item → BuyOffer
+
+actor User
+participant "Inbox Monitor" as InboxCS
+participant "Background Service" as BG
+participant "Inbox Executor" as InboxExec
+database "Config Storage" as Config
+participant "Tab Service" as TabSvc
+participant "MyOffer Matcher" as MyOfferCS
+participant "MyOffer Executor" as MyOfferExec
+participant "Item Matcher" as ItemCS
+participant "Item Executor" as ItemExec
+participant "BuyOffer Matcher" as BuyCS
+participant "BuyOffer Executor" as BuyExec
+participant "OCR Service" as ImageAPI
+participant "Web Page" as Web
+database "Session Storage" as Session
+
+== Inbox Monitoring ==
+
+User -> InboxCS: Open Inbox
+activate InboxCS
+
+InboxCS -> Session: Check Status
+activate Session
+Session --> InboxCS: Reload Status
+deactivate Session
+
+InboxCS -> BG: Check Config
+activate BG
+BG -> Config: Get Config
+Config --> BG: Config Data
+BG --> InboxCS: Config Status
+deactivate BG
+
+InboxCS -> InboxExec: Scan Links
+activate InboxExec
+
+loop For Each Link
+    InboxExec -> Web: Extract Info
+    activate Web
+    Web --> InboxExec: Message Data
+    deactivate Web
+    
+    InboxExec -> BG: Start Flow
+    activate BG
+    BG -> Config: Create Flow
+    BG --> InboxExec: Flow Created
+    deactivate BG
+end
+
+deactivate InboxExec
+deactivate InboxCS
+
+== MyOffer Processing ==
+
+BG -> MyOfferCS: Open Message
+activate MyOfferCS
+
+MyOfferCS -> MyOfferExec: Process Message
+activate MyOfferExec
+
+MyOfferExec -> Config: Validate Product
+Config --> MyOfferExec: Product Valid
+
+MyOfferExec -> BG: Open Item Page
+deactivate MyOfferExec
+deactivate MyOfferCS
+
+== Item Processing ==
+
+BG -> ItemCS: Process Item
+activate ItemCS
+
+ItemCS -> ItemExec: Validate Item
+activate ItemExec
+ItemExec -> Config: Check Product Rules
+Config --> ItemExec: Rules Valid
+
+ItemExec -> BG: Open Buy Offer
+deactivate ItemExec
+deactivate ItemCS
+
+== Purchase Processing ==
+
+BG -> BuyCS: Execute Purchase
+activate BuyCS
+
+BuyCS -> BuyExec: Process Purchase
+activate BuyExec
+
+BuyExec -> ImageAPI: Solve CAPTCHA
+activate ImageAPI
+ImageAPI --> BuyExec: Solution
+deactivate ImageAPI
+
+BuyExec -> Web: Submit Purchase
+activate Web
+Web --> BuyExec: Confirmation
+deactivate Web
+
+BuyExec -> Config: Mark Complete
+Config --> BuyExec: Updated
+
+deactivate BuyExec
+deactivate BuyCS
+
+@enduml

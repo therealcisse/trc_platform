@@ -1,0 +1,96 @@
+@startuml Email_Flow
+!include styles.puml
+
+title Flow Route 1: Email → Item → BuyOffer
+
+actor User
+participant "Email Matcher" as EmailCS
+participant "Background Service" as BG
+participant "Email Executor" as EmailExec
+database "Config Storage" as Config
+participant "Tab Service" as TabSvc
+participant "Item Matcher" as ItemCS
+participant "Item Executor" as ItemExec
+participant "BuyOffer Matcher" as BuyCS
+participant "BuyOffer Executor" as BuyExec
+participant "OCR Service" as ImageAPI
+participant "Web Page" as Web
+
+== Email Processing ==
+
+User -> EmailCS: Open Outlook
+activate EmailCS
+
+EmailCS -> BG: Check Config
+activate BG
+
+BG -> Config: Get Config
+activate Config
+Config --> BG: Config Data
+deactivate Config
+
+BG --> EmailCS: Config Status
+deactivate BG
+
+EmailCS -> EmailExec: Find Unread Emails
+activate EmailExec
+
+loop For Each Email
+    EmailExec -> Web: Open Email
+    activate Web
+    Web --> EmailExec: Email Content
+    
+    EmailExec -> BG: Start Flow
+    activate BG
+    BG -> Config: Create Flow
+    BG --> EmailExec: Flow Created
+    deactivate BG
+    
+    EmailExec -> Web: Mark As Read
+    Web --> EmailExec: Updated
+    deactivate Web
+end
+
+deactivate EmailExec
+deactivate EmailCS
+
+== Item Processing ==
+
+BG -> ItemCS: Open Item Page
+activate ItemCS
+
+ItemCS -> ItemExec: Process Item
+activate ItemExec
+
+ItemExec -> Config: Validate Product
+Config --> ItemExec: Product Valid
+
+ItemExec -> BG: Open Buy Offer
+deactivate ItemExec
+deactivate ItemCS
+
+== Purchase Processing ==
+
+BG -> BuyCS: Process Purchase
+activate BuyCS
+
+BuyCS -> BuyExec: Execute Purchase
+activate BuyExec
+
+BuyExec -> ImageAPI: Solve CAPTCHA
+activate ImageAPI
+ImageAPI --> BuyExec: Solution
+deactivate ImageAPI
+
+BuyExec -> Web: Submit Purchase
+activate Web
+Web --> BuyExec: Confirmation
+deactivate Web
+
+BuyExec -> Config: Mark Complete
+Config --> BuyExec: Updated
+
+deactivate BuyExec
+deactivate BuyCS
+
+@enduml

@@ -1,0 +1,28 @@
+@startuml Flow_Test
+!include styles.puml
+
+title Test Flow
+
+actor User
+participant "Service A" as A
+participant "Service B" as B
+database "Storage" as DB
+
+User -> A: Request
+activate A
+
+A -> B: Process
+activate B
+
+B -> DB: Store
+activate DB
+DB --> B: Done
+deactivate DB
+
+B --> A: Response
+deactivate B
+
+A --> User: Result
+deactivate A
+
+@enduml

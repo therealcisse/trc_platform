@@ -1,6 +1,7 @@
 import type {
   MyOfferCommand,
   CommandResponse,
+  ExecutionContext,
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
@@ -38,7 +39,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
     }
 
     // Create execution context
-    const context: Record<string, any> = {
+    const context: ExecutionContext = {
       tabId,
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.MY_OFFER,
@@ -70,9 +71,9 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       args: [
         JSON.stringify(context),
         JSON.stringify(payload.selectors || {
-          itemLink: '#my_area table.message_center_message td.content a',
-          titleLink: 'h1.item_title',
-          requestTimestampElement: '.message_center_message thead tr td:last-child',
+          itemLink: '.message_center_message a[href*="/item.php"]',
+          titleLink: 'h3.panel-title',
+          requestTimestampElement: '.message_center_message thead tr:nth-child(1) td:last-child',
         })
       ]
     });

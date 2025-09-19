@@ -1,0 +1,48 @@
+@startuml Index
+!include styles.puml
+
+title <size:20><b>Image Solve Platform Flow Routes</b></size>\n<size:12>Overview of Message Processing and Purchase Workflows</size>
+
+class "Flow Route 1\nEmail → Item → BuyOffer" as Route1 #SUCCESS {
+  + Entry Point: Outlook Email
+  + Key Components:
+    * Email Matcher
+    * Email Executor
+    * Item Processing
+    * Buy Offer Processing
+  --
+  See: flow_route_1_email.puml
+}
+
+class "Flow Route 2\nInbox → MyOffer → Item → BuyOffer" as Route2 #SPECIAL {
+  + Entry Point: HanseMerkur Inbox
+  + Key Components:
+    * Inbox Monitoring
+    * MyOffer Processing
+    * Item Processing
+    * Buy Offer Processing
+  + Special Features:
+    * Scheduled Reloads
+    * Timestamp-based Processing
+  --
+  See: flow_route_2_inbox.puml
+}
+
+note right of Route1
+  Direct processing from
+  Outlook email notifications.
+  Optimized for immediate
+  response to new offers.
+end note
+
+note right of Route2
+  Continuous monitoring of
+  HanseMerkur inbox with
+  scheduled reloads at
+  seconds 0 and 5 of
+  each minute.
+end note
+
+Route1 -[hidden]down- Route2
+
+@enduml

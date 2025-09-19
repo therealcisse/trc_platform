@@ -1,6 +1,7 @@
 import type {
   InboxCommand,
   CommandResponse,
+  ExecutionContext,
 } from '@extension/types';
 import type { MessageHandler } from '@extension/types';
 import { ConfigService, Log } from '@extension/shared';
@@ -36,7 +37,7 @@ export const inboxCommandHandler: MessageHandler<'inbox.openMyOfferLink'> = asyn
       };
     }
 
-    const context: Record<string, any> = {
+    const context: ExecutionContext = {
       tabId,
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.INBOX,

@@ -1,0 +1,49 @@
+' Common styles for sequence diagrams
+
+!define PRIMARY #2E86AB
+!define SUCCESS #A8DADC
+!define WARNING #FFA400
+!define ERROR #E63946
+!define INFO #90C3C8
+!define BACKGROUND #F1FAEE
+!define SPECIAL #FF006E
+
+skinparam {
+    BackgroundColor BACKGROUND
+    Shadowing false
+    DefaultFontName Arial
+    DefaultFontSize 12
+    RoundCorner 10
+    
+    Participant {
+        BackgroundColor PRIMARY
+        BorderColor #1D3557
+        FontColor white
+        FontSize 14
+        FontStyle bold
+    }
+    
+    Sequence {
+        ArrowColor #1D3557
+        ArrowFontSize 12
+        LifeLineBackgroundColor SUCCESS
+        LifeLineBorderColor #457B9D
+        MessageAlign center
+    }
+    
+    Note {
+        BackgroundColor INFO
+        BorderColor #457B9D
+        FontSize 11
+    }
+    
+    Database {
+        BackgroundColor INFO
+        BorderColor #457B9D
+    }
+    
+    Actor {
+        BackgroundColor WARNING
+        BorderColor #1D3557
+    }
+}

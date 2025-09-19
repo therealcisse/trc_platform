@@ -164,22 +164,20 @@ export async function executeEmailWorkflow(
     // Process emails
     await processEmails();
 
+    const getUnreadEmails = async (maxRetries = 3, interval = 500): Promise<NodeListOf<Element>> => {
+      for (let i = 0; i < maxRetries; i++) {
+        const emails = document.querySelectorAll(selectors.unreadEmail);
+        if (emails.length > 0) return emails;
+        await sleep(interval * Math.pow(2, i)); // Exponential backoff
+      }
+      return document.querySelectorAll(selectors.unreadEmail);
+    };
+
     async function processEmails(): Promise<void> {
       try {
         // Find all unread emails
-        const emails = document.querySelectorAll(selectors.unreadEmail);
+        const emails = await getUnreadEmails();
         log.info(`Found ${emails.length} unread emails`);
-
-        if (emails.length === 0) {
-          // Wait and check again
-          await sleep(500);
-          const retriedEmails = document.querySelectorAll(selectors.unreadEmail);
-          if (retriedEmails.length === 0) {
-            log.info('No unread emails found after retry');
-            await log.write();
-            return;
-          }
-        }
 
         // Process each email
         for (const email of emails) {

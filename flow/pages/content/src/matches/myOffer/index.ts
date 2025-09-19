@@ -70,9 +70,9 @@ class MyOfferMatcher implements Matcher {
     const response = await sendBackgroundCommand('myOffer.clickProductLink', {
       id,
       selectors: {
-        itemLink: '#my_area table.message_center_message td.content a',
-        titleLink: 'h1.item_title',
-        requestTimestampElement: '.message_center_message thead tr td:last-child',
+        itemLink: '.message_center_message a[href*="/item.php"]',
+        titleLink: 'h3.panel-title',
+        requestTimestampElement: '.message_center_message thead tr:nth-child(1) td:last-child',
       },
     });
 
@@ -146,7 +146,6 @@ export async function executeMyOfferWorkflow(
     .setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
-  let processedCount = 0;
 
   try {
     // Check if this is a managed tab

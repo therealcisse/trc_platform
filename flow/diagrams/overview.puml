@@ -1,0 +1,67 @@
+@startuml Overview
+!include styles.puml
+
+title Image Solve Platform Flow Routes
+
+class "Email Flow Route" as EmailFlow {
+  + Entry: Outlook Email
+  + Steps:
+    1. Monitor unread emails
+    2. Extract item links
+    3. Process items
+    4. Execute purchase
+  ..
+  Key Features:
+  * Immediate processing
+  * Email auto-marking
+  * Duplicate prevention
+}
+
+class "Inbox Flow Route" as InboxFlow {
+  + Entry: HanseMerkur Inbox
+  + Steps:
+    1. Monitor inbox
+    2. Process messages
+    3. Validate items
+    4. Execute purchase
+  ..
+  Key Features:
+  * Scheduled reloading
+  * Timestamp sorting
+  * Session management
+}
+
+class "Shared Components" as Shared {
+  + Item Processing
+  + Product Validation
+  + CAPTCHA Solving
+  + Purchase Execution
+  ..
+  Common Features:
+  * Flow tracking
+  * Config management
+  * Tab management
+}
+
+EmailFlow --> Shared
+InboxFlow --> Shared
+
+note right of EmailFlow
+  Direct email monitoring
+  optimized for quick
+  response to new offers
+end note
+
+note right of InboxFlow
+  Continuous inbox scanning
+  with configurable reload
+  intervals (0s, 5s)
+end note
+
+note right of Shared
+  Core functionality used
+  by both flow routes to
+  ensure consistent behavior
+end note
+
+@enduml

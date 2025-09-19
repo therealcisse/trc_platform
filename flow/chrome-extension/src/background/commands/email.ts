@@ -39,7 +39,7 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
     }
 
     // Create execution context
-    const context: Record<string, any> = {
+    const context: ExecutionContext = {
       tabId,
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.EMAIL,
