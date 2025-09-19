@@ -67,17 +67,18 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
     // Inject and execute the item workflow
     const result = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (contextJson: string, selectorsJson: string, strategiesJson: string, flowId: string) => {
+      func: async (contextJson: string, selectorsJson: string, flowJson: string, strategiesJson: string) => {
         // This runs in the content script context
         const context = JSON.parse(contextJson);
         const selectors = JSON.parse(selectorsJson);
+        const flow = JSON.parse(flowJson);
         const strategies = JSON.parse(strategiesJson);
 
         // Check if executor is available
         if (typeof (window as any).__itemExecutor === 'function') {
           // Add strategies to context
           context.productStrategies = strategies;
-          return await (window as any).__itemExecutor(context, selectors, flowId);
+          return await (window as any).__itemExecutor(context, selectors, flow);
         }
 
         // If not, we need to load it first
@@ -95,8 +96,8 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
           buyButton: '.buy_now a.btn',
           titleLink: 'h1.item_title',
         }),
-        JSON.stringify(productStrategies),
-        flowId
+        JSON.stringify(flow),
+        JSON.stringify(productStrategies)
       ]
     });
 

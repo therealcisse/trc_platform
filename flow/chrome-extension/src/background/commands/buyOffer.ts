@@ -63,14 +63,15 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
     // Inject and execute the buy offer workflow
     const result = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (contextJson: string, selectorsJson: string) => {
+      func: async (contextJson: string, selectorsJson: string, flowJson: string) => {
         // This runs in the content script context
         const context = JSON.parse(contextJson);
         const selectors = JSON.parse(selectorsJson);
+        const flow = JSON.parse(flowJson);
 
         // Check if executor is available
         if (typeof (window as any).__buyOfferExecutor === 'function') {
-          return await (window as any).__buyOfferExecutor(context, selectors);
+          return await (window as any).__buyOfferExecutor(context, selectors, flow);
         }
 
         // If not, we need to load it first
@@ -90,7 +91,8 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
           productTitle: '.col-sm-9 h2',     // Product title heading
           buyFormButton: 'button[role="action"]' // Buy button
 
-        })
+        }),
+        JSON.stringify(flow)
       ]
     });
 

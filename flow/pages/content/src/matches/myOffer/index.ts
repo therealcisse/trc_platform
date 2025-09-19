@@ -8,6 +8,7 @@ import type {
   MyOfferSelectors,
   ExecutionConfig,
   CommandResponse,
+  Flow,
 } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
 
@@ -138,9 +139,9 @@ checkAndRun();
 export async function executeMyOfferWorkflow(
   context: ExecutionContext,
   selectors: MyOfferSelectors,
-  flowId: string,
+  flow: Flow,
 ): Promise<ExecutionResult> {
-  const log = Log.withFlow(context.matcherId, flowId);
+  const log = Log.withFlow(context.matcherId, flow.id);
   log
     .info(`Starting myOffer workflow for tab ${context.tabId}`)
     .setMetadata({ tabId: context.tabId, url: context.url });

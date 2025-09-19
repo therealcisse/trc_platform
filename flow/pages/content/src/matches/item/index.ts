@@ -16,6 +16,7 @@ import type {
   ItemSelectors,
   ExecutionConfig,
   CommandResponse,
+  Flow,
 } from '@extension/types';
 import { MATCHER_IDS } from '@extension/types';
 
@@ -147,9 +148,9 @@ checkAndRun();
 export async function executeItemWorkflow(
   context: ExecutionContext,
   selectors: ItemSelectors,
-  flowId: string,
+  flow: Flow,
 ): Promise<ExecutionResult> {
-  const log = Log.withFlow(context.matcherId, flowId);
+  const log = Log.withFlow(context.matcherId, flow.id);
   log.info(`Starting item workflow for tab ${context.tabId}`).setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
@@ -206,13 +207,7 @@ export async function executeItemWorkflow(
       };
     }
 
-    const flow = await ConfigService.getFlow(flowId);
-
-    if (!flow) {
-      log.warn('Flow not found');
-    } else {
-      await processItem();
-    }
+    await processItem();
 
     // Process browse item (list view)
     async function processItem(): Promise<void> {
