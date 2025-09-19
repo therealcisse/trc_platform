@@ -7,6 +7,7 @@ import {
   fetchImageAsBlob,
   extractNumericAnswer,
 } from '@src/lib';
+import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import { Log, FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
 import { isInvalidProduct } from '@extension/types';
 import { type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
@@ -287,7 +288,7 @@ export async function executeBuyOfferWorkflow(
     log.info('Checking buying state to prevent race conditions');
     const buyingStateResponse = await sendBackgroundCommand('state.buying', {
       action: 'check',
-      flowId: context.flowId,
+      flowId: flowId,
     });
 
     // Handle if another tab started buying this flow
@@ -319,10 +320,9 @@ export async function executeBuyOfferWorkflow(
 
     const currentUrl = window.location.href;
 
-    const id = FlowUtils.parseIDFromPath(currentUrl);
-    const flow = await ConfigService.getFlow(id);
+    const flow = await ConfigService.getFlow(flowId);
     if (!flow) {
-      log.error('Flow not found', { flowId: id });
+      log.error('Flow not found', { flowId: flowId });
       throw new Error('Flow not found');
     }
     log.info('Flow validation successful');
@@ -340,30 +340,20 @@ export async function executeBuyOfferWorkflow(
     }
     log.debug(`Captcha image source: ${imgElement.src.substring(0, 50)}...`);
 
-    // Convert image to blob
-    log.info('Converting captcha image to blob for processing');
-    const imageBlob = await fetchImageAsBlob(imgElement.src);
+    // Convert image to data URL once
+    log.info('Converting captcha image to data URL for processing');
     const reader = new FileReader();
-    const imageDataUrl = await new Promise<string>((resolve, reject) => {
+    const imageDataUrl = await new Promise<string>(async (resolve, reject) => {
       reader.onloadend = () => resolve(reader.result as string);
       reader.onerror = reject;
-      reader.readAsDataURL(imageBlob);
+      reader.readAsDataURL(await fetchImageAsBlob(imgElement.src));
     });
+
+    const captchaProcessor = CaptchaProcessor.getInstance();
+    const answer = await captchaProcessor.solveCaptcha(imgElement.src, imageDataUrl, flowId);
+
     log.debug('Image conversion successful');
 
-    // Send to API for processing
-    log.info('Sending captcha to API for solving');
-    const imageResponse = await sendBackgroundCommand('image.solve', {
-      imageData: imageDataUrl,
-    });
-
-    if (!imageResponse.success || !imageResponse.data?.result) {
-      log.error('Failed to process captcha', { error: imageResponse.error });
-      throw new Error(imageResponse.error || 'Failed to process captcha');
-    }
-
-    // Extract and input the answer
-    const answer = extractNumericAnswer(imageResponse.data.result);
     log.info(`Captcha solved successfully: ${answer}`);
 
     inputElement.value = answer;
@@ -379,7 +369,7 @@ export async function executeBuyOfferWorkflow(
 
     if (remainingTime > 0) {
       log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
-      await sleep(remainingTime * 1000);
+      await sleep(remainingTime * 1000 - 100);
       log.debug('Processing time wait completed');
     }
 

@@ -206,9 +206,7 @@ export async function executeItemWorkflow(
       };
     }
 
-    const currentUrl = window.location.href;
-    const id = FlowUtils.parseIDFromHref(currentUrl);
-    const flow = await ConfigService.getFlow(id);
+    const flow = await ConfigService.getFlow(flowId);
 
     if (!flow) {
       log.warn('Flow not found');
