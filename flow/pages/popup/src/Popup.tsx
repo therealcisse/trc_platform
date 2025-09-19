@@ -210,26 +210,26 @@ const Popup = () => {
 
   if (loading) {
     return (
-      <div className="flex h-[600px] w-[400px] items-center justify-center bg-white">
+      <div className="flex h-full w-full items-center justify-center bg-white">
         <LoadingSpinner />
       </div>
     );
   }
 
   return (
-    <div className="flex h-[600px] w-[400px] flex-col bg-white">
+    <div className="flex h-full w-full flex-col bg-white">
       {/* Header with Enable Switch */}
       <div className="flex items-center justify-between border-b bg-gray-50 p-4">
         <div className="flex items-center gap-3">
           <Switch
             checked={enabled}
             onCheckedChange={handleToggleEnabled}
-            className="data-[state=checked]:bg-blue-600"
+            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
           />
-          <label className="text-sm font-medium text-gray-700">Enable Extension</label>
+          <label className="cursor-pointer select-none text-sm font-medium text-gray-700" onClick={handleToggleEnabled}>
+            Enable Extension
+          </label>
         </div>
-
-        {/* Auto-refresh indicator */}
         <div className="flex items-center gap-2">
           {autoRefresh && (
             <div className="flex items-center gap-1">

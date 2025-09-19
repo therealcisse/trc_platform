@@ -53,7 +53,11 @@ const Options = () => {
             <h2 className="font-medium">Enable Extension</h2>
             <p className="text-sm text-gray-400">Turn the extension on or off</p>
           </div>
-          <Switch checked={enabled} onCheckedChange={extensionConfigStorage.toggleEnabled} className="SwitchRoot" />
+          <Switch
+            checked={enabled}
+            onCheckedChange={extensionConfigStorage.toggleEnabled}
+            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+          />
         </div>
 
         {enabled && (
@@ -89,7 +93,7 @@ const Options = () => {
                     <Switch
                       checked={config.emailMode || false}
                       onCheckedChange={() => handleConfigToggle('emailMode')}
-                      className="SwitchRoot"
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
                   <div className="space-y-3">
@@ -126,7 +130,7 @@ const Options = () => {
                     <Switch
                       checked={config.inboxMode || false}
                       onCheckedChange={() => handleConfigToggle('inboxMode')}
-                      className="SwitchRoot"
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
                   <div className="space-y-3">
@@ -207,7 +211,7 @@ const Options = () => {
                     <Switch
                       checked={config.animals || false}
                       onCheckedChange={() => handleConfigToggle('animals')}
-                      className="SwitchRoot"
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
                   <div className="space-y-3">
@@ -253,7 +257,7 @@ const Options = () => {
                     <Switch
                       checked={config.people || false}
                       onCheckedChange={() => handleConfigToggle('people')}
-                      className="SwitchRoot"
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
                   <div className="space-y-3">
@@ -299,7 +303,7 @@ const Options = () => {
                     <Switch
                       checked={config.people || false}
                       onCheckedChange={() => handleConfigToggle('cancer')}
-                      className="SwitchRoot"
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
                   <div className="space-y-3">
