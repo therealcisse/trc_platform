@@ -1,6 +1,41 @@
 import type { Flow } from '@extension/types';
 
 export class FlowUtils {
+  parseDateToEpoch(dateStr: string): number {
+    // Example input: "15.09.2025 – 18:46:04"
+    // Normalize dash and trim
+    const normalized = dateStr.replace('–', '-').trim();
+
+    // Split into date and time parts
+    const [datePart, timePart] = normalized.split('-').map(s => s.trim());
+
+    if (!datePart || !timePart) {
+      throw new Error(`Invalid date string format: ${dateStr}`);
+    }
+
+    // Extract day, month, year
+    const [dayStr, monthStr, yearStr] = datePart.split('.');
+    const day = parseInt(dayStr, 10);
+    const month = parseInt(monthStr, 10);
+    const year = parseInt(yearStr, 10);
+
+    // Extract hour, minute, second
+    const [hourStr, minuteStr, secondStr] = timePart.split(':');
+    const hour = parseInt(hourStr, 10);
+    const minute = parseInt(minuteStr, 10);
+    const second = parseInt(secondStr, 10);
+
+    // Build Date object (note: month is 0-based in JS/TS)
+    const date = new Date(year, month - 1, day, hour, minute, second);
+
+    if (isNaN(date.getTime())) {
+      throw new Error(`Failed to parse date: ${dateStr}`);
+    }
+
+    // Return timestamp in milliseconds
+    return date.getTime();
+  }
+
   static parseIDFromTitle(title: string): string {
     const match = /\(ID\s+(\d+)\)/.exec(title);
     if (!match) {
