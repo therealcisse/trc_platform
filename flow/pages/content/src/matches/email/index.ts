@@ -140,7 +140,7 @@ export async function executeEmailWorkflow(
   const startTime = Date.now();
   const errors: Error[] = [];
   let processedCount = 0;
-  const visitedUrls: Record<string, boolean> = {};
+  const visitedUrls: Record<string, boolean> = {}; // local url tracking within this email session
 
   try {
     // Get configuration
@@ -221,7 +221,6 @@ export async function executeEmailWorkflow(
                 type: 'email',
                 id,
                 title,
-                href,
               });
 
               if (startFlowResult.success && startFlowResult.data === true) {

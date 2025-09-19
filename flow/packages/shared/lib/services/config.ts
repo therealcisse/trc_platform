@@ -77,7 +77,7 @@ export class ConfigService {
     await extensionConfigStorage.logs.addLog(
       exists
         ? `[Flow] Skipped existing flow ${flow.id} (${flow.source})`
-        : `[Flow] Started new flow ${flow.id} (${flow.source}) for ${flow.href}`,
+        : `[Flow] Started new flow ${flow.id} (${flow.source})`,
     );
 
     return exists;

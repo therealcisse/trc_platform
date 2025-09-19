@@ -147,7 +147,6 @@ export interface EmailFlowPayload {
   type: 'email';
   id: string;
   title: string;
-  href: string;
 }
 
 export interface InboxFlowPayload {
@@ -155,7 +154,6 @@ export interface InboxFlowPayload {
   id: string;
   requestTimestamp: number;
   title: string;
-  href: string;
 }
 
 export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
@@ -306,7 +304,6 @@ export interface Flow {
   status: 'running' | 'done';
   source: 'email' | 'inbox';
   title: string;
-  href: string;
 }
 
 export type FlowState = Record<string, Flow>;

@@ -61,7 +61,7 @@ export class FlowUtils {
     return match[1];
   }
 
-  static email(id: string, title: string, href: string): Flow {
+  static email(id: string, title: string): Flow {
     const now = Date.now();
     return {
       id,
@@ -70,11 +70,10 @@ export class FlowUtils {
       status: 'running',
       source: 'email',
       title,
-      href,
     };
   }
 
-  static inbox(id: string, requestTimestamp: number, title: string, href: string): Flow {
+  static inbox(id: string, requestTimestamp: number, title: string): Flow {
     return {
       id,
       timestamp: Date.now(),
@@ -82,7 +81,6 @@ export class FlowUtils {
       status: 'running',
       source: 'inbox',
       title,
-      href,
     };
   }
 }

@@ -163,7 +163,7 @@ export async function executeInboxWorkflow(
   const log = new Log(context.matcherId);
   log.info(`Extracting inbox links for tab ${context.tabId}`);
   const startTime = Date.now();
-  const visitedUrls: Record<string, boolean> = {};
+  const visitedUrls: Record<string, boolean> = {}; // local url tracking for this scan
 
   try {
     // Parse links from the page
@@ -250,7 +250,6 @@ export async function executeInboxWorkflow(
             id: link.id,
             title: link.title,
             requestTimestamp: link.requestTimestamp,
-            href: link.href,
           });
 
           if (startFlowResponse.success && startFlowResponse.data === true) {
@@ -261,7 +260,7 @@ export async function executeInboxWorkflow(
             continue;
           }
 
-          flowLog.info(`Processing new inbox flow`, { href: link.href, link: link.title });
+          flowLog.info(`Processing new inbox flow`, { link: link.title });
 
           // Check if we've already visited this URL
           if (!visitedUrls[link.href]) {
