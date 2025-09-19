@@ -9,6 +9,8 @@ import { Fragment } from 'react';
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
+const getDayTranslation = (day: DayName) => t(`days_${day.toLowerCase()}`);
+
 type DayName = (typeof DAYS)[number];
 
 const Options = () => {
@@ -43,15 +45,15 @@ const Options = () => {
     <div className="min-h-screen bg-gray-900 p-6 text-gray-100">
       <div className="mx-auto max-w-2xl space-y-8">
         <header className="text-center">
-          <h1 className="mb-1 text-2xl font-semibold">Extension Settings</h1>
-          <p className="text-sm text-gray-400">Configure your extension preferences</p>
+          <h1 className="mb-1 text-2xl font-semibold">{t('options_title')}</h1>
+          <p className="text-sm text-gray-400">{t('options_subtitle')}</p>
         </header>
 
         {/* Enable Extension Switch */}
         <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
           <div>
-            <h2 className="font-medium">Enable Extension</h2>
-            <p className="text-sm text-gray-400">Turn the extension on or off</p>
+            <h2 className="font-medium">{t('options_enable_extension')}</h2>
+            <p className="text-sm text-gray-400">{t('options_enable_extension_description')}</p>
           </div>
           <Switch
             checked={enabled}
@@ -64,16 +66,16 @@ const Options = () => {
           <div className="space-y-8">
             {/* Authentication */}
             <section>
-              <h2 className="mb-4 text-xl font-medium">Authentication</h2>
+              <h2 className="mb-4 text-xl font-medium">{t('options_authentication')}</h2>
               <div className="rounded-lg bg-gray-800 p-4">
                 <div className="space-y-2">
-                  <label className="block text-sm font-medium text-gray-300">API Token</label>
+                  <label className="block text-sm font-medium text-gray-300">{t('options_api_token')}</label>
                   <input
                     type="password"
                     value={config.token || ''}
                     onChange={e => extensionConfigStorage.updateConfig({ token: e.target.value })}
                     className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    placeholder="Enter your API token"
+                    placeholder={t('options_api_token_placeholder')}
                   />
                 </div>
               </div>
@@ -81,14 +83,14 @@ const Options = () => {
 
             {/* Message Monitoring */}
             <section>
-              <h2 className="mb-4 text-xl font-medium">Message Monitoring</h2>
+              <h2 className="mb-4 text-xl font-medium">{t('options_message_monitoring')}</h2>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 {/* Email Mode */}
                 <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium">Email Monitoring</h3>
-                      <p className="text-sm text-gray-400">Monitor emails for new offers</p>
+                      <h3 className="font-medium">{t('options_email_monitoring')}</h3>
+                      <p className="text-sm text-gray-400">{t('options_email_monitoring_description')}</p>
                     </div>
                     <Switch
                       checked={config.emailMode || false}
@@ -98,7 +100,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Min Refresh (seconds)</label>
+                      <label className="mb-1 block text-sm text-gray-300">{t('options_min_refresh')}</label>
                       <input
                         type="number"
                         value={config.emailRefreshMin || 30}
@@ -108,7 +110,7 @@ const Options = () => {
                       />
                     </div>
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Max Refresh (seconds)</label>
+                      <label className="mb-1 block text-sm text-gray-300">{t('options_max_refresh')}</label>
                       <input
                         type="number"
                         value={config.emailRefreshMax || 60}
@@ -124,8 +126,8 @@ const Options = () => {
                 <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex items-center justify-between">
                     <div>
-                      <h3 className="font-medium">Inbox Monitoring</h3>
-                      <p className="text-sm text-gray-400">Monitor inbox for new offers</p>
+                      <h3 className="font-medium">{t('options_inbox_monitoring')}</h3>
+                      <p className="text-sm text-gray-400">{t('options_inbox_monitoring_description')}</p>
                     </div>
                     <Switch
                       checked={config.inboxMode || false}
@@ -137,7 +139,7 @@ const Options = () => {
                   {config.inboxMode && (
                     <div className="space-y-3 border-t border-gray-700 pt-3">
                       <div>
-                        <label className="mb-1 block text-sm text-gray-300">Reload Seconds</label>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_reload_seconds')}</label>
                         <input
                           type="text"
                           value={(config.inboxReloadSeconds || [0, 5]).join(', ')}
@@ -151,11 +153,11 @@ const Options = () => {
                           placeholder="0, 5"
                           className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <p className="mt-1 text-xs text-gray-400">Comma-separated seconds (0-59) for reload timing</p>
+                        <p className="mt-1 text-xs text-gray-400">{t('options_reload_seconds_help')}</p>
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-sm text-gray-300">Max Links per Scan</label>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_max_links_per_scan')}</label>
                         <input
                           type="number"
                           value={config.inboxMaxLinksPerScan || 10}
@@ -168,11 +170,11 @@ const Options = () => {
                           max="50"
                           className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <p className="mt-1 text-xs text-gray-400">Maximum number of links to process per scan</p>
+                        <p className="mt-1 text-xs text-gray-400">{t('options_max_links_per_scan_help')}</p>
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-sm text-gray-300">Post-Reload Delay (ms)</label>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_post_reload_delay')}</label>
                         <input
                           type="number"
                           value={config.inboxPostReloadDelayMs || 2000}
@@ -186,11 +188,11 @@ const Options = () => {
                           step="100"
                           className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <p className="mt-1 text-xs text-gray-400">Delay after reload before scanning</p>
+                        <p className="mt-1 text-xs text-gray-400">{t('options_post_reload_delay_help')}</p>
                       </div>
 
                       <div>
-                        <label className="mb-1 block text-sm text-gray-300">Inter-Open Delay (ms)</label>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_inter_open_delay')}</label>
                         <input
                           type="number"
                           value={config.inboxInterOpenDelayMs || 400}
@@ -204,7 +206,7 @@ const Options = () => {
                           step="100"
                           className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
-                        <p className="mt-1 text-xs text-gray-400">Delay between opening links</p>
+                        <p className="mt-1 text-xs text-gray-400">{t('options_inter_open_delay_help')}</p>
                       </div>
                     </div>
                   )}
@@ -214,7 +216,7 @@ const Options = () => {
 
             {/* Operational Hours */}
             <section>
-              <h2 className="mb-4 text-xl font-medium">Operational Hours</h2>
+              <h2 className="mb-4 text-xl font-medium">{t('options_operational_hours')}</h2>
               <div className="rounded-lg bg-gray-800 p-6">
                 <div className="flex flex-col items-center space-y-4">
                   {DAYS.map(day => {
@@ -222,7 +224,7 @@ const Options = () => {
                     return (
                       <div key={day} className="flex w-full items-center justify-center gap-6">
                         <div className="flex w-36 items-center justify-between">
-                          <span className="text-gray-300">{day}</span>
+                          <span className="text-gray-300">{getDayTranslation(day)}</span>
                           <Switch
                             checked={dayConfig.enabled}
                             onCheckedChange={checked => handleOperationalHoursChange(day, 'enabled', checked)}
@@ -255,12 +257,12 @@ const Options = () => {
 
             {/* Product Strategies */}
             <section>
-              <h2 className="mb-4 text-xl font-medium">Product Strategies</h2>
+              <h2 className="mb-4 text-xl font-medium">{t('options_product_strategies')}</h2>
               <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
                 {/* Animals */}
                 <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Animal Insurance</h3>
+                    <h3 className="font-medium">{t('options_animal_insurance')}</h3>
                     <Switch
                       checked={config.animals || false}
                       onCheckedChange={() => handleConfigToggle('animals')}
@@ -269,7 +271,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
+                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
                       <input
                         type="number"
                         min="0"
@@ -286,7 +288,7 @@ const Options = () => {
                 {/* People */}
                 <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium">People Insurance</h3>
+                    <h3 className="font-medium">{t('options_people_insurance')}</h3>
                     <Switch
                       checked={config.people || false}
                       onCheckedChange={() => handleConfigToggle('people')}
@@ -295,7 +297,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
+                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
                       <input
                         type="number"
                         min="0"
@@ -312,7 +314,7 @@ const Options = () => {
                 {/* Cancer */}
                 <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                   <div className="flex items-center justify-between">
-                    <h3 className="font-medium">Cancer Insurance</h3>
+                    <h3 className="font-medium">{t('options_cancer_insurance')}</h3>
                     <Switch
                       checked={config.people || false}
                       onCheckedChange={() => handleConfigToggle('cancer')}
@@ -321,7 +323,7 @@ const Options = () => {
                   </div>
                   <div className="space-y-3">
                     <div>
-                      <label className="mb-1 block text-sm text-gray-300">Processing Time (seconds)</label>
+                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
                       <input
                         type="number"
                         min="0"

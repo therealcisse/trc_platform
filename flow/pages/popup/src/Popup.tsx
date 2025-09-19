@@ -2,6 +2,7 @@ import '@src/Popup.css';
 import { useEffect, useState, useCallback } from 'react';
 import { withErrorBoundary, withSuspense, ConfigService } from '@extension/shared';
 import { Switch, ErrorDisplay, LoadingSpinner } from '@extension/ui';
+import { t } from '@extension/i18n';
 import type { LogEntry } from '@extension/shared';
 
 interface FlowSummary {
@@ -187,24 +188,24 @@ const Popup = () => {
   const getStatusBadge = (status?: string) => {
     switch (status) {
       case 'done':
-        return <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">Done</span>;
+        return <span className="rounded bg-green-100 px-2 py-0.5 text-xs text-green-700">{t('status_done')}</span>;
       case 'error':
-        return <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">Error</span>;
+        return <span className="rounded bg-red-100 px-2 py-0.5 text-xs text-red-700">{t('status_error')}</span>;
       default:
-        return <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">Active</span>;
+        return <span className="rounded bg-blue-100 px-2 py-0.5 text-xs text-blue-700">{t('status_active')}</span>;
     }
   };
 
   const getLogLevelBadge = (level: string) => {
     switch (level) {
       case 'error':
-        return <span className="font-medium text-red-600">ERROR</span>;
+        return <span className="font-medium text-red-600">{t('log_level_error')}</span>;
       case 'warn':
-        return <span className="font-medium text-yellow-600">WARN</span>;
+        return <span className="font-medium text-yellow-600">{t('log_level_warn')}</span>;
       case 'info':
-        return <span className="font-medium text-blue-600">INFO</span>;
+        return <span className="font-medium text-blue-600">{t('log_level_info')}</span>;
       default:
-        return <span className="font-medium text-gray-500">DEBUG</span>;
+        return <span className="font-medium text-gray-500">{t('log_level_debug')}</span>;
     }
   };
 
@@ -227,14 +228,14 @@ const Popup = () => {
             className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
           />
           <label className="cursor-pointer select-none text-sm font-medium text-gray-700" onClick={handleToggleEnabled}>
-            Enable Extension
+            {t('popup_enable_extension')}
           </label>
         </div>
         <div className="flex items-center gap-2">
           {autoRefresh && (
             <div className="flex items-center gap-1">
               <div className="h-2 w-2 animate-pulse rounded-full bg-green-500" />
-              <span className="text-xs text-gray-500">Live</span>
+              <span className="text-xs text-gray-500">{t('popup_live')}</span>
             </div>
           )}
         </div>
@@ -246,14 +247,16 @@ const Popup = () => {
           /* Flow List View */
           <div className="flex h-full flex-col">
             <div className="border-b bg-gray-100 px-4 py-2">
-              <h2 className="text-sm font-semibold text-gray-700">Active Flows ({flows.length})</h2>
+              <h2 className="text-sm font-semibold text-gray-700">
+                {t('popup_active_flows', flows.length.toString())}
+              </h2>
             </div>
 
             <div className="flex-1 overflow-y-auto">
               {flows.length === 0 ? (
                 <div className="p-8 text-center text-gray-500">
-                  <div className="mb-2">No flows detected</div>
-                  <div className="text-xs">Flows will appear here when the extension processes them</div>
+                  <div className="mb-2">{t('popup_no_flows')}</div>
+                  <div className="text-xs">{t('popup_flows_appear_here')}</div>
                 </div>
               ) : (
                 <div className="divide-y">
@@ -267,19 +270,21 @@ const Popup = () => {
                           <span className="font-mono text-xs text-gray-600">{flow.flowId.substring(0, 8)}...</span>
                           {getStatusBadge(flow.status)}
                         </div>
-                        {flow.hasErrors && <span className="text-xs font-medium text-red-600">Has Errors</span>}
+                        {flow.hasErrors && (
+                          <span className="text-xs font-medium text-red-600">{t('popup_has_errors')}</span>
+                        )}
                       </div>
 
                       <div className="space-y-1 text-xs text-gray-500">
                         <div className="flex items-center gap-2">
-                          <span>Matcher: {flow.matcherId}</span>
+                          <span>{t('popup_matcher', flow.matcherId)}</span>
                           <span>•</span>
-                          <span>{flow.logCount} logs</span>
+                          <span>{t('popup_logs', flow.logCount.toString())}</span>
                         </div>
                         <div className="flex items-center gap-2">
-                          <span>Started: {formatTime(flow.startTime)}</span>
+                          <span>{t('popup_started', formatTime(flow.startTime))}</span>
                           <span>•</span>
-                          <span>Duration: {formatDuration(flow.startTime, flow.lastActivity)}</span>
+                          <span>{t('popup_duration', formatDuration(flow.startTime, flow.lastActivity))}</span>
                         </div>
                       </div>
                     </button>
@@ -298,17 +303,19 @@ const Popup = () => {
                 <svg className="h-4 w-4" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                   <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 19l-7-7 7-7" />
                 </svg>
-                Back
+                {t('popup_back')}
               </button>
 
-              <h2 className="text-sm font-semibold text-gray-700">Flow: {selectedFlowId.substring(0, 12)}...</h2>
+              <h2 className="text-sm font-semibold text-gray-700">
+                {t('popup_flow', selectedFlowId.substring(0, 12) + '...')}
+              </h2>
 
-              <div className="text-xs text-gray-500">{flowLogs.length} events</div>
+              <div className="text-xs text-gray-500">{t('popup_events', flowLogs.length.toString())}</div>
             </div>
 
             <div className="flex-1 overflow-y-auto p-2">
               {flowLogs.length === 0 ? (
-                <div className="p-4 text-center text-sm text-gray-500">Loading logs...</div>
+                <div className="p-4 text-center text-sm text-gray-500">{t('popup_loading_logs')}</div>
               ) : (
                 <div className="space-y-2">
                   {flowLogs.map((log, index) => (
