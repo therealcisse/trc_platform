@@ -17,6 +17,7 @@ import {
   TabManagementService,
   BuyingStateService,
 } from '@extension/shared';
+import { inboxCommandHandler } from './commands/inbox';
 
 // Service instances
 const tabService = new TabManagementService(extensionConfigStorage);
@@ -70,6 +71,9 @@ async function handleMessage(
   try {
     // Route message to appropriate handler
     switch (message.type) {
+      case 'inbox.openMyOfferLink':
+        return inboxCommandHandler(message.payload, sender);
+
       case 'email.openUnreadAndClickLink':
         return emailCommandHandler(message.payload, sender);
 

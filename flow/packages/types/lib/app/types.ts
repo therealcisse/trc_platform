@@ -163,6 +163,7 @@ export interface InboxFlowPayload {
 export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
 
 export interface BackgroundCommands {
+  'inbox.openMyOfferLink': InboxCommand;
   'email.openUnreadAndClickLink': EmailCommand;
   'buyOffer.execute': BuyOfferCommand;
   'matcher.register': MatcherRegistration;
@@ -203,6 +204,12 @@ export interface EmailSelectors {
   emailBody: string;
   markAsReadButton: string;
 }
+
+export interface InboxCommand {
+  selectors?: EmailSelectors;
+}
+
+export interface InboxSelectors {}
 
 export interface ItemCommand {
   productStrategies?: ProductStrategy[];

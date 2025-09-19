@@ -16,7 +16,7 @@ export class BackgroundLoggerService {
     metadata?: Record<string, any>;
   }): void {
     const { matcherId, flowId, messages, metadata } = payload;
-    
+
     // Add each message to the LogManager
     messages.forEach(({ message, timestamp, level }) => {
       logManager.addEntry({
@@ -28,7 +28,7 @@ export class BackgroundLoggerService {
         metadata,
       });
     });
-    
+
     console.log(`[LoggerService] Stored ${messages.length} log entries for ${flowId || matcherId}`);
   }
 
@@ -44,15 +44,15 @@ export class BackgroundLoggerService {
     switch (params.action) {
       case 'getAllLogs':
         return logManager.getAllLogs();
-      
+
       case 'getFlowLogs':
         if (!params.flowId) throw new Error('flowId required for getFlowLogs');
         return logManager.getLogsByFlowId(params.flowId);
-      
+
       case 'getMatcherLogs':
         if (!params.matcherId) throw new Error('matcherId required for getMatcherLogs');
         return logManager.getLogsByMatcherId(params.matcherId);
-      
+
       case 'exportFlowTimeline':
         if (!params.flowId) throw new Error('flowId required for exportFlowTimeline');
         const logs = logManager.getLogsByFlowId(params.flowId);
@@ -64,11 +64,11 @@ export class BackgroundLoggerService {
           })
           .join('\n');
         return `Flow Timeline: ${params.flowId}\n${'='.repeat(50)}\n${timeline}`;
-      
+
       case 'clearOldLogs':
         logManager.clearOldLogs(params.olderThanMs);
         return;
-      
+
       default:
         throw new Error(`Unknown log query action: ${params.action}`);
     }
@@ -128,7 +128,7 @@ export class BackgroundLoggerService {
     logs.forEach(log => {
       // Count by level
       stats.logsByLevel[log.level] = (stats.logsByLevel[log.level] || 0) + 1;
-      
+
       // Count by matcher
       stats.logsByMatcher[log.matcherId] = (stats.logsByMatcher[log.matcherId] || 0) + 1;
     });
