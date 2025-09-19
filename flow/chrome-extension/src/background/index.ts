@@ -126,6 +126,10 @@ async function handleMessage(
           requestId: 'config'
         };
 
+      case 'extension.toggleEnabled':
+        await ConfigService.toggleEnabled();
+        return { success: true, requestId: 'toggle-enabled' };
+
       case 'extension.startFlow': {
         const payload = message.payload as FlowPayload;
         const flow =

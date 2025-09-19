@@ -1,58 +1,28 @@
+/* Popup container styles */
 .App {
-  width: 320px;
-  height: 200px;
-  padding: 1rem;
+  width: 400px;
+  height: 600px;
   display: flex;
   flex-direction: column;
+  margin: 0;
+  padding: 0;
 }
 
-.App-content {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  justify-content: center;
-  gap: 1.5rem;
-  flex: 1;
+/* Ensure proper scrollbar styling */
+::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
 }
 
-.Title {
-  font-size: 1.25rem;
-  font-weight: 600;
-  text-align: center;
+::-webkit-scrollbar-track {
+  background: #f1f1f1;
 }
 
-.PowerButton {
-  width: 5rem;
-  height: 5rem;
-  border-radius: 9999px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  transition: all 200ms ease-in-out;
-  box-shadow:
-    0 4px 6px -1px rgb(0 0 0 / 0.1),
-    0 2px 4px -2px rgb(0 0 0 / 0.1),
-    inset 0 2px 4px rgb(255 255 255 / 0.1);
+::-webkit-scrollbar-thumb {
+  background: #888;
+  border-radius: 3px;
 }
 
-.PowerButton:hover {
-  transform: scale(1.05);
-  box-shadow:
-    0 10px 15px -3px rgb(0 0 0 / 0.1),
-    0 4px 6px -4px rgb(0 0 0 / 0.1),
-    inset 0 2px 4px rgb(255 255 255 / 0.1);
-}
-
-.PowerButton:active {
-  transform: scale(0.95);
-  box-shadow:
-    0 2px 4px -1px rgb(0 0 0 / 0.1),
-    0 1px 2px -1px rgb(0 0 0 / 0.1),
-    inset 0 2px 4px rgb(255 255 255 / 0.05);
-}
-
-.PowerButton svg {
-  width: 2.5rem;
-  height: 2.5rem;
-  filter: drop-shadow(0 1px 1px rgb(0 0 0 / 0.1));
+::-webkit-scrollbar-thumb:hover {
+  background: #555;
 }

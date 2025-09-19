@@ -178,6 +178,7 @@ export interface BackgroundCommands {
   };
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
+  'extension.toggleEnabled': {};
   'item.clickProductLink': ItemCommand;
   'myOffer.clickProductLink': MyOfferCommand;
   'image.solve': { imageData: string };
