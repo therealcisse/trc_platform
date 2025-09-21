@@ -37,11 +37,19 @@ export class FlowUtils {
   }
 
   static parseIDFromTitle(title: string): string {
-    const match = /\(ID\s+(\d+)\)/.exec(title);
-    if (!match) {
-      throw new Error('Could not parse ID from title');
+    // Try to match "(ID 12345)" format
+    const idInParensMatch = /\(ID\s+(\d+)\)/.exec(title);
+    if (idInParensMatch) {
+      return idInParensMatch[1];
     }
-    return match[1];
+
+    // Try to match "Lead 1455952 ..." format (anything starting with Lead followed by a number)
+    const leadMatch = /Lead\s+(\d+)/.exec(title);
+    if (leadMatch) {
+      return leadMatch[1];
+    }
+
+    throw new Error('Could not parse ID from title');
   }
 
   static parseIDFromHref(href: string): string {

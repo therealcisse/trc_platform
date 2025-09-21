@@ -57,13 +57,7 @@ export const inboxCommandHandler: MessageHandler<'inbox.openMyOfferLink'> = asyn
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(
-          payload.selectors || {
-            titleLinks: 'table a[href*="show_message"]',
-            messageRow: 'tr',
-            requestTimestampElement: 'td:nth-child(3)', // Erhalten column
-          },
-        ),
+        JSON.stringify(payload.selectors),
       ],
     });
 

@@ -19,7 +19,7 @@ class InboxMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['https://auktion.hansemerkur.de/my_message_center_inbox.html'];
+  urlPatterns = ['http://localhost:8082/inbox.html', 'https://auktion.hansemerkur.de/my_message_center_inbox.html'];
 
   domPreconditions = [
     {
@@ -115,9 +115,9 @@ class InboxMatcher implements Matcher {
       // Just send the command to background - all processing happens there
       const response = await sendBackgroundCommand('inbox.openMyOfferLink', {
         selectors: {
-          titleLinks: 'table a[href*="show_message"]',
-          messageRow: 'tr',
-          requestTimestampElement: 'td:nth-child(3)', // Erhalten column
+          rows: 'table.browse_list tr',
+          titleLinks: 'table.browse_list tr td:nth-child(3) a',
+          requestTimestampElement: 'td:nth-child(4)', // Erhalten column
         },
       });
 
@@ -180,11 +180,11 @@ export async function executeInboxWorkflow(
       selectors: InboxSelectors,
     ): Promise<Array<{ id: string; href: string; title: string; requestTimestamp: number }>> {
       const links: Array<{ id: string; href: string; title: string; requestTimestamp: number }> = [];
-      const rows = document.querySelectorAll('tr');
+      const rows = document.querySelectorAll(selectors.rows);
 
       for (const row of rows) {
         // Find the title link in this row
-        const anchor = row.querySelector(selectors.titleLinks || 'a[href*="show_message"]') as HTMLAnchorElement;
+        const anchor = row.querySelector(selectors.titleLinks) as HTMLAnchorElement;
         if (!anchor || !anchor.href) continue;
 
         const title = anchor.textContent?.trim() || '';
@@ -199,7 +199,7 @@ export async function executeInboxWorkflow(
         }
 
         // Get request timestamp from Erhalten column (3rd column)
-        const timestampCell = row.querySelector('td:nth-child(3)') as HTMLElement;
+        const timestampCell = row.querySelector(selectors.requestTimestampElement) as HTMLElement;
         if (!timestampCell) {
           log.warn(`No timestamp cell found for row with title: ${title}`);
           continue;

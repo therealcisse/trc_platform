@@ -75,9 +75,9 @@ export interface DelayConfig {
 }
 
 export interface InboxSelectors {
-  titleLinks?: string; // Selector for title column links
-  messageRow?: string; // Selector for message rows
-  requestTimestampElement?: string; // Selector for request timestamp (Erhalten column)
+  titleLinks: string; // Selector for title column links
+  rows: string; // Selector for message rows
+  requestTimestampElement: string; // Selector for request timestamp (Erhalten column)
 }
 
 export interface ExecutionResult {
@@ -202,7 +202,7 @@ export interface EmailSelectors {
 }
 
 export interface InboxCommand {
-  selectors?: InboxSelectors;
+  selectors: InboxSelectors;
 }
 
 export interface ItemCommand {
