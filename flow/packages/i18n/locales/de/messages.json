@@ -209,5 +209,38 @@
   },
   "days_saturday": {
     "message": "Samstag"
+  },
+  "options_actions": {
+    "message": "Aktionen"
+  },
+  "options_restore_defaults": {
+    "message": "Standardeinstellungen wiederherstellen"
+  },
+  "options_restore_defaults_description": {
+    "message": "Alle Konfigurationen auf Standardwerte zurücksetzen"
+  },
+  "options_delete_flow_db": {
+    "message": "Flow-Datenbank löschen"
+  },
+  "options_delete_flow_db_description": {
+    "message": "Gesamten Speicher und Protokolle für Flows löschen"
+  },
+  "options_show_flow_db": {
+    "message": "Flow-Datenbank anzeigen"
+  },
+  "options_show_flow_db_description": {
+    "message": "Flows-Daten als formatiertes JSON anzeigen"
+  },
+  "actions_confirm_restore": {
+    "message": "Sind Sie sicher, dass Sie die Standardeinstellungen wiederherstellen möchten? Dadurch werden alle Ihre Konfigurationen zurückgesetzt."
+  },
+  "actions_confirm_delete_db": {
+    "message": "Sind Sie sicher, dass Sie die Flow-Datenbank löschen möchten? Dadurch werden alle Flows und Protokolle dauerhaft entfernt."
+  },
+  "actions_success_restored": {
+    "message": "Einstellungen erfolgreich auf Standardwerte zurückgesetzt"
+  },
+  "actions_success_deleted": {
+    "message": "Flow-Datenbank erfolgreich gelöscht"
   }
 }

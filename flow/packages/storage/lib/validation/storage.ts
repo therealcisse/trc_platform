@@ -75,14 +75,13 @@ export const FlowSchema = z.object({
   status: z.enum(['running', 'done']),
   source: z.enum(['email', 'inbox']),
   title: z.string(),
-  href: z.string(),
 });
 
 export const ExtensionStorageSchema = z.object({
   enabled: z.boolean(),
   config: ExecutionConfigSchema,
   logs: z.array(LogEntrySchema),
-  managedTabs: z.record(z.number(), z.number()),
+  managedTabs: z.record(z.string(), z.number()),
   buyingOffers: z.record(z.string(), BuyingOfferSchema),
   productStrategies: z.array(StoredProductStrategySchema),
   flows: z.record(z.string(), FlowSchema),

@@ -244,11 +244,6 @@ export async function executeInboxWorkflow(
       const flowLog = Log.withFlow(MATCHER_IDS.INBOX, link.id);
 
       try {
-        flowLog.info(`Processing inbox message: ${link.title}`, {
-          href: link.href,
-          requestTimestamp: link.requestTimestamp,
-        });
-
         if (!context.dryRun) {
           // Start flow for this link
           const startFlowResponse = await sendBackgroundCommand('extension.startFlow', {
@@ -266,7 +261,7 @@ export async function executeInboxWorkflow(
             continue;
           }
 
-          flowLog.info(`Processing new inbox flow`, { link: link.title });
+          flowLog.info(`Processing new inbox flow: ${link.title}`, { link: link.title });
 
           // Check if we've already visited this URL
           if (!visitedUrls[link.href]) {
@@ -281,7 +276,7 @@ export async function executeInboxWorkflow(
                 url: link.href,
               });
             } else {
-              flowLog.debug('Dry run: Would open link in new tab');
+              flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
             }
           } else {
             flowLog.info('Link already visited, skipping');

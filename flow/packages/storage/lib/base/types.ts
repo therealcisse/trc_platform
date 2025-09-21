@@ -102,4 +102,8 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
     doneFlow(id: string): Promise<void>;
     getFlow(id: string): Promise<Flow | undefined>;
   };
+
+  // Actions methods
+  restoreDefaults(): Promise<void>;
+  clearFlowDatabase(): Promise<void>;
 };

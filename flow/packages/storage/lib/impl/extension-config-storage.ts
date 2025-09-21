@@ -90,7 +90,7 @@ export const extensionConfigStorage: ExtensionStorageType = {
 
     async startFlow(flow: Flow): Promise<boolean> {
       // Trigger cleanup
-      void this.cleanupOldFlows();
+      // void this.cleanupOldFlows();
 
       const current = await storage.get();
       if (current.flows[flow.id]) {
@@ -317,5 +317,20 @@ export const extensionConfigStorage: ExtensionStorageType = {
         }),
       );
     },
+  },
+
+  // Actions methods
+  async restoreDefaults() {
+    await storage.set(() => validateStorageData(ExtensionStorageSchema, DEFAULT_CONFIG));
+  },
+
+  async clearFlowDatabase() {
+    await storage.set(currentState =>
+      validateStorageData(ExtensionStorageSchema, {
+        ...currentState,
+        flows: {},
+        logs: [],
+      }),
+    );
   },
 };

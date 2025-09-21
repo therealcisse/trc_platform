@@ -37,7 +37,7 @@ export class BackgroundLoggerService {
    * Query logs by various criteria
    */
   static queryLogs(params: {
-    action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline' | 'clearOldLogs';
+    action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline' | 'clearOldLogs' | 'clearAllLogs';
     flowId?: string;
     matcherId?: string;
     olderThanMs?: number;
@@ -68,6 +68,10 @@ export class BackgroundLoggerService {
 
       case 'clearOldLogs':
         logManager.clearOldLogs(params.olderThanMs);
+        return;
+
+      case 'clearAllLogs':
+        this.clearAllLogs();
         return;
 
       default:
@@ -106,6 +110,16 @@ export class BackgroundLoggerService {
    */
   static exportAllLogs(): string {
     return JSON.stringify(logManager.getAllLogs(), null, 2);
+  }
+
+  /**
+   * Clear all logs from LogManager
+   */
+  static clearAllLogs(): void {
+    const logManager = LogManager.getInstance();
+    // Clear all logs regardless of age by setting cutoff to 0
+    logManager.clearOldLogs(0);
+    console.log('[LoggerService] Cleared all logs from LogManager');
   }
 
   /**

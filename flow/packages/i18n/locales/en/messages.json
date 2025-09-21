@@ -209,5 +209,38 @@
   },
   "days_saturday": {
     "message": "Saturday"
+  },
+  "options_actions": {
+    "message": "Actions"
+  },
+  "options_restore_defaults": {
+    "message": "Restore Default Settings"
+  },
+  "options_restore_defaults_description": {
+    "message": "Reset all configuration to default values"
+  },
+  "options_delete_flow_db": {
+    "message": "Delete Flow DB"
+  },
+  "options_delete_flow_db_description": {
+    "message": "Delete all storage and logs for flows"
+  },
+  "options_show_flow_db": {
+    "message": "Show Flow DB"
+  },
+  "options_show_flow_db_description": {
+    "message": "View flows data as formatted JSON"
+  },
+  "actions_confirm_restore": {
+    "message": "Are you sure you want to restore default settings? This will reset all your configuration."
+  },
+  "actions_confirm_delete_db": {
+    "message": "Are you sure you want to delete the Flow DB? This will permanently remove all flows and logs."
+  },
+  "actions_success_restored": {
+    "message": "Settings restored to defaults successfully"
+  },
+  "actions_success_deleted": {
+    "message": "Flow DB deleted successfully"
   }
 }

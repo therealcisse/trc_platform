@@ -182,7 +182,7 @@ export interface BackgroundCommands {
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
   'logs.query': {
-    action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline' | 'clearOldLogs';
+    action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline' | 'clearOldLogs' | 'clearAllLogs';
     flowId?: string;
     matcherId?: string;
     olderThanMs?: number;
@@ -315,7 +315,7 @@ export interface ExtensionStorage {
     timestamp: number;
     message: string;
   }[];
-  managedTabs: Record<number, number>;
+  managedTabs: Record<string, number>;
   buyingOffers: Record<string, BuyingOffer>;
   productStrategies: StoredProductStrategy[];
   flows: FlowState;

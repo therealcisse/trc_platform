@@ -3,7 +3,7 @@ import { t } from '@extension/i18n';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
-import { Fragment } from 'react';
+import { Fragment, useState } from 'react';
 import type { ExecutionConfig, OperationalHours } from '@extension/types';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
@@ -13,8 +13,28 @@ const getDayTranslation = (day: DayName) => t(`days_${day.toLowerCase()}`);
 
 type DayName = (typeof DAYS)[number];
 
+const JsonDisplay = ({ data, onClose }: { data: any; onClose: () => void }) => (
+  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+    <div className="max-h-[80vh] max-w-4xl overflow-auto rounded-lg bg-gray-800 p-6">
+      <div className="mb-4 flex items-center justify-between">
+        <h3 className="text-lg font-medium text-gray-100">Flow Database</h3>
+        <button
+          onClick={onClose}
+          className="flex h-8 w-8 items-center justify-center text-xl font-bold text-gray-400 hover:text-gray-200">
+          ✕
+        </button>
+      </div>
+      <pre className="overflow-auto whitespace-pre-wrap rounded bg-gray-900 p-4 text-sm text-green-400">
+        {JSON.stringify(data, null, 2)}
+      </pre>
+    </div>
+  </div>
+);
+
 const Options = () => {
   const { enabled, config } = useStorage(extensionConfigStorage);
+  const [showJsonModal, setShowJsonModal] = useState(false);
+  const [flowData, setFlowData] = useState(null);
 
   const handleOperationalHoursChange = (
     day: DayName,
@@ -39,6 +59,49 @@ const Options = () => {
     extensionConfigStorage.updateConfig({
       [key]: !config[key],
     });
+  };
+
+  const handleRestoreDefaults = async () => {
+    if (confirm(t('actions_confirm_restore'))) {
+      try {
+        await extensionConfigStorage.restoreDefaults();
+        alert(t('actions_success_restored'));
+      } catch (error) {
+        console.error('Failed to restore defaults:', error);
+      }
+    }
+  };
+
+  const handleDeleteFlowDb = async () => {
+    if (confirm(t('actions_confirm_delete_db'))) {
+      try {
+        // Clear storage-based flows and simple logs
+        await extensionConfigStorage.clearFlowDatabase();
+
+        // Clear advanced LogManager logs in background
+        await chrome.runtime.sendMessage({
+          type: 'logs.query',
+          payload: {
+            action: 'clearAllLogs',
+          },
+        });
+
+        alert(t('actions_success_deleted'));
+      } catch (error) {
+        console.error('Failed to delete flow DB:', error);
+        alert('Failed to delete flow database. Please try again.');
+      }
+    }
+  };
+
+  const handleShowFlowDb = async () => {
+    try {
+      const currentData = await extensionConfigStorage.get();
+      setFlowData({ flows: currentData.flows });
+      setShowJsonModal(true);
+    } catch (error) {
+      console.error('Failed to get flow data:', error);
+    }
   };
 
   return (
@@ -339,8 +402,54 @@ const Options = () => {
                 </div>
               </div>
             </section>
+
+            {/* Actions */}
+            <section>
+              <h2 className="mb-4 text-xl font-medium">{t('options_actions')}</h2>
+              <div className="space-y-4">
+                {/* Restore Default Settings */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_restore_defaults')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_restore_defaults_description')}</p>
+                  </div>
+                  <button
+                    onClick={handleRestoreDefaults}
+                    className="rounded bg-yellow-600 px-4 py-2 text-sm font-medium text-white hover:bg-yellow-700 focus:outline-none focus:ring-2 focus:ring-yellow-500">
+                    {t('options_restore_defaults')}
+                  </button>
+                </div>
+
+                {/* Delete Flow DB */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_delete_flow_db')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_delete_flow_db_description')}</p>
+                  </div>
+                  <button
+                    onClick={handleDeleteFlowDb}
+                    className="rounded bg-red-600 px-4 py-2 text-sm font-medium text-white hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500">
+                    {t('options_delete_flow_db')}
+                  </button>
+                </div>
+
+                {/* Show Flow DB */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_show_flow_db')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_show_flow_db_description')}</p>
+                  </div>
+                  <button
+                    onClick={handleShowFlowDb}
+                    className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    {t('options_show_flow_db')}
+                  </button>
+                </div>
+              </div>
+            </section>
           </div>
         )}
+        {showJsonModal && flowData && <JsonDisplay data={flowData} onClose={() => setShowJsonModal(false)} />}
       </div>
     </div>
   );
