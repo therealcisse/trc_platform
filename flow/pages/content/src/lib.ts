@@ -8,19 +8,27 @@ import type {
   LocalDate as LocalDateType,
   ExecutionConfig,
 } from '@extension/types';
-import { ExtensionStateType } from '../../../packages/storage/lib';
 
 // LocalDate utility class
 export class LocalDate implements LocalDateType {
   private localDate: Date;
 
   constructor() {
-    const d = new Date();
-    this.localDate = new Date(d.getTime() - d.getTimezoneOffset() * 60 * 1000);
+    // Simply use the current Date - it already provides local time correctly
+    this.localDate = new Date();
   }
 
   toString(): string {
-    return this.localDate.toISOString().split('Z')[0];
+    // Return local date/time string in ISO format (without timezone info)
+    const year = this.localDate.getFullYear();
+    const month = String(this.localDate.getMonth() + 1).padStart(2, '0');
+    const day = String(this.localDate.getDate()).padStart(2, '0');
+    const hours = String(this.localDate.getHours()).padStart(2, '0');
+    const minutes = String(this.localDate.getMinutes()).padStart(2, '0');
+    const seconds = String(this.localDate.getSeconds()).padStart(2, '0');
+    const milliseconds = String(this.localDate.getMilliseconds()).padStart(3, '0');
+
+    return `${year}-${month}-${day}T${hours}:${minutes}:${seconds}.${milliseconds}`;
   }
 
   getHours(): number {
@@ -243,8 +251,16 @@ export function isValidTimeOfDay(config: ExecutionConfig): boolean {
     return false;
   }
 
-  // Check if within operational hours
-  return hh >= operationalHours.min && hh < operationalHours.max;
+  const { min, max } = operationalHours;
+
+  // Handle midnight crossover case (e.g., 22:00 to 06:00)
+  if (min > max) {
+    // Time range crosses midnight: valid if hour >= min OR hour < max
+    return hh >= min || hh < max;
+  }
+
+  // Normal case: valid if hour is within range (inclusive of min, exclusive of max)
+  return hh >= min && hh < max;
 }
 
 /**
