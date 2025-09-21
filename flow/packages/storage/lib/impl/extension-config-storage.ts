@@ -1,5 +1,4 @@
-import { createStorage, StorageEnum, ExtensionStorageType } from '../base/index.js';
-import type { ExecutionConfig, ExtensionStorage, Flow } from '@extension/types';
+import { createStorage, StorageEnum } from '../base/index.js';
 import {
   validateStorageData,
   ExtensionStorageSchema,
@@ -8,8 +7,8 @@ import {
   ProductStrategySchema,
   StoredProductStrategySchema,
 } from '../validation/storage.js';
-
-import type { StoredProductStrategy } from '@extension/types';
+import type { ExtensionStorageType } from '../base/index.js';
+import type { ExecutionConfig, ExtensionStorage, Flow, StoredProductStrategy } from '@extension/types';
 
 export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
   enabled: false,

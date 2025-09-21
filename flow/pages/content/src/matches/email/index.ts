@@ -1,3 +1,5 @@
+import { FlowUtils, Log } from '@extension/shared';
+import { MATCHER_IDS } from '@extension/types';
 import {
   registerMatcher,
   sendBackgroundCommand,
@@ -7,10 +9,14 @@ import {
   random,
   sleep,
 } from '@src/lib';
-import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
-import { MATCHER_IDS } from '@extension/types';
-import type { ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
-import { FlowUtils, Log } from '@extension/shared';
+import type {
+  CommandResponse,
+  ExecutionConfig,
+  Matcher,
+  ExecutionContext,
+  ExecutionResult,
+  EmailSelectors,
+} from '@extension/types';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing

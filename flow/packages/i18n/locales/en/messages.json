@@ -1,21 +1,21 @@
 {
   "extensionDescription": {
     "description": "Extension description",
-    "message": "Chrome extension boilerplate developed with Vite, React and Typescript"
+    "message": "Chrome Extension Boilerplate developed with Vite, React and Typescript"
   },
   "extensionName": {
     "description": "Extension name",
-    "message": "Chrome extension boilerplate"
+    "message": "Chrome Extension Boilerplate"
   },
   "toggleTheme": {
     "message": "Toggle theme"
   },
   "injectButton": {
-    "message": "Click to inject Content Scripts"
+    "message": "Click here to inject content scripts"
   },
   "greeting": {
     "description": "Greeting message",
-    "message": "Hello, My name is $NAME$",
+    "message": "Hello, my name is $NAME$",
     "placeholders": {
       "name": {
         "content": "$1",
@@ -28,10 +28,10 @@
     "message": "Hello $1"
   },
   "displayErrorInfo": {
-    "message": "Error occur"
+    "message": "An error occurred"
   },
   "displayErrorDescription": {
-    "message": "Sorry, something went wrong while loading the page."
+    "message": "Sorry, an error occurred while loading the page."
   },
   "displayErrorDetailsInfo": {
     "message": "Error details:"
@@ -40,6 +40,174 @@
     "message": "Unknown error"
   },
   "displayErrorReset": {
-    "message": "Run Again"
+    "message": "Run again"
+  },
+  "options_title": {
+    "message": "Extension settings"
+  },
+  "options_subtitle": {
+    "message": "Configure your extension preferences"
+  },
+  "options_enable_extension": {
+    "message": "Enable extension"
+  },
+  "options_enable_extension_description": {
+    "message": "Turn extension on or off"
+  },
+  "options_authentication": {
+    "message": "Authentication"
+  },
+  "options_api_token": {
+    "message": "API token"
+  },
+  "options_api_token_placeholder": {
+    "message": "Enter your API token"
+  },
+  "options_message_monitoring": {
+    "message": "Message monitoring"
+  },
+  "options_email_monitoring": {
+    "message": "Email monitoring"
+  },
+  "options_email_monitoring_description": {
+    "message": "Monitor emails for new offers"
+  },
+  "options_min_refresh": {
+    "message": "Min. refresh (seconds)"
+  },
+  "options_max_refresh": {
+    "message": "Max. refresh (seconds)"
+  },
+  "options_inbox_monitoring": {
+    "message": "Inbox monitoring"
+  },
+  "options_inbox_monitoring_description": {
+    "message": "Monitor inbox for new offers"
+  },
+  "options_reload_seconds": {
+    "message": "Refresh interval (seconds)"
+  },
+  "options_reload_seconds_help": {
+    "message": "Comma-separated seconds (0-59) for refresh times"
+  },
+  "options_max_links_per_scan": {
+    "message": "Max. links per scan"
+  },
+  "options_max_links_per_scan_help": {
+    "message": "Maximum number of links processed per scan"
+  },
+  "options_post_reload_delay": {
+    "message": "Delay after refresh (ms)"
+  },
+  "options_post_reload_delay_help": {
+    "message": "Delay after refresh before scanning"
+  },
+  "options_inter_open_delay": {
+    "message": "Delay between openings (ms)"
+  },
+  "options_inter_open_delay_help": {
+    "message": "Delay between opening links"
+  },
+  "options_operational_hours": {
+    "message": "Operational hours"
+  },
+  "options_product_strategies": {
+    "message": "Product strategies"
+  },
+  "options_animal_insurance": {
+    "message": "Animal insurance"
+  },
+  "options_people_insurance": {
+    "message": "People insurance"
+  },
+  "options_cancer_insurance": {
+    "message": "Cancer insurance"
+  },
+  "options_processing_time": {
+    "message": "Processing time (seconds)"
+  },
+  "popup_enable_extension": {
+    "message": "Enable extension"
+  },
+  "popup_live": {
+    "message": "Live"
+  },
+  "popup_active_flows": {
+    "message": "Active flows ($1)"
+  },
+  "popup_no_flows": {
+    "message": "No flows detected"
+  },
+  "popup_flows_appear_here": {
+    "message": "Flows appear here when the extension processes them"
+  },
+  "popup_has_errors": {
+    "message": "Has errors"
+  },
+  "popup_matcher": {
+    "message": "Matcher: $1"
+  },
+  "popup_logs": {
+    "message": "$1 logs"
+  },
+  "popup_started": {
+    "message": "Started: $1"
+  },
+  "popup_duration": {
+    "message": "Duration: $1"
+  },
+  "popup_back": {
+    "message": "Back"
+  },
+  "popup_flow": {
+    "message": "Flow: $1"
+  },
+  "popup_events": {
+    "message": "$1 events"
+  },
+  "popup_loading_logs": {
+    "message": "Loading logs..."
+  },
+  "status_done": {
+    "message": "Done"
+  },
+  "status_error": {
+    "message": "Error"
+  },
+  "status_active": {
+    "message": "Active"
+  },
+  "log_level_error": {
+    "message": "ERROR"
+  },
+  "log_level_warn": {
+    "message": "WARNING"
+  },
+  "log_level_info": {
+    "message": "INFO"
+  },
+  "log_level_debug": {
+    "message": "DEBUG"
+  },
+  "days_sunday": {
+    "message": "Sunday"
+  },
+  "days_monday": {
+    "message": "Monday"
+  },
+  "days_tuesday": {
+    "message": "Tuesday"
+  },
+  "days_wednesday": {
+    "message": "Wednesday"
+  },
+  "days_thursday": {
+    "message": "Thursday"
+  },
+  "days_friday": {
+    "message": "Friday"
+  },
+  "days_saturday": {
+    "message": "Saturday"
   }
 }

@@ -1,3 +1,5 @@
+import { Log, FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
+import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import {
   registerMatcher,
   waitForSelector,
@@ -8,11 +10,15 @@ import {
   extractNumericAnswer,
 } from '@src/lib';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
-import { Log, FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
-import { isInvalidProduct } from '@extension/types';
-import { type CommandResponse, type ExecutionConfig, type Matcher } from '@extension/types';
-import { MATCHER_IDS } from '@extension/types';
-import type { ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
+import type {
+  CommandResponse,
+  ExecutionConfig,
+  Matcher,
+  ExecutionContext,
+  ExecutionResult,
+  BuyOfferSelectors,
+  Flow,
+} from '@extension/types';
 
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products

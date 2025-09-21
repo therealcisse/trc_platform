@@ -1,6 +1,6 @@
-import { type FC } from 'react';
 import { cn } from '@extension/ui';
 import type { DayConfig } from '../types';
+import type { FC } from 'react';
 
 interface TimeRangeSelectorProps {
   value: DayConfig;

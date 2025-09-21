@@ -1,18 +1,13 @@
-import type {
-  EmailCommand,
-  CommandResponse,
-  ExecutionContext
-} from '@extension/types';
-import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
+import type { EmailCommand, CommandResponse, ExecutionContext, MessageHandler } from '@extension/types';
 
 /**
  * Email command handler - Manages email workflow execution
  */
 export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'> = async (
   payload: EmailCommand,
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> => {
   console.log('[Background] Email command received from tab:', sender.tab?.id);
 
@@ -25,16 +20,13 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
     const tabId = sender.tab.id;
 
     // Get extension configuration
-    const [config, enabled] = await Promise.all([
-      ConfigService.getConfig(),
-      ConfigService.isEnabled()
-    ]);
+    const [config, enabled] = await Promise.all([ConfigService.getConfig(), ConfigService.isEnabled()]);
 
     if (!enabled) {
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: `email-${Date.now()}`
+        requestId: `email-${Date.now()}`,
       };
     }
 
@@ -45,7 +37,7 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
       matcherId: MATCHER_IDS.EMAIL,
       config,
       timeout: 30000, // 30 seconds timeout
-      dryRun: false
+      dryRun: false,
     };
 
     // Inject and execute the email workflow
@@ -67,7 +59,7 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
           success: false,
           error: 'Email executor not loaded',
           matcherId: context.matcherId,
-          executorName: 'email'
+          executorName: 'email',
         };
       },
       args: [
@@ -79,7 +71,7 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
             markAsReadButton: 'span',
           },
         ),
-      ]
+      ],
     });
 
     // Extract result from script execution
@@ -100,16 +92,15 @@ export const emailCommandHandler: MessageHandler<'email.openUnreadAndClickLink'>
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: `email-${Date.now()}`
+      requestId: `email-${Date.now()}`,
     };
-
   } catch (error) {
     console.error('[Background] Error handling email command:', error);
 
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: `email-${Date.now()}`
+      requestId: `email-${Date.now()}`,
     };
   }
 };
@@ -120,7 +111,7 @@ export async function ensureEmailExecutorLoaded(tabId: number): Promise<void> {
     // Check if executor is already loaded
     const checkResult = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => typeof (window as any).__emailExecutor === 'function'
+      func: () => typeof (window as any).__emailExecutor === 'function',
     });
 
     if (checkResult[0]?.result) {
@@ -130,7 +121,7 @@ export async function ensureEmailExecutorLoaded(tabId: number): Promise<void> {
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/email.iife.js'] // This would be the compiled JS file
+      files: ['content/email.iife.js'], // This would be the compiled JS file
     });
 
     console.log('[Background] Email executor injected into tab', tabId);

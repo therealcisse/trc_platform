@@ -1,23 +1,14 @@
 import 'webextension-polyfill';
-import { ConfigService } from '@extension/shared';
+import { buyOfferCommandHandler } from './commands/buyOffer';
 import { emailCommandHandler } from './commands/email';
+import { inboxCommandHandler } from './commands/inbox';
 import { itemCommandHandler } from './commands/item';
 import { myOfferCommandHandler } from './commands/myOffer';
-import { buyOfferCommandHandler } from './commands/buyOffer';
 import { BackgroundLoggerService } from './services/logger-service';
-import type {
-    FlowPayload,
-    BackgroundCommands,
-    CommandResponse,
-} from '@extension/types';
-import { MATCHER_IDS } from '@extension/types';
+import { ConfigService, FlowUtils, TabManagementService, BuyingStateService } from '@extension/shared';
 import { extensionConfigStorage } from '@extension/storage';
-import {
-  FlowUtils,
-  TabManagementService,
-  BuyingStateService,
-} from '@extension/shared';
-import { inboxCommandHandler } from './commands/inbox';
+import { MATCHER_IDS } from '@extension/types';
+import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
 
 // Service instances
 const tabService = new TabManagementService(extensionConfigStorage);
@@ -33,7 +24,6 @@ async function init() {
     // Setup message handlers
     setupMessageHandlers();
     console.log('[Background] Message handlers registered');
-
   } catch (error) {
     console.error('[Background] Initialization error:', error);
   }
@@ -51,20 +41,20 @@ function setupMessageHandlers() {
           sendResponse({
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
-            requestId: 'error'
+            requestId: 'error',
           });
         });
 
       // Return true to indicate we'll send response asynchronously
       return true;
-    }
+    },
   );
 }
 
 // Handle incoming messages
 async function handleMessage(
   message: { type: keyof BackgroundCommands; payload: any },
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> {
   console.log('[Background] Received message:', message.type);
 
@@ -94,18 +84,18 @@ async function handleMessage(
 
       case 'image.solve':
         return processImageAPI(message.payload.imageData)
-                    .then(result => {
-                        console.log('[Background] Successfully processed image');
-                        return ({ success: true, result: result.result, requestId: 'image' });
-                    })
-                    .catch(error => {
-                        console.error('[Background] Error processing image:', error);
-                        return ({
-                            success: false,
-                            requestId: 'image',
-                            error: error instanceof Error ? error.message : 'Unknown error'
-                        });
-                    });
+          .then(result => {
+            console.log('[Background] Successfully processed image');
+            return { success: true, result: result.result, requestId: 'image' };
+          })
+          .catch(error => {
+            console.error('[Background] Error processing image:', error);
+            return {
+              success: false,
+              requestId: 'image',
+              error: error instanceof Error ? error.message : 'Unknown error',
+            };
+          });
 
       case 'extension.log':
         // Store logs in background LogManager
@@ -127,7 +117,7 @@ async function handleMessage(
             config: await ConfigService.getConfig(),
             enabled: await ConfigService.isEnabled(),
           },
-          requestId: 'config'
+          requestId: 'config',
         };
 
       case 'extension.toggleEnabled':
@@ -166,13 +156,13 @@ async function handleMessage(
           return {
             success: true,
             data: result,
-            requestId: 'logs-query'
+            requestId: 'logs-query',
           };
         } catch (error) {
           return {
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
-            requestId: 'logs-query'
+            requestId: 'logs-query',
           };
         }
 
@@ -181,7 +171,7 @@ async function handleMessage(
         return {
           success: true,
           data: BackgroundLoggerService.getLogStats(),
-          requestId: 'logs-stats'
+          requestId: 'logs-stats',
         };
 
       default:
@@ -210,7 +200,7 @@ async function handleTabManagement(
         return {
           success: true,
           data: { tabId: tab.id },
-          requestId
+          requestId,
         };
 
       case 'close':
@@ -221,7 +211,7 @@ async function handleTabManagement(
         await tabService.closeTab(tabId);
         return {
           success: true,
-          requestId
+          requestId,
         };
 
       case 'reload':
@@ -231,7 +221,7 @@ async function handleTabManagement(
         await tabService.reloadTab(payload.tabId);
         return {
           success: true,
-          requestId
+          requestId,
         };
 
       case 'manage':
@@ -241,7 +231,7 @@ async function handleTabManagement(
         await tabService.markManaged(payload.tabId);
         return {
           success: true,
-          requestId
+          requestId,
         };
 
       case 'unmanage':
@@ -251,7 +241,7 @@ async function handleTabManagement(
         await tabService.unmarkManaged(payload.tabId);
         return {
           success: true,
-          requestId
+          requestId,
         };
 
       case 'isManaged':
@@ -262,7 +252,7 @@ async function handleTabManagement(
         return {
           success: true,
           data: { isManaged },
-          requestId
+          requestId,
         };
 
       default:
@@ -273,15 +263,17 @@ async function handleTabManagement(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId
+      requestId,
     };
   }
 }
 
 // Handle buying state commands
-async function handleBuyingState(
-  payload: { action: string; flowId: string; timeout?: number }
-): Promise<CommandResponse> {
+async function handleBuyingState(payload: {
+  action: string;
+  flowId: string;
+  timeout?: number;
+}): Promise<CommandResponse> {
   const requestId = payload.flowId;
 
   try {
@@ -293,7 +285,7 @@ async function handleBuyingState(
         await buyingService.markBuying(payload.flowId, payload.timeout);
         return {
           success: true,
-          requestId
+          requestId,
         };
 
       case 'check':
@@ -301,14 +293,14 @@ async function handleBuyingState(
         return {
           success: true,
           data: buyingState,
-          requestId
+          requestId,
         };
 
       case 'clear':
         await buyingService.clearBuying(payload.flowId);
         return {
           success: true,
-          requestId
+          requestId,
         };
 
       default:
@@ -319,7 +311,7 @@ async function handleBuyingState(
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId
+      requestId,
     };
   }
 }
@@ -337,9 +329,8 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
   if (!backendUrl) {
     throw new Error('Missing required environment variable: CEB_TRC_BACKEND_URL');
   } else {
-            console.log('[CEB] sending requests to backend:', backendUrl);
-
-        }
+    console.log('[CEB] sending requests to backend:', backendUrl);
+  }
 
   if (!config.token) {
     throw new Error('API token not configured. Please set your API token in the extension options.');
@@ -359,7 +350,7 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
   const response = await fetch(`${backendUrl}/api/core/solve`, {
     method: 'POST',
     headers: {
-      'Authorization': `Bearer ${config.token}`,
+      Authorization: `Bearer ${config.token}`,
     },
     body: formData,
   });
@@ -378,4 +369,3 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
 
   return data;
 }
-

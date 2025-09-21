@@ -1,8 +1,8 @@
 import '@src/Popup.css';
-import { useEffect, useState, useCallback } from 'react';
+import { t } from '@extension/i18n';
 import { withErrorBoundary, withSuspense, ConfigService } from '@extension/shared';
 import { Switch, ErrorDisplay, LoadingSpinner } from '@extension/ui';
-import { t } from '@extension/i18n';
+import { useEffect, useState, useCallback } from 'react';
 import type { LogEntry } from '@extension/shared';
 
 interface FlowSummary {
@@ -166,14 +166,13 @@ const Popup = () => {
     setFlowLogs([]);
   };
 
-  const formatTime = (timestamp: number) => {
-    return new Date(timestamp).toLocaleTimeString('en-US', {
+  const formatTime = (timestamp: number) =>
+    new Date(timestamp).toLocaleTimeString('en-US', {
       hour: '2-digit',
       minute: '2-digit',
       second: '2-digit',
       hour12: false,
     });
-  };
 
   const formatDuration = (start: number, end: number) => {
     const duration = end - start;

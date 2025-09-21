@@ -31,7 +31,7 @@ const manifest = {
   version: packageJson.version,
   description: 'TRC Platform Extension',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications', 'sidePanel'],
+  permissions: ['storage', 'scripting', 'tabs', 'notifications'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -41,81 +41,47 @@ const manifest = {
     default_popup: 'popup/index.html',
     default_icon: 'icon-34.png',
   },
-  // chrome_url_overrides: {
-  //   newtab: 'new-tab/index.html',
-  // },
   icons: {
     '128': 'icon-128.png',
   },
   content_scripts: [
     {
-      matches: [
-        'https://outlook.office.com/mail/*',
-        'https://outlook.office.com.mcas.ms/mail/*',
-      ],
+      matches: ['https://outlook.office.com/mail/*', 'https://outlook.office.com.mcas.ms/mail/*'],
       js: ['content/email.iife.js'],
-      run_at: 'document_end'
+      run_at: 'document_end',
     },
     {
-      matches: [
-        'https://auktion.hansemerkur.de/item.php',
-      ],
+      matches: ['https://auktion.hansemerkur.de/item.php'],
       js: ['content/item.iife.js'],
-      run_at: 'document_end'
+      run_at: 'document_end',
     },
     {
-      matches: [
-        'https://auktion.hansemerkur.de/buy_now/id/*',
-      ],
+      matches: ['https://auktion.hansemerkur.de/buy_now/id/*'],
       js: ['content/buyOffer.iife.js'],
-      run_at: 'document_end'
+      run_at: 'document_end',
     },
     {
-      matches: [
-        'https://auktion.hansemerkur.de/my_message_center_show_message.php'
-      ],
+      matches: ['https://auktion.hansemerkur.de/my_message_center_show_message.php'],
       js: ['content/myOffer.iife.js'],
-      run_at: 'document_end'
+      run_at: 'document_end',
     },
     {
-      matches: [
-        'https://auktion.hansemerkur.de/my_message_center_inbox.html'
-      ],
+      matches: ['https://auktion.hansemerkur.de/my_message_center_inbox.html'],
       js: ['content/inbox.iife.js'],
-      run_at: 'document_end'
+      run_at: 'document_end',
     },
     {
       matches: ['http://localhost:8082/pages/*'],
       js: ['content/solver.iife.js'],
-      run_at: 'document_end'
+      run_at: 'document_end',
     },
-    // {
-    //   matches: ['http://localhost:8082/'],
-    //   js: ['content/simulations.iife.js'],
-    // },
-    // {
-    //   matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-    //   js: ['content-ui/all.iife.js'],
-    // },
-    // {
-    //   matches: ['https://example.com/*'],
-    //   js: ['content-ui/example.iife.js'],
-    // },
-    // {
-    //   matches: ['http://*/*', 'https://*/*', '<all_urls>'],
-    //   css: ['content.css'],
-    // },
   ],
-  // devtools_page: 'devtools/index.html',
   web_accessible_resources: [
     {
       resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
       matches: ['*://*/*'],
     },
   ],
-  // side_panel: {
-  //   default_path: 'side-panel/index.html',
-  // },
 } satisfies ManifestType;
 
 export default manifest;

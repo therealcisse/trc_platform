@@ -1,4 +1,5 @@
-import { LogManager, type LogEntry } from '@extension/shared';
+import { LogManager } from '@extension/shared';
+import type { LogEntry } from '@extension/shared';
 import type { MatcherId } from '@extension/types';
 
 // Initialize LogManager in background context
@@ -91,7 +92,10 @@ export class BackgroundLoggerService {
       console.group('[LoggerService] All Logs');
       logs.forEach(log => {
         const time = new Date(log.timestamp).toISOString();
-        console.log(`${time} [${log.flowId || 'no-flow'}] [${log.level.toUpperCase()}] ${log.message}`, log.metadata || '');
+        console.log(
+          `${time} [${log.flowId || 'no-flow'}] [${log.level.toUpperCase()}] ${log.message}`,
+          log.metadata || '',
+        );
       });
       console.groupEnd();
     }

@@ -1,18 +1,13 @@
-import type {
-  BuyOfferCommand,
-  CommandResponse,
-  ExecutionContext
-} from '@extension/types';
-import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
+import type { BuyOfferCommand, CommandResponse, ExecutionContext, MessageHandler } from '@extension/types';
 
 /**
  * Buy Offer command handler - Manages purchase workflow execution
  */
 export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async (
   payload: BuyOfferCommand,
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> => {
   console.log('[Background] Buy offer command received from tab:', sender.tab?.id);
 
@@ -25,28 +20,24 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
     const tabId = sender.tab.id;
 
     // Get extension configuration
-    const [config, enabled] = await Promise.all([
-      ConfigService.getConfig(),
-      ConfigService.isEnabled()
-    ]);
+    const [config, enabled] = await Promise.all([ConfigService.getConfig(), ConfigService.isEnabled()]);
 
     if (!enabled) {
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: payload.id
+        requestId: payload.id,
       };
     }
 
-    const flow = await ConfigService.getFlow(payload.id)
+    const flow = await ConfigService.getFlow(payload.id);
 
     if (!flow) {
       return {
         success: false,
         error: 'Flow not found',
-        requestId: payload.id
+        requestId: payload.id,
       };
-
     }
 
     // Create execution context
@@ -57,7 +48,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       flowId: payload.id,
       config,
       timeout: 60000, // 60 seconds timeout due to delay
-      dryRun: false
+      dryRun: false,
     };
 
     // Inject and execute the buy offer workflow
@@ -80,20 +71,21 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
           success: false,
           error: 'Buy offer executor not loaded',
           matcherId: context.matcherId,
-          executorName: 'buyOffer'
+          executorName: 'buyOffer',
         };
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(payload.selectors || {
-          input: '#captcha_code',           // Captcha input field
-          img: '#page_buy_now_captcha label img', // Captcha image
-          productTitle: '.col-sm-9 h2',     // Product title heading
-          buyFormButton: 'button[role="action"]' // Buy button
-
-        }),
-        JSON.stringify(flow)
-      ]
+        JSON.stringify(
+          payload.selectors || {
+            input: '#captcha_code', // Captcha input field
+            img: '#page_buy_now_captcha label img', // Captcha image
+            productTitle: '.col-sm-9 h2', // Product title heading
+            buyFormButton: 'button[role="action"]', // Buy button
+          },
+        ),
+        JSON.stringify(flow),
+      ],
     });
 
     // Extract result from script execution
@@ -114,16 +106,15 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: payload.id
+      requestId: payload.id,
     };
-
   } catch (error) {
     console.error('[Background] Error handling buy offer command:', error);
 
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: payload.id
+      requestId: payload.id,
     };
   }
 };
@@ -134,7 +125,7 @@ export async function ensureBuyOfferExecutorLoaded(tabId: number): Promise<void>
     // Check if executor is already loaded
     const checkResult = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => typeof (window as any).__buyOfferExecutor === 'function'
+      func: () => typeof (window as any).__buyOfferExecutor === 'function',
     });
 
     if (checkResult[0]?.result) {
@@ -144,7 +135,7 @@ export async function ensureBuyOfferExecutorLoaded(tabId: number): Promise<void>
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/buyOffer.iife.js'] // This would be the compiled JS file
+      files: ['content/buyOffer.iife.js'], // This would be the compiled JS file
     });
 
     console.log('[Background] Buy offer executor injected into tab', tabId);

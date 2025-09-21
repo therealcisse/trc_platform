@@ -1,6 +1,5 @@
-import type { ExtensionStorage } from '@extension/types';
-
 import { extensionConfigStorage } from '@extension/storage';
+import type { ExtensionStorage } from '@extension/types';
 
 /**
  * Config service for managing extension configuration

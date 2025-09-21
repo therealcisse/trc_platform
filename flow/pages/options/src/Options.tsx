@@ -3,8 +3,8 @@ import { t } from '@extension/i18n';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
-import { type ExecutionConfig, type OperationalHours } from '@extension/types';
 import { Fragment } from 'react';
+import type { ExecutionConfig, OperationalHours } from '@extension/types';
 
 const HOURS = Array.from({ length: 24 }, (_, i) => i);
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;

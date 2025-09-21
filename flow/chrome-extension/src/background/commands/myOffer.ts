@@ -1,18 +1,13 @@
-import type {
-  MyOfferCommand,
-  CommandResponse,
-  ExecutionContext,
-} from '@extension/types';
-import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
+import type { MyOfferCommand, CommandResponse, ExecutionContext, MessageHandler } from '@extension/types';
 
 /**
  * myOffer command handler - Manages myOffer workflow execution
  */
 export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> = async (
   payload: MyOfferCommand,
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> => {
   console.log('[Background] myOffer command received from tab:', sender.tab?.id);
 
@@ -25,16 +20,13 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
     const tabId = sender.tab.id;
 
     // Get extension configuration
-    const [config, enabled] = await Promise.all([
-      ConfigService.getConfig(),
-      ConfigService.isEnabled()
-    ]);
+    const [config, enabled] = await Promise.all([ConfigService.getConfig(), ConfigService.isEnabled()]);
 
     if (!enabled) {
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: payload.id
+        requestId: payload.id,
       };
     }
 
@@ -45,7 +37,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       matcherId: MATCHER_IDS.MY_OFFER,
       config,
       timeout: 30000, // 30 seconds timeout
-      dryRun: false
+      dryRun: false,
     };
 
     const flow = await ConfigService.getFlow(payload.id);
@@ -68,18 +60,20 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
           success: false,
           error: 'myOffer executor not loaded',
           matcherId: context.matcherId,
-          executorName: 'myOffer'
+          executorName: 'myOffer',
         };
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(payload.selectors || {
-          itemLink: '.message_center_message a[href*="/item.php"]',
-          titleLink: 'h3.panel-title',
-          requestTimestampElement: '.message_center_message thead tr:nth-child(1) td:last-child',
-        }),
-        JSON.stringify(flow)
-      ]
+        JSON.stringify(
+          payload.selectors || {
+            itemLink: '.message_center_message a[href*="/item.php"]',
+            titleLink: 'h3.panel-title',
+            requestTimestampElement: '.message_center_message thead tr:nth-child(1) td:last-child',
+          },
+        ),
+        JSON.stringify(flow),
+      ],
     });
 
     // Extract result from script execution
@@ -100,16 +94,15 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: payload.id
+      requestId: payload.id,
     };
-
   } catch (error) {
     console.error('[Background] Error handling myOffer command:', error);
 
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: payload.id
+      requestId: payload.id,
     };
   }
 };
@@ -120,7 +113,7 @@ export async function ensureMyOfferExecutorLoaded(tabId: number): Promise<void> 
     // Check if executor is already loaded
     const checkResult = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => typeof (window as any).__myOfferExecutor === 'function'
+      func: () => typeof (window as any).__myOfferExecutor === 'function',
     });
 
     if (checkResult[0]?.result) {
@@ -130,7 +123,7 @@ export async function ensureMyOfferExecutorLoaded(tabId: number): Promise<void> 
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/myOffer.iife.js'] // This would be the compiled JS file
+      files: ['content/myOffer.iife.js'], // This would be the compiled JS file
     });
 
     console.log('[Background] myOffer executor injected into tab', tabId);
@@ -139,5 +132,3 @@ export async function ensureMyOfferExecutorLoaded(tabId: number): Promise<void> 
     throw error;
   }
 }
-
-

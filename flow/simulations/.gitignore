@@ -1,0 +1,12 @@
+*
+!.gitignore
+!img_src/
+!pages/
+!buyNow.html
+!generate-pages.js
+!inbox.html
+!index.html
+!item.html
+!ko.html
+!myOffer.html
+!ok.html

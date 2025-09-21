@@ -496,7 +496,7 @@ export function extractNumericAnswer(result: string): string {
   // The correct answer format follows the pattern in the HTML files
 
   // Remove any markdown or formatting
-  let cleanResult = result
+  const cleanResult = result
     .replace(/```[\s\S]*?```/g, '') // Remove code blocks
     .replace(/[*_~`]/g, '') // Remove markdown formatting
     .trim();

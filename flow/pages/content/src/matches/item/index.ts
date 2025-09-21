@@ -1,3 +1,5 @@
+import { ProductFactory, FlowUtils, ConfigService, Log } from '@extension/shared';
+import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import {
   registerMatcher,
   sendBackgroundCommand,
@@ -7,8 +9,6 @@ import {
   clickWithVerification,
   sleep,
 } from '@src/lib';
-import { ProductFactory, FlowUtils } from '@extension/shared';
-import { isInvalidProduct } from '@extension/types';
 import type {
   Matcher,
   ExecutionContext,
@@ -18,9 +18,6 @@ import type {
   CommandResponse,
   Flow,
 } from '@extension/types';
-import { MATCHER_IDS } from '@extension/types';
-
-import { ConfigService, Log } from '@extension/shared';
 
 /**
  * Item Matcher - Detects item pages and triggers item processing

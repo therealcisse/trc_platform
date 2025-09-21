@@ -1,6 +1,6 @@
 import type { StorageEnum } from './index.js';
-import type { ExecutionConfig, ExtensionStorage, Flow } from '@extension/types';
 import type { ValidatedBuyingOffer, ValidatedLogEntry, ValidatedProductStrategy } from '../validation/storage.js';
+import type { ExecutionConfig, ExtensionStorage, Flow } from '@extension/types';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
 

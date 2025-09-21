@@ -1,6 +1,6 @@
-import { registerMatcher, sendBackgroundCommand } from '@src/lib';
 import { ProductFactory, Log } from '@extension/shared';
-import { isInvalidProduct } from '@extension/types';
+import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
+import { registerMatcher, sendBackgroundCommand } from '@src/lib';
 import type {
   Matcher,
   ExecutionContext,
@@ -10,7 +10,6 @@ import type {
   CommandResponse,
   Flow,
 } from '@extension/types';
-import { MATCHER_IDS } from '@extension/types';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing

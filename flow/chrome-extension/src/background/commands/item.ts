@@ -1,18 +1,13 @@
-import type {
-  ItemCommand,
-  CommandResponse,
-  ExecutionContext
-} from '@extension/types';
-import type { MessageHandler } from '@extension/types';
 import { ConfigService } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
+import type { ItemCommand, CommandResponse, ExecutionContext, MessageHandler } from '@extension/types';
 
 /**
  * item command handler - Manages item workflow execution
  */
 export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async (
   payload: ItemCommand,
-  sender: chrome.runtime.MessageSender
+  sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> => {
   console.log('[Background] item command received from tab:', sender.tab?.id);
 
@@ -25,28 +20,24 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
     const tabId = sender.tab.id;
 
     // Get extension configuration
-    const [config, enabled] = await Promise.all([
-      ConfigService.getConfig(),
-      ConfigService.isEnabled()
-    ]);
+    const [config, enabled] = await Promise.all([ConfigService.getConfig(), ConfigService.isEnabled()]);
 
     if (!enabled) {
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: payload.id
+        requestId: payload.id,
       };
     }
 
-    const flow = await ConfigService.getFlow(payload.id)
+    const flow = await ConfigService.getFlow(payload.id);
 
     if (!flow) {
       return {
         success: false,
         error: 'Flow not found',
-        requestId: payload.id
+        requestId: payload.id,
       };
-
     }
 
     // Create execution context
@@ -56,7 +47,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       matcherId: MATCHER_IDS.ITEM,
       config,
       timeout: 30000, // 30 seconds timeout
-      dryRun: false
+      dryRun: false,
     };
 
     const flowId = flow.id;
@@ -87,18 +78,20 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
           success: false,
           error: 'item executor not loaded',
           matcherId: context.matcherId,
-          executorName: 'item'
+          executorName: 'item',
         };
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(payload.selectors || {
-          buyButton: '.buy_now a.btn',
-          titleLink: 'h1.item_title',
-        }),
+        JSON.stringify(
+          payload.selectors || {
+            buyButton: '.buy_now a.btn',
+            titleLink: 'h1.item_title',
+          },
+        ),
         JSON.stringify(flow),
-        JSON.stringify(productStrategies)
-      ]
+        JSON.stringify(productStrategies),
+      ],
     });
 
     // Extract result from script execution
@@ -119,16 +112,15 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
       success: executionResult.success,
       data: executionResult,
       error: executionResult.error,
-      requestId: payload.id
+      requestId: payload.id,
     };
-
   } catch (error) {
     console.error('[Background] Error handling item command:', error);
 
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
-      requestId: payload.id
+      requestId: payload.id,
     };
   }
 };
@@ -139,7 +131,7 @@ export async function ensureItemExecutorLoaded(tabId: number): Promise<void> {
     // Check if executor is already loaded
     const checkResult = await chrome.scripting.executeScript({
       target: { tabId },
-      func: () => typeof (window as any).__itemExecutor === 'function'
+      func: () => typeof (window as any).__itemExecutor === 'function',
     });
 
     if (checkResult[0]?.result) {
@@ -149,7 +141,7 @@ export async function ensureItemExecutorLoaded(tabId: number): Promise<void> {
     // Inject the executor script
     await chrome.scripting.executeScript({
       target: { tabId },
-      files: ['content/item.iife.js'] // This would be the compiled JS file
+      files: ['content/item.iife.js'], // This would be the compiled JS file
     });
 
     console.log('[Background] item executor injected into tab', tabId);
@@ -158,4 +150,3 @@ export async function ensureItemExecutorLoaded(tabId: number): Promise<void> {
     throw error;
   }
 }
-

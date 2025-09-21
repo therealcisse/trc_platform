@@ -1,8 +1,14 @@
-import { registerMatcher, sendBackgroundCommand, sleep } from '@src/lib';
-import type { CommandResponse, ExecutionConfig, Matcher } from '@extension/types';
-import { MATCHER_IDS } from '@extension/types';
-import type { ExecutionContext, ExecutionResult, InboxSelectors } from '@extension/types';
 import { FlowUtils, Log } from '@extension/shared';
+import { MATCHER_IDS } from '@extension/types';
+import { registerMatcher, sendBackgroundCommand, sleep } from '@src/lib';
+import type {
+  CommandResponse,
+  ExecutionConfig,
+  Matcher,
+  ExecutionContext,
+  ExecutionResult,
+  InboxSelectors,
+} from '@extension/types';
 
 /**
  * Inbox Matcher - Monitors HanseMerkur inbox for new messages
