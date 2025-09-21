@@ -45,17 +45,31 @@ export const ExecutionConfigSchema = z.object({
   inboxMaxLinksPerScan: z.number().optional().default(10),
   inboxInterOpenDelayMs: z.number().optional().default(400),
   token: z.string().optional(),
-  operationalHours: OperationalHoursSchema.optional(),
-  emailMode: z.boolean().optional(),
-  emailRefreshMin: z.number().optional(),
-  emailRefreshMax: z.number().optional(),
-  products: z.array(ProductConfigSchema).optional(),
-  animals: z.boolean().optional(),
-  animalProcessingTimeSeconds: z.number().optional(),
-  cancer: z.boolean().optional(),
-  cancerProcessingTimeSeconds: z.number().optional(),
-  people: z.boolean().optional(),
-  peopleProcessingTimeSeconds: z.number().optional(),
+
+  // Required fields (removed .optional())
+  operationalHours: OperationalHoursSchema,
+  emailMode: z.boolean(),
+  emailRefreshMin: z.number(),
+  emailRefreshMax: z.number(),
+  products: z.array(ProductConfigSchema),
+
+  // Animal insurance product strategy
+  animals: z.boolean(),
+  animalTimerMin: z.number(),
+  animalTimerMax: z.number(),
+  animalProcessingTimeSeconds: z.number(),
+
+  // Cancer scan product strategy
+  cancer: z.boolean(),
+  cancerTimerMin: z.number(),
+  cancerTimerMax: z.number(),
+  cancerProcessingTimeSeconds: z.number(),
+
+  // People insurance product strategy
+  people: z.boolean(),
+  peopleTimerMin: z.number(),
+  peopleTimerMax: z.number(),
+  peopleProcessingTimeSeconds: z.number(),
 });
 
 export const BuyingOfferSchema = z.object({

@@ -35,30 +35,30 @@ export interface ExecutionConfig {
   // API Authentication
   token?: string;
 
-  operationalHours?: OperationalHours;
-  emailMode?: boolean;
-  emailRefreshMin?: number;
-  emailRefreshMax?: number;
+  operationalHours: OperationalHours;
+  emailMode: boolean;
+  emailRefreshMin: number;
+  emailRefreshMax: number;
 
-  products?: ProductConfig[];
+  products: ProductConfig[];
 
   // Animal insurance product strategy
-  animals?: boolean;
-  animalTimerMin?: number;
-  animalTimerMax?: number;
-  animalProcessingTimeSeconds?: number;
+  animals: boolean;
+  animalTimerMin: number;
+  animalTimerMax: number;
+  animalProcessingTimeSeconds: number;
 
   // Cancer scan product strategy
-  cancer?: boolean;
-  cancerTimerMin?: number;
-  cancerTimerMax?: number;
-  cancerProcessingTimeSeconds?: number;
+  cancer: boolean;
+  cancerTimerMin: number;
+  cancerTimerMax: number;
+  cancerProcessingTimeSeconds: number;
 
   // People insurance product strategy
-  people?: boolean;
-  peopleTimerMin?: number;
-  peopleTimerMax?: number;
-  peopleProcessingTimeSeconds?: number;
+  people: boolean;
+  peopleTimerMin: number;
+  peopleTimerMax: number;
+  peopleProcessingTimeSeconds: number;
 }
 
 export interface OperationalHours {
@@ -217,20 +217,17 @@ export interface ItemSelectors {
 }
 
 export interface MyOfferCommand {
-  productStrategies?: ProductStrategy[];
-  id: string;
-  selectors?: MyOfferSelectors;
+  selectors: MyOfferSelectors;
 }
 
 export interface MyOfferSelectors {
   titleLink: string;
   itemLink: string;
-  requestTimestampElement: string;
 }
 
 export interface BuyOfferCommand {
   id: string;
-  selectors?: BuyOfferSelectors;
+  selectors: BuyOfferSelectors;
 }
 
 export interface BuyOfferSelectors {

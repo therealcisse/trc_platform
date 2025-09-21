@@ -86,7 +86,7 @@ async function handleMessage(
         return processImageAPI(message.payload.imageData)
           .then(result => {
             console.log('[Background] Successfully processed image');
-            return { success: true, result: result.result, requestId: 'image' };
+            return { success: true, data: result, requestId: 'image' };
           })
           .catch(error => {
             console.error('[Background] Error processing image:', error);
@@ -208,7 +208,7 @@ async function handleTabManagement(
         if (!tabId) {
           throw new Error('Tab ID required for close action');
         }
-        await tabService.closeTab(tabId);
+        // await tabService.closeTab(tabId);
         return {
           success: true,
           requestId,

@@ -4,7 +4,6 @@ import {
   registerMatcher,
   sendBackgroundCommand,
   isValidTimeOfDay,
-  assertValidTimeOfDay,
   waitForSelector,
   clickWithVerification,
   sleep,
@@ -28,7 +27,7 @@ class ItemMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['https://auktion.hansemerkur.de/item.php'];
+  urlPatterns = ['http://localhost:8082/item/*', 'https://auktion.hansemerkur.de/item.php'];
 
   domPreconditions = [
     {
@@ -42,6 +41,7 @@ class ItemMatcher implements Matcher {
     const currentUrl = window.location.href;
     const id = FlowUtils.parseIDFromHref(currentUrl);
     const log = Log.withFlow(MATCHER_IDS.ITEM, id);
+    console.log(`Id : ${id}`);
     log.info('Item matcher activated');
 
     try {
@@ -62,8 +62,6 @@ class ItemMatcher implements Matcher {
         await log.write();
         return;
       }
-
-      // id already extracted at the start
 
       await this.handleBrowseItem(result.config, id, log);
     } catch (error) {
@@ -222,27 +220,27 @@ export async function executeItemWorkflow(
           return;
         }
 
-        const productText = titleLink.textContent ?? '';
+        // const title = titleLink.textContent ?? '';
 
-        log.info(`Product: ${productText}`);
-
-        const config = context.config || {};
-        const product = ProductFactory.parse(config, productText);
-
-        if (isInvalidProduct(product)) {
-          log.warn(`Invalid product format: ${product.error}`);
-          return;
-        }
-
-        log.debug(`Product details: ${JSON.stringify(product)}`);
-
-        // Product is already validated by factory
-        const { allowed } = { allowed: product.allowed };
-
-        if (!allowed) {
-          log.info('Product not allowed by configuration, skipping');
-          return;
-        }
+        // log.info(`Product: ${title}`);
+        //
+        // const config = context.config || {};
+        // const product = ProductFactory.parse(config, title);
+        //
+        // if (isInvalidProduct(product)) {
+        //   log.warn(`Invalid product format: ${product.error}`);
+        //   return;
+        // }
+        //
+        // log.debug(`Product details: ${JSON.stringify(product)}`);
+        //
+        // // Product is already validated by factory
+        // const { allowed } = { allowed: product.allowed };
+        //
+        // if (!allowed) {
+        //   log.info('Product not allowed by configuration, skipping');
+        //   return;
+        // }
 
         // Open the item
         log.info(`Opening item: ${buyButton.href}`);

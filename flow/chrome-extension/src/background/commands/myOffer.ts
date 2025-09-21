@@ -26,7 +26,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       return {
         success: false,
         error: 'Extension is disabled',
-        requestId: payload.id,
+        requestId: `myOffer-${Date.now()}`,
       };
     }
 
@@ -40,20 +40,17 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       dryRun: false,
     };
 
-    const flow = await ConfigService.getFlow(payload.id);
-
     // Inject and execute the myOffer workflow
     const result = await chrome.scripting.executeScript({
       target: { tabId },
-      func: async (contextJson: string, selectorsJson: string, flowJson: string) => {
+      func: async (contextJson: string, selectorsJson: string) => {
         // This runs in the content script context
         const context = JSON.parse(contextJson);
         const selectors = JSON.parse(selectorsJson);
-        const flow = JSON.parse(flowJson);
 
         // Check if executor is available
         if (typeof (window as any).__myOfferExecutor === 'function') {
-          return await (window as any).__myOfferExecutor(context, selectors, flow);
+          return await (window as any).__myOfferExecutor(context, selectors);
         }
 
         return {
@@ -65,14 +62,7 @@ export const myOfferCommandHandler: MessageHandler<'myOffer.clickProductLink'> =
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(
-          payload.selectors || {
-            itemLink: '.message_center_message a[href*="/item.php"]',
-            titleLink: 'h3.panel-title',
-            requestTimestampElement: '.message_center_message thead tr:nth-child(1) td:last-child',
-          },
-        ),
-        JSON.stringify(flow),
+        JSON.stringify(payload.selectors),
       ],
     });
 

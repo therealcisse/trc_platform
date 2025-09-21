@@ -51,17 +51,26 @@ const manifest = {
       run_at: 'document_end',
     },
     {
-      matches: ['https://auktion.hansemerkur.de/item.php'],
+      matches: [
+        'http://localhost:8082/item/*',
+        'https://auktion.hansemerkur.de/item.php',
+      ],
       js: ['content/item.iife.js'],
       run_at: 'document_end',
     },
     {
-      matches: ['https://auktion.hansemerkur.de/buy_now/id/*'],
+      matches: [
+        'http://localhost:8082/buy_now/id/*',
+        'https://auktion.hansemerkur.de/buy_now/id/*',
+      ],
       js: ['content/buyOffer.iife.js'],
       run_at: 'document_end',
     },
     {
-      matches: ['https://auktion.hansemerkur.de/my_message_center_show_message.php'],
+      matches: [
+        'http://localhost:8082/myOffer/*',
+        'https://auktion.hansemerkur.de/my_message_center_show_message.php',
+      ],
       js: ['content/myOffer.iife.js'],
       run_at: 'document_end',
     },

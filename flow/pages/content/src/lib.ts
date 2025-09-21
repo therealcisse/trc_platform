@@ -2,13 +2,13 @@ import type {
   Matcher,
   BackgroundCommands,
   CommandResponse,
-  ExecutionContext,
-  ExecutionResult,
   WaitOptions,
   ClickOptions,
   TelemetryEvent,
   LocalDate as LocalDateType,
+  ExecutionConfig,
 } from '@extension/types';
+import { ExtensionStateType } from '../../../packages/storage/lib';
 
 // LocalDate utility class
 export class LocalDate implements LocalDateType {
@@ -233,25 +233,18 @@ export function random(min: number, max: number): number {
 }
 
 // Check if current time is within operational hours
-export function isValidTimeOfDay(config: any): boolean {
+export function isValidTimeOfDay(config: ExecutionConfig): boolean {
   const now = new LocalDate();
   const hh = now.getHours();
   const day = now.getDay();
 
-  const operationalHours = config.operationalHours?.[day];
-  if (!operationalHours?.enabled) {
+  const operationalHours = config.operationalHours[day];
+  if (!operationalHours.enabled) {
     return false;
   }
 
   // Check if within operational hours
   return hh >= operationalHours.min && hh < operationalHours.max;
-}
-
-export async function assertValidTimeOfDay(config: any): Promise<void> {
-  while (!isValidTimeOfDay(config)) {
-    console.log('[Extension] Invalid time of day, waiting...');
-    await sleep(60000); // Wait 1 minute
-  }
 }
 
 /**

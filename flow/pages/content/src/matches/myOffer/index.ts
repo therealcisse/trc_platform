@@ -1,4 +1,4 @@
-import { ProductFactory, Log } from '@extension/shared';
+import { ProductFactory, Log, FlowUtils } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher, sendBackgroundCommand } from '@src/lib';
 import type {
@@ -8,7 +8,6 @@ import type {
   MyOfferSelectors,
   ExecutionConfig,
   CommandResponse,
-  Flow,
 } from '@extension/types';
 
 /**
@@ -20,7 +19,10 @@ class MyOfferMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['https://auktion.hansemerkur.de/my_message_center_show_message.php'];
+  urlPatterns = [
+    'http://localhost:8082/myOffer/*',
+    'https://auktion.hansemerkur.de/my_message_center_show_message.php',
+  ];
 
   domPreconditions = [
     {
@@ -31,9 +33,7 @@ class MyOfferMatcher implements Matcher {
   ];
 
   async run(): Promise<void> {
-    const currentUrl = window.location.href;
-    const id = FlowUtils.parseIDFromHref(currentUrl);
-    const log = Log.withFlow(MATCHER_IDS.MY_OFFER, id);
+    const log = new Log(MATCHER_IDS.MY_OFFER);
     log.info('MyOffer matcher activated');
 
     try {
@@ -55,9 +55,7 @@ class MyOfferMatcher implements Matcher {
         return;
       }
 
-      // id already extracted at the start
-
-      await this.handleBrowseMyOffer(result.config, id, log);
+      await this.handleBrowseMyOffer(result.config, log);
     } catch (error) {
       log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
       await log.write();
@@ -65,14 +63,12 @@ class MyOfferMatcher implements Matcher {
     }
   }
 
-  private async handleBrowseMyOffer(config: any, id: string, log: Log): Promise<void> {
+  private async handleBrowseMyOffer(config: any, log: Log): Promise<void> {
     // Send command to process browse myOffer
     const response = await sendBackgroundCommand('myOffer.clickProductLink', {
-      id,
       selectors: {
-        itemLink: '.message_center_message a[href*="/item.php"]',
+        itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
         titleLink: 'h3.panel-title',
-        requestTimestampElement: '.message_center_message thead tr:nth-child(1) td:last-child',
       },
     });
 
@@ -82,24 +78,6 @@ class MyOfferMatcher implements Matcher {
       log.error(`Browse myOffer executor failed: ${response.error}`);
     }
     await log.write();
-  }
-
-  private setupAutoRefresh(config: any): void {
-    let checkCount = 0;
-    const maxChecks = 4;
-
-    const refreshInterval = setInterval(() => {
-      if (config.emailMode) {
-        clearInterval(refreshInterval);
-        return;
-      }
-
-      checkCount++;
-      if (checkCount > maxChecks) {
-        console.log('[MyOfferMatcher] Max checks reached, refreshing page');
-        window.location.reload();
-      }
-    }, 1000);
   }
 }
 
@@ -138,9 +116,8 @@ checkAndRun();
 export async function executeMyOfferWorkflow(
   context: ExecutionContext,
   selectors: MyOfferSelectors,
-  flow: Flow,
 ): Promise<ExecutionResult> {
-  const log = Log.withFlow(context.matcherId, flow.id);
+  const log = new Log(context.matcherId);
   log
     .info(`Starting myOffer workflow for tab ${context.tabId}`)
     .setMetadata({ tabId: context.tabId, url: context.url });
@@ -183,30 +160,18 @@ export async function executeMyOfferWorkflow(
           return;
         }
 
-        const productText = titleLink.textContent ?? '';
+        const title = titleLink.textContent ?? '';
 
-        log.info(`Product: ${productText}`);
-
-        const config = context.config || {};
-        const product = ProductFactory.parse(config, productText);
-
-        if (isInvalidProduct(product)) {
-          log.warn(`Invalid product format: ${product.error}`);
-          return;
-        }
-
-        log.debug(`Product details: ${JSON.stringify(product)}`);
-
-        // Product is already validated by factory
-        const { allowed } = { allowed: product.allowed };
-
-        if (!allowed) {
-          log.info('Product not allowed by configuration, skipping');
-          return;
-        }
+        log.info(`Product: ${title}`);
 
         const href = itemLlink.href;
         log.info(`Opening myOffer: ${href}`);
+
+        try {
+          const id = FlowUtils.parseIDFromTitle(title);
+          const flowLog = Log.withFlow(context.matcherId, id);
+          flowLog.info(`Processed myOffer link: ${href}`);
+        } catch (e) {}
 
         if (!context.dryRun) {
           // Open link in new managed tab

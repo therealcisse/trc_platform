@@ -45,7 +45,6 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       tabId,
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.BUY_OFFER,
-      flowId: payload.id,
       config,
       timeout: 60000, // 60 seconds timeout due to delay
       dryRun: false,
@@ -76,14 +75,7 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
       },
       args: [
         JSON.stringify(context),
-        JSON.stringify(
-          payload.selectors || {
-            input: '#captcha_code', // Captcha input field
-            img: '#page_buy_now_captcha label img', // Captcha image
-            productTitle: '.col-sm-9 h2', // Product title heading
-            buyFormButton: 'button[role="action"]', // Buy button
-          },
-        ),
+        JSON.stringify(payload.selectors),
         JSON.stringify(flow),
       ],
     });
