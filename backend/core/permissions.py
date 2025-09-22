@@ -20,6 +20,18 @@ class IsTokenAuthenticated(permissions.BasePermission):
         return hasattr(request, "token") and getattr(request, "token", None) is not None
 
 
+class HasAcceptedTerms(permissions.BasePermission):
+    """
+    Allows access only to users who have accepted terms.
+    """
+
+    message = "You must accept the terms to use this feature."
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        user = get_authenticated_user(request)
+        return user is not None and getattr(user, "user_accepted_terms", False)
+
+
 class IsEmailVerified(permissions.BasePermission):
     """
     Custom permission to only allow access to users with verified email.

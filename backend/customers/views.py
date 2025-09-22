@@ -15,6 +15,7 @@ from rest_framework.permissions import AllowAny, BasePermission, IsAuthenticated
 from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
+from rest_framework.permissions import IsAuthenticated
 
 from core.models import Settings
 from core.permissions import IsEmailVerified
@@ -39,6 +40,16 @@ from .utils import (
 )
 
 logger = logging.getLogger(__name__)
+
+
+class AcceptTermsView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        user = request.user
+        user.user_accepted_terms = True
+        user.save(update_fields=["user_accepted_terms"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
 
 
 class RegisterView(APIView):

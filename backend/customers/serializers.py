@@ -13,6 +13,7 @@ class RegisterSerializer(serializers.Serializer):
     email = serializers.EmailField()
     password = serializers.CharField(min_length=8, write_only=True)
     invite_code = serializers.CharField()
+    user_accepted_terms = serializers.BooleanField()
 
     def validate_email(self, value: str) -> str:
         if User.objects.filter(email__iexact=value).exists():
@@ -33,12 +34,19 @@ class RegisterSerializer(serializers.Serializer):
             raise ValidationError("invalid_invite") from e
         return value
 
+    def validate_user_accepted_terms(self, value: bool) -> bool:
+        if value is not True:
+            raise ValidationError("You must accept the terms to register.")
+        return value
+
     def create(self, validated_data: dict[str, Any]) -> User:
         invite_code = validated_data.pop("invite_code")
         invite = InviteCode.objects.get(code=invite_code)
 
         user = User.objects.create_user(
-            email=validated_data["email"], password=validated_data["password"]
+            email=validated_data["email"],
+            password=validated_data["password"],
+            user_accepted_terms=validated_data["user_accepted_terms"],
         )
 
         # Mark invite code as used
@@ -121,5 +129,12 @@ class ApiTokenListSerializer(serializers.ModelSerializer):
 class UserSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
-        fields = ["id", "email", "is_active", "email_verified_at", "date_joined"]
+        fields = [
+            "id",
+            "email",
+            "is_active",
+            "email_verified_at",
+            "date_joined",
+            "user_accepted_terms",
+        ]
         read_only_fields = fields

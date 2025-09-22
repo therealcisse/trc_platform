@@ -79,7 +79,9 @@ class SolveView(APIView):
     """
 
     authentication_classes = [BearerTokenAuthentication]
-    permission_classes = []  # Authentication handles permission
+    from core.permissions import HasAcceptedTerms
+
+    permission_classes = [HasAcceptedTerms]  # Require acceptance of terms
     parser_classes = [MultiPartParser, FileUploadParser]
 
     def post(self, request: Request) -> Response:
