@@ -46,15 +46,6 @@ export type StorageConfigType<D = string> = {
   };
 };
 
-export interface ThemeStateType {
-  theme: 'light' | 'dark';
-  isLight: boolean;
-}
-
-export type ThemeStorageType = BaseStorageType<ThemeStateType> & {
-  toggle: () => Promise<void>;
-};
-
 export interface ExtensionStateType {
   config: ExecutionConfig;
   enabled: boolean;

@@ -1,3 +1,5 @@
+packageManager: "pnpm@9.12.0"
+
 packages:
   - chrome-extension
   - pages/*
@@ -11,3 +13,10 @@ onlyBuiltDependencies:
   - esbuild
   - geckodriver
   - unrs-resolver
+
+pnpm:
+  overrides:
+    # Require packages to be at least 1 day old (1440 minutes = 24 hours)
+    minimumReleaseAge: 1440
+    minimumReleaseAgeExclude:
+      - '@eslint/*'

@@ -82,11 +82,6 @@ const manifest = {
       js: ['content/inbox.iife.js'],
       run_at: 'document_end',
     },
-    {
-      matches: ['http://localhost:8082/pages/*'],
-      js: ['content/solver.iife.js'],
-      run_at: 'document_end',
-    },
   ],
   web_accessible_resources: [
     {
