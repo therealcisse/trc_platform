@@ -1,16 +1,8 @@
 import { Log } from '../utils/index.js';
 import { sendBackgroundCommand } from './index.js';
 
-interface ManagedTab {
-  id: number;
-  flowId: string;
-  createdAt: number;
-  lastActive: number;
-}
-
 export class TabManager {
   private static instance: TabManager;
-  private tabs: Map<number, ManagedTab> = new Map();
   private readonly maxTabs = 100;
   private readonly log: Log;
 
@@ -28,13 +20,18 @@ export class TabManager {
   async openTab(url: string, flowId: string): Promise<number> {
     await this.cleanupStaleTabs();
 
-    if (this.tabs.size >= this.maxTabs) {
-      const oldestTab = this.findOldestTab();
-      if (oldestTab) {
-        await this.closeTab(oldestTab.id);
-      }
+    // Check tab count and cleanup if necessary
+    const countResponse = await sendBackgroundCommand('tab.manage', {
+      action: 'getTabCount',
+    });
+
+    if (countResponse.success && countResponse.data?.count >= this.maxTabs) {
+      await sendBackgroundCommand('tab.manage', {
+        action: 'cleanupStale',
+      });
     }
 
+    // Open the tab via background
     const response = await sendBackgroundCommand('tab.manage', {
       action: 'open',
       url,
@@ -44,54 +41,43 @@ export class TabManager {
       throw new Error('Failed to open tab');
     }
 
-    const newTab: ManagedTab = {
-      id: response.data.tabId,
+    const tabId = response.data.tabId;
+
+    // Add to managed tabs with flowId
+    const addResponse = await sendBackgroundCommand('tab.manage', {
+      action: 'addManagedTab',
+      tabId,
       flowId,
-      createdAt: Date.now(),
-      lastActive: Date.now(),
-    };
+    });
 
-    this.tabs.set(newTab.id, newTab);
-    this.log.info(`Opened new tab ${newTab.id} for flow ${flowId}`);
+    if (!addResponse.success) {
+      this.log.warn(`Failed to mark tab ${tabId} as managed: ${addResponse.error}`);
+    }
 
-    return newTab.id;
+    this.log.info(`Opened new tab ${tabId} for flow ${flowId}`);
+    return tabId;
   }
 
   async updateTabActivity(tabId: number): Promise<void> {
-    const tab = this.tabs.get(tabId);
-    if (tab) {
-      tab.lastActive = Date.now();
-      this.tabs.set(tabId, tab);
+    const response = await sendBackgroundCommand('tab.manage', {
+      action: 'updateActivity',
+      tabId,
+    });
+
+    if (!response.success) {
+      this.log.warn(`Failed to update activity for tab ${tabId}: ${response.error}`);
     }
-  }
-
-  private findOldestTab(): ManagedTab | null {
-    let oldest: ManagedTab | null = null;
-    let oldestTime = Infinity;
-
-    for (const tab of this.tabs.values()) {
-      if (tab.lastActive < oldestTime) {
-        oldest = tab;
-        oldestTime = tab.lastActive;
-      }
-    }
-
-    return oldest;
   }
 
   private async cleanupStaleTabs(): Promise<void> {
-    const staleTimeout = 5 * 60 * 1000; // 5 minutes
-    const now = Date.now();
-    const staleTabs: number[] = [];
+    const response = await sendBackgroundCommand('tab.manage', {
+      action: 'cleanupStale',
+    });
 
-    for (const [id, tab] of this.tabs.entries()) {
-      if (now - tab.lastActive > staleTimeout) {
-        staleTabs.push(id);
-      }
-    }
-
-    for (const tabId of staleTabs) {
-      await this.closeTab(tabId);
+    if (!response.success) {
+      this.log.warn(`Failed to cleanup stale tabs: ${response.error}`);
+    } else if (response.data?.cleanedCount > 0) {
+      this.log.info(`Cleaned up ${response.data.cleanedCount} stale tabs`);
     }
   }
 
@@ -101,39 +87,47 @@ export class TabManager {
         action: 'close',
         tabId,
       });
-      this.tabs.delete(tabId);
       this.log.info(`Closed tab ${tabId}`);
     } catch (error) {
       this.log.error(`Failed to close tab ${tabId}`, { error });
-      // Still remove from our tracking even if close fails
-      this.tabs.delete(tabId);
     }
   }
 
   async closeAllTabs(flowId: string): Promise<void> {
-    // Collect all matching tab IDs
-    const toClose: number[] = [];
-    for (const [tabId, tab] of this.tabs.entries()) {
-      if (tab.flowId === flowId) {
-        toClose.push(tabId);
+    const response = await sendBackgroundCommand('tab.manage', {
+      action: 'closeAllTabs',
+      flowId,
+    });
 
-        await sendBackgroundCommand('tab.manage', {
-          action: 'close',
-          tabId,
-        });
-      }
-    }
-
-    for (const id of toClose) {
-      this.tabs.delete(id);
+    if (!response.success) {
+      this.log.error(`Failed to close all tabs for flow ${flowId}: ${response.error}`);
+    } else {
+      this.log.info(`Closed all tabs for flow ${flowId}`);
     }
   }
 
-  getTabCount(): number {
-    return this.tabs.size;
+  async getTabCount(): Promise<number> {
+    const response = await sendBackgroundCommand('tab.manage', {
+      action: 'getTabCount',
+    });
+
+    if (response.success && response.data?.count !== undefined) {
+      return response.data.count;
+    }
+
+    return 0;
   }
 
-  isTabManaged(tabId: number): boolean {
-    return this.tabs.has(tabId);
+  async isTabManaged(tabId: number): Promise<boolean> {
+    const response = await sendBackgroundCommand('tab.manage', {
+      action: 'isManaged',
+      tabId,
+    });
+
+    if (response.success && response.data?.isManaged !== undefined) {
+      return response.data.isManaged;
+    }
+
+    return false;
   }
 }

@@ -4,10 +4,10 @@ import type { TabManagementService as ITabManagementService } from '@extension/t
 export class TabManagementService implements ITabManagementService {
   constructor(private storage: ExtensionStorageType) {}
 
-  async openTab(url: string, managedTab = false): Promise<chrome.tabs.Tab> {
+  async openTab(url: string, managedTab = false, flowId?: string): Promise<chrome.tabs.Tab> {
     const tab = await chrome.tabs.create({ url });
-    if (managedTab && tab.id) {
-      await this.storage.tabManagement.markManaged(tab.id);
+    if (managedTab && tab.id && flowId) {
+      await this.storage.tabManagement.markManaged(tab.id, flowId);
     }
     return tab;
   }
@@ -25,8 +25,8 @@ export class TabManagementService implements ITabManagementService {
     return this.storage.tabManagement.isManaged(tabId);
   }
 
-  async markManaged(tabId: number): Promise<void> {
-    await this.storage.tabManagement.markManaged(tabId);
+  async markManaged(tabId: number, flowId: string): Promise<void> {
+    await this.storage.tabManagement.markManaged(tabId, flowId);
   }
 
   async unmarkManaged(tabId: number): Promise<void> {
@@ -35,5 +35,25 @@ export class TabManagementService implements ITabManagementService {
 
   async getManagedTabs(): Promise<number[]> {
     return this.storage.tabManagement.getAllManagedTabs();
+  }
+
+  async updateActivity(tabId: number): Promise<void> {
+    await this.storage.tabManagement.updateActivity(tabId);
+  }
+
+  async getTabCount(): Promise<number> {
+    return this.storage.tabManagement.getTabCount();
+  }
+
+  async closeAllTabsForFlow(flowId: string): Promise<void> {
+    await this.storage.tabManagement.closeAllTabsForFlow(flowId);
+  }
+
+  async cleanupStaleTabs(): Promise<number> {
+    return this.storage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
+  }
+
+  async validateExistingTabs(): Promise<number> {
+    return this.storage.tabManagement.validateExistingTabs();
   }
 }

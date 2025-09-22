@@ -195,11 +195,13 @@ export function random(min: number, max: number): number {
   return Math.floor(Math.random() * (max - min + 1) + min);
 }
 
+const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
+
 // Check if current time is within operational hours
 export function isValidTimeOfDay(config: ExecutionConfig): boolean {
   const now = new LocalDate();
   const hh = now.getHours();
-  const day = now.getDay();
+  const day = DAYS[now.getDay()];
 
   const operationalHours = config.operationalHours[day];
   if (!operationalHours.enabled) {

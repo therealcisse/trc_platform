@@ -246,9 +246,21 @@ export interface ExecutorRequest {
 }
 
 export interface TabManagementCommand {
-  action: 'open' | 'close' | 'reload' | 'manage' | 'unmanage' | 'isManaged';
+  action:
+    | 'open'
+    | 'close'
+    | 'reload'
+    | 'manage'
+    | 'unmanage'
+    | 'isManaged'
+    | 'addManagedTab'
+    | 'updateActivity'
+    | 'getTabCount'
+    | 'closeAllTabs'
+    | 'cleanupStale';
   tabId?: number;
   url?: string;
+  flowId?: string;
 }
 
 export interface BuyingStateCommand {
@@ -269,8 +281,6 @@ export interface TelemetryEvent {
 export interface TelemetryData {
   startTime: number;
   endTime: number;
-  domOperations: number;
-  networkRequests: number;
   errors: Error[];
 }
 
@@ -304,6 +314,12 @@ export interface Flow {
 
 export type FlowState = Record<string, Flow>;
 
+export interface ManagedTabInfo {
+  flowId: string;
+  createdAt: number;
+  lastActive: number;
+}
+
 export interface ExtensionStorage {
   enabled: boolean;
   config: ExecutionConfig;
@@ -311,7 +327,7 @@ export interface ExtensionStorage {
     timestamp: number;
     message: string;
   }[];
-  managedTabs: Record<string, number>;
+  managedTabs: Record<string, ManagedTabInfo>;
   buyingOffers: Record<string, BuyingOffer>;
   productStrategies: StoredProductStrategy[];
   flows: FlowState;
@@ -352,7 +368,7 @@ export interface TabManagementService {
   closeTab(tabId: number): Promise<void>;
   reloadTab(tabId: number): Promise<void>;
   isManaged(tabId: number): Promise<boolean>;
-  markManaged(tabId: number): void;
+  markManaged(tabId: number, flowId: string): void;
   unmarkManaged(tabId: number): void;
 }
 

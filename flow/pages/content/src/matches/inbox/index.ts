@@ -44,8 +44,20 @@ class InboxMatcher implements Matcher {
       }>;
 
       const result = configResponse.data;
-      if (!result?.enabled || !result.config.inboxMode) {
-        log.info('Inbox monitoring disabled');
+      if (!result) {
+        log.warn('No configuration found');
+        await log.write();
+        return;
+      }
+
+      if (!result.enabled) {
+        log.info('Extension disabled');
+        await log.write();
+        return;
+      }
+
+      if (!result.config.inboxMode) {
+        log.info('Inbox mode disabled');
         await log.write();
         return;
       }
@@ -80,7 +92,7 @@ class InboxMatcher implements Matcher {
   }
 
   private startReloadScheduler(config: ExecutionConfig): void {
-    const reloadSeconds = config.inboxReloadSeconds || [0, 5];
+    const reloadSeconds = config.inboxReloadSeconds || [3, 7];
     const log = new Log(MATCHER_IDS.INBOX);
 
     // Clear any existing scheduler
@@ -313,8 +325,6 @@ export async function executeInboxWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: links.length,
-        networkRequests: 0,
         errors: [],
       },
     };
@@ -330,8 +340,6 @@ export async function executeInboxWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 0,
-        networkRequests: 0,
         errors: [error as Error],
       },
     };

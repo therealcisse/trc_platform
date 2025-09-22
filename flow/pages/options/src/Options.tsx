@@ -211,7 +211,7 @@ const Options = () => {
                         <label className="mb-1 block text-sm text-gray-300">{t('options_reload_seconds')}</label>
                         <input
                           type="text"
-                          value={(config.inboxReloadSeconds || [0, 5]).join(', ')}
+                          value={(config.inboxReloadSeconds || [3, 7]).join(', ')}
                           onChange={e => {
                             const seconds = e.target.value
                               .split(',')
@@ -219,7 +219,7 @@ const Options = () => {
                               .filter(n => !isNaN(n) && n >= 0 && n < 60);
                             extensionConfigStorage.updateConfig({ inboxReloadSeconds: seconds });
                           }}
-                          placeholder="0, 5"
+                          placeholder="3, 7"
                           className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                         />
                         <p className="mt-1 text-xs text-gray-400">{t('options_reload_seconds_help')}</p>

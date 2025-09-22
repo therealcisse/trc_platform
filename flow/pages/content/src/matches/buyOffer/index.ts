@@ -289,8 +289,6 @@ export async function executeBuyOfferWorkflow(
         telemetry: {
           startTime,
           endTime: Date.now(),
-          domOperations: 0, // Input, title, image, and buy click
-          networkRequests: 0, // State check, image processing, and buy submit
           errors,
         },
       };
@@ -328,8 +326,6 @@ export async function executeBuyOfferWorkflow(
         telemetry: {
           startTime,
           endTime: Date.now(),
-          domOperations: 0, // Input, title, image, and buy click
-          networkRequests: 0, // State check, image processing, and buy submit
           errors,
         },
       };
@@ -365,17 +361,19 @@ export async function executeBuyOfferWorkflow(
       // Mark flow as done
       log.info('Purchase completed successfully, marking flow as done');
       await ConfigService.doneFlow(flow.id);
+
       log.info(`Flow ${flow.id} marked as completed`);
-
-      log.info(`Closing all tabs for flow: ${flow.id}`);
-      await tabManager.closeAllTabs(flow.id);
-
       // Clear buying state on success
       log.debug('Clearing buying state');
       await sendBackgroundCommand('state.buying', {
         action: 'clear',
         flowId: flow.id,
       });
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      sleep(15000);
+      await tabManager.closeAllTabs(flow.id);
+
       log.info('Buying state cleared successfully');
     } else {
       log.debug('Dry run: Would click buy button');
@@ -400,8 +398,6 @@ export async function executeBuyOfferWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 4, // Input, title, image, and buy click
-        networkRequests: 3, // State check, image processing, and buy submit
         errors,
       },
     };
@@ -457,8 +453,6 @@ export async function executeBuyOfferWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: errors.some(e => e.message.includes('not found')) ? 1 : 2,
-        networkRequests: errors.some(e => e.message.includes('API')) ? 1 : 2,
         errors,
       },
     };

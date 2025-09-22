@@ -225,14 +225,14 @@ export async function executeEmailWorkflow(
               if (startFlowResult.success && startFlowResult.data === true) {
                 // Flow already exists, skip this link
                 // Create a new log with flowId for this specific email
-                const flowLog = Log.withFlow(context.matcherId, id);
+                const flowLog = Log.withFlow(MATCHER_IDS.EMAIL, id);
                 flowLog.info(`Skipping email with existing flow: ${id}`);
                 await flowLog.write();
                 continue;
               }
 
               // Create a new log with flowId for this specific email flow
-              const flowLog = Log.withFlow(context.matcherId, id);
+              const flowLog = Log.withFlow(MATCHER_IDS.EMAIL, id);
               flowLog.info(`Processing new email flow`, { href, title });
 
               // Check if we've already visited this URL
@@ -267,7 +267,7 @@ export async function executeEmailWorkflow(
           }
 
           // Small delay between emails
-          // await sleep(500);
+          await sleep(500);
         }
       } catch (error) {
         log.error(`Error in email processing: ${error}`);
@@ -310,8 +310,6 @@ export async function executeEmailWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: processedCount * 3, // Open, read link, mark as read
-        networkRequests: processedCount,
         errors,
       },
     };
@@ -328,8 +326,6 @@ export async function executeEmailWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: processedCount * 3,
-        networkRequests: processedCount,
         errors: [...errors, error as Error],
       },
     };

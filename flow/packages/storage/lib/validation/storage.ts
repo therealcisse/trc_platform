@@ -40,7 +40,7 @@ export const ProductStrategySchema = StoredProductStrategySchema;
 export const ExecutionConfigSchema = z.object({
   // Inbox mode configuration
   inboxMode: z.boolean().optional(),
-  inboxReloadSeconds: z.array(z.number()).optional().default([0, 5]),
+  inboxReloadSeconds: z.array(z.number()).optional().default([3, 7]),
   inboxPostReloadDelayMs: z.number().optional().default(2000),
   inboxMaxLinksPerScan: z.number().optional().default(10),
   inboxInterOpenDelayMs: z.number().optional().default(400),
@@ -91,11 +91,17 @@ export const FlowSchema = z.object({
   title: z.string(),
 });
 
+export const ManagedTabInfoSchema = z.object({
+  flowId: z.string(),
+  createdAt: z.number(),
+  lastActive: z.number(),
+});
+
 export const ExtensionStorageSchema = z.object({
   enabled: z.boolean(),
   config: ExecutionConfigSchema,
   logs: z.array(LogEntrySchema),
-  managedTabs: z.record(z.string(), z.number()),
+  managedTabs: z.record(z.string(), ManagedTabInfoSchema),
   buyingOffers: z.record(z.string(), BuyingOfferSchema),
   productStrategies: z.array(StoredProductStrategySchema),
   flows: z.record(z.string(), FlowSchema),
@@ -111,6 +117,7 @@ export type ValidatedBuyingOffer = z.infer<typeof BuyingOfferSchema>;
 export type ValidatedLogEntry = z.infer<typeof LogEntrySchema>;
 export type ValidatedProductStrategy = z.infer<typeof ProductStrategySchema>;
 export type ValidatedFlow = z.infer<typeof FlowSchema>;
+export type ValidatedManagedTabInfo = z.infer<typeof ManagedTabInfoSchema>;
 export type ValidatedExtensionStorage = z.infer<typeof ExtensionStorageSchema>;
 export type ValidatedProductConfig = z.infer<typeof ProductConfigSchema>;
 export type ValidatedDelayConfig = z.infer<typeof DelayConfigSchema>;

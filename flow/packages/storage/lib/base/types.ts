@@ -77,8 +77,14 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
 
   // Tab management namespace
   tabManagement: {
-    markManaged(tabId: number): Promise<void>;
+    markManaged(tabId: number, flowId: string): Promise<void>;
     unmarkManaged(tabId: number): Promise<void>;
+    updateActivity(tabId: number): Promise<void>;
+    getTabCount(): Promise<number>;
+    closeAllTabsForFlow(flowId: string): Promise<void>;
+    validateExistingTabs(): Promise<number>;
+    cleanupStaleTabs(staleTimeout: number): Promise<number>;
+    getTabsByFlow(flowId: string): Promise<number[]>;
     isManaged(tabId: number): Promise<boolean>;
     getAllManagedTabs(): Promise<number[]>;
   };

@@ -6,6 +6,7 @@ import {
   LogEntrySchema,
   ProductStrategySchema,
   StoredProductStrategySchema,
+  ManagedTabInfoSchema,
 } from '../validation/storage.js';
 import type { ExtensionStorageType } from '../base/index.js';
 import type { ExecutionConfig, ExtensionStorage, Flow, StoredProductStrategy } from '@extension/types';
@@ -257,13 +258,20 @@ export const extensionConfigStorage: ExtensionStorageType = {
 
   // Tab management namespace
   tabManagement: {
-    async markManaged(tabId: number) {
+    async markManaged(tabId: number, flowId: string) {
+      const now = Date.now();
+      const tabInfo = validateStorageData(ManagedTabInfoSchema, {
+        flowId,
+        createdAt: now,
+        lastActive: now,
+      });
+
       await storage.set(currentState =>
         validateStorageData(ExtensionStorageSchema, {
           ...currentState,
           managedTabs: {
             ...currentState.managedTabs,
-            [tabId]: Date.now(),
+            [tabId]: tabInfo,
           },
         }),
       );
@@ -279,14 +287,147 @@ export const extensionConfigStorage: ExtensionStorageType = {
       });
     },
 
+    async updateActivity(tabId: number) {
+      await storage.set(currentState => {
+        const tabInfo = currentState.managedTabs[tabId];
+        if (tabInfo) {
+          const updatedTabInfo = validateStorageData(ManagedTabInfoSchema, {
+            ...tabInfo,
+            lastActive: Date.now(),
+          });
+          return validateStorageData(ExtensionStorageSchema, {
+            ...currentState,
+            managedTabs: {
+              ...currentState.managedTabs,
+              [tabId]: updatedTabInfo,
+            },
+          });
+        }
+        return currentState;
+      });
+    },
+
     async isManaged(tabId: number) {
       const current = await storage.get();
-      return tabId in current.managedTabs;
+      return String(tabId) in current.managedTabs;
     },
 
     async getAllManagedTabs() {
       const current = await storage.get();
       return Object.keys(current.managedTabs).map(Number);
+    },
+
+    async getTabCount() {
+      const current = await storage.get();
+      return Object.keys(current.managedTabs).length;
+    },
+
+    async getTabsByFlow(flowId: string) {
+      const current = await storage.get();
+      return Object.entries(current.managedTabs)
+        .filter(([_, tabInfo]) => tabInfo.flowId === flowId)
+        .map(([tabId]) => Number(tabId));
+    },
+
+    async closeAllTabsForFlow(flowId: string) {
+      const current = await storage.get();
+      const tabsToClose = Object.entries(current.managedTabs)
+        .filter(([_, tabInfo]) => tabInfo.flowId === flowId)
+        .map(([tabId]) => Number(tabId));
+
+      // Close actual tabs
+      for (const tabId of tabsToClose) {
+        try {
+          await chrome.tabs.remove(tabId);
+        } catch (error) {
+          // Tab might already be closed, continue
+        }
+      }
+
+      // Remove from storage
+      await storage.set(currentState => {
+        const newManagedTabs = { ...currentState.managedTabs };
+        tabsToClose.forEach(tabId => {
+          delete newManagedTabs[String(tabId)];
+        });
+
+        return validateStorageData(ExtensionStorageSchema, {
+          ...currentState,
+          managedTabs: newManagedTabs,
+        });
+      });
+    },
+
+    async cleanupStaleTabs(staleTimeout: number = 5 * 60 * 1000) {
+      const current = await storage.get();
+      const now = Date.now();
+      const staleTabIds: number[] = [];
+
+      // Find stale tabs
+      Object.entries(current.managedTabs).forEach(([tabId, tabInfo]) => {
+        if (now - tabInfo.lastActive > staleTimeout) {
+          staleTabIds.push(Number(tabId));
+        }
+      });
+
+      // Close stale tabs
+      for (const tabId of staleTabIds) {
+        try {
+          await chrome.tabs.remove(tabId);
+        } catch {
+          // Tab might already be closed
+        }
+      }
+
+      // Remove from storage if any were found
+      if (staleTabIds.length > 0) {
+        await storage.set(currentState => {
+          const newManagedTabs = { ...currentState.managedTabs };
+          staleTabIds.forEach(tabId => {
+            delete newManagedTabs[String(tabId)];
+          });
+
+          return validateStorageData(ExtensionStorageSchema, {
+            ...currentState,
+            managedTabs: newManagedTabs,
+          });
+        });
+      }
+
+      return staleTabIds.length;
+    },
+
+    async validateExistingTabs() {
+      const current = await storage.get();
+      const tabIds = Object.keys(current.managedTabs).map(Number);
+      const invalidTabIds: number[] = [];
+
+      // Check which tabs still exist
+      for (const tabId of tabIds) {
+        try {
+          await chrome.tabs.get(tabId);
+        } catch {
+          // Tab no longer exists
+          invalidTabIds.push(tabId);
+        }
+      }
+
+      // Remove invalid tabs from storage
+      if (invalidTabIds.length > 0) {
+        await storage.set(currentState => {
+          const newManagedTabs = { ...currentState.managedTabs };
+          invalidTabIds.forEach(tabId => {
+            delete newManagedTabs[String(tabId)];
+          });
+
+          return validateStorageData(ExtensionStorageSchema, {
+            ...currentState,
+            managedTabs: newManagedTabs,
+          });
+        });
+      }
+
+      return invalidTabIds.length;
     },
   },
 

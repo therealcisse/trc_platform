@@ -185,7 +185,7 @@ async function handleMessage(
 
 // Handle tab management commands
 async function handleTabManagement(
-  payload: { action: string; tabId?: number; url?: string },
+  payload: { action: string; tabId?: number; url?: string; flowId?: string },
   sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> {
   const requestId = 'tab';
@@ -196,7 +196,7 @@ async function handleTabManagement(
         if (!payload.url) {
           throw new Error('URL required for open action');
         }
-        const tab = await tabService.openTab(payload.url, true);
+        const tab = await tabService.openTab(payload.url, true, payload.flowId);
         return {
           success: true,
           data: { tabId: tab.id },
@@ -225,10 +225,10 @@ async function handleTabManagement(
         };
 
       case 'manage':
-        if (!payload.tabId) {
-          throw new Error('Tab ID required for manage action');
+        if (!payload.tabId || !payload.flowId) {
+          throw new Error('Tab ID and Flow ID required for manage action');
         }
-        await tabService.markManaged(payload.tabId);
+        await tabService.markManaged(payload.tabId, payload.flowId);
         return {
           success: true,
           requestId,
@@ -252,6 +252,52 @@ async function handleTabManagement(
         return {
           success: true,
           data: { isManaged },
+          requestId,
+        };
+
+      case 'addManagedTab':
+        if (!payload.tabId || !payload.flowId) {
+          throw new Error('Tab ID and Flow ID required for addManagedTab action');
+        }
+        await extensionConfigStorage.tabManagement.markManaged(payload.tabId, payload.flowId);
+        return {
+          success: true,
+          requestId,
+        };
+
+      case 'updateActivity':
+        if (!payload.tabId) {
+          throw new Error('Tab ID required for updateActivity action');
+        }
+        await extensionConfigStorage.tabManagement.updateActivity(payload.tabId);
+        return {
+          success: true,
+          requestId,
+        };
+
+      case 'getTabCount':
+        const count = await extensionConfigStorage.tabManagement.getTabCount();
+        return {
+          success: true,
+          data: { count },
+          requestId,
+        };
+
+      case 'closeAllTabs':
+        if (!payload.flowId) {
+          throw new Error('Flow ID required for closeAllTabs action');
+        }
+        await extensionConfigStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
+        return {
+          success: true,
+          requestId,
+        };
+
+      case 'cleanupStale':
+        const cleanedCount = await extensionConfigStorage.tabManagement.cleanupStaleTabs();
+        return {
+          success: true,
+          data: { cleanedCount },
           requestId,
         };
 

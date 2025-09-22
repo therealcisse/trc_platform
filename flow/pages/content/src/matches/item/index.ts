@@ -159,8 +159,6 @@ export async function executeItemWorkflow(
         telemetry: {
           startTime,
           endTime: Date.now(),
-          domOperations: 0,
-          networkRequests: 0,
           errors,
         },
       };
@@ -216,8 +214,6 @@ export async function executeItemWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 0,
-        networkRequests: 0,
         errors,
       },
     };
@@ -234,8 +230,6 @@ export async function executeItemWorkflow(
       telemetry: {
         startTime,
         endTime: Date.now(),
-        domOperations: 0,
-        networkRequests: 0,
         errors: [...errors, error as Error],
       },
     };
