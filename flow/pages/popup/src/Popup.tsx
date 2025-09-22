@@ -36,7 +36,6 @@ const Popup = () => {
 
       if (flowsResponse?.success && flowsResponse.data) {
         const dbFlows = flowsResponse.data as Flow[];
-        console.log(dbFlows)
         // Sort by timestamp (newest first)
         const sortedFlows = [...dbFlows].sort((a, b) => b.timestamp - a.timestamp);
         setFlows(sortedFlows);
@@ -144,7 +143,7 @@ const Popup = () => {
       </div>
 
       {/* Main Content Area - Takes remaining height */}
-      <div className="flex min-h-0 flex-1 flex-col overflow-hidden">
+      <div className="flex min-h-0 flex-1 flex-col">
         <div className="flex-shrink-0 border-b bg-gray-100 px-4 py-2">
           <h2 className="text-sm font-semibold text-gray-700">{t('popup_active_flows', flows.length.toString())}</h2>
         </div>
