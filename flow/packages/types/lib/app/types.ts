@@ -27,11 +27,12 @@ export interface ExecutionContext {
 
 export interface ExecutionConfig {
   // Inbox mode configuration
-  inboxMode?: boolean;
-  inboxReloadSeconds?: number[]; // [0, 5] means reload at 0 and 5 seconds of each minute
-  inboxPostReloadDelayMs?: number; // Delay after reload before scanning
-  inboxMaxLinksPerScan?: number; // Max links to open per scan
-  inboxInterOpenDelayMs?: number; // Delay between opening links
+  inboxMode: boolean;
+  inboxReloadSeconds: number[]; // [0, 5] means reload at 0 and 5 seconds of each minute
+  inboxPostReloadDelayMs: number; // Delay after reload before scanning
+  inboxMaxLinksPerScan: number; // Max links to open per scan
+  inboxInterOpenDelayMs: number; // Delay between opening links
+
   // API Authentication
   token?: string;
 
@@ -308,6 +309,7 @@ export interface Flow {
   requestTimestamp: number;
   status: 'running' | 'done' | 'failed';
   source: 'email' | 'inbox';
+  doneTimestamp?: number;
 }
 
 export type FlowState = Record<string, Flow>;

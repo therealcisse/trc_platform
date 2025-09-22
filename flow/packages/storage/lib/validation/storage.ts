@@ -39,11 +39,12 @@ export const ProductStrategySchema = StoredProductStrategySchema;
 
 export const ExecutionConfigSchema = z.object({
   // Inbox mode configuration
-  inboxMode: z.boolean().optional(),
-  inboxReloadSeconds: z.array(z.number()).optional().default([3, 7]),
-  inboxPostReloadDelayMs: z.number().optional().default(2000),
-  inboxMaxLinksPerScan: z.number().optional().default(10),
-  inboxInterOpenDelayMs: z.number().optional().default(400),
+  inboxMode: z.boolean().default(true),
+  inboxReloadSeconds: z.array(z.number()).default([3, 7]),
+  inboxPostReloadDelayMs: z.number().default(2000),
+  inboxMaxLinksPerScan: z.number().default(10),
+  inboxInterOpenDelayMs: z.number().default(400),
+
   token: z.string().optional(),
 
   // Required fields (removed .optional())
@@ -88,6 +89,7 @@ export const FlowSchema = z.object({
   requestTimestamp: z.number(),
   status: z.enum(['running', 'done', 'failed']),
   source: z.enum(['email', 'inbox']),
+  doneTimestamp: z.number().optional(),
 });
 
 export const ManagedTabInfoSchema = z.object({

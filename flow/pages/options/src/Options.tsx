@@ -248,7 +248,7 @@ const Options = () => {
                         <label className="mb-1 block text-sm text-gray-300">{t('options_reload_seconds')}</label>
                         <input
                           type="text"
-                          value={(config.inboxReloadSeconds || [3, 7]).join(', ')}
+                          value={config.inboxReloadSeconds.join(', ')}
                           onChange={e => {
                             const seconds = e.target.value
                               .split(',')
@@ -266,7 +266,7 @@ const Options = () => {
                         <label className="mb-1 block text-sm text-gray-300">{t('options_max_links_per_scan')}</label>
                         <input
                           type="number"
-                          value={config.inboxMaxLinksPerScan || 10}
+                          value={config.inboxMaxLinksPerScan}
                           onChange={e =>
                             extensionConfigStorage.updateConfig({
                               inboxMaxLinksPerScan: parseInt(e.target.value) || 10,
@@ -283,7 +283,7 @@ const Options = () => {
                         <label className="mb-1 block text-sm text-gray-300">{t('options_post_reload_delay')}</label>
                         <input
                           type="number"
-                          value={config.inboxPostReloadDelayMs || 2000}
+                          value={config.inboxPostReloadDelayMs}
                           onChange={e =>
                             extensionConfigStorage.updateConfig({
                               inboxPostReloadDelayMs: parseInt(e.target.value) || 2000,
@@ -301,7 +301,7 @@ const Options = () => {
                         <label className="mb-1 block text-sm text-gray-300">{t('options_inter_open_delay')}</label>
                         <input
                           type="number"
-                          value={config.inboxInterOpenDelayMs || 400}
+                          value={config.inboxInterOpenDelayMs}
                           onChange={e =>
                             extensionConfigStorage.updateConfig({
                               inboxInterOpenDelayMs: parseInt(e.target.value) || 400,

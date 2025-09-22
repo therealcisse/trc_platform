@@ -168,8 +168,23 @@
   "popup_loading_logs": {
     "message": "Lade Logs..."
   },
+  "popup_no_logs": {
+    "message": "Keine Logs gefunden"
+  },
+  "source_email": {
+    "message": "Email"
+  },
+  "source_inbox": {
+    "message": "Inbox"
+  },
   "status_done": {
     "message": "Erledigt"
+  },
+  "status_failed": {
+    "message": "Fehlgeschlagen"
+  },
+  "status_running": {
+    "message": "Läuft"
   },
   "status_error": {
     "message": "Fehler"

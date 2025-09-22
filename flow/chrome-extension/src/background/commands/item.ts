@@ -35,7 +35,7 @@ export const itemCommandHandler: MessageHandler<'item.clickProductLink'> = async
     if (!flow) {
       return {
         success: false,
-        error: 'Flow not found',
+        error: `Flow not found: ${payload.id}`,
         requestId: payload.id,
       };
     }

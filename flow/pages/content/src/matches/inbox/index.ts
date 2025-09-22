@@ -182,7 +182,6 @@ export async function executeInboxWorkflow(
   const log = new Log(context.matcherId);
   log.info(`Extracting inbox links for tab ${context.tabId}`);
   const startTime = Date.now();
-  const visitedUrls: Record<string, boolean> = {}; // local url tracking for this scan
   const tabManager = TabManager.getInstance();
 
   try {
@@ -246,8 +245,8 @@ export async function executeInboxWorkflow(
     let skippedCount = 0;
     const errors: string[] = [];
 
-    const maxLinks = context.config?.inboxMaxLinksPerScan || 10;
-    const interOpenDelay = context.config?.inboxInterOpenDelayMs || 400;
+    const maxLinks = context.config.inboxMaxLinksPerScan;
+    const interOpenDelay = context.config.inboxInterOpenDelayMs;
 
     const linksToProcess = links.slice(0, maxLinks);
     log.info(`Processing up to ${linksToProcess.length} links from ${links.length} total (newest first)`);
@@ -275,19 +274,12 @@ export async function executeInboxWorkflow(
 
           flowLog.info(`Processing new inbox flow: ${link.id}`);
 
-          // Check if we've already visited this URL
-          if (!visitedUrls[link.href]) {
-            visitedUrls[link.href] = true;
+          flowLog.info(`Opening link: ${link.href}`);
 
-            flowLog.info(`Opening link: ${link.href}`);
-
-            if (!context.dryRun) {
-              tabManager.openTab(link.href, link.id);
-            } else {
-              flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
-            }
+          if (!context.dryRun) {
+            tabManager.openTab(link.href, link.id);
           } else {
-            flowLog.info('Link already visited, skipping');
+            flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
           }
 
           // Flow created successfully - no need for separate tracking

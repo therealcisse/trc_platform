@@ -37,6 +37,10 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
 
     // Inbox mode defaults
     inboxMode: true,
+    inboxReloadSeconds: [3, 7],
+    inboxPostReloadDelayMs: 2000,
+    inboxMaxLinksPerScan: 10,
+    inboxInterOpenDelayMs: 400,
 
     // Product strategies
     animals: true,
@@ -126,7 +130,7 @@ export const extensionConfigStorage: ExtensionStorageType = {
             ...currentState,
             flows: {
               ...currentState.flows,
-              [id]: { ...flow, status: 'done' },
+              [id]: { ...flow, status: 'done', doneTimestamp: Date.now() },
             },
           });
         }
@@ -142,7 +146,7 @@ export const extensionConfigStorage: ExtensionStorageType = {
             ...currentState,
             flows: {
               ...currentState.flows,
-              [id]: { ...flow, status: 'failed' },
+              [id]: { ...flow, status: 'failed', doneTimestamp: Date.now() },
             },
           });
         }
