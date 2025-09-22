@@ -128,19 +128,19 @@ export class ProductFactory {
     let processingTime = 0;
     switch (product.type) {
       case 'ANIMAL':
-        processingTime = config.animalProcessingTimeSeconds || 0;
+        processingTime = config.animalProcessingTimeSeconds;
         break;
       case 'CANCER':
-        processingTime = config.cancerProcessingTimeSeconds || 0;
+        processingTime = config.cancerProcessingTimeSeconds;
         break;
       case 'PEOPLE':
-        processingTime = config.peopleProcessingTimeSeconds || 0;
+        processingTime = config.peopleProcessingTimeSeconds;
         break;
     }
 
     // Calculate elapsed time since request started
     // requestTimestamp is in seconds, Date.now() is in milliseconds
-    const elapsedSeconds = Math.floor((Date.now() - requestTimestamp * 1000) / 1000);
+    const elapsedSeconds = Math.floor((Date.now() - requestTimestamp) / 1000);
 
     // Return remaining time, minimum 0
     return Math.max(0, processingTime - elapsedSeconds);

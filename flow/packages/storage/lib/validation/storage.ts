@@ -88,7 +88,6 @@ export const FlowSchema = z.object({
   requestTimestamp: z.number(),
   status: z.enum(['running', 'done', 'failed']),
   source: z.enum(['email', 'inbox']),
-  title: z.string(),
 });
 
 export const ManagedTabInfoSchema = z.object({

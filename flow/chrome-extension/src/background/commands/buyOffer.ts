@@ -61,7 +61,12 @@ export const buyOfferCommandHandler: MessageHandler<'buyOffer.execute'> = async 
 
         // Check if executor is available
         if (typeof (window as any).__buyOfferExecutor === 'function') {
-          return await (window as any).__buyOfferExecutor(context, selectors, flow);
+          try {
+            return await (window as any).__buyOfferExecutor(context, selectors, flow);
+
+          } catch (error) {
+            console.error('[Background] Buy offer workflow error:', error);
+          }
         }
 
         // If not, we need to load it first

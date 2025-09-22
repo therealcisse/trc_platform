@@ -159,6 +159,11 @@ export const extensionConfigStorage: ExtensionStorageType = {
       const current = await storage.get();
       return Object.keys(current.flows);
     },
+
+    async getAllFlows(): Promise<Flow[]> {
+      const current = await storage.get();
+      return Object.values(current.flows);
+    },
   },
 
   // Core methods

@@ -14,23 +14,60 @@ const getDayTranslation = (day: DayName) => t(`days_${day.toLowerCase()}`);
 
 type DayName = (typeof DAYS)[number];
 
-const JsonDisplay = ({ data, onClose }: { data: any; onClose: () => void }) => (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
-    <div className="max-h-[80vh] max-w-4xl overflow-auto rounded-lg bg-gray-800 p-6">
-      <div className="mb-4 flex items-center justify-between">
-        <h3 className="text-lg font-medium text-gray-100">Flow Database</h3>
-        <button
-          onClick={onClose}
-          className="flex h-8 w-8 items-center justify-center text-xl font-bold text-gray-400 hover:text-gray-200">
-          ✕
-        </button>
+const JsonDisplay = ({ data, onClose }: { data: any; onClose: () => void }) => {
+  const [copied, setCopied] = useState(false);
+
+  const handleCopy = async () => {
+    try {
+      await navigator.clipboard.writeText(JSON.stringify(data, null, 2));
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch (err) {
+      console.error('Failed to copy:', err);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
+      <div className="flex h-[80vh] w-full max-w-4xl flex-col rounded-lg bg-gray-800 p-6">
+        <div className="mb-4 flex items-center justify-between">
+          <h3 className="text-lg font-medium text-gray-100">Flow Database</h3>
+          <div className="flex items-center gap-2">
+            <button
+              onClick={handleCopy}
+              className="flex items-center gap-2 rounded-md bg-gray-700 px-3 py-1.5 text-sm text-gray-300 transition-colors hover:bg-gray-600 hover:text-gray-100">
+              {/* Copy Icon */}
+              <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                className="h-4 w-4">
+                <rect x="9" y="9" width="13" height="13" rx="2" ry="2" />
+                <path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1" />
+              </svg>
+              {copied ? 'Copied!' : 'Copy'}
+            </button>
+            <button
+              onClick={onClose}
+              className="flex h-8 w-8 items-center justify-center text-xl font-bold text-gray-400 hover:text-gray-200">
+              ✕
+            </button>
+          </div>
+        </div>
+        <div className="flex-1 overflow-auto rounded bg-gray-900">
+          <pre className="min-h-full whitespace-pre p-4 text-start font-mono text-sm text-green-400">
+            {JSON.stringify(data, null, 2)}
+          </pre>
+        </div>
       </div>
-      <pre className="overflow-auto whitespace-pre-wrap rounded bg-gray-900 p-4 text-sm text-green-400">
-        {JSON.stringify(data, null, 2)}
-      </pre>
     </div>
-  </div>
-);
+  );
+};
 
 const Options = () => {
   const { enabled, config } = useStorage(extensionConfigStorage);

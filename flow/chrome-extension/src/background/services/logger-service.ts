@@ -118,7 +118,7 @@ export class BackgroundLoggerService {
   static clearAllLogs(): void {
     const logManager = LogManager.getInstance();
     // Clear all logs regardless of age by setting cutoff to 0
-    logManager.clearOldLogs(0);
+    logManager.clearAllLogs();
     console.log('[LoggerService] Cleared all logs from LogManager');
   }
 

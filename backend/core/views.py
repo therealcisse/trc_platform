@@ -122,7 +122,6 @@ class SolveView(APIView):
                 {
                     "request_id": request.request_id,
                     "result": result["result"],
-                    "model": result["model"],
                     "duration_ms": duration_ms,
                 }
             )

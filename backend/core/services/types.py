@@ -28,10 +28,7 @@ class ErrorCode(str, Enum):
 class ModelType(str, Enum):
     """Supported OpenAI model types."""
 
-    GPT4_VISION = "gpt-4-vision-preview"
-    GPT4_TURBO = "gpt-4-turbo"
-    GPT4 = "gpt-4"
-    GPT35_TURBO = "gpt-3.5-turbo"
+    GPT5_NANO = "gpt-5-nano-2025-08-07"
 
 
 @dataclass(frozen=True)
@@ -62,7 +59,6 @@ class SolveImageResult:
     """
 
     result: str
-    model: str
     usage: UsageInfo
     request_id: str | None = None
     processing_time_ms: int | None = None
@@ -101,7 +97,6 @@ class SolveImageResult:
         """
         base_dict: dict[str, str | dict[str, int] | int | None] = {
             "result": self.result,
-            "model": self.model,
             "usage": {
                 "prompt_tokens": self.usage.prompt_tokens,
                 "completion_tokens": self.usage.completion_tokens,
@@ -123,7 +118,7 @@ class OpenAIConfig:
     """Configuration for OpenAI client."""
 
     api_key: str
-    model: str = ModelType.GPT4_VISION.value
+    model: str = ModelType.GPT5_NANO.value
     timeout_s: int = 30
     base_url: str = "https://api.openai.com/v1"
     max_retries: int = 3

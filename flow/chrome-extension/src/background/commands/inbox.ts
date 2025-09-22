@@ -61,7 +61,9 @@ export const inboxCommandHandler: MessageHandler<'inbox.openMyOfferLink'> = asyn
       ],
     });
 
-    console.log('[Background] Inbox processing complete:', JSON.stringify(result));
+    log.info('[Background] Inbox processing complete:', result);
+
+    await log.write();
 
     return {
       success: true,
@@ -69,8 +71,7 @@ export const inboxCommandHandler: MessageHandler<'inbox.openMyOfferLink'> = asyn
       requestId: `inbox-${Date.now()}`,
     };
   } catch (error) {
-    console.error('[Background] Error handling inbox command:', error);
-    log.error(`Fatal error: ${error}`);
+    log.error(`[Background] Error handling inbox command: ${error}`);
     await log.write();
 
     return {

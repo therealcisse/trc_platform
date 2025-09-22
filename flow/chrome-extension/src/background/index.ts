@@ -128,8 +128,8 @@ async function handleMessage(
         const payload = message.payload as FlowPayload;
         const flow =
           payload.type === 'email'
-            ? FlowUtils.email(payload.id, payload.title)
-            : FlowUtils.inbox(payload.id, payload.requestTimestamp, payload.title);
+            ? FlowUtils.email(payload.id)
+            : FlowUtils.inbox(payload.id, payload.requestTimestamp);
 
         const existed = await ConfigService.startFlow(flow);
         return {
@@ -146,6 +146,15 @@ async function handleMessage(
           success: true,
           data: flow,
           requestId: id,
+        };
+      }
+
+      case 'extension.getAllFlows': {
+        const flows = await ConfigService.getAllFlows();
+        return {
+          success: true,
+          data: flows,
+          requestId: 'get-all-flows',
         };
       }
 

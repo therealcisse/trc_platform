@@ -203,7 +203,6 @@ export async function executeEmailWorkflow(
 
             if (linkElement instanceof HTMLAnchorElement) {
               const href = linkElement.href;
-              const title = linkElement.textContent ?? '';
               let id: string;
 
               try {
@@ -219,7 +218,6 @@ export async function executeEmailWorkflow(
               const startFlowResult = await sendBackgroundCommand('extension.startFlow', {
                 type: 'email',
                 id,
-                title,
               });
 
               if (startFlowResult.success && startFlowResult.data === true) {
@@ -233,7 +231,7 @@ export async function executeEmailWorkflow(
 
               // Create a new log with flowId for this specific email flow
               const flowLog = Log.withFlow(MATCHER_IDS.EMAIL, id);
-              flowLog.info(`Processing new email flow`, { href, title });
+              flowLog.info(`Processing new email flow`, { href });
 
               // Check if we've already visited this URL
               if (!visitedUrls[href]) {

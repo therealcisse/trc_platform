@@ -41,10 +41,10 @@ export const mockProduct: Product = {
  */
 export const mockFlow: Flow = {
   id: '123',
-  type: 'inbox',
-  title: 'Test Flow',
-  href: 'https://auktion.hansemerkur.de/item.php?id=123',
-  requestTimestamp: Date.now() / 1000,
+  timestamp: Date.now(),
+  requestTimestamp: Date.now(),
+  status: 'running',
+  source: 'inbox',
 };
 
 /**

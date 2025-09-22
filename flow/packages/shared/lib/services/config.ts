@@ -90,11 +90,17 @@ export class ConfigService {
   }
 
   /**
+   * Get all flows
+   */
+  static async getAllFlows(): Promise<ExtensionStorage['flows'][string][]> {
+    return extensionConfigStorage.flows.getAllFlows();
+  }
+
+  /**
    * Mark a flow as done
    */
   static async doneFlow(id: string): Promise<void> {
     await extensionConfigStorage.flows.doneFlow(id);
-    await extensionConfigStorage.buyingState.clearBuying(id);
     await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
   }
   /**
@@ -102,7 +108,6 @@ export class ConfigService {
    */
   static async failedFlow(id: string): Promise<void> {
     await extensionConfigStorage.flows.failedFlow(id);
-    await extensionConfigStorage.buyingState.clearBuying(id);
-    await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
+    await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as failed`);
   }
 }

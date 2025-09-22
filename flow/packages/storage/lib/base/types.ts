@@ -110,6 +110,7 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
     failedFlow(id: string): Promise<void>;
     getFlow(id: string): Promise<Flow | undefined>;
     getAllFlowIds(): Promise<string[]>;
+    getAllFlows(): Promise<Flow[]>;
   };
 
   // Actions methods

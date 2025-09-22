@@ -4,6 +4,7 @@ import { withErrorBoundary, withSuspense, ConfigService } from '@extension/share
 import { Switch, ErrorDisplay, LoadingSpinner } from '@extension/ui';
 import { useEffect, useState, useCallback } from 'react';
 import type { LogEntry } from '@extension/shared';
+import type { Flow } from '@extension/types';
 
 interface FlowSummary {
   flowId: string;
@@ -39,24 +40,55 @@ const Popup = () => {
     loadState();
   }, []);
 
-  // Fetch all logs and extract flow summaries
+  // Fetch flows from database and merge with logs
   const fetchFlows = useCallback(async () => {
     try {
-      const response = await chrome.runtime.sendMessage({
+      // First, get all flows from the database
+      const flowsResponse = await chrome.runtime.sendMessage({
+        type: 'extension.getAllFlows',
+        payload: {},
+      });
+
+      const dbFlows = flowsResponse?.success && flowsResponse.data ? (flowsResponse.data as Flow[]) : [];
+
+      // Then get logs to enrich flow data
+      const logsResponse = await chrome.runtime.sendMessage({
         type: 'logs.query',
         payload: { action: 'getAllLogs' },
       });
 
-      if (response?.success && response.data) {
-        const logs = response.data as LogEntry[];
+      if (logsResponse?.success && logsResponse.data) {
+        const logs = logsResponse.data as LogEntry[];
 
-        // Group logs by flowId
+        // Create a map to track flow summaries
         const flowMap = new Map<string, FlowSummary>();
 
+        // First, add all flows from the database
+        dbFlows.forEach(flow => {
+          flowMap.set(flow.id, {
+            flowId: flow.id,
+            matcherId: '',
+            startTime: flow.timestamp,
+            lastActivity: flow.timestamp,
+            logCount: 0,
+            hasErrors: false,
+            status: flow.status === 'done' ? 'done' : flow.status === 'failed' ? 'error' : 'active',
+          });
+        });
+
+        // Then enrich with log data
         logs.forEach(log => {
           if (!log.flowId) return;
 
-          if (!flowMap.has(log.flowId)) {
+          const flow = flowMap.get(log.flowId);
+          if (flow) {
+            // Update existing flow data
+            if (!flow.matcherId) flow.matcherId = log.matcherId;
+            flow.logCount++;
+            flow.lastActivity = Math.max(flow.lastActivity, log.timestamp);
+            if (log.level === 'error') flow.hasErrors = true;
+          } else {
+            // Flow exists in logs but not in database (shouldn't happen, but handle gracefully)
             flowMap.set(log.flowId, {
               flowId: log.flowId,
               matcherId: log.matcherId,
@@ -66,23 +98,6 @@ const Popup = () => {
               hasErrors: log.level === 'error',
               status: 'active',
             });
-          } else {
-            const flow = flowMap.get(log.flowId)!;
-            flow.logCount++;
-            flow.lastActivity = Math.max(flow.lastActivity, log.timestamp);
-            flow.startTime = Math.min(flow.startTime, log.timestamp);
-            if (log.level === 'error') flow.hasErrors = true;
-
-            // Determine status from log messages
-            if (
-              log.message.includes('completed successfully') ||
-              log.message.includes('marked as done') ||
-              log.message.includes('marked as completed')
-            ) {
-              flow.status = 'done';
-            } else if (log.message.includes('Fatal error') || log.message.includes('failed')) {
-              flow.status = 'error';
-            }
           }
         });
 
@@ -267,7 +282,7 @@ const Popup = () => {
                       className="w-full p-3 text-left transition-colors hover:bg-gray-50">
                       <div className="mb-1 flex items-start justify-between">
                         <div className="flex items-center gap-2">
-                          <span className="font-mono text-xs text-gray-600">{flow.flowId.substring(0, 8)}...</span>
+                          <span className="font-mono text-xs text-gray-600">{flow.flowId} </span>
                           {getStatusBadge(flow.status)}
                         </div>
                         {flow.hasErrors && (

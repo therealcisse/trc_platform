@@ -95,6 +95,10 @@ export class LogManager {
       .sort((a, b) => a.timestamp - b.timestamp);
   }
 
+  clearAllLogs(): void {
+    this.storage.entries.clear();
+  }
+
   clearOldLogs(olderThanMs: number = 3600000): void {
     // Default: 1 hour
     const cutoff = Date.now() - olderThanMs;

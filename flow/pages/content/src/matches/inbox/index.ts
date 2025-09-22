@@ -192,8 +192,8 @@ export async function executeInboxWorkflow(
 
     async function parseInboxLinks(
       selectors: InboxSelectors,
-    ): Promise<Array<{ id: string; href: string; title: string; requestTimestamp: number }>> {
-      const links: Array<{ id: string; href: string; title: string; requestTimestamp: number }> = [];
+    ): Promise<Array<{ id: string; href: string; requestTimestamp: number }>> {
+      const links: Array<{ id: string; href: string; requestTimestamp: number }> = [];
       const rows = document.querySelectorAll(selectors.rows);
 
       for (const row of rows) {
@@ -231,7 +231,6 @@ export async function executeInboxWorkflow(
         links.push({
           id,
           href: anchor.href,
-          title,
           requestTimestamp,
         });
       }
@@ -263,7 +262,6 @@ export async function executeInboxWorkflow(
           const startFlowResponse = await sendBackgroundCommand('extension.startFlow', {
             type: 'inbox',
             id: link.id,
-            title: link.title,
             requestTimestamp: link.requestTimestamp,
           });
 
@@ -275,7 +273,7 @@ export async function executeInboxWorkflow(
             continue;
           }
 
-          flowLog.info(`Processing new inbox flow: ${link.title}`, { link: link.title });
+          flowLog.info(`Processing new inbox flow: ${link.id}`);
 
           // Check if we've already visited this URL
           if (!visitedUrls[link.href]) {

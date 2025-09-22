@@ -146,14 +146,12 @@ export interface CommandResponse<T = any> {
 export interface EmailFlowPayload {
   type: 'email';
   id: string;
-  title: string;
 }
 
 export interface InboxFlowPayload {
   type: 'inbox';
   id: string;
   requestTimestamp: number;
-  title: string;
 }
 
 export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
@@ -181,6 +179,7 @@ export interface BackgroundCommands {
   'image.solve': { imageData: string };
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
+  'extension.getAllFlows': {};
   'logs.query': {
     action: 'getAllLogs' | 'getFlowLogs' | 'getMatcherLogs' | 'exportFlowTimeline' | 'clearOldLogs' | 'clearAllLogs';
     flowId?: string;
@@ -309,7 +308,6 @@ export interface Flow {
   requestTimestamp: number;
   status: 'running' | 'done' | 'failed';
   source: 'email' | 'inbox';
-  title: string;
 }
 
 export type FlowState = Record<string, Flow>;

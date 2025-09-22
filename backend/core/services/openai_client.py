@@ -191,7 +191,6 @@ class MockOpenAIClient(BaseOpenAIClient):
             )
             return SolveImageResult(
                 result="ERROR: No math problem found",
-                model=model or self.model,
                 usage=usage,
                 request_id=f"mock-{self.call_count}",
                 processing_time_ms=int(random.uniform(100, 500)),
@@ -208,7 +207,6 @@ class MockOpenAIClient(BaseOpenAIClient):
 
         return SolveImageResult(
             result=answer,
-            model=model or self.model,
             usage=usage,
             request_id=f"mock-{self.call_count}",
             processing_time_ms=int(random.uniform(200, 800)),
@@ -262,7 +260,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
             InvalidResponseError: If the response is malformed
         """
         start_time = time.time()
-        model = model or ModelType.GPT4_VISION.value
+        model = model or ModelType.GPT5_NANO.value
         timeout = timeout or self.timeout
 
         # Validate image before processing
@@ -467,7 +465,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
 
             return SolveImageResult(
                 result=answer,
-                model=model,
                 usage=usage,
                 request_id=response_data.get("id"),
                 processing_time_ms=processing_time_ms,

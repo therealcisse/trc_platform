@@ -274,7 +274,7 @@ export async function executeBuyOfferWorkflow(
       log.info(`Flow ${flow.id} marked as completed`);
 
       log.info(`Closing all tabs for flow: ${flow.id}`);
-      await tabManager.closeAllTabs(flow.id);
+      // await tabManager.closeAllTabs(flow.id);
 
       return {
         success: true,
@@ -302,14 +302,14 @@ export async function executeBuyOfferWorkflow(
     const product = ProductFactory.parse(config, title);
 
     if (isInvalidProduct(product)) {
-      log.warn(`Invalid product format: ${product.error}`);
+      log.warn(`Invalid product format: ${product.name} ${product.error}`);
 
       log.info('❌ Purchase completed unsuccessfully, marking flow as done');
       await ConfigService.failedFlow(flow.id);
       log.info(`Flow ${flow.id} marked as completed`);
 
       log.info(`Closing all tabs for flow: ${flow.id}`);
-      await tabManager.closeAllTabs(flow.id);
+      // await tabManager.closeAllTabs(flow.id);
 
       return {
         success: true,
@@ -339,8 +339,9 @@ export async function executeBuyOfferWorkflow(
     );
 
     if (remainingTime > 0) {
+      log.info(`Waiting ${flow.requestTimestamp} seconds for remaining processing time`);
       log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
-      await sleep(remainingTime * 1000 - 100);
+      await sleep(remainingTime - 100);
       log.debug('Processing time wait completed');
     }
 
@@ -349,14 +350,6 @@ export async function executeBuyOfferWorkflow(
 
     if (!context.dryRun) {
       log.info('Clicking buy button to complete purchase');
-      await clickWithVerification(buyButton, {
-        verify: true,
-        scroll: true,
-      });
-
-      // Wait for form submission
-      log.debug('Waiting for form submission to complete');
-      await sleep(500);
 
       // Mark flow as done
       log.info('Purchase completed successfully, marking flow as done');
@@ -370,9 +363,14 @@ export async function executeBuyOfferWorkflow(
         flowId: flow.id,
       });
 
+      await clickWithVerification(buyButton, {
+        verify: false,
+        scroll: false,
+      });
+
       log.info(`Closing all tabs for flow: ${flow.id}`);
-      sleep(15000);
-      await tabManager.closeAllTabs(flow.id);
+      await sleep(15000);
+      // await tabManager.closeAllTabs(flow.id);
 
       log.info('Buying state cleared successfully');
     } else {
@@ -411,7 +409,7 @@ export async function executeBuyOfferWorkflow(
     console.error('[BuyOfferExecutor] Fatal error:', error);
 
     log.info(`Closing all tabs for flow: ${flow.id}`);
-    await tabManager.closeAllTabs(flow.id);
+    // await tabManager.closeAllTabs(flow.id);
 
     log.info('Purchase completed unsuccessfully, marking flow as done');
     await ConfigService.failedFlow(flow.id);
