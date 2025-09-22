@@ -30,6 +30,13 @@ from .models import Settings
 from .services import openai_client
 from .services.exceptions import OpenAIError
 
+# In-memory LRU cache for flow_id-based responses
+import os
+from collections import OrderedDict
+
+FLOW_CACHE_SIZE = int(os.getenv("FLOW_CACHE_SIZE", 1024))
+_solve_cache = OrderedDict()
+
 if TYPE_CHECKING:
     from customers.models import User
 else:
@@ -77,6 +84,20 @@ class SolveView(APIView):
 
     def post(self, request: Request) -> Response:
         start_time = time.time()
+        # Extract optional flow_id for caching
+        flow_id = request.query_params.get("flow_id") or request.data.get("flow_id")
+        if flow_id:
+            cached = _solve_cache.pop(flow_id, None)
+            if cached:
+                _solve_cache[flow_id] = cached  # refresh LRU
+                duration_ms = int((time.time() - start_time) * 1000)
+                return Response(
+                    {
+                        "request_id": request.request_id,
+                        "result": cached["result"],
+                        "duration_ms": cached["duration_ms"],
+                    }
+                )
 
         # Get authenticated user
         if not request.user or not request.user.is_authenticated:
@@ -95,6 +116,7 @@ class SolveView(APIView):
         app_settings = CachedSettings.get_settings()
 
         # Process image (this is the main latency bottleneck)
+        # After successful solve, cache result if flow_id provided
         try:
             result = openai_client.solve_image(
                 image_bytes,
@@ -104,6 +126,13 @@ class SolveView(APIView):
             )
 
             duration_ms = int((time.time() - start_time) * 1000)
+
+            # Cache the result for this flow_id
+            if flow_id:
+                _solve_cache[flow_id] = {"result": result["result"], "duration_ms": duration_ms}
+                # Enforce cache size
+                if len(_solve_cache) > FLOW_CACHE_SIZE:
+                    _solve_cache.popitem(last=False)
 
             # Defer logging and billing updates
             self._defer_logging(
@@ -115,6 +144,7 @@ class SolveView(APIView):
                 request_id=request.request_id,
                 app_settings=app_settings,
                 status_code="success",
+                flow_id=flow_id,
             )
 
             # Return response immediately
@@ -139,6 +169,7 @@ class SolveView(APIView):
                 request_id=request.request_id,
                 app_settings=app_settings,
                 status_code="error",
+                flow_id=flow_id,
                 error_code=e.error_code.value,
             )
 
@@ -165,6 +196,7 @@ class SolveView(APIView):
         request_id: str,
         app_settings: Settings,
         status_code: str,
+        flow_id: str | None = None,
         error_code: str | None = None,
     ) -> None:
         """
@@ -187,6 +219,7 @@ class SolveView(APIView):
                     user=user,
                     token=token,
                     billing_period=billing_period,
+                    flow_id=flow_id,
                     service="core.image_solve",
                     duration_ms=duration_ms,
                     request_bytes=len(image_bytes),

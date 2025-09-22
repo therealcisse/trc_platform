@@ -269,7 +269,7 @@ const Options = () => {
                           value={config.inboxMaxLinksPerScan}
                           onChange={e =>
                             extensionConfigStorage.updateConfig({
-                              inboxMaxLinksPerScan: parseInt(e.target.value) || 10,
+                              inboxMaxLinksPerScan: parseInt(e.target.value) || 100,
                             })
                           }
                           min="1"

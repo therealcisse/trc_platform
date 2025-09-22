@@ -83,7 +83,7 @@ async function handleMessage(
         return handleBuyingState(message.payload);
 
       case 'image.solve':
-        return processImageAPI(message.payload.imageData)
+        return processImageAPI(message.payload.imageData, message.payload.flowId)
           .then(result => {
             console.log('[Background] Successfully processed image');
             return { success: true, data: result, requestId: 'image' };
@@ -303,7 +303,7 @@ async function handleTabManagement(
         };
 
       case 'cleanupStale':
-        const cleanedCount = await extensionConfigStorage.tabManagement.cleanupStaleTabs();
+        const cleanedCount = await extensionConfigStorage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
         return {
           success: true,
           data: { cleanedCount },
@@ -384,7 +384,7 @@ init();
 /**
  * Process an image by sending it to the TRC backend API
  */
-async function processImageAPI(imageData: string): Promise<{ result: string }> {
+async function processImageAPI(imageData: string, flowId: string): Promise<{ result: string }> {
   const backendUrl = process.env['CEB_TRC_BACKEND_URL'];
   const config = await ConfigService.getConfig();
 
@@ -407,6 +407,7 @@ async function processImageAPI(imageData: string): Promise<{ result: string }> {
   // Prepare form data for API
   const formData = new FormData();
   formData.append('file', blob, 'image.png');
+  formData.append('flow_id', flowId);
 
   // Send to API - No CORS restrictions in background script!
   const response = await fetch(`${backendUrl}/api/core/solve`, {

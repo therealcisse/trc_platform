@@ -196,11 +196,14 @@ export const UsagePage = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Size
                   </th>
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"> */}
+                  {/*   Token */}
+                  {/* </th> */}
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"> */}
+                  {/*   Request ID */}
+                  {/* </th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Token
-                  </th>
-                  <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Request ID
+                    Flow ID
                   </th>
                 </tr>
               </thead>
@@ -230,17 +233,20 @@ export const UsagePage = () => {
                         <span>↓ {formatBytes(request.responseBytes)}</span>
                       </div>
                     </td>
-                    <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400">
-                      {request.tokenId ? (
-                        <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs">
-                          Token
-                        </code>
-                      ) : (
-                        '-'
-                      )}
-                    </td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-600 dark:text-gray-400"> */}
+                    {/*   {request.tokenId ? ( */}
+                    {/*     <code className="px-2 py-1 bg-gray-100 dark:bg-gray-800 rounded text-xs"> */}
+                    {/*       Token */}
+                    {/*     </code> */}
+                    {/*   ) : ( */}
+                    {/*     '-' */}
+                    {/*   )} */}
+                    {/* </td> */}
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs"> */}
+                    {/*   {request.requestId} */}
+                    {/* </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs">
-                      {request.requestId}
+                      {request.flowId ?? '-'}
                     </td>
                   </tr>
                 ))}

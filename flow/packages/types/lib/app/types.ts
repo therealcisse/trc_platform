@@ -177,7 +177,7 @@ export interface BackgroundCommands {
   'extension.toggleEnabled': {};
   'item.clickProductLink': ItemCommand;
   'myOffer.clickProductLink': MyOfferCommand;
-  'image.solve': { imageData: string };
+  'image.solve': { imageData: string; flowId: string };
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
   'extension.getAllFlows': {};

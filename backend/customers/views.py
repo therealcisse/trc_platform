@@ -285,6 +285,7 @@ class UsageRequestsView(APIView):
                     "request_bytes": log.request_bytes,
                     "response_bytes": log.response_bytes,
                     "request_id": str(log.request_id),
+                    "flow_id": log.flow_id,
                     "token_prefix": log.token.token_prefix if log.token else None,
                 }
             )
@@ -420,6 +421,7 @@ class BillingPeriodDetailView(APIView):
                     "request_bytes": log.request_bytes,
                     "response_bytes": log.response_bytes,
                     "request_id": str(log.request_id),
+                    "flow_id": log.flow_id,
                 }
             )
 
@@ -456,6 +458,7 @@ class TestSolveView(APIView):
         """Process an image using session authentication for testing."""
         # Start timer
         start_time = time.time()
+        flow_id = "customers.test_solve"
 
         # Get authenticated user from session
         user = request.user
@@ -500,6 +503,7 @@ class TestSolveView(APIView):
             # Log request with special service name to distinguish test requests
             request_log = RequestLog.objects.create(
                 user=user,
+                flow_id=flow_id,
                 token=None,  # No token for test requests
                 billing_period=billing_period,
                 service="customers.test_solve",  # Different service name
@@ -559,6 +563,7 @@ class TestSolveView(APIView):
             # Log error
             request_log = RequestLog.objects.create(
                 user=user,
+                flow_id=flow_id,
                 token=None,
                 billing_period=billing_period,
                 service="customers.test_solve",

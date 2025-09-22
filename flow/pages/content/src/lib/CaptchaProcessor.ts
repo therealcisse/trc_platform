@@ -51,7 +51,7 @@ export class CaptchaProcessor {
 
         const response = await sendBackgroundCommand(
           'image.solve',
-          { imageData: imageDataUrl },
+          { imageData: imageDataUrl, flowId },
           5000 * Math.pow(2, attempt), // 5s, 10s, 20s
         );
 

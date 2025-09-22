@@ -130,7 +130,27 @@ export async function executeItemWorkflow(
     if (!isValidTimeOfDay(context.config)) {
       log.warn('Outside operation hours, scheduling reload at next minute mark');
 
-      function setUpNext(): void {
+      async function setUpNext(resolve: (value: unknown) => void): Promise<void> {
+        const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
+          config: ExecutionConfig;
+          enabled: boolean;
+        }>;
+
+        const result = configResponse.data;
+        if (!result) {
+          log.warn('No configuration found');
+          await log.write();
+          return;
+        }
+
+        if (!result.enabled) {
+          log.info('Extension disabled');
+          await log.write();
+          return;
+        }
+
+        const config = result.config;
+
         // Calculate time until next minute
         const now = new Date();
         const nextMinute = new Date(now);
@@ -140,15 +160,22 @@ export async function executeItemWorkflow(
 
         const delay = nextMinute.getTime() - now.getTime();
 
-        // Schedule reload at exact minute mark
-        setTimeout(() => {
-          if (isValidTimeOfDay(context.config)) {
-            window.location.reload();
+        setTimeout(async () => {
+          if (isValidTimeOfDay(config)) {
+            resolve(null);
+
+            setTimeout(function () {
+              window.location.reload();
+            }, 100);
           } else {
-            setUpNext();
+            setUpNext(resolve);
           }
-        }, delay + 100);
+        }, delay);
       }
+
+      await new Promise(function (resolve) {
+        setUpNext(resolve);
+      });
 
       await log.write();
       return {

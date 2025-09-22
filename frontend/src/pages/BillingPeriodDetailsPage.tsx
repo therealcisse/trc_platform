@@ -221,8 +221,11 @@ export const BillingPeriodDetailsPage = () => {
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
                     Size
                   </th>
+                  {/* <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider"> */}
+                  {/*   Request ID */}
+                  {/* </th> */}
                   <th className="px-6 py-3 text-left text-xs font-medium text-gray-500 dark:text-gray-400 uppercase tracking-wider">
-                    Request ID
+                    Flow ID
                   </th>
                 </tr>
               </thead>
@@ -257,8 +260,11 @@ export const BillingPeriodDetailsPage = () => {
                         <span>↓ {formatBytes(request.responseBytes)}</span>
                       </div>
                     </td>
+                    {/* <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs"> */}
+                    {/*   {request.requestId} */}
+                    {/* </td> */}
                     <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500 dark:text-gray-500 font-mono text-xs">
-                      {request.requestId}
+                      {request.flowId ?? '-'}
                     </td>
                   </tr>
                 ))}

@@ -10,6 +10,7 @@ import type {
   ExecutionResult,
   InboxSelectors,
 } from '@extension/types';
+import { basename } from 'node:path';
 
 /**
  * Inbox Matcher - Monitors HanseMerkur inbox for new messages
@@ -248,12 +249,16 @@ export async function executeInboxWorkflow(
     const maxLinks = context.config.inboxMaxLinksPerScan;
     const interOpenDelay = context.config.inboxInterOpenDelayMs;
 
-    const linksToProcess = links.slice(0, maxLinks);
+    const linksToProcess = links;
     log.info(`Processing up to ${linksToProcess.length} links from ${links.length} total (newest first)`);
 
     for (const link of linksToProcess) {
       // Create flow-specific log for this link
       const flowLog = Log.withFlow(MATCHER_IDS.INBOX, link.id);
+
+      if (openedCount >= maxLinks) {
+        break;
+      }
 
       try {
         if (!context.dryRun) {
@@ -277,14 +282,13 @@ export async function executeInboxWorkflow(
           flowLog.info(`Opening link: ${link.href}`);
 
           if (!context.dryRun) {
+            // Flow created successfully - no need for separate tracking
             tabManager.openTab(link.href, link.id);
+            openedCount++;
+            flowLog.info(`Flow started successfully`);
           } else {
             flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
           }
-
-          // Flow created successfully - no need for separate tracking
-          openedCount++;
-          flowLog.info(`Flow started successfully`);
         } else {
           flowLog.debug('Dry run: Would start flow');
         }

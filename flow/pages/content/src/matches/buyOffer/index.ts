@@ -191,9 +191,80 @@ export async function executeBuyOfferWorkflow(
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
+  const captchaProcessor = CaptchaProcessor.getInstance();
 
   try {
     log.info('Validating preconditions for buy offer workflow');
+
+    const titleLink = (await waitForSelector(selectors.productTitle, {
+      timeout: 5000,
+      visible: true,
+    })) as HTMLImageElement;
+
+    if (!titleLink) {
+      log.info('No title found, skipping');
+
+      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
+      await ConfigService.failedFlow(flow.id);
+      log.info(`Flow ${flow.id} marked as completed`);
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      setTimeout(async function () {
+        await tabManager.closeAllTabs(flow.id);
+      }, 100);
+
+      return {
+        success: true,
+        matcherId: context.matcherId,
+        executorName: 'buyOffer',
+        data: {
+          flowId: flow.id,
+          completedAt: Date.now(),
+        },
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          errors,
+        },
+      };
+    }
+
+    const title = titleLink.textContent ?? '';
+
+    log.info(`Product: ${title}`);
+
+    const config = context.config;
+    const product = ProductFactory.parse(config, title);
+
+    if (isInvalidProduct(product)) {
+      log.warn(`Invalid product format: ${product.name} ${product.error}`);
+
+      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
+      await ConfigService.failedFlow(flow.id);
+      log.info(`Flow ${flow.id} marked as completed`);
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      setTimeout(async function () {
+        await tabManager.closeAllTabs(flow.id);
+      }, 100);
+
+      return {
+        success: true,
+        matcherId: context.matcherId,
+        executorName: 'buyOffer',
+        data: {
+          flowId: flow.id,
+          // product: product.toString(),
+          product: product,
+          completedAt: Date.now(),
+        },
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          errors,
+        },
+      };
+    }
 
     // Wait for and focus captcha input first
     log.debug('Waiting for captcha input element');
@@ -250,7 +321,6 @@ export async function executeBuyOfferWorkflow(
       reader.readAsDataURL(await fetchImageAsBlob(imgElement.src));
     });
 
-    const captchaProcessor = CaptchaProcessor.getInstance();
     const answer = await captchaProcessor.solveCaptcha(imgElement.src, imageDataUrl, flow.id);
 
     log.debug('Image conversion successful');
@@ -260,76 +330,6 @@ export async function executeBuyOfferWorkflow(
     inputElement.value = answer;
     inputElement.dispatchEvent(new Event('input', { bubbles: true }));
     log.debug('Answer entered into captcha field');
-
-    const titleLink = (await waitForSelector(selectors.productTitle, {
-      timeout: 5000,
-      visible: true,
-    })) as HTMLImageElement;
-
-    if (!titleLink) {
-      log.info('No title found, skipping');
-
-      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
-      await ConfigService.failedFlow(flow.id);
-      log.info(`Flow ${flow.id} marked as completed`);
-
-      log.info(`Closing all tabs for flow: ${flow.id}`);
-      // await tabManager.closeAllTabs(flow.id);
-
-      return {
-        success: true,
-        matcherId: context.matcherId,
-        executorName: 'buyOffer',
-        data: {
-          flowId: flow.id,
-          captchaProcessed: true,
-          answer,
-          completedAt: Date.now(),
-        },
-        telemetry: {
-          startTime,
-          endTime: Date.now(),
-          errors,
-        },
-      };
-    }
-
-    const title = titleLink.textContent ?? '';
-
-    log.info(`Product: ${title}`);
-
-    const config = context.config;
-    const product = ProductFactory.parse(config, title);
-
-    if (isInvalidProduct(product)) {
-      log.warn(`Invalid product format: ${product.name} ${product.error}`);
-
-      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
-      await ConfigService.failedFlow(flow.id);
-      log.info(`Flow ${flow.id} marked as completed`);
-
-      log.info(`Closing all tabs for flow: ${flow.id}`);
-      // await tabManager.closeAllTabs(flow.id);
-
-      return {
-        success: true,
-        matcherId: context.matcherId,
-        executorName: 'buyOffer',
-        data: {
-          flowId: flow.id,
-          // product: product.toString(),
-          product: product,
-          captchaProcessed: true,
-          answer,
-          completedAt: Date.now(),
-        },
-        telemetry: {
-          startTime,
-          endTime: Date.now(),
-          errors,
-        },
-      };
-    }
 
     // Calculate remaining time
     const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
@@ -369,8 +369,10 @@ export async function executeBuyOfferWorkflow(
       });
 
       log.info(`Closing all tabs for flow: ${flow.id}`);
-      await sleep(15000);
-      // await tabManager.closeAllTabs(flow.id);
+      await sleep(1000);
+      setTimeout(async function () {
+        await tabManager.closeAllTabs(flow.id);
+      }, 100);
 
       log.info('Buying state cleared successfully');
     } else {
@@ -408,9 +410,6 @@ export async function executeBuyOfferWorkflow(
     await log.write();
     console.error('[BuyOfferExecutor] Fatal error:', error);
 
-    log.info(`Closing all tabs for flow: ${flow.id}`);
-    // await tabManager.closeAllTabs(flow.id);
-
     log.info('Purchase completed unsuccessfully, marking flow as done');
     await ConfigService.failedFlow(flow.id);
     log.info(`Flow ${flow.id} marked as completed`);
@@ -442,6 +441,11 @@ export async function executeBuyOfferWorkflow(
         errors.push(cleanupError);
       }
     }
+
+    log.info(`Closing all tabs for flow: ${flow.id}`);
+    setTimeout(async function () {
+      await tabManager.closeAllTabs(flow.id);
+    }, 100);
 
     return {
       success: false,

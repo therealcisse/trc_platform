@@ -54,6 +54,7 @@ export interface RequestLog {
   errorCode: string | null;
   requestId: string;
   billingPeriodId: string | null;
+  flowId: string | null;
   result: string | null;
 }
 

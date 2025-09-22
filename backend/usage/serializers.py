@@ -82,6 +82,7 @@ class RequestLogSerializer(serializers.ModelSerializer):
             "status",
             "error_code",
             "request_id",
+            "flow_id",
             "billing_period",
             "result",
         ]

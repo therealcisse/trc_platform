@@ -187,7 +187,7 @@ function isElementVisible(element: Element): boolean {
   );
 }
 
-export function sleep(ms: number): Promise<void> {
+export async function sleep(ms: number): Promise<void> {
   return new Promise(resolve => setTimeout(resolve, ms));
 }
 
@@ -301,124 +301,6 @@ export function openAllSimulationLinks(): void {
   } else {
     // DOM is already ready, but let's give it a moment for any dynamic content
     setTimeout(processLinks, 100);
-  }
-}
-
-/**
- * Processes an image from a simulation page by:
- * 1. Extracting the image from the DOM
- * 2. Sending it to the background script for API processing (bypasses CORS)
- * 3. Filling in the result and submitting the form
- */
-export async function processImage(): Promise<void> {
-  console.log('[CEB] Processing simulation image...');
-
-  try {
-    // Find the image element
-    const imageElement = document.querySelector('.image-container img') as HTMLImageElement;
-    if (!imageElement) {
-      throw new Error('Image not found on page');
-    }
-
-    // Find the form elements
-    const inputElement = document.getElementById('numberInput') as HTMLInputElement;
-    const formElement = document.getElementById('validationForm') as HTMLFormElement;
-
-    if (!inputElement || !formElement) {
-      throw new Error('Form elements not found on page');
-    }
-
-    console.log('[CEB] Extracting image from:', imageElement.src);
-
-    // Convert image to base64 data URL for message passing
-    const imageDataUrl = await fetchImageAsDataUrl(imageElement.src);
-
-    console.log('[CEB] Sending image to background script for processing...');
-
-    // Send message to background script to process the image
-    // This bypasses CORS completely as the background script makes the API call
-    const response = await sendBackgroundCommand('image.solve', {
-      imageData: imageDataUrl,
-    });
-
-    if (!response.success) {
-      throw new Error(response.error || 'Failed to process image');
-    }
-
-    console.log('[CEB] Received result from background:', response.data);
-
-    // Extract the numeric answer from the result
-    // The API might return something like "The answer is 10" or just "10"
-    const result = extractNumericAnswer(response.data);
-
-    console.log('[CEB] Extracted answer:', result);
-
-    // Fill in the input
-    inputElement.value = result;
-
-    // Trigger input event to ensure any validation listeners are fired
-    inputElement.dispatchEvent(new Event('input', { bubbles: true }));
-
-    // Submit the form
-    console.log('[CEB] Submitting form with answer:', result);
-
-    // Find and click the submit button or submit the form directly
-    const submitButton = formElement.querySelector('button[type="submit"]') as HTMLButtonElement;
-    if (submitButton) {
-      submitButton.click();
-    } else {
-      formElement.submit();
-    }
-
-    console.log('[CEB] Image processing completed successfully');
-  } catch (error) {
-    console.error('[CEB] Error processing image:', error);
-
-    // Show error in result div if it exists
-    const resultDiv = document.getElementById('result');
-    if (resultDiv) {
-      resultDiv.className = 'result error show';
-      resultDiv.textContent = `Error: ${error instanceof Error ? error.message : 'Unknown error'}`;
-    }
-  }
-}
-
-/**
- * Fetches an image URL and returns it as a data URL for message passing
- */
-async function fetchImageAsDataUrl(imageUrl: string): Promise<string> {
-  try {
-    // If it's a relative URL, convert to absolute
-    const absoluteUrl = new URL(imageUrl, window.location.href).href;
-
-    const response = await fetch(absoluteUrl);
-    if (!response.ok) {
-      throw new Error(`Failed to fetch image: ${response.status}`);
-    }
-
-    const blob = await response.blob();
-
-    // Ensure it's an image
-    if (!blob.type.startsWith('image/')) {
-      throw new Error(`Fetched content is not an image: ${blob.type}`);
-    }
-
-    // Convert blob to data URL for message passing
-    return new Promise((resolve, reject) => {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        if (typeof reader.result === 'string') {
-          resolve(reader.result);
-        } else {
-          reject(new Error('Failed to convert image to data URL'));
-        }
-      };
-      reader.onerror = reject;
-      reader.readAsDataURL(blob);
-    });
-  } catch (error) {
-    console.error('[CEB] Error fetching image:', error);
-    throw error;
   }
 }
 
