@@ -1,5 +1,5 @@
-import { Log } from '@extension/shared';
-import { sendBackgroundCommand } from '@src/lib';
+import { Log } from '../utils/index.js';
+import { sendBackgroundCommand } from './index.js';
 
 interface ManagedTab {
   id: number;
@@ -95,7 +95,7 @@ export class TabManager {
     }
   }
 
-  private async closeTab(tabId: number): Promise<void> {
+  async closeTab(tabId: number): Promise<void> {
     try {
       await sendBackgroundCommand('tab.manage', {
         action: 'close',
@@ -107,6 +107,25 @@ export class TabManager {
       this.log.error(`Failed to close tab ${tabId}`, { error });
       // Still remove from our tracking even if close fails
       this.tabs.delete(tabId);
+    }
+  }
+
+  async closeAllTabs(flowId: string): Promise<void> {
+    // Collect all matching tab IDs
+    const toClose: number[] = [];
+    for (const [tabId, tab] of this.tabs.entries()) {
+      if (tab.flowId === flowId) {
+        toClose.push(tabId);
+
+        await sendBackgroundCommand('tab.manage', {
+          action: 'close',
+          tabId,
+        });
+      }
+    }
+
+    for (const id of toClose) {
+      this.tabs.delete(id);
     }
   }
 

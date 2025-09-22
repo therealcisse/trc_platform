@@ -1,13 +1,7 @@
 import { ProductFactory, FlowUtils, ConfigService, Log } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import {
-  registerMatcher,
-  sendBackgroundCommand,
-  isValidTimeOfDay,
-  waitForSelector,
-  clickWithVerification,
-  sleep,
-} from '@src/lib';
+import { sendBackgroundCommand, TabManager } from '@extension/shared';
+import { registerMatcher, isValidTimeOfDay, waitForSelector, clickWithVerification, sleep } from '@src/lib';
 import type {
   Matcher,
   ExecutionContext,
@@ -41,7 +35,6 @@ class ItemMatcher implements Matcher {
     const currentUrl = window.location.href;
     const id = FlowUtils.parseIDFromHref(currentUrl);
     const log = Log.withFlow(MATCHER_IDS.ITEM, id);
-    console.log(`Id : ${id}`);
     log.info('Item matcher activated');
 
     try {
@@ -77,7 +70,6 @@ class ItemMatcher implements Matcher {
       id,
       selectors: {
         buyButton: '.buy_now a.btn',
-        titleLink: 'h1.item_title',
       },
     });
 
@@ -87,24 +79,6 @@ class ItemMatcher implements Matcher {
       log.error(`Browse item executor failed: ${response.error}`);
     }
     await log.write();
-  }
-
-  private setupAutoRefresh(config: any): void {
-    let checkCount = 0;
-    const maxChecks = 4;
-
-    const refreshInterval = setInterval(() => {
-      if (config.emailMode) {
-        clearInterval(refreshInterval);
-        return;
-      }
-
-      checkCount++;
-      if (checkCount > maxChecks) {
-        console.log('[ItemMatcher] Max checks reached, refreshing page');
-        window.location.reload();
-      }
-    }, 1000);
   }
 }
 
@@ -149,25 +123,32 @@ export async function executeItemWorkflow(
   log.info(`Starting item workflow for tab ${context.tabId}`).setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
+  const tabManager = TabManager.getInstance();
 
   try {
     // Check if we're in operation hours
     if (!isValidTimeOfDay(context.config)) {
       log.warn('Outside operation hours, scheduling reload at next minute mark');
 
-      // Calculate time until next minute
-      const now = new Date();
-      const nextMinute = new Date(now);
-      nextMinute.setMinutes(now.getMinutes() + 1);
-      nextMinute.setSeconds(0);
-      nextMinute.setMilliseconds(0);
+      function setUpNext(): void {
+        // Calculate time until next minute
+        const now = new Date();
+        const nextMinute = new Date(now);
+        nextMinute.setMinutes(now.getMinutes() + 1);
+        nextMinute.setSeconds(0);
+        nextMinute.setMilliseconds(0);
 
-      const delay = nextMinute.getTime() - now.getTime();
+        const delay = nextMinute.getTime() - now.getTime();
 
-      // Schedule reload at exact minute mark
-      setTimeout(() => {
-        window.location.reload();
-      }, delay + 100);
+        // Schedule reload at exact minute mark
+        setTimeout(() => {
+          if (isValidTimeOfDay(context.config)) {
+            window.location.reload();
+          } else {
+            setUpNext();
+          }
+        }, delay + 100);
+      }
 
       await log.write();
       return {
@@ -186,12 +167,9 @@ export async function executeItemWorkflow(
     }
 
     // Check if this is a managed tab
-    const isManagedResponse = await sendBackgroundCommand('tab.manage', {
-      action: 'isManaged',
-      tabId: context.tabId,
-    });
+    const isManagedTab = tabManager.isTabManaged(context.tabId);
 
-    if (!isManagedResponse.data) {
+    if (!isManagedTab) {
       log.warn('Tab is not managed, skipping');
       await log.write();
       return {
@@ -208,48 +186,17 @@ export async function executeItemWorkflow(
     async function processItem(): Promise<void> {
       try {
         const buyButton = document.querySelector(selectors.buyButton) as HTMLAnchorElement;
-        const titleLink = document.querySelector(selectors.titleLink) as HTMLElement;
 
         if (!buyButton) {
           log.info('No buy button found, skipping');
           return;
         }
 
-        if (!titleLink) {
-          log.info('No title found, skipping');
-          return;
-        }
-
-        // const title = titleLink.textContent ?? '';
-
-        // log.info(`Product: ${title}`);
-        //
-        // const config = context.config || {};
-        // const product = ProductFactory.parse(config, title);
-        //
-        // if (isInvalidProduct(product)) {
-        //   log.warn(`Invalid product format: ${product.error}`);
-        //   return;
-        // }
-        //
-        // log.debug(`Product details: ${JSON.stringify(product)}`);
-        //
-        // // Product is already validated by factory
-        // const { allowed } = { allowed: product.allowed };
-        //
-        // if (!allowed) {
-        //   log.info('Product not allowed by configuration, skipping');
-        //   return;
-        // }
-
         // Open the item
         log.info(`Opening item: ${buyButton.href}`);
 
         if (!context.dryRun) {
-          await sendBackgroundCommand('tab.manage', {
-            action: 'open',
-            url: buyButton.href,
-          });
+          tabManager.openTab(buyButton.href, flow.id);
         } else {
           log.debug('Dry run: Would open item in new tab');
         }

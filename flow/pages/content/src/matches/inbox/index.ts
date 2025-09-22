@@ -1,6 +1,7 @@
 import { FlowUtils, Log } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { registerMatcher, sendBackgroundCommand, sleep } from '@src/lib';
+import { sendBackgroundCommand, TabManager } from '@extension/shared';
+import { registerMatcher, sleep } from '@src/lib';
 import type {
   CommandResponse,
   ExecutionConfig,
@@ -170,6 +171,7 @@ export async function executeInboxWorkflow(
   log.info(`Extracting inbox links for tab ${context.tabId}`);
   const startTime = Date.now();
   const visitedUrls: Record<string, boolean> = {}; // local url tracking for this scan
+  const tabManager = TabManager.getInstance();
 
   try {
     // Parse links from the page
@@ -270,11 +272,7 @@ export async function executeInboxWorkflow(
             flowLog.info(`Opening link: ${link.href}`);
 
             if (!context.dryRun) {
-              // Open link in new managed tab
-              await sendBackgroundCommand('tab.manage', {
-                action: 'open',
-                url: link.href,
-              });
+              tabManager.openTab(link.href, link.id);
             } else {
               flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
             }

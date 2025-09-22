@@ -1,14 +1,7 @@
 import { FlowUtils, Log } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import {
-  registerMatcher,
-  sendBackgroundCommand,
-  waitForSelector,
-  clickWithVerification,
-  safeNavigate,
-  random,
-  sleep,
-} from '@src/lib';
+import { registerMatcher, waitForSelector, clickWithVerification, safeNavigate, random, sleep } from '@src/lib';
+import { sendBackgroundCommand } from '@extension/shared';
 import type {
   CommandResponse,
   ExecutionConfig,

@@ -1,13 +1,7 @@
 import { Log, FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import {
-  registerMatcher,
-  waitForSelector,
-  clickWithVerification,
-  sendBackgroundCommand,
-  sleep,
-  fetchImageAsBlob,
-} from '@src/lib';
+import { registerMatcher, waitForSelector, clickWithVerification, sleep, fetchImageAsBlob } from '@src/lib';
+import { sendBackgroundCommand } from '@extension/shared';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type {
   CommandResponse,
@@ -18,6 +12,7 @@ import type {
   BuyOfferSelectors,
   Flow,
 } from '@extension/types';
+import { TabManager } from '@extension/shared';
 
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
@@ -59,6 +54,7 @@ class BuyOfferMatcher implements Matcher {
     const log = Log.withFlow(MATCHER_IDS.BUY_OFFER, flowId);
     log.info('🔄 Buy offer matcher activated');
     log.debug('Current URL', { url: currentUrl, flowId });
+    const tabManager = TabManager.getInstance();
 
     try {
       // Get configuration and check if enabled
@@ -82,37 +78,6 @@ class BuyOfferMatcher implements Matcher {
 
       log.info('Extension enabled, proceeding with buy offer detection');
 
-      // Get product title
-      // log.debug('Looking for product title element');
-      // const titleElement = document.querySelector('#page_buy_now h2');
-      // if (!titleElement) {
-      //   log.warn('Product title not found - page may not be fully loaded');
-      //   await log.write();
-      //   return;
-      // }
-
-      // const productText = titleElement.textContent || '';
-      // log.info(`Product detected: "${productText}"`);
-      //
-      // // Parse and validate product
-      // log.debug('Parsing product with factory');
-      // const product = ProductFactory.parse(result.config, productText);
-      //
-      // if (isInvalidProduct(product)) {
-      //   log.warn(`Invalid product format: ${product.error}`, { productText });
-      //   await log.write();
-      //   return;
-      // }
-      //
-      // log.info('Product parsed successfully');
-      // log.debug(`Product details`, {
-      //   name: product.name,
-      //   type: product.type,
-      //   allowed: product.allowed,
-      // });
-
-      // flowId already extracted at the start
-
       // Check if this flow is already being purchased
       log.info('Checking if flow is already being purchased');
       const buyingStateResponse = await sendBackgroundCommand('state.buying', {
@@ -126,22 +91,10 @@ class BuyOfferMatcher implements Matcher {
         await log.write();
 
         // Close duplicate tab
-        await sendBackgroundCommand('tab.manage', {
-          action: 'close',
-          tabId: window.tabId,
-        });
-
+        await tabManager.closeTab(window.tabId);
         return;
       }
 
-      // Product is already validated by factory
-      // const { allowed } = { allowed: product.allowed };
-      // if (!allowed) {
-      //   log.info('Product not allowed by current configuration', { product: product.name });
-      //   await log.write();
-      //   return;
-      // }
-      //
       // Calculate timeout (delay + extra headroom)
       const delaySeconds = 0;
       const extraHeadroomSeconds = 300;
@@ -237,6 +190,7 @@ export async function executeBuyOfferWorkflow(
     .setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
+  const tabManager = TabManager.getInstance();
 
   try {
     log.info('Validating preconditions for buy offer workflow');
@@ -257,22 +211,6 @@ export async function executeBuyOfferWorkflow(
     inputElement.focus();
     log.debug('Captcha input focused');
 
-    // Get product title for validation
-    log.debug('Retrieving product title for validation');
-
-    // const productText = flow.title;
-    // log.info(`Product found: "${productText}"`);
-    //
-    // const product = ProductFactory.parse(context.config || {}, productText);
-    //
-    // if (isInvalidProduct(product)) {
-    //   log.error(`Invalid product format: ${product.error}`, { productText });
-    //   throw new Error(product.error);
-    // }
-    //
-    // log.info('Product validated successfully');
-    // log.debug(`Product details: ${JSON.stringify(product)}`);
-
     // Get buy button
     log.debug('Locating buy button');
     const buyButton = await waitForSelector(selectors.buyFormButton, {
@@ -287,37 +225,6 @@ export async function executeBuyOfferWorkflow(
 
     // Check buying state (prevent race conditions)
     log.info('Checking buying state to prevent race conditions');
-    // const buyingStateResponse = await sendBackgroundCommand('state.buying', {
-    //   action: 'check',
-    //   flowId: flow.id,
-    // });
-
-    // Handle if another tab started buying this flow
-    // if (buyingStateResponse.data?.buying) {
-    //   log.warn('Another tab is already buying this flow');
-    //   log.info('Closing duplicate tab to prevent double purchase');
-    //
-    //   // Close this tab
-    //   await sendBackgroundCommand('tab.manage', {
-    //     action: 'close',
-    //     tabId: context.tabId,
-    //   });
-    //
-    //   return {
-    //     success: false,
-    //     matcherId: context.matcherId,
-    //     executorName: 'buyOffer',
-    //     error: 'Duplicate purchase attempt for flow',
-    //   };
-    // }
-
-    // Product is already validated by factory
-    // const { allowed } = { allowed: product.allowed };
-    //
-    // if (!allowed) {
-    //   log.warn('Product not allowed by configuration', { product: product.name });
-    //   throw new Error('Product not allowed by configuration');
-    // }
 
     log.info('Flow validation successful');
 
@@ -354,18 +261,92 @@ export async function executeBuyOfferWorkflow(
     inputElement.dispatchEvent(new Event('input', { bubbles: true }));
     log.debug('Answer entered into captcha field');
 
-    // // Calculate remaining time
-    // const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
-    //   product,
-    //   flow.requestTimestamp,
-    //   context.config || {},
-    // );
-    //
-    // if (remainingTime > 0) {
-    //   log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
-    //   await sleep(remainingTime * 1000 - 100);
-    //   log.debug('Processing time wait completed');
-    // }
+    const titleLink = (await waitForSelector(selectors.productTitle, {
+      timeout: 5000,
+      visible: true,
+    })) as HTMLImageElement;
+
+    if (!titleLink) {
+      log.info('No title found, skipping');
+
+      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
+      await ConfigService.failedFlow(flow.id);
+      log.info(`Flow ${flow.id} marked as completed`);
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      await tabManager.closeAllTabs(flow.id);
+
+      return {
+        success: true,
+        matcherId: context.matcherId,
+        executorName: 'buyOffer',
+        data: {
+          flowId: flow.id,
+          captchaProcessed: true,
+          answer,
+          completedAt: Date.now(),
+        },
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          domOperations: 0, // Input, title, image, and buy click
+          networkRequests: 0, // State check, image processing, and buy submit
+          errors,
+        },
+      };
+    }
+
+    const title = titleLink.textContent ?? '';
+
+    log.info(`Product: ${title}`);
+
+    const config = context.config;
+    const product = ProductFactory.parse(config, title);
+
+    if (isInvalidProduct(product)) {
+      log.warn(`Invalid product format: ${product.error}`);
+
+      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
+      await ConfigService.failedFlow(flow.id);
+      log.info(`Flow ${flow.id} marked as completed`);
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      await tabManager.closeAllTabs(flow.id);
+
+      return {
+        success: true,
+        matcherId: context.matcherId,
+        executorName: 'buyOffer',
+        data: {
+          flowId: flow.id,
+          // product: product.toString(),
+          product: product,
+          captchaProcessed: true,
+          answer,
+          completedAt: Date.now(),
+        },
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          domOperations: 0, // Input, title, image, and buy click
+          networkRequests: 0, // State check, image processing, and buy submit
+          errors,
+        },
+      };
+    }
+
+    // Calculate remaining time
+    const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
+      product,
+      flow.requestTimestamp,
+      context.config,
+    );
+
+    if (remainingTime > 0) {
+      log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
+      await sleep(remainingTime * 1000 - 100);
+      log.debug('Processing time wait completed');
+    }
 
     // Execute purchase
     log.info('EXECUTING FINAL PURCHASE');
@@ -385,6 +366,9 @@ export async function executeBuyOfferWorkflow(
       log.info('Purchase completed successfully, marking flow as done');
       await ConfigService.doneFlow(flow.id);
       log.info(`Flow ${flow.id} marked as completed`);
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      await tabManager.closeAllTabs(flow.id);
 
       // Clear buying state on success
       log.debug('Clearing buying state');
@@ -429,6 +413,13 @@ export async function executeBuyOfferWorkflow(
     });
     await log.write();
     console.error('[BuyOfferExecutor] Fatal error:', error);
+
+    log.info(`Closing all tabs for flow: ${flow.id}`);
+    await tabManager.closeAllTabs(flow.id);
+
+    log.info('Purchase completed unsuccessfully, marking flow as done');
+    await ConfigService.failedFlow(flow.id);
+    log.info(`Flow ${flow.id} marked as completed`);
 
     // Track specific error types for better debugging
     if (error instanceof Error) {

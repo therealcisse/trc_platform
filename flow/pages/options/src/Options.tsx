@@ -1,5 +1,6 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
+import { TabManager } from '@extension/shared';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
@@ -76,7 +77,12 @@ const Options = () => {
     if (confirm(t('actions_confirm_delete_db'))) {
       try {
         // Clear storage-based flows and simple logs
+        const flows = await extensionConfigStorage.flows.getAllFlowIds();
         await extensionConfigStorage.clearFlowDatabase();
+
+        for (const id of flows) {
+          await TabManager.getInstance().closeAllTabs(id);
+        }
 
         // Clear advanced LogManager logs in background
         await chrome.runtime.sendMessage({

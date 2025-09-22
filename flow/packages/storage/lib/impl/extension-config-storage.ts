@@ -133,9 +133,30 @@ export const extensionConfigStorage: ExtensionStorageType = {
       });
     },
 
+    async failedFlow(id: string): Promise<void> {
+      await storage.set(currentState => {
+        const flow = currentState.flows[id];
+        if (flow) {
+          return validateStorageData(ExtensionStorageSchema, {
+            ...currentState,
+            flows: {
+              ...currentState.flows,
+              [id]: { ...flow, status: 'failed' },
+            },
+          });
+        }
+        return currentState;
+      });
+    },
+
     async getFlow(id: string): Promise<Flow | undefined> {
       const current = await storage.get();
       return current.flows[id];
+    },
+
+    async getAllFlowIds(): Promise<string[]> {
+      const current = await storage.get();
+      return Object.keys(current.flows);
     },
   },
 
@@ -192,6 +213,16 @@ export const extensionConfigStorage: ExtensionStorageType = {
     },
 
     async clearBuying(flowId: string) {
+      await storage.set(currentState => {
+        const { [flowId]: _, ...remainingOffers } = currentState.buyingOffers;
+        return validateStorageData(ExtensionStorageSchema, {
+          ...currentState,
+          buyingOffers: remainingOffers,
+        });
+      });
+    },
+
+    async purgeBuying(flowId: string) {
       await storage.set(currentState => {
         const { [flowId]: _, ...remainingOffers } = currentState.buyingOffers;
         return validateStorageData(ExtensionStorageSchema, {
@@ -333,6 +364,18 @@ export const extensionConfigStorage: ExtensionStorageType = {
   },
 
   async clearFlowDatabase() {
+    const flows = (await storage.get()).flows;
+
+    for (const [id, _] of Object.entries(flows)) {
+      await chrome.runtime.sendMessage({
+        type: 'state.buying',
+        payload: {
+          action: 'purge',
+          flowId: id,
+        },
+      });
+    }
+
     await storage.set(currentState =>
       validateStorageData(ExtensionStorageSchema, {
         ...currentState,

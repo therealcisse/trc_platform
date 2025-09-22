@@ -208,7 +208,7 @@ async function handleTabManagement(
         if (!tabId) {
           throw new Error('Tab ID required for close action');
         }
-        // await tabService.closeTab(tabId);
+        await tabService.closeTab(tabId);
         return {
           success: true,
           requestId,
@@ -298,6 +298,13 @@ async function handleBuyingState(payload: {
 
       case 'clear':
         await buyingService.clearBuying(payload.flowId);
+        return {
+          success: true,
+          requestId,
+        };
+
+      case 'purge':
+        await buyingService.purgeBuying(payload.flowId);
         return {
           success: true,
           requestId,

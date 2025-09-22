@@ -70,6 +70,7 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
     markBuying(flowId: string, timeout: number): Promise<void>;
     checkBuying(flowId: string): Promise<{ buying: boolean }>;
     clearBuying(flowId: string): Promise<void>;
+    purgeBuying(flowId: string): Promise<void>;
     clearExpired(): Promise<void>;
     getBuyingOffer(flowId: string): Promise<ValidatedBuyingOffer | undefined>;
   };
@@ -100,7 +101,9 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
     cleanupOldFlows(): Promise<void>;
     startFlow(flow: Flow): Promise<boolean>;
     doneFlow(id: string): Promise<void>;
+    failedFlow(id: string): Promise<void>;
     getFlow(id: string): Promise<Flow | undefined>;
+    getAllFlowIds(): Promise<string[]>;
   };
 
   // Actions methods

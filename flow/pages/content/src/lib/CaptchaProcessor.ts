@@ -1,6 +1,7 @@
 import { Log } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { sendBackgroundCommand, extractNumericAnswer } from '@src/lib';
+import { extractNumericAnswer } from '@src/lib';
+import { sendBackgroundCommand } from '@extension/shared';
 
 interface CaptchaCache {
   answer: string;

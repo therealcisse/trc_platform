@@ -1,6 +1,7 @@
 import { ProductFactory, Log, FlowUtils } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import { registerMatcher, sendBackgroundCommand } from '@src/lib';
+import { registerMatcher } from '@src/lib';
+import { sendBackgroundCommand, TabManager } from '@extension/shared';
 import type {
   Matcher,
   ExecutionContext,
@@ -123,15 +124,13 @@ export async function executeMyOfferWorkflow(
     .setMetadata({ tabId: context.tabId, url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
+  const tabManager = TabManager.getInstance();
 
   try {
     // Check if this is a managed tab
-    const isManagedResponse = await sendBackgroundCommand('tab.manage', {
-      action: 'isManaged',
-      tabId: context.tabId,
-    });
+    const isManagedTab = tabManager.isTabManaged(context.tabId);
 
-    if (!isManagedResponse.data) {
+    if (!isManagedTab) {
       log.warn('Tab is not managed, skipping');
       await log.write();
       return {
@@ -167,22 +166,19 @@ export async function executeMyOfferWorkflow(
         const href = itemLlink.href;
         log.info(`Opening myOffer: ${href}`);
 
-        try {
-          const id = FlowUtils.parseIDFromTitle(title);
-          const flowLog = Log.withFlow(context.matcherId, id);
-          flowLog.info(`Processed myOffer link: ${href}`);
-        } catch (e) {}
+        const id = FlowUtils.parseIDFromTitle(title);
+        const flowLog = Log.withFlow(context.matcherId, id);
 
         if (!context.dryRun) {
           // Open link in new managed tab
-          await sendBackgroundCommand('tab.manage', {
-            action: 'open',
-            url: href,
-          });
+          tabManager.openTab(href, id);
+          flowLog.info(`Opening myOffer link: ${href}`);
           log.info(`Opened myOffer link in managed tab: ${href}`);
         } else {
           log.debug('Dry run: Would open myOffer in new tab');
         }
+
+        flowLog.info(`Processed myOffer`);
       } catch (error) {
         log.error(`Error in browse myOffer processing: ${error}`);
         errors.push(error as Error);

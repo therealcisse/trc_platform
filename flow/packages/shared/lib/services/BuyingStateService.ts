@@ -23,4 +23,8 @@ export class BuyingStateService implements IBuyingStateService {
   async clearBuying(flowId: string): Promise<void> {
     await this.storage.buyingState.clearBuying(flowId);
   }
+
+  async purgeBuying(flowId: string): Promise<void> {
+    await this.storage.buyingState.purgeBuying(flowId);
+  }
 }

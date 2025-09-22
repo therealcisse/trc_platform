@@ -86,7 +86,7 @@ export const FlowSchema = z.object({
   id: z.string(),
   timestamp: z.number(),
   requestTimestamp: z.number(),
-  status: z.enum(['running', 'done']),
+  status: z.enum(['running', 'done', 'failed']),
   source: z.enum(['email', 'inbox']),
   title: z.string(),
 });

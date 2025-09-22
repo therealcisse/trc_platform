@@ -20,7 +20,7 @@ export interface ExecutionContext {
   tabId: number;
   url: string;
   matcherId: string;
-  config?: ExecutionConfig;
+  config: ExecutionConfig;
   timeout?: number;
   dryRun?: boolean;
 }
@@ -213,7 +213,6 @@ export interface ItemCommand {
 
 export interface ItemSelectors {
   buyButton: string;
-  titleLink: string;
 }
 
 export interface MyOfferCommand {
@@ -298,7 +297,7 @@ export interface Flow {
   id: string;
   timestamp: number;
   requestTimestamp: number;
-  status: 'running' | 'done';
+  status: 'running' | 'done' | 'failed';
   source: 'email' | 'inbox';
   title: string;
 }

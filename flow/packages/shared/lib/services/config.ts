@@ -94,6 +94,15 @@ export class ConfigService {
    */
   static async doneFlow(id: string): Promise<void> {
     await extensionConfigStorage.flows.doneFlow(id);
+    await extensionConfigStorage.buyingState.clearBuying(id);
+    await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
+  }
+  /**
+   * Mark a flow as done
+   */
+  static async failedFlow(id: string): Promise<void> {
+    await extensionConfigStorage.flows.failedFlow(id);
+    await extensionConfigStorage.buyingState.clearBuying(id);
     await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
   }
 }
