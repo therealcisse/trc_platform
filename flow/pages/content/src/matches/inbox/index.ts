@@ -93,7 +93,7 @@ class InboxMatcher implements Matcher {
   }
 
   private startReloadScheduler(config: ExecutionConfig): void {
-    const reloadSeconds = config.inboxReloadSeconds || [3, 7];
+    const reloadSeconds = config.inboxReloadSeconds;
     const log = new Log(MATCHER_IDS.INBOX);
 
     // Clear any existing scheduler
