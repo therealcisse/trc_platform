@@ -1,12 +1,20 @@
 import { z } from 'zod';
 import type { ProductStrategy, DelayConfig } from '@extension/types';
+import { LocalTime } from '@extension/types';
+
+export const LocalTimeSchema = z
+  .object({
+    hour: z.number().int().min(0).max(23),
+    minute: z.number().int().min(0).max(59),
+  })
+  .transform(({ hour, minute }) => LocalTime.of(hour, minute));
 
 export const OperationalHoursSchema = z.record(
   z.enum(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']),
   z.object({
     enabled: z.boolean(),
-    min: z.number(),
-    max: z.number(),
+    min: LocalTimeSchema,
+    max: LocalTimeSchema,
   }),
 );
 

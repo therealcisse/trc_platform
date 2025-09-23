@@ -6,11 +6,43 @@ import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@exten
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { Fragment, useState } from 'react';
 import type { ExecutionConfig, OperationalHours } from '@extension/types';
+import { LocalTime } from '@extension/types';
 
-const HOURS = Array.from({ length: 24 }, (_, i) => i);
+const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => ({ value: h, label: String(h).padStart(2, '0') }));
+const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, m) => ({ value: m, label: String(m).padStart(2, '0') }));
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
 const getDayTranslation = (day: DayName) => t(`days_${day.toLowerCase()}`);
+
+function TimePicker({
+  value,
+  disabled,
+  onChange,
+}: {
+  value: LocalTime;
+  disabled?: boolean;
+  onChange: (t: LocalTime) => void;
+}) {
+  return (
+    <div className="flex items-center gap-2">
+      <Select
+        value={value.hour}
+        onChange={v => onChange(LocalTime.of(Number(v), value.minute))}
+        disabled={disabled}
+        options={HOUR_OPTIONS}
+        className="w-20 border-gray-600 bg-gray-700 text-gray-100"
+      />
+      <span className="text-gray-400">:</span>
+      <Select
+        value={value.minute}
+        onChange={v => onChange(LocalTime.of(value.hour, Number(v)))}
+        disabled={disabled}
+        options={MINUTE_OPTIONS}
+        className="w-20 border-gray-600 bg-gray-700 text-gray-100"
+      />
+    </div>
+  );
+}
 
 type DayName = (typeof DAYS)[number];
 
@@ -77,7 +109,7 @@ const Options = () => {
   const handleOperationalHoursChange = (
     day: DayName,
     field: keyof (typeof config.operationalHours)[string],
-    value: boolean | number,
+    value: boolean | LocalTime,
   ) => {
     const currentHours = config.operationalHours || {};
     const currentDayConfig = currentHours[day] || DEFAULT_OPERATIONAL_HOURS_CONFIG;
@@ -103,7 +135,7 @@ const Options = () => {
     if (confirm(t('actions_confirm_restore'))) {
       try {
         await extensionConfigStorage.restoreDefaults();
-        alert(t('actions_success_restored'));
+        // alert(t('actions_success_restored'));
       } catch (error) {
         console.error('Failed to restore defaults:', error);
       }
@@ -129,7 +161,7 @@ const Options = () => {
           },
         });
 
-        alert(t('actions_success_deleted'));
+        // alert(t('actions_success_deleted'));
       } catch (error) {
         console.error('Failed to delete flow DB:', error);
         alert('Failed to delete flow database. Please try again.');
@@ -338,20 +370,16 @@ const Options = () => {
                           />
                         </div>
                         <div className="flex items-center gap-3">
-                          <Select
+                          <TimePicker
                             value={dayConfig.min}
-                            onChange={value => handleOperationalHoursChange(day, 'min', Number(value))}
                             disabled={!dayConfig.enabled}
-                            options={HOURS.map(hour => ({ value: hour, label: `${hour}:00` }))}
-                            className="w-24 border-gray-600 bg-gray-700 text-gray-100"
+                            onChange={lt => handleOperationalHoursChange(day, 'min', lt)}
                           />
                           <span className="text-gray-400">to</span>
-                          <Select
+                          <TimePicker
                             value={dayConfig.max}
-                            onChange={value => handleOperationalHoursChange(day, 'max', Number(value))}
                             disabled={!dayConfig.enabled}
-                            options={HOURS.map(hour => ({ value: hour, label: `${hour}:00` }))}
-                            className="w-24 border-gray-600 bg-gray-700 text-gray-100"
+                            onChange={lt => handleOperationalHoursChange(day, 'max', lt)}
                           />
                         </div>
                       </div>

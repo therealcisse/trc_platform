@@ -6,6 +6,7 @@ import type {
   LocalDate as LocalDateType,
   ExecutionConfig,
 } from '@extension/types';
+import { LocalTime, LocalTimeUtils } from '@extension/types';
 
 import { sendBackgroundCommand } from '@extension/shared';
 
@@ -200,7 +201,6 @@ const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 
 // Check if current time is within operational hours
 export function isValidTimeOfDay(config: ExecutionConfig): boolean {
   const now = new LocalDate();
-  const hh = now.getHours();
   const day = DAYS[now.getDay()];
 
   const operationalHours = config.operationalHours[day];
@@ -210,14 +210,16 @@ export function isValidTimeOfDay(config: ExecutionConfig): boolean {
 
   const { min, max } = operationalHours;
 
-  // Handle midnight crossover case (e.g., 22:00 to 06:00)
-  if (min > max) {
-    // Time range crosses midnight: valid if hour >= min OR hour < max
-    return hh >= min || hh < max;
-  }
+  // Use minute-precision with inclusive end
+  const currentMins = LocalTime.now().toMinutesOfDay();
+  const start = LocalTimeUtils.toMinutesOfDay(min);
+  const endInclusive = LocalTimeUtils.toMinutesOfDay(max);
 
-  // Normal case: valid if hour is within range (inclusive of min, exclusive of max)
-  return hh >= min && hh < max;
+  if (start <= endInclusive) {
+    return currentMins >= start && currentMins <= endInclusive;
+  }
+  // Midnight crossover: [start..23:59] U [00:00..end]
+  return currentMins >= start || currentMins <= endInclusive;
 }
 
 /**

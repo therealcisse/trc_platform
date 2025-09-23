@@ -10,11 +10,12 @@ import {
 } from '../validation/storage.js';
 import type { ExtensionStorageType } from '../base/index.js';
 import type { ExecutionConfig, ExtensionStorage, Flow, StoredProductStrategy } from '@extension/types';
+import { LocalTime } from '@extension/types';
 
 export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
   enabled: false,
-  min: 8,
-  max: 17,
+  min: LocalTime.of(8, 0),
+  max: LocalTime.of(17, 0),
 } as const;
 
 export const DEFAULT_CONFIG: ExtensionStorage = {

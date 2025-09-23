@@ -1,3 +1,5 @@
+import { LocalTimeUtils } from './LocalTimeUtils.js';
+
 // Core matcher and executor types
 export interface Matcher {
   id: string;
@@ -65,8 +67,8 @@ export interface ExecutionConfig {
 export interface OperationalHours {
   [day: string]: {
     enabled: boolean;
-    min: number;
-    max: number;
+    min: LocalTime;
+    max: LocalTime;
   };
 }
 
@@ -446,4 +448,57 @@ export function isCancerProduct(product: Product): product is CancerProduct {
 
 export function isInvalidProduct(product: Product): product is InvalidProduct {
   return product.type === 'INVALID';
+}
+
+// Local time value object for minute-precision operational hours
+export class LocalTime {
+  readonly hour: number;
+  readonly minute: number;
+
+  private constructor(hour: number, minute: number) {
+    if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
+      throw new RangeError('Hour must be 0–23');
+    }
+    if (!Number.isInteger(minute) || minute < 0 || minute > 59) {
+      throw new RangeError('Minute must be 0–59');
+    }
+    this.hour = hour;
+    this.minute = minute;
+  }
+
+  static of(hour: number, minute: number): LocalTime {
+    return new LocalTime(hour, minute);
+  }
+
+  static now(): LocalTime {
+    const d = new Date();
+    return new LocalTime(d.getHours(), d.getMinutes());
+  }
+
+  static parse(str: string): LocalTime {
+    const match = /^(\d{2}):(\d{2})$/.exec(str);
+    if (!match) throw new Error('Invalid time string: ' + str);
+    const [, h, m] = match;
+    return new LocalTime(+h, +m);
+  }
+
+  toString(): string {
+    const pad = (n: number) => String(n).padStart(2, '0');
+    return `${pad(this.hour)}:${pad(this.minute)}`;
+  }
+
+  toMinutesOfDay(): number {
+    return LocalTimeUtils.toMinutesOfDay(this);
+  }
+
+  compareTo(other: LocalTime): number {
+    return this.toMinutesOfDay() - other.toMinutesOfDay();
+  }
+
+  plusMinutes(mins: number): LocalTime {
+    const total = (this.toMinutesOfDay() + mins + 24 * 60) % (24 * 60);
+    const hour = Math.floor(total / 60);
+    const minute = total % 60;
+    return new LocalTime(hour, minute);
+  }
 }
