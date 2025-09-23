@@ -115,6 +115,7 @@ class CurrentUserView(APIView):
                 "id": str(user.id),
                 "email": user.email,
                 "isEmailVerified": user.is_email_verified,
+                "userAcceptedTerms": user.user_accepted_terms,
                 "dateJoined": user.date_joined.isoformat(),
                 "csrfToken": csrf_token,  # Include CSRF token in response
             }

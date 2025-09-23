@@ -18,12 +18,14 @@ const registerSchema = z
     path: ['confirmPassword'],
   });
 
+import { Terms } from '../../components/Terms';
 type RegisterFormData = z.infer<typeof registerSchema>;
 
 export const RegisterPage = () => {
   const { register: registerUser } = useAuth();
   const [showPassword, setShowPassword] = useState(false);
   const [showConfirmPassword, setShowConfirmPassword] = useState(false);
+  const [userAcceptedTerms, setUserAcceptedTerms] = useState(false);
   const [error, setError] = useState<string | null>(null);
 
   const {
@@ -37,7 +39,8 @@ export const RegisterPage = () => {
   const onSubmit = async (data: RegisterFormData) => {
     try {
       setError(null);
-      await registerUser(data);
+      const postData = { ...data, userAcceptedTerms };
+      await registerUser(postData);
     } catch (err: any) {
       const errorMessage = err.response?.data?.detail || 'Registration failed. Please try again.';
       // Handle specific error messages for invite codes
@@ -176,9 +179,13 @@ export const RegisterPage = () => {
             )}
           </div>
 
+          <div>
+            <Terms value={userAcceptedTerms} onChange={(val) => setUserAcceptedTerms(val)} />
+          </div>
+
           <button
             type="submit"
-            disabled={isSubmitting}
+            disabled={isSubmitting || !userAcceptedTerms}
             className="w-full py-3 px-4 bg-primary-600 hover:bg-primary-700 text-white font-medium rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             {isSubmitting ? 'Creating account...' : 'Create account'}

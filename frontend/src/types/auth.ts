@@ -2,6 +2,7 @@ export interface User {
   id: string;
   email: string;
   isEmailVerified: boolean;
+  userAcceptedTerms: boolean;
   dateJoined: Date;
 }
 
@@ -15,6 +16,7 @@ export interface RegisterCredentials {
   password: string;
   confirmPassword: string;
   inviteCode: string;
+  userAcceptedTerms: boolean;
 }
 
 export interface ChangePasswordData {

@@ -194,10 +194,12 @@ export const MainLayout = () => {
             </div>
 
             {/* Navigation */}
-            <nav className={clsx(
-              "flex-1 px-2 py-4 space-y-1",
-              isSidebarCollapsed ? "overflow-visible" : "overflow-y-auto"
-            )}>
+            <nav
+              className={clsx(
+                'flex-1 px-2 py-4 space-y-1',
+                isSidebarCollapsed ? 'overflow-visible' : 'overflow-y-auto'
+              )}
+            >
               {navigation.map((item) => (
                 <div key={item.name}>
                   {item.children ? (

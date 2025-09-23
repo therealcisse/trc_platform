@@ -67,7 +67,12 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     await authService.login(credentials);
     // Refresh user data to ensure we have the latest information
     await refreshUser();
-    navigate('/dashboard');
+    // After refresh, check acceptance
+    if (user && !user.userAcceptedTerms) {
+      navigate('/accept-terms');
+    } else {
+      navigate('/dashboard');
+    }
   };
 
   const register = async (credentials: RegisterCredentials) => {

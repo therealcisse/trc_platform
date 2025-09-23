@@ -1,5 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
+import AcceptTermsPage from './pages/auth/AcceptTerms';
+import { TermsGuard } from './components/TermsGuard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
 import { LoginPage } from './pages/auth/LoginPage';
@@ -25,9 +27,16 @@ export default function App() {
           <Route path="/register" element={<RegisterPage />} />
           <Route path="/verify-email" element={<EmailVerificationPage />} />
           <Route path="/resend-verification" element={<ResendVerificationPage />} />
+          <Route path="/accept-terms" element={<AcceptTermsPage />} />
 
-          {/* Protected routes */}
-          <Route element={<ProtectedRoute />}>
+          {/* Protected routes (terms enforced) */}
+          <Route
+            element={
+              <TermsGuard>
+                <ProtectedRoute />
+              </TermsGuard>
+            }
+          >
             <Route element={<MainLayout />}>
               <Route path="/dashboard" element={<DashboardPage />} />
               <Route path="/tokens" element={<TokensPage />} />
