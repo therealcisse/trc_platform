@@ -125,6 +125,11 @@ export async function executeItemWorkflow(
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
 
+  if (flow.status === 'done') {
+    log.info('❌ Flow is already done, closing all tabs');
+    await tabManager.closeAllTabs(flow.id);
+  }
+
   try {
     // Check if we're in operation hours
     if (!isValidTimeOfDay(context.config)) {
@@ -161,19 +166,28 @@ export async function executeItemWorkflow(
         const delay = nextMinute.getTime() - now.getTime();
 
         setTimeout(async () => {
+          log.debug('Checking for operational hour');
+
           if (isValidTimeOfDay(config)) {
             resolve(null);
+
+            log.debug('Found operational hour');
+
+            await log.write();
 
             setTimeout(function () {
               window.location.reload();
             }, 100);
           } else {
+            log.debug('Not an operational hour');
+
+            await log.write();
             setUpNext(resolve);
           }
         }, delay);
       }
 
-      await new Promise(function (resolve) {
+      new Promise(function (resolve) {
         setUpNext(resolve);
       });
 

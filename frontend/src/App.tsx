@@ -16,6 +16,10 @@ import { BillingCurrentPeriodPage } from './pages/BillingCurrentPeriodPage';
 import { UsagePage } from './pages/UsagePage';
 import { AccountPage } from './pages/AccountPage';
 import { ChangePasswordPage } from './pages/account/ChangePasswordPage';
+import { TermsPage } from './pages/TermsPage';
+import { PrivacyPage } from './pages/PrivacyPage';
+import { ImpressumPage } from './pages/ImpressumPage';
+import { CookiesPage } from './pages/CookiesPage';
 
 export default function App() {
   return (
@@ -28,6 +32,10 @@ export default function App() {
           <Route path="/verify-email" element={<EmailVerificationPage />} />
           <Route path="/resend-verification" element={<ResendVerificationPage />} />
           <Route path="/accept-terms" element={<AcceptTermsPage />} />
+          <Route path="/terms" element={<TermsPage />} />
+          <Route path="/privacy" element={<PrivacyPage />} />
+          <Route path="/impressum" element={<ImpressumPage />} />
+          <Route path="/cookies" element={<CookiesPage />} />
 
           {/* Protected routes (terms enforced) */}
           <Route

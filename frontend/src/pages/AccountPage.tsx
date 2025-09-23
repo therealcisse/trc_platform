@@ -6,6 +6,7 @@ import {
   ShieldCheckIcon,
   ArrowRightIcon,
   ArrowRightOnRectangleIcon,
+  DocumentTextIcon,
 } from '@heroicons/react/24/outline';
 import { format } from 'date-fns';
 
@@ -196,6 +197,50 @@ export const AccountPage = () => {
             <ArrowRightOnRectangleIcon className="h-4 w-4 mr-2" />
             Logout
           </button>
+        </div>
+      </div>
+
+      {/* Legal */}
+      <div className="mt-6 sm:mt-8 bg-white dark:bg-gray-900 rounded-xl border border-gray-200 dark:border-gray-800 overflow-hidden">
+        {/* Section Header */}
+        <div className="px-4 sm:px-6 py-3 sm:py-4 border-b border-gray-200 dark:border-gray-800">
+          <div className="flex items-center">
+            <DocumentTextIcon className="h-5 w-5 text-gray-400 mr-3 flex-shrink-0" />
+            <div className="min-w-0">
+              <h2 className="text-base sm:text-lg font-semibold text-gray-900 dark:text-white">
+                Legal
+              </h2>
+            </div>
+          </div>
+        </div>
+
+        <div className="p-4 sm:p-6">
+          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+            <Link
+              to="/terms"
+              className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 underline"
+            >
+              Terms & Conditions
+            </Link>
+            <Link
+              to="/privacy"
+              className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 underline"
+            >
+              Privacy Policy
+            </Link>
+            <Link
+              to="/impressum"
+              className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 underline"
+            >
+              Impressum
+            </Link>
+            <Link
+              to="/cookies"
+              className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 underline"
+            >
+              Cookies
+            </Link>
+          </div>
         </div>
       </div>
     </div>

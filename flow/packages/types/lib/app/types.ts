@@ -206,9 +206,8 @@ export interface InboxCommand {
 }
 
 export interface ItemCommand {
-  productStrategies?: ProductStrategy[];
   id: string;
-  selectors?: ItemSelectors;
+  selectors: ItemSelectors;
 }
 
 export interface ItemSelectors {

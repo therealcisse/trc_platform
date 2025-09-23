@@ -24,16 +24,18 @@ export function Terms({ value, onChange }: { value: boolean; onChange: (v: boole
 
   return (
     <>
-      <label className="flex items-center gap-2 cursor-pointer">
-        <span>I have read and accept the Terms</span>
-        <Switch
-          ref={switchRef}
-          checked={value}
-          onClick={handleSwitchClick}
-          onCheckedChange={() => {}}
-          className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-        />
-      </label>
+      <div className="flex items-center gap-3">
+        <label className="flex items-center gap-2 cursor-pointer">
+          <span>I have read and accept the Terms</span>
+          <Switch
+            ref={switchRef}
+            checked={value}
+            onClick={handleSwitchClick}
+            onCheckedChange={() => {}}
+            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+          />
+        </label>
+      </div>
       {open && <TermsModal onAccept={handleAccepted} onClose={() => setOpen(false)} />}
     </>
   );

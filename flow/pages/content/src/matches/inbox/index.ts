@@ -72,7 +72,7 @@ class InboxMatcher implements Matcher {
         log.info('Performing post-reload scan');
 
         // Wait for configured delay
-        await sleep(config.inboxPostReloadDelayMs || 2000);
+        await sleep(config.inboxPostReloadDelayMs);
 
         // Trigger scan
         await this.scanAndOpenLinks();

@@ -193,6 +193,11 @@ export async function executeBuyOfferWorkflow(
   const tabManager = TabManager.getInstance();
   const captchaProcessor = CaptchaProcessor.getInstance();
 
+  if (flow.status === 'done') {
+    log.info('❌ Flow is already done, closing all tabs');
+    await tabManager.closeAllTabs(flow.id);
+  }
+
   try {
     log.info('Validating preconditions for buy offer workflow');
 

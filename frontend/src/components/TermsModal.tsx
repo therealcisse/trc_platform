@@ -1,9 +1,21 @@
 import { Dialog } from '@radix-ui/react-dialog';
 import { useRef, useState, useLayoutEffect } from 'react';
 
-export function TermsModal({ onAccept, onClose }: { onAccept: () => void; onClose: () => void }) {
+import termsEN from '../../TERMS.md?raw';
+import termsDE from '../../TERMS.de.md?raw';
+
+export function TermsModal({
+  onAccept,
+  onClose,
+  open,
+}: {
+  onAccept: () => void;
+  onClose: () => void;
+  open?: boolean;
+}) {
   const termsRef = useRef<HTMLDivElement>(null);
   const [scrolledToBottom, setScrolledToBottom] = useState(false);
+  const [lang, setLang] = useState<'en' | 'de'>('en');
 
   const handleScroll = () => {
     const el = termsRef.current;
@@ -19,6 +31,13 @@ export function TermsModal({ onAccept, onClose }: { onAccept: () => void; onClos
     setScrolledToBottom(false);
   }, []);
 
+  // Reset when language changes
+  useLayoutEffect(() => {
+    setScrolledToBottom(false);
+    const el = termsRef.current;
+    if (el) el.scrollTop = 0;
+  }, [lang]);
+
   useLayoutEffect(() => {
     const el = termsRef.current;
     if (el && el.scrollHeight <= el.clientHeight + 3) {
@@ -28,7 +47,7 @@ export function TermsModal({ onAccept, onClose }: { onAccept: () => void; onClos
 
   return (
     <Dialog
-      open={true}
+      open={open ?? true}
       onOpenChange={(v) => {
         if (!v) onClose();
       }}
@@ -43,9 +62,35 @@ export function TermsModal({ onAccept, onClose }: { onAccept: () => void; onClos
           className={`relative w-[75%] h-full flex flex-col bg-white dark:bg-gray-900 shadow-xl outline-none mx-auto transition duration-500 transform
             opacity-100 scale-100`}
         >
-          <h2 id="terms-title" className="p-6 text-lg font-bold">
-            Terms & Conditions
-          </h2>
+          <div className="p-6 flex items-center justify-between gap-4">
+            <h2 id="terms-title" className="text-lg font-bold">
+              {lang === 'en' ? 'Terms & Conditions' : 'Allgemeine Geschäftsbedingungen (AGB)'}
+            </h2>
+            <div className="flex items-center gap-2">
+              <button
+                className={`px-2 py-1 rounded-md text-xs border ${
+                  lang === 'en'
+                    ? 'bg-primary-600 text-white border-primary-600'
+                    : 'bg-transparent text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700'
+                }`}
+                onClick={() => setLang('en')}
+                aria-pressed={lang === 'en'}
+              >
+                English
+              </button>
+              <button
+                className={`px-2 py-1 rounded-md text-xs border ${
+                  lang === 'de'
+                    ? 'bg-primary-600 text-white border-primary-600'
+                    : 'bg-transparent text-gray-700 dark:text-gray-300 border-gray-300 dark:border-gray-700'
+                }`}
+                onClick={() => setLang('de')}
+                aria-pressed={lang === 'de'}
+              >
+                Deutsch
+              </button>
+            </div>
+          </div>
           <div
             id="terms-content"
             ref={termsRef}
@@ -55,8 +100,11 @@ export function TermsModal({ onAccept, onClose }: { onAccept: () => void; onClos
             aria-describedby="terms-content-desc"
             style={{ outline: 'none' }}
           >
-            {/* Replace with real terms content */}
-            <div id="terms-content-desc">[Place your terms & conditions content here]</div>
+            <div id="terms-content-desc">
+              <pre className="whitespace-pre-wrap break-words text-sm sm:text-base leading-relaxed text-gray-900 dark:text-gray-100">
+                {lang === 'en' ? termsEN : termsDE}
+              </pre>
+            </div>
           </div>
           <div className="absolute left-0 right-0 bottom-0 p-6 bg-white dark:bg-gray-900 border-t">
             <button

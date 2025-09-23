@@ -38,7 +38,7 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     // Inbox mode defaults
     inboxMode: true,
     inboxReloadSeconds: [3, 7],
-    inboxPostReloadDelayMs: 2000,
+    inboxPostReloadDelayMs: 0,
     inboxMaxLinksPerScan: 100,
     inboxInterOpenDelayMs: 400,
 

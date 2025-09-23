@@ -44,22 +44,22 @@ deactivate BG
 alt Extension Enabled & Inbox Mode Active
     InboxCS -> Session: sessionStorage.getItem('inbox_scan_after_reload')
     activate Session #INFO
-    
+
     alt Post-reload scan (value = '1')
         Session --> InboxCS: '1'
         InboxCS -> Session: sessionStorage.removeItem('inbox_scan_after_reload')
         deactivate Session
         InboxCS -> InboxCS: Log: "Performing post-reload scan"
-        InboxCS -> InboxCS: sleep(config.inboxPostReloadDelayMs || 2000)
+        InboxCS -> InboxCS: sleep(config.inboxPostReloadDelayMs)
         InboxCS -> InboxCS: scanAndOpenLinks()
     else Initial scan
         Session --> InboxCS: null
         InboxCS -> InboxCS: scanAndOpenLinks()
     end
-    
+
     InboxCS -> InboxCS: startReloadScheduler(config)
     note over InboxCS: Scheduler Configuration:\n- Reload at seconds: [0, 5]\n- Check every 1000ms\n- Auto-reload at matching seconds
-    
+
     loop Every 1 second
         InboxCS -> InboxCS: Check current second
         alt Current second matches [0, 5]
@@ -68,85 +68,85 @@ alt Extension Enabled & Inbox Mode Active
             note right: Page reloads and\nrestarts from Phase 1
         end
     end
-    
+
     == Phase 2: Link Extraction and Processing ==
-    
+
     group scanAndOpenLinks()
         InboxCS -> BG: <color:blue>sendBackgroundCommand('inbox.openMyOfferLink')</color>
         note right: Selectors:\n- titleLinks: 'table a[href*="show_message"]'\n- messageRow: 'tr'\n- requestTimestampElement: 'td:nth-child(3)'
-        
+
         activate BG #WARNING
-        
+
         BG -> InboxExec: chrome.scripting.executeScript()\n__inboxExecutor(context, selectors)
         activate InboxExec #SPECIAL
-        
+
         InboxExec -> Web: document.querySelectorAll('tr')
         Web --> InboxExec: Table rows
-        
+
         loop For each row
             InboxExec -> Web: row.querySelector('a[href*="show_message"]')
             Web --> InboxExec: Title link
-            
+
             InboxExec -> InboxExec: FlowUtils.parseIDFromTitle(title)\nExtract ID from title text
             note right: ID Pattern:\nExtracts alphanumeric ID\nfrom message title
-            
+
             InboxExec -> Web: row.querySelector('td:nth-child(3)')\nGet timestamp cell
             Web --> InboxExec: Timestamp text
-            
+
             InboxExec -> InboxExec: FlowUtils.parseDateToEpoch(timestampText)\nConvert to epoch
-            
+
             InboxExec -> InboxExec: links.push({\n  id, href, title, requestTimestamp\n})
         end
-        
+
         InboxExec -> InboxExec: links.sort((a,b) => b.requestTimestamp - a.requestTimestamp)\nSort by newest first
-        
+
         InboxExec -> InboxExec: linksToProcess = links.slice(0, maxLinks)\nmaxLinks = config.inboxMaxLinksPerScan || 10
-        
+
         loop For each link to process (newest first)
             InboxExec -> InboxExec: Log.withFlow(MATCHER_IDS.INBOX, link.id)\nCreate flow-specific log
-            
+
             InboxExec -> BG: <color:blue>sendBackgroundCommand('extension.startFlow')</color>
             note right: Flow data:\n- type: 'inbox'\n- id: link.id\n- title: link.title\n- requestTimestamp: epoch\n- href: link.href
-            
+
             BG -> Config: startFlow(flow)
             Config -> Config: Check if flow exists
-            
+
             alt Flow doesn't exist (new flow)
                 Config --> BG: false (new flow)
                 BG --> InboxExec: {success: true, data: false}
-                
+
                 InboxExec -> InboxExec: visitedUrls[link.href] = true
-                
+
                 InboxExec -> BG: <color:blue>sendBackgroundCommand('tab.manage')</color>\n{action: 'open', url: link.href}
-                
+
                 BG -> TabSvc: openTab(url, managed: true)
                 activate TabSvc #SUCCESS
                 TabSvc -> TabSvc: chrome.tabs.create()
                 TabSvc --> BG: {tabId: newTabId}
                 deactivate TabSvc
-                
+
                 BG --> InboxExec: {success: true, data: {tabId}}
-                
+
                 InboxExec -> InboxExec: openedCount++
-                
+
                 InboxExec -> InboxExec: sleep(interOpenDelay)\nDefault: 400ms
                 note right: Delay between\nopening links
-                
+
             else Flow already exists
                 Config --> BG: true (existing flow)
                 BG --> InboxExec: {success: true, data: true}
                 InboxExec -> InboxExec: skippedCount++\nLog: "Flow already exists"
             end
         end
-        
+
         InboxExec --> BG: <color:green>ExecutionResult</color>
         note right: Result contains:\n- success: true\n- links array with timestamps\n- telemetry data\n- opened/skipped counts
         deactivate InboxExec
-        
+
         BG --> InboxCS: <color:green>CommandResponse</color>
         deactivate BG
     end
-    
+
 else Extension/Inbox Mode Disabled
     InboxCS -> InboxCS: Log: "Inbox monitoring disabled"
 end
@@ -175,41 +175,41 @@ deactivate BG
 alt Extension Enabled
     MyOfferCS -> BG: <color:blue>sendBackgroundCommand('myOffer.clickProductLink')</color>
     note right: Payload:\n- id: flow ID\n- selectors:\n  - itemLink: '#my_area table.message_center_message td.content a'\n  - titleLink: 'h1.item_title'\n  - requestTimestampElement: '.message_center_message thead tr td:last-child'
-    
+
     activate BG #WARNING
-    
+
     BG -> MyOfferExec: chrome.scripting.executeScript()\n__myOfferExecutor(context, selectors, flowId)
     activate MyOfferExec #SPECIAL
-    
+
     MyOfferExec -> BG: <color:blue>sendBackgroundCommand('tab.manage')</color>\n{action: 'isManaged', tabId}
     BG -> TabSvc: isManaged(tabId)
     TabSvc --> BG: true
     BG --> MyOfferExec: {data: true}
-    
+
     MyOfferExec -> Web: querySelector('#my_area table.message_center_message td.content a')
     Web --> MyOfferExec: Item link element
-    
+
     MyOfferExec -> Web: querySelector('h1.item_title')
     Web --> MyOfferExec: Product title
-    
+
     MyOfferExec -> MyOfferExec: ProductFactory.parse(config, productText)\nValidate product
-    
+
     alt Product is valid and allowed
         MyOfferExec -> BG: <color:blue>sendBackgroundCommand('tab.manage')</color>\n{action: 'open', url: itemLink.href}
-        
+
         BG -> TabSvc: openTab(itemUrl, managed: true)
         TabSvc -> TabSvc: chrome.tabs.create()
         TabSvc --> BG: {tabId: itemTabId}
         BG --> MyOfferExec: {success: true, data: {tabId}}
-        
+
         MyOfferExec -> MyOfferExec: Log: "Opening item page"
     else Product not valid/allowed
         MyOfferExec -> MyOfferExec: Log: "Invalid product or not allowed"
     end
-    
+
     MyOfferExec --> BG: <color:green>ExecutionResult</color>
     deactivate MyOfferExec
-    
+
     BG --> MyOfferCS: <color:green>CommandResponse</color>
     deactivate BG
 end

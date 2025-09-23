@@ -119,11 +119,31 @@ export const LoginPage = () => {
           </button>
         </form>
 
-        <div className="mt-6 text-center">
+        <div className="mt-6 text-center space-y-2">
           <p className="text-sm text-gray-600 dark:text-gray-400">
             Don't have an account?{' '}
             <Link to="/register" className="font-medium text-primary-600 hover:text-primary-500">
               Sign up
+            </Link>
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            By signing in, you agree to our{' '}
+            <Link to="/terms" className="underline hover:text-primary-600">
+              Terms
+            </Link>{' '}
+            and acknowledge our{' '}
+            <Link to="/privacy" className="underline hover:text-primary-600">
+              Privacy Policy
+            </Link>
+            .
+          </p>
+          <p className="text-xs text-gray-500 dark:text-gray-400">
+            <Link to="/impressum" className="underline hover:text-primary-600">
+              Impressum
+            </Link>{' '}
+            ·{' '}
+            <Link to="/cookies" className="underline hover:text-primary-600">
+              Cookies
             </Link>
           </p>
         </div>

@@ -1,4 +1,4 @@
-import { ProductFactory, Log, FlowUtils } from '@extension/shared';
+import { ProductFactory, Log, FlowUtils, ConfigService } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher } from '@src/lib';
 import { sendBackgroundCommand, TabManager } from '@extension/shared';
@@ -168,6 +168,12 @@ export async function executeMyOfferWorkflow(
 
         const id = FlowUtils.parseIDFromTitle(title);
         const flowLog = Log.withFlow(context.matcherId, id);
+
+        const flow = await ConfigService.getFlow(id);
+        if (flow && flow.status === 'done') {
+          flowLog.info('❌ Flow is already done, closing all tabs');
+          await tabManager.closeAllTabs(flow.id);
+        }
 
         if (!context.dryRun) {
           // Open link in new managed tab

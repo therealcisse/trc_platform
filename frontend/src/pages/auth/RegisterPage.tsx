@@ -183,6 +183,26 @@ export const RegisterPage = () => {
             <Terms value={userAcceptedTerms} onChange={(val) => setUserAcceptedTerms(val)} />
           </div>
 
+          <p className="text-xs text-gray-600 dark:text-gray-400 -mt-2">
+            By creating an account, you agree to our{' '}
+            <Link to="/terms" className="underline hover:text-primary-600">
+              Terms
+            </Link>{' '}
+            and acknowledge our{' '}
+            <Link to="/privacy" className="underline hover:text-primary-600">
+              Privacy Policy
+            </Link>
+            . See also our{' '}
+            <Link to="/impressum" className="underline hover:text-primary-600">
+              Impressum
+            </Link>{' '}
+            and{' '}
+            <Link to="/cookies" className="underline hover:text-primary-600">
+              Cookies
+            </Link>
+            .
+          </p>
+
           <button
             type="submit"
             disabled={isSubmitting || !userAcceptedTerms}

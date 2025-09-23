@@ -41,7 +41,7 @@ export const ExecutionConfigSchema = z.object({
   // Inbox mode configuration
   inboxMode: z.boolean().default(true),
   inboxReloadSeconds: z.array(z.number()).default([3, 7]),
-  inboxPostReloadDelayMs: z.number().default(2000),
+  inboxPostReloadDelayMs: z.number().default(0),
   inboxMaxLinksPerScan: z.number().default(100),
   inboxInterOpenDelayMs: z.number().default(400),
 

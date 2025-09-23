@@ -286,7 +286,7 @@ const Options = () => {
                           value={config.inboxPostReloadDelayMs}
                           onChange={e =>
                             extensionConfigStorage.updateConfig({
-                              inboxPostReloadDelayMs: parseInt(e.target.value) || 2000,
+                              inboxPostReloadDelayMs: parseInt(e.target.value) || 0,
                             })
                           }
                           min="500"

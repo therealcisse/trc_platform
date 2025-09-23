@@ -200,8 +200,24 @@ export class FlowLog {
       metadata: { ...this.metadata, ...metadata },
     });
 
+    function formatLogDate(date: Date = new Date()): string {
+      const pad = (num: number, size: number = 2): string => String(num).padStart(size, '0');
+
+      const year: number = date.getFullYear();
+      const month: string = pad(date.getMonth() + 1);
+      const day: string = pad(date.getDate());
+
+      const hours: string = pad(date.getHours());
+      const minutes: string = pad(date.getMinutes());
+      const seconds: string = pad(date.getSeconds());
+      const millis: string = pad(date.getMilliseconds(), 3);
+
+      // Example format: 2025-09-23 21:15:42.123
+      return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.${millis}`;
+    }
+
     // Also log to console with appropriate level
-    const prefix = `[${this.matcherId}]${this.flowId ? `[${this.flowId}]` : ''}`;
+    const prefix = `[${formatLogDate()}][${this.matcherId}]${this.flowId ? `[${this.flowId}]` : ''}`;
     switch (level) {
       case 'error':
         console.error(`${prefix} ${message}`, metadata || '');
