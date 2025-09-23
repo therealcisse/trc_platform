@@ -1,7 +1,7 @@
 import { FlowUtils, Log } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { sendBackgroundCommand, TabManager } from '@extension/shared';
-import { registerMatcher, sleep } from '@src/lib';
+import { isValidTimeOfDay, registerMatcher, sleep } from '@src/lib';
 import type {
   CommandResponse,
   ExecutionConfig,
@@ -10,7 +10,6 @@ import type {
   ExecutionResult,
   InboxSelectors,
 } from '@extension/types';
-import { basename } from 'node:path';
 
 /**
  * Inbox Matcher - Monitors HanseMerkur inbox for new messages
@@ -64,6 +63,7 @@ class InboxMatcher implements Matcher {
       }
 
       const config = result.config;
+      const timeAllowed = isValidTimeOfDay(config);
 
       // Check if we need to handle a scheduled reload
       const shouldScanAfterReload = sessionStorage.getItem('inbox_scan_after_reload') === '1';
@@ -71,14 +71,22 @@ class InboxMatcher implements Matcher {
         sessionStorage.removeItem('inbox_scan_after_reload');
         log.info('Performing post-reload scan');
 
-        // Wait for configured delay
-        await sleep(config.inboxPostReloadDelayMs);
+        if (timeAllowed) {
+          // Wait for configured delay
+          await sleep(config.inboxPostReloadDelayMs);
 
-        // Trigger scan
-        await this.scanAndOpenLinks();
+          // Trigger scan
+          await this.scanAndOpenLinks();
+        } else {
+          log.warn('Outside operational hours, skipping initial scan');
+        }
       } else {
-        // Initial scan on page load
-        await this.scanAndOpenLinks();
+        if (timeAllowed) {
+          // Initial scan on page load
+          await this.scanAndOpenLinks();
+        } else {
+          log.warn('Outside operational hours, skipping initial scan');
+        }
       }
 
       // Start reload scheduler
