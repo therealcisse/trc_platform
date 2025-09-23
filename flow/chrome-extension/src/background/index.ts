@@ -5,7 +5,13 @@ import { inboxCommandHandler } from './commands/inbox';
 import { itemCommandHandler } from './commands/item';
 import { myOfferCommandHandler } from './commands/myOffer';
 import { BackgroundLoggerService } from './services/logger-service';
-import { ConfigService, FlowUtils, TabManagementService, BuyingStateService } from '@extension/shared';
+import {
+  ConfigService,
+  FlowUtils,
+  TabManagementService,
+  BuyingStateService,
+  sleep,
+} from '@extension/shared';
 import { extensionConfigStorage } from '@extension/storage';
 import { MATCHER_IDS } from '@extension/types';
 import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
@@ -78,6 +84,13 @@ async function handleMessage(
 
       case 'tab.manage':
         return handleTabManagement(message.payload, sender);
+
+      case 'flows.scheduleCloseAfterNavigation':
+        handleFlowDone(message.payload, sender);
+        return {
+          success: true,
+          requestId: 'scheduleCloseAfterNavigation',
+        };
 
       case 'state.buying':
         return handleBuyingState(message.payload);
@@ -321,6 +334,20 @@ async function handleTabManagement(
       requestId,
     };
   }
+}
+
+async function handleFlowDone(
+  payload: {
+    flowId: string; timeoutMs: number;
+  },
+  sender: chrome.runtime.MessageSender,
+): Promise<void> {
+
+  setTimeout(async function () {
+    await sleep(payload.timeoutMs);
+    console.info(`[Background] Closing all tabs: ${payload.flowId}:`);
+    await extensionConfigStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
+  }, 0);
 }
 
 // Handle buying state commands

@@ -178,6 +178,7 @@ export interface BackgroundCommands {
   'item.clickProductLink': ItemCommand;
   'myOffer.clickProductLink': MyOfferCommand;
   'image.solve': { imageData: string; flowId: string };
+  'flows.scheduleCloseAfterNavigation': { flowId: string; timeoutMs: number };
   'extension.startFlow': FlowPayload;
   'extension.getFlow': { id: string };
   'extension.getAllFlows': {};

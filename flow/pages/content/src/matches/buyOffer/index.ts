@@ -336,20 +336,6 @@ export async function executeBuyOfferWorkflow(
     inputElement.dispatchEvent(new Event('input', { bubbles: true }));
     log.debug('Answer entered into captcha field');
 
-    // Calculate remaining time
-    const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
-      product,
-      flow.requestTimestamp,
-      context.config,
-    );
-
-    if (remainingTime > 0) {
-      log.info(`Waiting ${flow.requestTimestamp} seconds for remaining processing time`);
-      log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
-      await sleep(remainingTime - 100);
-      log.debug('Processing time wait completed');
-    }
-
     // Execute purchase
     log.info('EXECUTING FINAL PURCHASE');
 
@@ -368,16 +354,31 @@ export async function executeBuyOfferWorkflow(
         flowId: flow.id,
       });
 
+      // Calculate remaining time
+      const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
+        product,
+        flow.requestTimestamp,
+        context.config,
+      );
+
+      const timeoutMs = remainingTime / 1000 + 5000;
+      log.info(`Closing all tabs for flow: ${flow.id} after ${timeoutMs}ms`);
+      await sendBackgroundCommand('flows.scheduleCloseAfterNavigation', {
+        flowId: flow.id,
+        timeoutMs: timeoutMs,
+      });
+
+      if (remainingTime > 0) {
+        log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
+        await sleep(remainingTime - 100);
+        log.debug('Processing time wait completed');
+      }
+
+      log.info('Clicking on buyButton');
       await clickWithVerification(buyButton, {
         verify: false,
         scroll: false,
       });
-
-      log.info(`Closing all tabs for flow: ${flow.id}`);
-      await sleep(1000);
-      setTimeout(async function () {
-        await tabManager.closeAllTabs(flow.id);
-      }, 100);
 
       log.info('Buying state cleared successfully');
     } else {

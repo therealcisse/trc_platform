@@ -135,26 +135,29 @@ export async function executeItemWorkflow(
     if (!isValidTimeOfDay(context.config)) {
       log.warn('Outside operation hours, scheduling reload at next minute mark');
 
-      async function setUpNext(resolve: (value: unknown) => void): Promise<void> {
-        const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
-          config: ExecutionConfig;
-          enabled: boolean;
-        }>;
+      async function setUpNext(): Promise<void> {
+        async function getConfig(fn: (config: ExecutionConfig) => void) {
+          const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
+            config: ExecutionConfig;
+            enabled: boolean;
+          }>;
 
-        const result = configResponse.data;
-        if (!result) {
-          log.warn('No configuration found');
-          await log.write();
-          return;
+          const result = configResponse.data;
+          if (!result) {
+            log.warn('No configuration found');
+            await log.write();
+            return;
+          }
+
+          if (!result.enabled) {
+            log.info('Extension disabled');
+            await log.write();
+            return;
+          }
+
+          const config = result.config;
+          fn(config);
         }
-
-        if (!result.enabled) {
-          log.info('Extension disabled');
-          await log.write();
-          return;
-        }
-
-        const config = result.config;
 
         // Calculate time until next minute
         const now = new Date();
@@ -168,28 +171,26 @@ export async function executeItemWorkflow(
         setTimeout(async () => {
           log.debug('Checking for operational hour');
 
-          if (isValidTimeOfDay(config)) {
-            resolve(null);
+          getConfig(async function (config) {
+            if (isValidTimeOfDay(config)) {
+              log.debug('Found operational hour');
 
-            log.debug('Found operational hour');
+              await log.write();
 
-            await log.write();
+              setTimeout(function () {
+                window.location.reload();
+              }, 100);
+            } else {
+              log.debug('Not an operational hour');
 
-            setTimeout(function () {
-              window.location.reload();
-            }, 100);
-          } else {
-            log.debug('Not an operational hour');
-
-            await log.write();
-            setUpNext(resolve);
-          }
+              await log.write();
+              setUpNext();
+            }
+          });
         }, delay);
       }
 
-      new Promise(function (resolve) {
-        setUpNext(resolve);
-      });
+      await setUpNext();
 
       await log.write();
       return {
