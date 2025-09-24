@@ -559,7 +559,6 @@ class TestSolveView(APIView):
                 {
                     "request_id": getattr(request, "request_id", None),
                     "result": result["result"],
-                    "model": result["model"],
                     "duration_ms": duration_ms,
                     "is_test": True,  # Indicate this was a test request
                 }

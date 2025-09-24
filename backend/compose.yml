@@ -55,7 +55,7 @@ services:
   #     EMAIL_HOST_PASSWORD: ""
   #     EMAIL_USE_TLS: "false"
   #     OPENAI_API_KEY: ""
-  #     OPENAI_MODEL: "gpt-vision"
+  #     OPENAI_MODEL: "gpt-5-nano-2025-08-07"
   #     OPENAI_TIMEOUT_S: "30"
   #     COST_PER_REQUEST_CENTS: "100"
   #     CORS_ALLOWED_ORIGINS: "http://localhost:5173"
