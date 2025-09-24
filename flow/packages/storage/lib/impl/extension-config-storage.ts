@@ -30,7 +30,7 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
       Friday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
       Saturday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
     },
-    emailMode: true,
+    emailMode: false,
     emailRefreshMin: 30,
     emailRefreshMax: 60,
 
@@ -38,7 +38,7 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
 
     // Inbox mode defaults
     inboxMode: true,
-    inboxReloadSeconds: [3, 7],
+    inboxReloadSeconds: [4, 7],
     inboxPostReloadDelayMs: 0,
     inboxMaxLinksPerScan: 10,
     inboxInterOpenDelayMs: 400,

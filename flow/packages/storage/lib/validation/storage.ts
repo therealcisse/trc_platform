@@ -48,7 +48,7 @@ export const ProductStrategySchema = StoredProductStrategySchema;
 export const ExecutionConfigSchema = z.object({
   // Inbox mode configuration
   inboxMode: z.boolean().default(true),
-  inboxReloadSeconds: z.array(z.number()).default([3, 7]),
+  inboxReloadSeconds: z.array(z.number()).default([4, 7]),
   inboxPostReloadDelayMs: z.number().default(0),
   inboxMaxLinksPerScan: z.number().default(10),
   inboxInterOpenDelayMs: z.number().default(400),
