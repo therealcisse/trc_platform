@@ -2,10 +2,10 @@
 
 Last updated: 23 September 2025
 
+
 These Terms of Service (the “Terms”) govern your access to and use of the Image Solve Platform web application (the “App”), including its frontend interface and any related services operated by Amadou Cisse, registered in Hamburg, Germany (“we”, “us”, “our”). By registering for an account or otherwise using the App, you agree to these Terms. If you do not agree, do not use the App.
 
 Note on language and applicable law: These Terms are provided in English and are intended to comply with German law, including the BGB (German Civil Code) and consumer protection rules for distance contracts. For consumers, your mandatory statutory rights remain unaffected.
-
 
 1. Definitions
 - User: Any natural person or legal entity using the App.
@@ -17,7 +17,7 @@ Note on language and applicable law: These Terms are provided in English and are
 
 
 2. Scope and Parties
-These Terms apply to all Users of the App. Additional policies (e.g., our Privacy Policy, Cookie Policy, Acceptable Use Policy) form part of these Terms by reference. Information identifying the provider (Impressum) is available at: /impressum.
+These Terms apply to all Users of the App. Additional policies (e.g., our Privacy Policy, Cookie Policy, Acceptable Use Policy) form part of these Terms by reference. Information identifying the provider (Impressum) is available at: /impressum. Provider details: Amadou Cisse, Marienhof 7, 22399 Hamburg, amadou.cisse@proton.me, VAT ID: DE369245022.
 
 
 3. Contract Formation (Distance Selling)
@@ -51,7 +51,7 @@ We may remove or disable content and/or suspend accounts that violate these obli
 
 
 7. Fees, Payment, and Billing (if applicable)
-- Pricing: Fees (e.g., subscription or usage‑based) are stated in EUR and may be subject to VAT. We will disclose prices and taxes at checkout or in your plan details.
+- Pricing: Fees (e.g., subscription or usage‑based) are stated in EUR and may be subject to VAT. VAT will be applied at the rate applicable in Germany or in the User’s country of residence, depending on applicable EU VAT rules. We will disclose prices and taxes at checkout or in your plan details.
 - Payment: We accept the payment methods indicated in the App. Charges may recur automatically if you subscribe to a recurring plan. Invoices/receipts will be provided electronically.
 - Non‑payment: We may suspend or terminate access for overdue amounts after notice. Statutory default interest and reasonable collection costs may apply.
 - Set‑off: You may only set off claims that are undisputed or have been finally adjudicated by a court.
@@ -65,11 +65,11 @@ We may remove or disable content and/or suspend accounts that violate these obli
 9. Term, Termination, and Suspension
 - You may terminate your Account at any time via the account settings or by contacting us.
 - We may terminate or suspend access, with prior notice where feasible, if you materially breach these Terms, fail to pay, or if required by law or security concerns.
-- Effects: Upon termination, access to the App ceases. We will delete or anonymize personal data according to our Privacy Policy and legal retention requirements. You should export your Content before termination where possible.
+- Effects: Upon termination, access to the App ceases. After termination, we are not obliged to retain or return Content, except as required by law. We will delete or anonymize personal data according to our Privacy Policy and legal retention requirements. You should export your Content before termination where possible.
 
 
 10. Warranty; Liability (German law)
-- Statutory rights: Consumers retain statutory rights with respect to defects in digital services to the extent applicable by law.
+- **Statutory rights: Consumers retain statutory rights with respect to defects in digital services to the extent applicable by law.**
 - No guarantee of results: The App and outputs are provided “as is” for general information and experimentation. We make no guarantees of correctness or fitness for a particular purpose beyond mandatory law.
 - Liability: We are liable without limitation for intent and gross negligence, for damages resulting from injury to life, body or health, and under the German Product Liability Act. For slight negligence, we are liable only for breach of essential contractual obligations (cardinal duties), and then limited to the typical foreseeable damage. Any further liability is excluded. Limitations do not apply where prohibited by law.
 
@@ -107,8 +107,8 @@ If any provision of these Terms is invalid or unenforceable, the remainder remai
 17. Miscellaneous
 - Communications: Legal notices may be sent to your account email; you may contact us at: amadou.cisse@proton.me or Marienhof 7, 22399 Hamburg.
 - Assignment: You may not transfer rights or obligations under these Terms without our consent. We may assign to an affiliate or in connection with a restructuring, in compliance with law.
-- ADR Statement: We are neither obliged nor willing to participate in dispute resolution before a consumer arbitration board, unless mandatory law requires otherwise. The EU Commission’s ODR platform is available at https://ec.europa.eu/consumers/odr/.
-- Language versions: These Terms are available in English and German. In case of discrepancies, the German version prevails for users in Germany.
+- ADR Statement: We are neither obliged nor willing to participate in dispute resolution before a consumer arbitration board, unless mandatory law requires otherwise. This does not affect your right to seek legal remedies before the competent courts. The EU Commission’s ODR platform is available at https://ec.europa.eu/consumers/odr/.
+- Language versions: These Terms are available in English and German. The English version is provided for convenience only. The German version is legally binding for users in Germany.
 
 
 18. Effective Date
@@ -116,19 +116,19 @@ These Terms are effective as of 23 September 2025.
 
 
 Annex A — Right of Withdrawal for Consumers (Widerrufsbelehrung)
-1. Right of Withdrawal
+**Right of Withdrawal**
 You have the right to withdraw from this contract within 14 days without giving any reason. The withdrawal period is 14 days from the day of contract conclusion.
 
 To exercise the right of withdrawal, you must inform us (Amadou Cisse, Marienhof 7, 22399 Hamburg, amadou.cisse@proton.me) of your decision by a clear statement (e.g., email). You may use the model withdrawal form below, but it is not mandatory.
 
-2. Effects of Withdrawal
-If you withdraw, we will reimburse all payments received from you, including delivery costs (if any), without undue delay and at the latest within 14 days from the day on which we are informed of your decision. We will use the same means of payment as you used, unless otherwise agreed.
+**Effects of Withdrawal**
+If you withdraw, we will reimburse all payments received from you, including delivery costs (if any), without undue delay and at the latest within 14 days from the day on which we are informed of your decision. We will use the same means of payment as you used, unless otherwise agreed, and you will not incur any fees as a result of such reimbursement.
 
 For services already commenced during the withdrawal period at your express request, you shall pay us an amount proportional to the services provided up to the time you informed us of your withdrawal.
 
 For digital content not supplied on a tangible medium, your right of withdrawal may expire if performance has begun with your prior express consent and acknowledgment of the loss of the right of withdrawal (BGB §356(5)). We will request such consent and acknowledgment where applicable.
 
-3. Model Withdrawal Form
+**Model Withdrawal Form**
 (Complete and return this form only if you wish to withdraw from the contract.)
 — To: Amadou Cisse, Marienhof 7, 22399 Hamburg, amadou.cisse@proton.me
 — I/We (*) hereby withdraw from my/our (*) contract for the provision of the following service (*):
@@ -207,7 +207,7 @@ B12. Warranty; Liability (German law)
 - We do not assume liability for indirect or consequential damages such as lost profits, unless mandatory law provides otherwise.
 
 B13. Export Control and Sanctions
-You represent that you are not located in a country subject to embargoes/sanctions and are not a prohibited party under applicable export control or sanctions laws. You will not use the API in violation of such laws.
+You represent that you are not located in a country subject to embargoes/sanctions and are not a prohibited party under applicable export control or sanctions laws. You will not use the API in violation of such laws. You may not re-export the API or related services to any jurisdiction under EU or US sanctions without all necessary authorizations.
 
 B14. Changes to the API Terms
 We may update this Part B to reflect legal, technical, or business changes. We will notify you in advance of material changes and indicate the effective date. If you do not accept changes for ongoing paid access, you may terminate with effect from the change date.

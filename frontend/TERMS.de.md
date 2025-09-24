@@ -2,6 +2,7 @@
 
 Zuletzt aktualisiert: 23. September 2025
 
+
 Diese AGB regeln die Nutzung der Web‑Anwendung „Image Solve Platform“ (die „App“) sowie der zugehörigen Backend‑Dienste und Schnittstellen (API), betrieben von Amadou Cisse, Marienhof 7, 22399 Hamburg, Deutschland ("wir", "uns"). Mit der Registrierung bzw. Nutzung der App erklären Sie sich mit diesen AGB einverstanden.
 
 Hinweis zur Sprache und zum Recht: Diese AGB sind auf Englisch und Deutsch verfügbar. Maßgeblich ist deutsches Recht (BGB, TMG, DSGVO/DSG). Für Verbraucher bleiben zwingende Verbraucherschutzrechte unberührt. 
@@ -18,7 +19,7 @@ Teil A — Nutzerbedingungen (Frontend)
 - Abonnement: Etwaige entgeltliche, wiederkehrende Leistungen oder nutzungsbezogene Abrechnung.
 
 2. Geltungsbereich / Anbieterkennzeichnung
-Diese AGB gelten für alle Nutzer der App. Ergänzende Regelwerke (z. B. Datenschutzerklärung, Cookie‑Richtlinie, Nutzungsrichtlinie) sind Bestandteil dieser AGB. Anbieterkennzeichnung (Impressum): /impressum.
+Diese AGB gelten für alle Nutzer der App. Ergänzende Regelwerke (z. B. Datenschutzerklärung, Cookie‑Richtlinie, Nutzungsrichtlinie) sind Bestandteil dieser AGB. Anbieterkennzeichnung (Impressum): /impressum. Anbieter: Amadou Cisse, Marienhof 7, 22399 Hamburg, amadou.cisse@proton.me, USt-IdNr.: DE369245022.
 
 3. Vertragsschluss (Fernabsatz)
 - Registrierung und Annahme: Der Vertrag kommt zustande, wenn Sie diese AGB im Rahmen der Registrierung ausdrücklich akzeptieren (z. B. Checkbox) und/oder die App nutzen. Wir bestätigen die Registrierung (z. B. per E‑Mail).
@@ -47,7 +48,7 @@ Bei Verstößen können Inhalte gesperrt/entfernt und Konten vorübergehend oder
 - Bei Missbrauchsverdacht/Sicherheitsrisiken/Rechtsverstößen kann der Zugang gesperrt/gekündigt werden.
 
 7. Entgelte, Zahlung, Abrechnung (sofern anwendbar)
-- Preise: EUR zzgl. ggf. USt. Preise/Steuern werden im Bestellprozess/Plan ersichtlich.
+- Preise: EUR zzgl. ggf. USt. Die Umsatzsteuer wird mit dem in Deutschland oder im Wohnsitzland des Nutzers geltenden Steuersatz gemäß den anwendbaren EU‑Mehrwertsteuervorschriften erhoben. Preise/Steuern werden im Bestellprozess/Plan ersichtlich.
 - Zahlung: Gemäß in der App angegebenen Verfahren. Abonnements können sich automatisch verlängern. Rechnungen/Belege werden elektronisch bereitgestellt.
 - Zahlungsverzug: Bei Verzug kann der Zugang nach vorheriger Ankündigung gesperrt/gekündigt werden. Gesetzliche Verzugszinsen und angemessene Inkassokosten können anfallen.
 - Aufrechnung: Nur mit unbestrittenen oder rechtskräftig festgestellten Forderungen.
@@ -58,10 +59,10 @@ Bei Verstößen können Inhalte gesperrt/entfernt und Konten vorübergehend oder
 9. Laufzeit, Kündigung, Sperrung
 - Kündigung durch den Nutzer jederzeit über die Kontoeinstellungen oder per Kontaktaufnahme möglich.
 - Kündigung/Sperrung durch uns bei wesentlichen Vertragsverstößen/Nichtzahlung/gesetzlichen Gründen – mit Vorankündigung, soweit zumutbar.
-- Folgen: Zugang endet. Daten werden gemäß Datenschutzerklärung und gesetzlichen Aufbewahrungspflichten gelöscht/anonymisiert. Exportieren Sie Inhalte vorab, soweit möglich.
+- Folgen: Zugang endet. Nach Beendigung sind wir nicht verpflichtet, Inhalte aufzubewahren oder zurückzugeben, es sei denn, gesetzlich vorgeschrieben. Daten werden gemäß Datenschutzerklärung und gesetzlichen Aufbewahrungspflichten gelöscht/anonymisiert. Exportieren Sie Inhalte vorab, soweit möglich.
 
 10. Gewährleistung; Haftung (deutsches Recht)
-- Gesetzliche Rechte: Verbraucherrechte bei Mängeln digitaler Produkte bleiben unberührt.
+- **Gesetzliche Rechte: Verbraucherrechte bei Mängeln digitaler Produkte bleiben unberührt.**
 - Keine Ergebnisgarantie: Die App/Outputs werden „wie besehen“ bereitgestellt. Keine Gewähr über das gesetzlich Gebotene hinaus.
 - Haftung: Unbeschränkte Haftung für Vorsatz/grobe Fahrlässigkeit, Verletzung von Leben/Körper/Gesundheit sowie nach ProdHaftG. Bei leichter Fahrlässigkeit haften wir nur bei Verletzung wesentlicher Vertragspflichten (Kardinalpflichten) und der Höhe nach beschränkt auf den typischerweise vorhersehbaren Schaden. Weitergehende Haftung ist – soweit gesetzlich zulässig – ausgeschlossen.
 
@@ -91,24 +92,24 @@ Ist eine Bestimmung unwirksam/undurchführbar, bleibt der Rest wirksam. Anstelle
 17. Sonstiges
 - Kommunikation: Rechtserhebliche Mitteilungen per E‑Mail an Ihre Konto‑Adresse; Kontakt: amadou.cisse@proton.me oder Marienhof 7, 22399 Hamburg.
 - Abtretung: Abtretung ohne unsere Zustimmung unzulässig; wir dürfen im Konzern/bei Umstrukturierungen abtreten (gesetzeskonform).
-- ADR‑Hinweis: Wir sind zur Teilnahme an Verbraucherschlichtung nicht verpflichtet und nicht bereit. EU‑OS‑Plattform: https://ec.europa.eu/consumers/odr/.
-- Sprachfassungen: Diese AGB sind in deutscher und englischer Sprache verfügbar. Bei Abweichungen ist für Nutzer in Deutschland die deutsche Fassung maßgeblich.
+- ADR‑Hinweis: Wir sind zur Teilnahme an Verbraucherschlichtung nicht verpflichtet und nicht bereit. Dies berührt nicht Ihr Recht, Rechtsbehelfe vor den zuständigen Gerichten in Anspruch zu nehmen. EU‑OS‑Plattform: https://ec.europa.eu/consumers/odr/.
+- Sprachfassungen: Diese AGB sind in deutscher und englischer Sprache verfügbar. Die englische Fassung dient lediglich der Verständlichkeit. Für Nutzer in Deutschland ist die deutsche Fassung rechtsverbindlich.
 
 18. Inkrafttreten
 Diese AGB gelten ab dem 23. September 2025.
 
 Anlage A — Widerrufsbelehrung für Verbraucher
-1. Widerrufsrecht
+**Widerrufsrecht**
 Sie haben das Recht, binnen 14 Tagen ohne Angabe von Gründen diesen Vertrag zu widerrufen. Die Frist beginnt mit Vertragsschluss.
 
 Zur Ausübung des Widerrufs genügt eine eindeutige Erklärung (z. B. E‑Mail) an: Amadou Cisse, Marienhof 7, 22399 Hamburg, amadou.cisse@proton.me. Sie können das unten stehende Muster verwenden, das jedoch nicht vorgeschrieben ist.
 
-2. Folgen des Widerrufs
-Im Falle des Widerrufs erstatten wir alle Zahlungen (inkl. Lieferkosten, falls anwendbar) unverzüglich und spätestens binnen 14 Tagen ab Eingang Ihrer Widerrufserklärung. Wir verwenden dasselbe Zahlungsmittel, sofern nichts anderes vereinbart.
+**Folgen des Widerrufs**
+Im Falle des Widerrufs erstatten wir alle Zahlungen (inkl. Lieferkosten, falls anwendbar) unverzüglich und spätestens binnen 14 Tagen ab Eingang Ihrer Widerrufserklärung. Wir verwenden dasselbe Zahlungsmittel, sofern nichts anderes vereinbart, und Ihnen werden wegen dieser Rückzahlung keine Entgelte berechnet.
 
 Haben Sie verlangt, dass die Dienstleistung während der Widerrufsfrist beginnen soll, so haben Sie einen angemessenen Betrag zu zahlen, der dem Anteil der bis zum Widerruf bereits erbrachten Leistungen entspricht. Bei digitalen Inhalten, die nicht auf einem körperlichen Datenträger geliefert werden, kann das Widerrufsrecht erlöschen, wenn die Ausführung mit Ihrer ausdrücklichen Zustimmung begonnen hat und Sie Ihr Kenntnis vom Verlust des Widerrufsrechts bestätigt haben (§ 356 Abs. 5 BGB).
 
-3. Muster‑Widerrufsformular
+**Muster‑Widerrufsformular**
 — An: Amadou Cisse, Marienhof 7, 22399 Hamburg, amadou.cisse@proton.me
 — Hiermit widerrufe(n) ich/wir (*) den von mir/uns (*) abgeschlossenen Vertrag über die Erbringung der folgenden Dienstleistung (*):
 — Bestellt am (*)/erhalten am (*):
@@ -186,7 +187,7 @@ B12. Gewährleistung/Haftung (deutsches Recht)
 - Keine Haftung für mittelbare Schäden/entgangenen Gewinn, soweit gesetzlich zulässig.
 
 B13. Exportkontrolle/Sanktionen
-- Sie versichern, nicht Sanktionen/Embargos zu unterliegen und die API nicht entgegen Export‑/Sanktionsrecht zu nutzen.
+- Sie versichern, nicht Sanktionen/Embargos zu unterliegen und die API nicht entgegen Export‑/Sanktionsrecht zu nutzen. Ein Re‑Export der API oder damit verbundener Dienste in nach EU‑/US‑Recht sanktionierte Jurisdiktionen ohne erforderliche Genehmigungen ist unzulässig.
 
 B14. Änderungen
 - Anpassungen aus rechtlichen/technischen/geschäftlichen Gründen; über wesentliche Änderungen informieren wir vorab. Bei laufenden, entgeltlichen Zugängen können Sie zum Änderungszeitpunkt kündigen.

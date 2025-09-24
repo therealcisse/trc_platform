@@ -57,7 +57,7 @@ export const TermsPage = () => {
           to="/account"
           className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
         >
-          {lang === 'en' ? 'Back' : 'Zurückn'}
+          {lang === 'en' ? 'Back' : 'Zurück'}
         </Link>
       </div>
     </div>
