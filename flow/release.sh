@@ -27,6 +27,15 @@ sha256_file() {
   fi
 }
 
+validity_date() {
+  # Try GNU date first, fallback to BSD date
+  if date -d "+7 days" "+%d %B %Y" >/dev/null 2>&1; then
+    date -d "+7 days" "+%d %B %Y"
+  else
+    date -v+7d "+%d %B %Y"
+  fi
+}
+
 # =========================
 # Arguments
 # =========================
@@ -92,6 +101,8 @@ echo "$CHECKSUM  $ZIP_NAME" | tee "$RELEASE_DIR/$OUTPUT_SUM" >/dev/null
 # =========================
 # Generate email
 # =========================
+VALIDITY="$(validity_date)"
+
 EMAIL_SUBJECT="Software Delivery — ${PROJECT_NAME}, Version ${VERSION}"
 EMAIL_BODY=$(cat <<EOF
 Subject: ${EMAIL_SUBJECT}
@@ -104,8 +115,11 @@ Project: ${PROJECT_NAME}
 Product: ${PRODUCT_NAME}
 Version: ${VERSION}
 
-File: ${ZIP_NAME}
-Checksum (SHA-256): ${CHECKSUM}
+Download link (valid until ${VALIDITY}):
+${ZIP_NAME}
+
+Checksum (SHA-256):
+${CHECKSUM}
 
 Please verify the checksum after download. Kindly confirm receipt and integrity by replying to this email.
 
