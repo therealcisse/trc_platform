@@ -5,7 +5,7 @@ set -euo pipefail
 # Config
 # =========================
 : "${PROJECT_NAME:=Flow}"                    # Used in email subject
-: "${PRODUCT_NAME:=Flow}"                    # Used in email body
+: "${PRODUCT_NAME:=Image Solver Extension}"                    # Used in email body
 : "${RECIPIENT_NAME:=Patrycjusz}"            # Used in email greeting
 : "${DIST_DIR:=dist}"                        # Folder to package
 : "${OUTPUT_EMAIL:=delivery_email.txt}"      # Email output file name
