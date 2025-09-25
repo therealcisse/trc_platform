@@ -4,12 +4,12 @@ set -euo pipefail
 # =========================
 # Config
 # =========================
-: "${PROJECT_NAME:=Flow}"        # Used in email subject
-: "${PRODUCT_NAME:=Flow}"        # Used in email body
-: "${RECIPIENT_NAME:=Patrycjusz}"          # Used in email greeting
-: "${DIST_DIR:=dist}"                    # Folder to package
-: "${OUTPUT_EMAIL:=delivery_email.txt}"  # Email output file
-: "${OUTPUT_SUM:=checksum.txt}"          # Checksum output file
+: "${PROJECT_NAME:=Flow}"                    # Used in email subject
+: "${PRODUCT_NAME:=Flow}"                    # Used in email body
+: "${RECIPIENT_NAME:=Patrycjusz}"            # Used in email greeting
+: "${DIST_DIR:=dist}"                        # Folder to package
+: "${OUTPUT_EMAIL:=delivery_email.txt}"      # Email output file name
+: "${OUTPUT_SUM:=checksum.txt}"              # Checksum output file name
 
 # =========================
 # Helpers
@@ -47,7 +47,7 @@ pnpm build
 [[ -d "$DIST_DIR" ]] || die "Dist folder '$DIST_DIR' does not exist."
 
 # =========================
-# Version bump, build, commit
+# Version bump, commit
 # =========================
 if [[ -n "$VERSION" ]]; then
   echo "Setting version: $VERSION"
@@ -67,20 +67,27 @@ else
 fi
 
 # =========================
+# Prepare release directory
+# =========================
+RELEASE_DIR="releases/$VERSION"
+mkdir -p "$RELEASE_DIR"
+
+# =========================
 # Package dist and checksum
 # =========================
 DATE_STR="$(date +%F)"
 ZIP_NAME="${PRODUCT_NAME// /_}_v${VERSION}_${DATE_STR}.zip"
+ZIP_PATH="$RELEASE_DIR/$ZIP_NAME"
 
-echo "Creating archive: $ZIP_NAME"
+echo "Creating archive: $ZIP_PATH"
 (
   cd "$DIST_DIR"
-  zip -r -q -X "../$ZIP_NAME" .
+  zip -r -q -X "../$ZIP_PATH" .
 )
 
 echo "Computing SHA-256 checksum"
-CHECKSUM="$(sha256_file "$ZIP_NAME")"
-echo "$CHECKSUM  $ZIP_NAME" | tee "$OUTPUT_SUM" >/dev/null
+CHECKSUM="$(sha256_file "$ZIP_PATH")"
+echo "$CHECKSUM  $ZIP_NAME" | tee "$RELEASE_DIR/$OUTPUT_SUM" >/dev/null
 
 # =========================
 # Generate email
@@ -107,14 +114,13 @@ Amadou Cisse
 EOF
 )
 
-echo "$EMAIL_BODY" | tee "$OUTPUT_EMAIL" >/dev/null
+echo "$EMAIL_BODY" | tee "$RELEASE_DIR/$OUTPUT_EMAIL" >/dev/null
 
 # =========================
 # Done
 # =========================
 echo
-echo "Delivery artifacts created:"
-echo "  Archive:        $ZIP_NAME"
-echo "  Checksum file:  $OUTPUT_SUM"
-echo "  Email template: $OUTPUT_EMAIL"
-
+echo "Delivery artifacts created in $RELEASE_DIR:"
+echo "  Archive:        $ZIP_PATH"
+echo "  Checksum file:  $RELEASE_DIR/$OUTPUT_SUM"
+echo "  Email template: $RELEASE_DIR/$OUTPUT_EMAIL"
