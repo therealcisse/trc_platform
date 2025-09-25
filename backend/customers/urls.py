@@ -17,6 +17,7 @@ from .views import (
     UsageSummaryView,
     VerifyEmailView,
     AcceptTermsView,
+    AcceptDisclaimerView,
 )
 
 urlpatterns = [
@@ -41,4 +42,5 @@ urlpatterns = [
         name="billing-period-detail",
     ),
     path("accept_terms/", AcceptTermsView.as_view(), name="accept-terms"),
+    path("accept_disclaimer/", AcceptDisclaimerView.as_view(), name="accept-disclaimer"),
 ]

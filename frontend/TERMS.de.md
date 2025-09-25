@@ -40,6 +40,7 @@ Sie verpflichten sich u. a.,
 - Zugangsdaten geheim zu halten und Missbrauch unverzüglich zu melden;
 - besondere Kategorien personenbezogener Daten (Art. 9 DSGVO) nur hochzuladen, wenn unbedingt erforderlich und rechtmäßig; und
 - die App nicht für Hochrisiko‑Anwendungen zu verwenden.
+- Nutzungsbedingungen Dritter, Plattformregeln und technische Zugriffsbeschränkungen einzuhalten; die App nicht zur unbefugten Nutzung, Störung oder zum Missbrauch fremder Systeme/Netze/Dienste zu verwenden und keine technischen Schutzmaßnahmen zu umgehen.
 Bei Verstößen können Inhalte gesperrt/entfernt und Konten vorübergehend oder dauerhaft suspendiert werden.
 
 6. Konto und Sicherheit
@@ -47,6 +48,7 @@ Bei Verstößen können Inhalte gesperrt/entfernt und Konten vorübergehend oder
 - Passwörter und Zugangsmittel sind vertraulich zu behandeln.
 - Bei Missbrauchsverdacht/Sicherheitsrisiken/Rechtsverstößen kann der Zugang gesperrt/gekündigt werden.
 
+Verantwortlichkeit für die Nutzung. Sie erkennen an, dass wir keinen Einfluss darauf haben, wie die App verwendet wird. Sie tragen die alleinige Verantwortung für Installation, Konfiguration und Betrieb Ihrer Umgebung sowie für die Rechtmäßigkeit Ihrer Nutzung. Wir billigen oder autorisieren keinen bestimmten Anwendungsfall.
 7. Entgelte, Zahlung, Abrechnung (sofern anwendbar)
 - Preise: EUR zzgl. ggf. USt. Die Umsatzsteuer wird mit dem in Deutschland oder im Wohnsitzland des Nutzers geltenden Steuersatz gemäß den anwendbaren EU‑Mehrwertsteuervorschriften erhoben. Preise/Steuern werden im Bestellprozess/Plan ersichtlich.
 - Zahlung: Gemäß in der App angegebenen Verfahren. Abonnements können sich automatisch verlängern. Rechnungen/Belege werden elektronisch bereitgestellt.
@@ -58,7 +60,7 @@ Bei Verstößen können Inhalte gesperrt/entfernt und Konten vorübergehend oder
 
 9. Laufzeit, Kündigung, Sperrung
 - Kündigung durch den Nutzer jederzeit über die Kontoeinstellungen oder per Kontaktaufnahme möglich.
-- Kündigung/Sperrung durch uns bei wesentlichen Vertragsverstößen/Nichtzahlung/gesetzlichen Gründen – mit Vorankündigung, soweit zumutbar.
+- Kündigung/Sperrung durch uns bei wesentlichen Vertragsverstößen/Nichtzahlung/gesetzlichen Gründen – mit Vorankündigung, soweit zumutbar. Wir sind berechtigt, den Vertrag mit sofortiger Wirkung zu kündigen, wenn wir Kenntnis von einer rechtswidrigen Nutzung der App erlangen oder wenn die Nutzung uns rechtlichen Risiken aussetzt.
 - Folgen: Zugang endet. Nach Beendigung sind wir nicht verpflichtet, Inhalte aufzubewahren oder zurückzugeben, es sei denn, gesetzlich vorgeschrieben. Daten werden gemäß Datenschutzerklärung und gesetzlichen Aufbewahrungspflichten gelöscht/anonymisiert. Exportieren Sie Inhalte vorab, soweit möglich.
 
 10. Gewährleistung; Haftung (deutsches Recht)
@@ -70,6 +72,17 @@ Bei Verstößen können Inhalte gesperrt/entfernt und Konten vorübergehend oder
 - Unsere Rechte: Alle IP‑Rechte an der App liegen bei uns oder Lizenzgebern. Wir räumen eine nicht ausschließliche, nicht übertragbare, nicht unterlizenzierbare Nutzungsberechtigung nach diesen AGB ein.
 - Ihre Inhalte: Sie behalten die Rechte an Ihren Inhalten. Sie räumen uns die zur Bereitstellung der Dienste und zur Erfüllung gesetzlicher Pflichten erforderlichen Nutzungsrechte ein. Eine weitergehende Nutzung (z. B. Modellverbesserung) erfolgt nur gem. Datenschutzerklärung und – soweit erforderlich – mit Ihrer Einwilligung.
 - Beschränkungen: Kein Reverse Engineering/Umgehung technischer Schutzmaßnahmen, soweit nicht gesetzlich erlaubt.
+
+11a. Freistellung
+
+11a.1 Sie stellen uns sowie unsere Organe, Mitarbeiter, Vertreter und Unterauftragnehmer von sämtlichen Ansprüchen, Forderungen, Klagen, Schäden, Bußgeldern, Strafen, Verbindlichkeiten, Kosten und Aufwendungen (einschließlich angemessener Rechtsanwalts‑ und Gerichtskosten) frei, verteidigen uns und halten uns schadlos, die sich aus oder im Zusammenhang mit Folgendem ergeben:
+(a) Ihrer Nutzung der App, einschließlich jeglicher Nutzung, die gegen geltende Gesetze, Vorschriften oder vertragliche Bedingungen Dritter (u. a. Website‑Nutzungsbedingungen, Plattformregeln, technische Schutzmaßnahmen) verstößt,
+(b) der Behauptung, dass Ihre Nutzung der App einem Dritten Schaden zugefügt hat oder in Systeme oder Dienste eines Dritten eingegriffen hat, oder
+(c) jedem Verstoß gegen Zusicherungen, Verpflichtungen oder Pflichten aus diesen AGB.
+
+11a.2 Die Freistellungsverpflichtung gilt unabhängig davon, ob der Anspruch eines Dritten auf Vertrag, Delikt, gesetzliche Vorschriften oder andere Anspruchsgrundlagen gestützt wird.
+
+11a.3 Sie erstatten uns auf erste Anforderung sämtliche im Zusammenhang mit der Abwehr solcher Ansprüche entstehenden Kosten, einschließlich angemessener Rechtsanwalts‑ und Gerichtskosten; wir unterstützen Sie in zumutbarer Weise bei der Verteidigung.
 
 12. Datenschutz (DSGVO)
 - Verantwortlicher: Angaben siehe oben und in der Datenschutzerklärung (/privacy).
@@ -145,6 +158,7 @@ B4. Zulässige Nutzung / Beschränkungen
 - Sicherheit: Kein Scannen/Umgehen von Sicherheitsmaßnahmen; keine Umgehung von Rate‑Limits.
 - Fair Use: Einhaltung veröffentlichter/mitgeteilter Limits; bei Überschreitung können Drosselung/Sperrung erfolgen.
 - Wettbewerb: Kein Benchmarking/Scraping/Erstellen eines nahezu identischen Konkurrenzdienstes ohne Zustimmung.
+- Drittnutzungsbedingungen: Einhaltung von Nutzungsbedingungen Dritter, Plattformregeln und technischen Zugriffsbeschränkungen; keine unbefugte Nutzung/Einwirkung auf fremde Systeme und keine Umgehung technischer Schutzmaßnahmen.
 
 B5. Dienste und Verfügbarkeit
 - Funktion: KI‑gestützte Bildanalyse (z. B. POST /api/core/solve) sowie zugehörige Endpunkte (Health, Nutzung, Abrechnung).
@@ -154,6 +168,7 @@ B5. Dienste und Verfügbarkeit
 B6. Ausgaben und Genauigkeit
 - Keine Gewähr auf Richtigkeit/Vollständigkeit der KI‑Ausgaben; keine Nutzung für sicherheitskritische/rechts‑/fachberatende Zwecke.
 - Verantwortung: Validierung der Ausgaben und Entscheidungen liegt bei Ihnen.
+Sie erkennen an, dass wir nicht steuern, wie Sie die API verwenden. Sie tragen die alleinige Verantwortung für Integration, Konfiguration und Betrieb Ihrer Anwendung sowie für die Rechtmäßigkeit Ihrer Nutzung.
 
 B7. Entgelte/Abrechnung/Steuern (sofern anwendbar)
 - Preise: Abo und/oder nutzungsbasiert (EUR, ggf. zzgl. USt.).
@@ -177,7 +192,7 @@ B10. Sicherheitsanforderungen
 - Sie sind für die Sicherheit Ihrer Anwendung und erhobener Endnutzerdaten verantwortlich.
 
 B11. Sperrung/Kündigung
-- Sperrung/Entzug des API‑Zugangs bei Verstößen, Überschreitung von Limits, Sicherheitsrisiken oder rechtlichen Gründen – mit Vorankündigung, soweit zumutbar.
+- Sperrung/Entzug des API‑Zugangs bei Verstößen, Überschreitung von Limits, Sicherheitsrisiken oder rechtlichen Gründen – mit Vorankündigung, soweit zumutbar. Wir können den API‑Zugang mit sofortiger Wirkung beenden, wenn wir Kenntnis von einer rechtswidrigen Nutzung erlangen oder wenn die Nutzung uns rechtlichen Risiken aussetzt.
 - Beendigung durch Sie jederzeit durch Löschen der Tokens/Einstellung der Aufrufe; Entgelte bis dahin bleiben fällig.
 - Nach Beendigung können minimale Protokolle zu gesetzlichen/legitimen Zwecken aufbewahrt werden (vgl. Datenschutzerklärung).
 
@@ -197,3 +212,14 @@ B15. Gerichtsstand/Anwendbares Recht
 
 B16. Salvatorisches; Vorrangregel
 - Unwirksame Klauseln berühren den Rest nicht. Vorrang: individuelle Vereinbarung/AVV → Teil B → Teil A.
+
+B18. Freistellung
+
+B18.1 Sie stellen uns sowie unsere Organe, Mitarbeiter, Vertreter und Unterauftragnehmer von sämtlichen Ansprüchen, Forderungen, Klagen, Schäden, Bußgeldern, Strafen, Verbindlichkeiten, Kosten und Aufwendungen (einschließlich angemessener Rechtsanwalts‑ und Gerichtskosten) frei, verteidigen uns und halten uns schadlos, die sich aus oder im Zusammenhang mit Folgendem ergeben:
+(a) Ihrer Nutzung der API, einschließlich jeglicher Nutzung, die gegen geltende Gesetze, Vorschriften oder vertragliche Bedingungen Dritter (u. a. Website‑Nutzungsbedingungen, Plattformregeln, technische Schutzmaßnahmen) verstößt,
+(b) der Behauptung, dass Ihre Nutzung der API einem Dritten Schaden zugefügt hat oder in Systeme oder Dienste eines Dritten eingegriffen hat, oder
+(c) jedem Verstoß gegen Zusicherungen, Verpflichtungen oder Pflichten aus diesem Teil B oder den AGB.
+
+B18.2 Die Freistellungsverpflichtung gilt unabhängig davon, ob der Anspruch eines Dritten auf Vertrag, Delikt, gesetzliche Vorschriften oder andere Anspruchsgrundlagen gestützt wird.
+
+B18.3 Sie erstatten uns auf erste Anforderung sämtliche im Zusammenhang mit der Abwehr solcher Ansprüche entstehenden Kosten, einschließlich angemessener Rechtsanwalts‑ und Gerichtskosten; wir unterstützen Sie in zumutbarer Weise bei der Verteidigung.

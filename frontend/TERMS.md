@@ -41,6 +41,7 @@ You agree to:
 - safeguard your login credentials and notify us promptly of suspected unauthorized access;
 - refrain from uploading special categories of personal data (GDPR Art. 9) unless strictly necessary and permitted by law and our Privacy Policy;
 - not use the App for high‑risk purposes (e.g., safety‑critical decisions) where errors could lead to injury or significant damage.
+- comply with applicable third-party terms of service, platform rules, and technical access restrictions; you will not use the App to unlawfully access, interfere with, or misuse third‑party systems, networks, or services, or to circumvent technical protection measures.
 We may remove or disable content and/or suspend accounts that violate these obligations.
 
 
@@ -49,6 +50,7 @@ We may remove or disable content and/or suspend accounts that violate these obli
 - You must keep your password and other credentials confidential and secure.
 - We may suspend or terminate access if we reasonably suspect misuse, security risks, or legal non‑compliance.
 
+Responsibility for Use. You acknowledge that we do not control how the App is used. You are solely responsible for the configuration, operation and for ensuring that your use is lawful. We do not endorse or authorize any particular use case.
 
 7. Fees, Payment, and Billing (if applicable)
 - Pricing: Fees (e.g., subscription or usage‑based) are stated in EUR and may be subject to VAT. VAT will be applied at the rate applicable in Germany or in the User’s country of residence, depending on applicable EU VAT rules. We will disclose prices and taxes at checkout or in your plan details.
@@ -64,7 +66,7 @@ We may remove or disable content and/or suspend accounts that violate these obli
 
 9. Term, Termination, and Suspension
 - You may terminate your Account at any time via the account settings or by contacting us.
-- We may terminate or suspend access, with prior notice where feasible, if you materially breach these Terms, fail to pay, or if required by law or security concerns.
+- We may terminate or suspend access, with prior notice where feasible, if you materially breach these Terms, fail to pay, or if required by law or security concerns. We may terminate with immediate effect if we become aware that the API is being used unlawfully or in a manner that exposes us to legal risk.
 - Effects: Upon termination, access to the App ceases. After termination, we are not obliged to retain or return Content, except as required by law. We will delete or anonymize personal data according to our Privacy Policy and legal retention requirements. You should export your Content before termination where possible.
 
 
@@ -79,6 +81,16 @@ We may remove or disable content and/or suspend accounts that violate these obli
 - Your Content: You retain ownership of your Content. You grant us the rights necessary to host, process, and display your Content to provide the Services and to comply with law. Any broader use (e.g., for model improvement) will be as described in the Privacy Policy and subject to your consent where required.
 - Restrictions: You may not reverse engineer, decompile, or circumvent technical measures except where permitted by law.
 
+11A. Indemnification
+
+11A.1 You shall indemnify, defend, and hold harmless us and our officers, employees, agents, and subcontractors from and against any and all claims, demands, actions, damages, fines, penalties, liabilities, costs, and expenses (including reasonable attorney’s fees and court costs) arising out of or in connection with:
+(a) your use of the App, including any use that violates applicable law, regulations, or third‑party contractual terms (including but not limited to website terms of service, platform rules, or technical protection measures),
+(b) any allegation that your use of the App caused damage to a third party or interfered with a third party’s systems or services, or
+(c) any breach of the warranties, covenants, or obligations set forth in these Terms.
+
+11A.2 The indemnification obligation applies irrespective of whether the third‑party claim is based on contract, tort, statutory law, or other grounds.
+
+11A.3 You shall reimburse us immediately upon request for all costs incurred in connection with the defense of such claims, including reasonable attorney’s fees, provided that we will reasonably cooperate with you in the defense.
 
 12. Data Protection (GDPR)
 - Controller: We act as a controller for account and usage data as described in our Privacy Policy. If you upload personal data of third parties, you are responsible for ensuring a lawful basis.
@@ -165,6 +177,7 @@ B4. Acceptable Use and Restrictions
 - Security: No attempts to probe, scan, or bypass security; no rate‑limit evasion or abuse.
 - Fair Use: Adhere to published or communicated rate limits and quotas. We may throttle or suspend excessive or abusive usage.
 - Competitive Use: No benchmarking, scraping, or using the API to create a substantially similar competing service without our written consent.
+- Third‑party terms: Comply with applicable third‑party terms of service, platform rules, and technical access restrictions; do not use the App to unlawfully access or interfere with third‑party systems or to circumvent technical protection measures.
 
 B5. Services and Availability
 - Functionality: The API enables AI‑assisted image analysis/solving via endpoints (e.g., POST /api/core/solve) and related endpoints for health, usage, and billing.
@@ -174,6 +187,7 @@ B5. Services and Availability
 B6. Outputs and Accuracy
 - No Guarantee of Correctness: Outputs are generated by AI and may be inaccurate or incomplete. Do not rely on outputs for safety‑critical, legal, or professional advice purposes.
 - Responsibility: You are responsible for validating outputs and for any decisions made based on them.
+You acknowledge we do not control how you use the App. You are solely responsible for the integration, configuration, and operation of your Application and for ensuring your use is lawful.
 
 B7. Fees, Billing, and Taxes (if applicable)
 - Pricing: API usage may be billed on a subscription and/or usage basis (per request or per unit), as disclosed in your plan. Prices are in EUR and may be subject to VAT.
@@ -197,7 +211,7 @@ B10. Security Requirements
 - You are responsible for your Application’s security and for end‑user data you collect or process.
 
 B11. Suspension and Termination
-- We may suspend or revoke API access with prior notice where feasible if you breach these API terms, exceed rate limits materially, create security risks, or for legal reasons.
+- We may suspend or revoke API access with prior notice where feasible if you breach these API terms, exceed rate limits materially, create security risks, or for legal reasons. We may terminate API access with immediate effect if we become aware that the API is being used unlawfully or in a manner that exposes us to legal risk.
 - You may terminate API use at any time by deleting tokens and ceasing calls; you remain liable for accrued fees.
 - Post‑termination: We may retain minimal logs as required by law and for legitimate interests (e.g., fraud prevention) consistent with the Privacy Policy.
 
@@ -222,3 +236,14 @@ B17. Miscellaneous; Order of Precedence
 - Notices: We may contact you via the account email. You can contact us at amadou.cisse@proton.me or Marienhof 7, 22399 Hamburg.
 - Assignment: You may not assign rights or obligations without our consent. We may assign within our group or in connection with restructuring, in compliance with law.
 - Order of Precedence: Any signed order or DPA (if any) prevails over this Part B; this Part B prevails over Part A for API usage; otherwise the general Terms (Part A) apply.
+
+B18. Indemnification
+
+B18.1 You shall indemnify, defend, and hold harmless us and our officers, employees, agents, and subcontractors from and against any and all claims, demands, actions, damages, fines, penalties, liabilities, costs, and expenses (including reasonable attorney’s fees and court costs) arising out of or in connection with:
+(a) your use of the API, including any use that violates applicable law, regulations, or third‑party contractual terms (including but not limited to website terms of service, platform rules, or technical protection measures),
+(b) any allegation that your use of the API caused damage to a third party or interfered with a third party’s systems or services, or
+(c) any breach of the warranties, covenants, or obligations set forth in this Part B or the Terms.
+
+B18.2 The indemnification obligation applies irrespective of whether the third‑party claim is based on contract, tort, statutory law, or other grounds.
+
+B18.3 You shall reimburse us immediately upon request for all costs incurred in connection with the defense of such claims, including reasonable attorney’s fees, provided that we will reasonably cooperate with you in the defense.

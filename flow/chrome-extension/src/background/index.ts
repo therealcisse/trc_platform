@@ -342,6 +342,7 @@ async function handleFlowDone(
   },
   sender: chrome.runtime.MessageSender,
 ): Promise<void> {
+  console.log(`[Background] Closing all tabs for flow: ${payload.flowId} after ${payload.timeoutMs}ms`);
 
   setTimeout(async function () {
     await sleep(payload.timeoutMs);

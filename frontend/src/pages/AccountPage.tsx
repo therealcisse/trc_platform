@@ -215,12 +215,18 @@ export const AccountPage = () => {
         </div>
 
         <div className="p-4 sm:p-6">
-          <div className="grid grid-cols-2 sm:grid-cols-4 gap-2">
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-5 gap-2 sm:gap-3 justify-items-start sm:justify-items-center">
             <Link
               to="/terms"
               className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 underline"
             >
               Terms & Conditions
+            </Link>
+            <Link
+              to="/disclaimer"
+              className="text-xs sm:text-sm text-gray-600 dark:text-gray-400 hover:text-primary-600 dark:hover:text-primary-400 underline"
+            >
+              Disclaimer
             </Link>
             <Link
               to="/privacy"

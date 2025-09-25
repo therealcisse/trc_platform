@@ -187,8 +187,12 @@ export const RegisterPage = () => {
             By creating an account, you agree to our{' '}
             <Link to="/terms" className="underline hover:text-primary-600">
               Terms
-            </Link>{' '}
-            and acknowledge our{' '}
+            </Link>
+            {', '}acknowledge our{' '}
+            <Link to="/disclaimer" className="underline hover:text-primary-600">
+              Disclaimer
+            </Link>
+            {', and '}
             <Link to="/privacy" className="underline hover:text-primary-600">
               Privacy Policy
             </Link>

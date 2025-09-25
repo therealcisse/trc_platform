@@ -193,7 +193,21 @@ export async function executeBuyOfferWorkflow(
   const tabManager = TabManager.getInstance();
   const captchaProcessor = CaptchaProcessor.getInstance();
 
-  if (flow.status === 'done') {
+  // Check if this is a managed tab
+  const isManagedTab = tabManager.isTabManaged(context.tabId);
+
+  if (!isManagedTab) {
+    log.warn('Tab is not managed, skipping');
+    await log.write();
+    return {
+      success: false,
+      matcherId: context.matcherId,
+      executorName: 'myOffer',
+      error: 'Tab is not managed',
+    };
+  }
+
+  if (flow.status === 'done' || flow.status === 'failed') {
     log.info('❌ Flow is already done, closing all tabs');
     await tabManager.closeAllTabs(flow.id);
   }
@@ -259,7 +273,6 @@ export async function executeBuyOfferWorkflow(
         executorName: 'buyOffer',
         data: {
           flowId: flow.id,
-          // product: product.toString(),
           product: product,
           completedAt: Date.now(),
         },
@@ -342,10 +355,6 @@ export async function executeBuyOfferWorkflow(
     if (!context.dryRun) {
       log.info('Clicking buy button to complete purchase');
 
-      // Mark flow as done
-      log.info('Purchase completed successfully, marking flow as done');
-      await ConfigService.doneFlow(flow.id);
-
       log.info(`Flow ${flow.id} marked as completed`);
       // Clear buying state on success
       log.debug('Clearing buying state');
@@ -361,7 +370,7 @@ export async function executeBuyOfferWorkflow(
         context.config,
       );
 
-      const timeoutMs = remainingTime / 1000 + 5000;
+      const timeoutMs = remainingTime * 1000 + 5000;
       log.info(`Closing all tabs for flow: ${flow.id} after ${timeoutMs}ms`);
       await sendBackgroundCommand('flows.scheduleCloseAfterNavigation', {
         flowId: flow.id,
@@ -372,9 +381,19 @@ export async function executeBuyOfferWorkflow(
         log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
         await sleep(remainingTime - 100);
         log.debug('Processing time wait completed');
+      } else {
+        log.info(`Buying immediately ${flow.requestTimestamp}`);
       }
 
+      // Mark flow as done
+      log.info('Purchase completed successfully, marking flow as done');
+      await ConfigService.doneFlow(flow.id);
+
       log.info('Clicking on buyButton');
+
+      log.info(`✅ Buy offer workflow completed successfully for flow ${flow.id}`);
+      await log.write();
+
       await clickWithVerification(buyButton, {
         verify: false,
         scroll: false,
@@ -386,17 +405,13 @@ export async function executeBuyOfferWorkflow(
       log.info('Dry run: Would mark flow as done');
     }
 
-    log.info(`✅ Buy offer workflow completed successfully for flow ${flow.id}`);
-    await log.write();
-
     return {
       success: true,
       matcherId: context.matcherId,
       executorName: 'buyOffer',
       data: {
         flowId: flow.id,
-        // product: product.toString(),
-        product: 'OKK',
+        product: product,
         captchaProcessed: true,
         answer,
         completedAt: Date.now(),

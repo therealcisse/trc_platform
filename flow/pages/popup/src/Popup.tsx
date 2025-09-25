@@ -171,7 +171,9 @@ const Popup = () => {
                       <span>{t('popup_started', formatTime(flow.requestTimestamp))}</span>
                       <span>•</span>
                       <span>
-                        {flow.status === 'done' ? t('popup_duration', formatDuration(flow)) : formatDuration(flow)}
+                        {flow.status === 'done' || flow.status === 'failed'
+                          ? t('popup_duration', formatDuration(flow))
+                          : formatDuration(flow)}
                       </span>
                     </div>
                   </div>

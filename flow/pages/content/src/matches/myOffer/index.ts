@@ -170,7 +170,7 @@ export async function executeMyOfferWorkflow(
         const flowLog = Log.withFlow(context.matcherId, id);
 
         const flow = await ConfigService.getFlow(id);
-        if (flow && flow.status === 'done') {
+        if (flow && (flow.status === 'done' || flow.status === 'failed')) {
           flowLog.info('❌ Flow is already done, closing all tabs');
           await tabManager.closeAllTabs(flow.id);
         }

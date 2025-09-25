@@ -44,6 +44,7 @@ class User(AbstractBaseUser, PermissionsMixin):
     email_verified_at = models.DateTimeField(null=True, blank=True)
     date_joined = models.DateTimeField(auto_now_add=True)
     user_accepted_terms = models.BooleanField(default=False)
+    user_acknowledged_disclaimer = models.BooleanField(default=False)
 
     objects = UserManager()
 

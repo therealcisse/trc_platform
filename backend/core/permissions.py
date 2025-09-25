@@ -32,6 +32,18 @@ class HasAcceptedTerms(permissions.BasePermission):
         return user is not None and getattr(user, "user_accepted_terms", False)
 
 
+class HasAcknowledgedDisclaimer(permissions.BasePermission):
+    """
+    Allows access only to users who have acknowledged the disclaimer.
+    """
+
+    message = "You must acknowledge the disclaimer to use this feature."
+
+    def has_permission(self, request: Request, view: APIView) -> bool:
+        user = get_authenticated_user(request)
+        return user is not None and getattr(user, "user_acknowledged_disclaimer", False)
+
+
 class IsEmailVerified(permissions.BasePermission):
     """
     Custom permission to only allow access to users with verified email.

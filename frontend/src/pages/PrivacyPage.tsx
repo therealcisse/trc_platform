@@ -1,3 +1,4 @@
+import { Link } from 'react-router-dom';
 import { useState } from 'react';
 import privacyEN from '../../PRIVACY.en.md?raw';
 import privacyDE from '../../PRIVACY.de.md?raw';
@@ -49,6 +50,15 @@ export const PrivacyPage = () => {
         <pre className="whitespace-pre-wrap break-words text-sm sm:text-base leading-relaxed text-gray-900 dark:text-gray-100">
           {content}
         </pre>
+      </div>
+
+      <div className="mt-6">
+        <Link
+          to="/account"
+          className="text-sm text-primary-600 dark:text-primary-400 hover:underline"
+        >
+          {lang === 'en' ? 'Back' : 'Zurück'}
+        </Link>
       </div>
     </div>
   );

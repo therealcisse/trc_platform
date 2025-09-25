@@ -14,5 +14,15 @@ export function TermsGuard({ children }: { children: React.ReactNode }) {
   ) {
     return <Navigate to="/accept-terms" replace />;
   }
+  if (
+    isAuthenticated &&
+    user &&
+    user.userAcceptedTerms &&
+    !('userAcknowledgedDisclaimer' in user ? user.userAcknowledgedDisclaimer : true) &&
+    location.pathname !== '/accept-disclaimer' &&
+    location.pathname !== '/logout'
+  ) {
+    return <Navigate to="/accept-disclaimer" replace />;
+  }
   return <>{children}</>;
 }

@@ -52,6 +52,16 @@ class AcceptTermsView(APIView):
         return Response(status=status.HTTP_204_NO_CONTENT)
 
 
+class AcceptDisclaimerView(APIView):
+    permission_classes = [IsAuthenticated]
+
+    def post(self, request: Request) -> Response:
+        user = request.user
+        user.user_acknowledged_disclaimer = True
+        user.save(update_fields=["user_acknowledged_disclaimer"])
+        return Response(status=status.HTTP_204_NO_CONTENT)
+
+
 class RegisterView(APIView):
     permission_classes = [AllowAny]
 
@@ -116,6 +126,7 @@ class CurrentUserView(APIView):
                 "email": user.email,
                 "isEmailVerified": user.is_email_verified,
                 "userAcceptedTerms": user.user_accepted_terms,
+                "userAcknowledgedDisclaimer": getattr(user, "user_acknowledged_disclaimer", False),
                 "dateJoined": user.date_joined.isoformat(),
                 "csrfToken": csrf_token,  # Include CSRF token in response
             }

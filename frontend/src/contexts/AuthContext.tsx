@@ -70,6 +70,8 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     // After refresh, check acceptance
     if (user && !user.userAcceptedTerms) {
       navigate('/accept-terms');
+    } else if (user && 'userAcknowledgedDisclaimer' in user && !user.userAcknowledgedDisclaimer) {
+      navigate('/accept-disclaimer');
     } else {
       navigate('/dashboard');
     }

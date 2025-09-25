@@ -236,28 +236,34 @@ const Options = () => {
                       className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
                   </div>
-                  {config.emailMode && <div className="space-y-3">
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">{t('options_min_refresh')}</label>
-                      <input
-                        type="number"
-                        value={config.emailRefreshMin || 30}
-                        disabled={!config.emailMode}
-                        onChange={e => extensionConfigStorage.updateConfig({ emailRefreshMin: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                  {config.emailMode && (
+                    <div className="space-y-3">
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_min_refresh')}</label>
+                        <input
+                          type="number"
+                          value={config.emailRefreshMin || 30}
+                          disabled={!config.emailMode}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({ emailRefreshMin: Number(e.target.value) })
+                          }
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_max_refresh')}</label>
+                        <input
+                          type="number"
+                          value={config.emailRefreshMax || 60}
+                          disabled={!config.emailMode}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({ emailRefreshMax: Number(e.target.value) })
+                          }
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
                     </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">{t('options_max_refresh')}</label>
-                      <input
-                        type="number"
-                        value={config.emailRefreshMax || 60}
-                        disabled={!config.emailMode}
-                        onChange={e => extensionConfigStorage.updateConfig({ emailRefreshMax: Number(e.target.value) })}
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
-                  </div>}
+                  )}
                 </div>
 
                 {/* Inbox Mode */}

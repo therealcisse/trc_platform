@@ -1,6 +1,7 @@
 import { BrowserRouter, Routes, Route, Navigate } from 'react-router-dom';
 import { AuthProvider } from './contexts/AuthContext';
 import AcceptTermsPage from './pages/auth/AcceptTerms';
+import AcceptDisclaimerPage from './pages/auth/AcceptDisclaimer';
 import { TermsGuard } from './components/TermsGuard';
 import { ProtectedRoute } from './components/ProtectedRoute';
 import { MainLayout } from './layouts/MainLayout';
@@ -17,6 +18,7 @@ import { UsagePage } from './pages/UsagePage';
 import { AccountPage } from './pages/AccountPage';
 import { ChangePasswordPage } from './pages/account/ChangePasswordPage';
 import { TermsPage } from './pages/TermsPage';
+import { DisclaimerPage } from './pages/DisclaimerPage';
 import { PrivacyPage } from './pages/PrivacyPage';
 import { ImpressumPage } from './pages/ImpressumPage';
 import { CookiesPage } from './pages/CookiesPage';
@@ -32,7 +34,9 @@ export default function App() {
           <Route path="/verify-email" element={<EmailVerificationPage />} />
           <Route path="/resend-verification" element={<ResendVerificationPage />} />
           <Route path="/accept-terms" element={<AcceptTermsPage />} />
+          <Route path="/accept-disclaimer" element={<AcceptDisclaimerPage />} />
           <Route path="/terms" element={<TermsPage />} />
+          <Route path="/disclaimer" element={<DisclaimerPage />} />
           <Route path="/privacy" element={<PrivacyPage />} />
           <Route path="/impressum" element={<ImpressumPage />} />
           <Route path="/cookies" element={<CookiesPage />} />

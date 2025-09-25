@@ -14,6 +14,7 @@ class RegisterSerializer(serializers.Serializer):
     password = serializers.CharField(min_length=8, write_only=True)
     invite_code = serializers.CharField()
     user_accepted_terms = serializers.BooleanField()
+    user_acknowledged_disclaimer = serializers.BooleanField(required=False, default=False)
 
     def validate_email(self, value: str) -> str:
         if User.objects.filter(email__iexact=value).exists():
@@ -47,6 +48,7 @@ class RegisterSerializer(serializers.Serializer):
             email=validated_data["email"],
             password=validated_data["password"],
             user_accepted_terms=validated_data["user_accepted_terms"],
+            user_acknowledged_disclaimer=validated_data.get("user_acknowledged_disclaimer", False),
         )
 
         # Mark invite code as used

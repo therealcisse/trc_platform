@@ -3,6 +3,7 @@ export interface User {
   email: string;
   isEmailVerified: boolean;
   userAcceptedTerms: boolean;
+  userAcknowledgedDisclaimer: boolean; // NEW: indicates whether the user has acknowledged the Disclaimer
   dateJoined: Date;
 }
 

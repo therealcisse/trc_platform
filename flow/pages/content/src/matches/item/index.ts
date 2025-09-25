@@ -125,11 +125,6 @@ export async function executeItemWorkflow(
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
 
-  if (flow.status === 'done') {
-    log.info('❌ Flow is already done, closing all tabs');
-    await tabManager.closeAllTabs(flow.id);
-  }
-
   try {
     // Check if this is a managed tab
     const isManagedTab = tabManager.isTabManaged(context.tabId);
@@ -143,6 +138,11 @@ export async function executeItemWorkflow(
         executorName: 'item',
         error: 'Tab is not managed',
       };
+    }
+
+    if (flow.status === 'done' || flow.status === 'failed') {
+      log.info('❌ Flow is already completed, closing all tabs');
+      await tabManager.closeAllTabs(flow.id);
     }
 
     await processItem();
