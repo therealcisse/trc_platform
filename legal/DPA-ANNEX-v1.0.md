@@ -6,8 +6,8 @@ Between
 - Processor: Amadou Cisse, Marienhof 7, 22399 Hamburg, Germany ("Processor")
 
 This Annex forms part of and is incorporated by reference into the following underlying agreements between the same parties (each an "Underlying Agreement"):
-- API Service Agreement (SUBSCRIPTION-v1.0.md), and/or
-- Maintenance and Support Agreement(s) (MAINTENANCE-v1.0.md).
+- API Service Agreement, and/or
+- Maintenance and Support Agreement(s).
 
 1. Subject Matter and Duration
 - Subject matter: The Processor processes personal data on behalf of the Controller for the purposes of providing the services under the Underlying Agreement(s), including API operation and technical support/maintenance as applicable.
@@ -66,8 +66,8 @@ This Annex forms part of and is incorporated by reference into the following und
 - Controller is responsible for the lawfulness of the processing, obtaining necessary consents or other legal bases, providing required notices to data subjects, and for the accuracy, quality, and legality of personal data provided to Processor.
 
 15. Contact and Notices
-- Data protection contact for Controller: [insert contact/email]
-- Data protection contact for Processor: [insert contact/email]
+- Data protection contact for Controller: patrik.szmidt@gmail.com
+- Data protection contact for Processor: amadou.cisse@proton.me
 - Notices under this DPA may be given in Textform (e.g., email) unless a stricter form is required by law.
 
 16. Governing Law and Jurisdiction
@@ -85,3 +85,9 @@ Annex 2 — Technical and Organisational Measures (TOMs)
 
 Annex 3 — Subprocessors
 - Available upon request from Processor; any updates will be notified to Controller in accordance with Section 7.
+
+Signatures
+
+For the Provider: Place/Date, Name, Title, Signature
+
+For the Customer: Place/Date, Name, Title, Signature

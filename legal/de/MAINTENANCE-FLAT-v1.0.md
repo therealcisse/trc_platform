@@ -17,6 +17,10 @@ Am Casinopark 15
 Deutschland
 ("Kunde")
 
+### Begriffsbestimmungen
+
+- „Software“ bezeichnet die im Softwarelizenz- und Liefervertrag („SALE“) definierte Software „Flow“, wie in der „Funktionale Spezifikation „Flow“ (Nicht‑Technisch) v1.0“ beschrieben.
+
 ## 1. Leistungsumfang
 
 1.1 Dieser Vertrag umfasst Wartungs- und Supportleistungen für die Software, die gemäß dem Softwarelizenz- und Liefervertrag vom \[Datum einfügen] geliefert wurde.
@@ -61,11 +65,13 @@ Deutschland
 6.2 Eine Verlängerung für Folgemonate bedarf der schriftlichen Bestätigung (Textform ausreichend, z. B. E‑Mail).
 6.3 Kündigung aus wichtigem Grund. Jede Partei kann aus wichtigem Grund mit sofortiger Wirkung schriftlich kündigen, wenn die andere Partei diesen Vertrag wesentlich verletzt und die Verletzung nicht innerhalb von 14 Tagen nach Mitteilung behebt.
 
+6.4 Kündigung bei rechtswidriger Nutzung. Der Entwickler ist berechtigt, diesen Vertrag mit sofortiger Wirkung zu kündigen, wenn er Kenntnis davon erlangt, dass die Software unter Verstoß gegen geltendes Recht oder in einer Weise genutzt wird, die den Entwickler rechtlichen Risiken aussetzt. In diesem Fall enden alle dem Kunden eingeräumten Rechte automatisch, unbeschadet sonstiger Rechte oder Rechtsbehelfe des Entwicklers.
+
 ## 7. Vertraulichkeit und Datenschutz
 
 7.1 Vertraulichkeit. Jede Partei behandelt nicht‑öffentliche Informationen der jeweils anderen Partei vertraulich und nutzt sie ausschließlich zur Vertragserfüllung.
 
-7.2 Datenschutz. Soweit der Entwickler im Rahmen der Supportleistungen personenbezogene Daten für den Kunden verarbeitet, gilt der als Anlage beigefügte Auftragsverarbeitungsvertrag (DPA-ANNEX-v1.0.md) gemäß Art. 28 DSGVO.
+7.2 Datenschutz. Soweit der Entwickler im Rahmen der Supportleistungen personenbezogene Daten für den Kunden verarbeitet, gilt der als Anlage beigefügte „Auftragsverarbeitungsvertrag (Art. 28 DSGVO) — Anlage DPA“ gemäß Art. 28 DSGVO.
 
 ## 8. Ausschlüsse
 
@@ -78,6 +84,30 @@ Deutschland
 9.2 Höhere Gewalt. Keine Partei haftet für Verzögerungen oder Nichterfüllung aufgrund von Ereignissen außerhalb ihres zumutbaren Einflussbereichs.
 
 9.3 Änderungen bedürfen der Schriftform (Textform ausreichend, z. B. E‑Mail), sofern gesetzlich keine strengere Form erforderlich ist.
+
+## 10. Einhaltung von Recht und Nutzungsbedingungen
+
+Der Kunde sichert zu und gewährleistet, dass die Nutzung der Software sämtlichen anwendbaren Gesetzen, Verordnungen und vertraglichen Verpflichtungen (einschließlich Nutzungsbedingungen Dritter oder Zugriffs­beschränkungen) entspricht. Der Kunde darf die Software nicht in einer Weise nutzen oder nutzen lassen, die einen unrechtmäßigen Zugriff auf oder eine missbräuchliche Verwendung von Computersystemen, Netzen oder Diensten darstellt oder erleichtert.
+
+## 11. Verantwortlichkeit für die Nutzung
+
+Der Kunde erkennt an, dass der Entwickler keinen Einfluss darauf hat, wie die Software genutzt wird. Der Kunde trägt die alleinige Verantwortung für Installation, Konfiguration und Betrieb der Software und dafür, dass eine solche Nutzung rechtmäßig ist. Der Entwickler billigt oder autorisiert keinen bestimmten Anwendungsfall.
+
+## 12. Freistellung
+
+12.1 Der Kunde stellt den Entwickler sowie dessen Organe, Mitarbeiter, Vertreter und Unterauftragnehmer von sämtlichen Ansprüchen, Forderungen, Klagen, Schäden, Bußgeldern, Strafen, Verbindlichkeiten, Kosten und Aufwendungen (einschließlich angemessener Rechtsanwalts- und Gerichtskosten) frei, verteidigt sie und hält sie schadlos, die sich aus oder im Zusammenhang mit Folgendem ergeben:
+
+(a) der Nutzung der Software durch den Kunden, einschließlich jeglicher Nutzung, die gegen geltende Gesetze, Vorschriften oder vertragliche Bedingungen Dritter (einschließlich, aber nicht beschränkt auf Website‑Nutzungsbedingungen, Plattformregeln oder technische Schutzmaßnahmen) verstößt,
+(b) der Behauptung, dass die Nutzung der Software durch den Kunden einem Dritten Schaden zugefügt hat oder in Systeme oder Dienste eines Dritten eingegriffen hat, oder
+(c) jedem Verstoß gegen Zusicherungen, Verpflichtungen oder Pflichten aus diesem Vertrag.
+
+12.2 Die Freistellungsverpflichtung gilt unabhängig davon, ob der Anspruch eines Dritten auf Vertrag, Delikt, gesetzliche Vorschriften oder andere Anspruchsgrundlagen gestützt wird.
+
+12.3 Der Kunde erstattet dem Entwickler auf erste Anforderung sämtliche im Zusammenhang mit der Abwehr solcher Ansprüche entstehenden Kosten, einschließlich angemessener Rechtsanwalts- und Gerichtskosten, wobei der Entwickler den Kunden bei der Verteidigung in zumutbarer Weise unterstützt.
+
+## 13. Exportkontrolle und Compliance
+
+Beide Parteien halten alle anwendbaren Exportkontroll‑, Sanktions‑ und Handelsgesetze ein (einschließlich EU‑, deutschem und, soweit einschlägig, US‑Recht). Der Kunde verpflichtet sich, die Software/Services nicht in sanktionierte Länder, an gelistete Parteien oder für verbotene Zwecke zu exportieren oder weiterzugeben und erforderliche Genehmigungen einzuholen. Der Entwickler darf Leistungen aussetzen, wenn eine Verletzung vernünftigerweise zu vermuten ist.
 
 **Unterschriften**
 

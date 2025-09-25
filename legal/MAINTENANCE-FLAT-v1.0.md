@@ -18,6 +18,10 @@ Am Casinopark 15
 Germany
 ("Customer")
 
+### Definitions
+
+- “Software” means the software defined in the Software License and Delivery Agreement, as described in “Flow Deliverable Functional Specification (Non‑Technical) v1.0”.
+
 ## 1. Scope of Services
 
 1.1 This Agreement covers maintenance and support services for the Software delivered under the Software License and Delivery Agreement dated \[insert date].
@@ -62,11 +66,13 @@ Germany
 6.2 Renewal for subsequent months requires written confirmation (email is sufficient).
 6.3 Termination for Cause. Either party may terminate with immediate effect for cause upon written notice if the other party materially breaches this Agreement and fails to cure within 14 days of notice.
 
+6.4 Termination for Unlawful Use. The Developer may terminate this Agreement with immediate effect if it becomes aware that the Software is being used in violation of applicable law or in a manner that exposes the Developer to legal risk. In such case, all rights granted to the Customer shall automatically cease, without prejudice to the Developer’s other rights or remedies.
+
 ## 7. Confidentiality and Data Protection
 
 7.1 Confidentiality. Each party shall keep confidential any non-public information received from the other and use it only to perform this Agreement.
 
-7.2 Data Protection. To the extent the Developer processes personal data for the Customer while providing support, the Data Processing Agreement attached as Annex DPA (legal/DPA-ANNEX-v1.0.md) applies and governs such processing pursuant to Art. 28 GDPR.
+7.2 Data Protection. To the extent the Developer processes personal data for the Customer while providing support, the Data Processing Agreement attached as Annex titled “Data Processing Agreement (Art. 28 GDPR) — Annex DPA” applies and governs such processing pursuant to Art. 28 GDPR.
 
 ## 8. Exclusions
 
@@ -79,6 +85,30 @@ Germany
 9.2 Force Majeure. Neither party is liable for delays or failures caused by events beyond its reasonable control.
 
 9.3 Amendments must be in writing (Textform sufficient, e.g., email), unless a stricter form is required by law.
+
+## 10. Compliance with Law and Terms of Use
+
+The Customer warrants and represents that the use of the Software will comply with all applicable laws, regulations, and contractual obligations (including third-party terms of service or access restrictions). The Customer shall not use, or permit the use of, the Software in any manner that constitutes or facilitates unlawful access to or misuse of computer systems, networks, or services.
+
+## 11. Responsibility for Use
+
+The Customer acknowledges that the Developer has no control over how the Software is used. The Customer assumes sole responsibility for the installation, configuration, and operation of the Software and for ensuring that such use is lawful. The Developer does not endorse or authorize any particular use case.
+
+## 12. Indemnification
+
+12.1 The Customer shall indemnify, defend, and hold harmless the Developer, its officers, employees, agents, and subcontractors from and against any and all claims, demands, actions, damages, fines, penalties, liabilities, costs, and expenses (including reasonable attorney’s fees and court costs) arising out of or in connection with:
+
+(a) the Customer’s use of the Software, including any use that violates applicable law, regulations, or third-party contractual terms (including but not limited to website terms of service, platform rules, or technical protection measures),
+(b) any allegation that the Customer’s use of the Software caused damage to a third party or interfered with a third party’s systems or services, or
+(c) any breach of the warranties, covenants, or obligations set forth in this Agreement.
+
+12.2 The indemnification obligation applies irrespective of whether the third party claim is based on contract, tort, statutory law, or other grounds.
+
+12.3 The Customer shall reimburse the Developer immediately upon request for all costs incurred in connection with the defense of such claims, including reasonable attorney’s fees, provided that the Developer will reasonably cooperate with the Customer in the defense.
+
+## 13. Export Controls and Compliance
+
+Both parties will comply with applicable export control, sanctions, and trade laws (including EU, German, and, where applicable, US laws). The Customer will not export, re‑export, provide, or otherwise make available the Software/Services to sanctioned countries, listed parties, or prohibited end‑uses and will obtain required licenses. The Provider may suspend performance where a breach is reasonably suspected.
 
 **Signatures**
 

@@ -104,3 +104,30 @@ E. Product filters (if present)
 10) Warranty scope reference
 - The 90‑day warranty covers reproducible defects where the extension fails to perform the behaviors described here within the configured options and valid time windows, on the supported pages, under the agreed operating environment.
 - Changes to third‑party sites, additional pages, new flows, or behaviors not described in this document are out of scope and may require a separate paid engagement.
+
+11) Image Solver – Warranty and Use Notice
+- The Image Solver is an optional convenience feature that tries to read a math question from a picture and returns only the final numeric answer.
+- It relies on a third-party AI service. Accuracy, availability, and response times are not guaranteed and may change without notice.
+- Results may be incomplete or incorrect, or no problem may be detected—especially with unclear or low‑quality images. Always verify results independently.
+- This feature is not intended for safety‑critical or other high‑risk uses. Use is at your own risk, and we are not liable for losses arising from reliance on its output.
+- Images you submit are sent to an external provider only to process your request; we do not retain them longer than necessary to provide the service. Using this feature means you consent to this transfer.
+- We may limit, suspend, or discontinue this feature at any time (for example, due to provider limits, costs, policy, or abuse prevention).
+- If no valid math problem is detected, the service may return a message indicating that no problem was found.
+- This feature does not automatically modify your data or documents; it only returns a suggested answer for you to review.
+- This feature is provided “as is,” without warranties of any kind (including accuracy or fitness for a particular purpose).
+- Math problem recognition and output rules:
+  - If the image contains a math problem, return only the numerical answer.
+  - For expressions like "2+2", return "4".
+  - For equations like "x=5+3", return "8".
+  - If there are multiple problems, solve all and return answers separated by commas.
+  - If you cannot identify a math problem, return "ERROR: No math problem found".
+  - Do not include units, explanations, or any other text — just the number(s).
+- Examples (non-exhaustive):
+  - Image shows "3 + 5" → Return: "8"
+  - Image shows "12 × 4" → Return: "48"
+  - Image shows "100 ÷ 5" → Return: "20"
+  - Image shows "7 - 3" → Return: "4"
+  - Image shows "2³" → Return: "8"
+  - Image shows "√16" → Return: "4"
+  - Image shows "What is 15% of 200?" → Return: "30"
+  - Image shows multiple: "2+2" and "3×3" → Return: "4, 9"

@@ -18,11 +18,16 @@ Am Casinopark 15
 Germany
 ("Customer")
 
+### Definitions
+
+- “Software” means the software defined in this Agreement (“Flow”), as described in “Flow Deliverable Functional Specification (Non‑Technical) v1.0”.
+- “Specification” means “Flow Deliverable Functional Specification (Non‑Technical) v1.0” (Annex: Flow Specification).
+
 ## 1. Subject of the Agreement
 
 The Developer has created a software application ("Software") according to the Customer’s specifications.
 The Developer agrees to deliver the Software to the Customer, and the Customer agrees to pay the agreed fee, under the terms of this Agreement.
-The agreed technical specifications are set out in legal/SPEC-FLOW-v1.0.md (Annex: Flow Specification) and form an integral part of this Agreement.
+The agreed technical specifications are set out in “Flow Deliverable Functional Specification (Non‑Technical) v1.0” (Annex: Flow Specification) and form an integral part of this Agreement.
 
 ## 2. Delivery and Acceptance
 
@@ -74,7 +79,7 @@ The Developer retains all intellectual property rights to the Software, includin
 
 ## 5. Payment
 
-5.1 The total fee for the Software is **EUR 2,500 (two thousand five hundred euros) plus statutory VAT**.
+5.1 The total fee for the Software is **EUR 3,000 (two thousand five hundred euros) plus statutory VAT**.
 5.2 The fee is due within 14 days after delivery and acceptance.
 5.3 The Customer receives the rights of use only after full payment has been received.
 
@@ -99,6 +104,48 @@ Both parties shall keep confidential any business or technical information obtai
 7.7 Notices. Notices shall be sent to the addresses set out above or to any updated contact notified in writing.
 
 7.8 Order of Precedence and Entire Agreement. This Agreement constitutes the entire agreement between the parties with respect to the Software and prevails over conflicting terms unless the parties expressly agree otherwise in writing.
+
+## 8. Compliance with Law and Terms of Use
+
+The Customer warrants and represents that the use of the Software will comply with all applicable laws, regulations, and contractual obligations (including third-party terms of service or access restrictions). The Customer shall not use, or permit the use of, the Software in any manner that constitutes or facilitates unlawful access to or misuse of computer systems, networks, or services.
+
+## 9. Responsibility for Use
+
+The Customer acknowledges that the Developer has no control over how the Software is used. The Customer assumes sole responsibility for the installation, configuration, and operation of the Software and for ensuring that such use is lawful. The Developer does not endorse or authorize any particular use case.
+
+## 10. Indemnification
+
+10.1 The Customer shall indemnify, defend, and hold harmless the Developer, its officers, employees, agents, and subcontractors from and against any and all claims, demands, actions, damages, fines, penalties, liabilities, costs, and expenses (including reasonable attorney’s fees and court costs) arising out of or in connection with:
+
+(a) the Customer’s use of the Software, including any use that violates applicable law, regulations, or third-party contractual terms (including but not limited to website terms of service, platform rules, or technical protection measures),
+(b) any allegation that the Customer’s use of the Software caused damage to a third party or interfered with a third party’s systems or services, or
+(c) any breach of the warranties, covenants, or obligations set forth in this Agreement.
+
+10.2 The indemnification obligation applies irrespective of whether the third party claim is based on contract, tort, statutory law, or other grounds.
+
+10.3 The Customer shall reimburse the Developer immediately upon request for all costs incurred in connection with the defense of such claims, including reasonable attorney’s fees, provided that the Developer will reasonably cooperate with the Customer in the defense.
+
+## 11. Termination for Unlawful Use
+
+The Developer may terminate this Agreement with immediate effect if it becomes aware that the Software is being used in violation of applicable law or in a manner that exposes the Developer to legal risk. In such case, all rights granted to the Customer shall automatically cease, without prejudice to the Developer’s other rights or remedies.
+
+## 12. Export Controls and Compliance
+
+Both parties will comply with applicable export control, sanctions, and trade laws (including EU, German, and, where applicable, US laws). The Customer will not export, re‑export, provide, or otherwise make available the Software to sanctioned countries, listed parties, or prohibited end‑uses and will obtain required licenses. The Developer may suspend performance where a breach is reasonably suspected.
+
+## 13. Completion, Suspension, and (Optional) Early Cancellation
+
+1) One‑off engagement; no general termination
+This agreement covers a single delivery. It ends automatically once the agreed deliverables are provided and the final invoice is paid. Apart from the separate clause on illegal/unauthorized use, there is no ongoing termination right.
+
+2) Suspension for non‑payment or safety
+We may pause work or withhold handover if (a) invoices are overdue, (b) we reasonably believe the work is being used illegally or to violate third‑party rights, or (c) continuing work would create security, safety, or policy risks. Suspension does not waive any right to fees or other remedies.
+
+3) Optional — Termination by the Customer before Completion
+Before the final delivery, the Customer may terminate this Agreement in writing. In such case, the Customer undertakes to pay (i) for the services performed up to that point, (ii) for non-cancellable third-party expenses, and (iii) a cancellation fee of 30% of the remaining contract value (i.e. up to EUR 900, depending on the outstanding contract value). After payment, we will provide the work-in-progress “as is”. After final acceptance, no refund claims exist.
+
+4) Effect; survival
+Rights already granted for fully paid deliverables remain in effect. Confidentiality, IP/ownership, payment obligations, limitations of liability, and warranty disclaimers survive any cancellation, suspension, or completion.
 
 **Signatures**
 

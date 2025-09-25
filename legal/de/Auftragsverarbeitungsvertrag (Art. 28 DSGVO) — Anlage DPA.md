@@ -6,8 +6,8 @@ Zwischen
 - Auftragsverarbeiter: Amadou Cisse, Marienhof 7, 22399 Hamburg, Deutschland ("Auftragsverarbeiter")
 
 Diese Anlage ist Bestandteil der folgenden zugrunde liegenden Vereinbarungen zwischen denselben Parteien (jeweils eine „Zugrundeliegende Vereinbarung“):
-- API‑Dienstleistungsvertrag (SUBSCRIPTION.pdf), und/oder
-- Wartungs‑ und Supportvertrag/‑verträge (MAINTENANCE.pdf).
+- API‑Dienstleistungsvertrag, und/oder
+- Wartungs‑ und Supportvertrag/‑verträge.
 
 1. Gegenstand und Dauer
 - Gegenstand: Der Auftragsverarbeiter verarbeitet personenbezogene Daten im Auftrag des Verantwortlichen zum Zweck der Erbringung der Leistungen nach den Zugrundeliegenden Vereinbarungen, einschließlich API‑Betrieb sowie technischer Support/Wartung, soweit jeweils anwendbar.
@@ -66,8 +66,8 @@ Diese Anlage ist Bestandteil der folgenden zugrunde liegenden Vereinbarungen zwi
 - Der Verantwortliche ist für die Rechtmäßigkeit der Verarbeitung, das Einholen erforderlicher Einwilligungen oder anderer Rechtsgrundlagen, die Erfüllung von Informationspflichten sowie die Richtigkeit, Qualität und Rechtmäßigkeit der dem Auftragsverarbeiter bereitgestellten personenbezogenen Daten verantwortlich.
 
 15. Kontakt und Mitteilungen
-- Datenschutzkontakt des Verantwortlichen: [Kontakt/E‑Mail einfügen]
-- Datenschutzkontakt des Auftragsverarbeiters: [Kontakt/E‑Mail einfügen]
+- Datenschutzkontakt des Verantwortlichen: patrik.szmidt@gmail.com
+- Datenschutzkontakt des Auftragsverarbeiters: amadou.cisse@proton.me
 - Mitteilungen im Rahmen dieses DPA können in Textform (z. B. E‑Mail) erfolgen, sofern gesetzlich keine strengere Form vorgeschrieben ist.
 
 16. Anwendbares Recht und Gerichtsstand

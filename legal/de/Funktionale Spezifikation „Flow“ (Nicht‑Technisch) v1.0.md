@@ -104,3 +104,30 @@ E. Produktfilter (falls vorhanden)
 10) Bezug zur Gewährleistung
 - Die 90‑Tage‑Gewährleistung deckt reproduzierbare Fehler ab, bei denen die Erweiterung die hier beschriebenen Verhaltensweisen innerhalb der konfigurierten Optionen und gültigen Zeitfenster auf den unterstützten Seiten in der vereinbarten Umgebung nicht erbringt.
 - Änderungen an Drittseiten, zusätzliche Seiten, neue Flows oder hier nicht beschriebene Verhaltensweisen sind nicht umfasst und können eine gesonderte, vergütungspflichtige Beauftragung erfordern.
+
+11) Bildlöser – Gewährleistung und Nutzungshinweis
+- Der Bildlöser ist eine optionale Komfortfunktion, die versucht, eine Matheaufgabe aus einem Bild zu erkennen und nur das endgültige Zahlen‑Ergebnis zurückzugeben.
+- Er nutzt einen KI‑Dienst eines externen Anbieters. Genauigkeit, Verfügbarkeit und Antwortzeiten sind nicht garantiert und können sich ohne Ankündigung ändern.
+- Ergebnisse können unvollständig oder falsch sein, oder es wird keine Aufgabe erkannt – insbesondere bei unscharfen oder qualitativ schlechten Bildern. Bitte prüfen Sie Ergebnisse stets eigenständig.
+- Die Funktion ist nicht für sicherheitskritische oder andere risikoreiche Anwendungen gedacht. Die Nutzung erfolgt auf eigenes Risiko; wir haften nicht für Schäden, die aus der Nutzung der Ergebnisse entstehen.
+- Übermittelte Bilder werden ausschließlich zur Bearbeitung der Anfrage an den externen Anbieter übertragen; wir bewahren sie nicht länger auf als für die Leistungserbringung notwendig. Die Nutzung dieser Funktion setzt Ihre Zustimmung zu dieser Übertragung voraus.
+- Wir können die Funktion jederzeit einschränken, aussetzen oder einstellen (z. B. aufgrund von Anbieterlimits, Kosten, Richtlinien oder Missbrauchsprävention).
+- Wenn keine gültige Matheaufgabe erkannt wird, kann eine entsprechende Hinweis‑Meldung zurückgegeben werden.
+- Die Funktion ändert Ihre Daten oder Dokumente nicht automatisch; sie liefert lediglich einen Vorschlag, den Sie selbst prüfen.
+- Diese Funktion wird „wie besehen“ und ohne Gewähr bereitgestellt (einschließlich ohne Gewähr für Genauigkeit oder Eignung für einen bestimmten Zweck).
+- Erkennungs- und Ausgaberegeln für Matheaufgaben:
+  - Enthält das Bild eine Matheaufgabe, gib ausschließlich die numerische Lösung zurück.
+  - Bei Ausdrücken wie "2+2": gib "4" zurück.
+  - Bei Gleichungen wie "x=5+3": gib "8" zurück.
+  - Gibt es mehrere Aufgaben, löse alle und gib die Lösungen kommagetrennt aus.
+  - Kann keine Matheaufgabe erkannt werden, gib "ERROR: No math problem found" zurück.
+  - Keine Einheiten, Erklärungen oder sonstiger Text — nur die Zahl(en).
+- Beispiele (nicht abschließend):
+  - Bild zeigt "3 + 5" → Rückgabe: "8"
+  - Bild zeigt "12 × 4" → Rückgabe: "48"
+  - Bild zeigt "100 ÷ 5" → Rückgabe: "20"
+  - Bild zeigt "7 - 3" → Rückgabe: "4"
+  - Bild zeigt "2³" → Rückgabe: "8"
+  - Bild zeigt "√16" → Rückgabe: "4"
+  - Bild zeigt "Wie viel sind 15 % von 200?" → Rückgabe: "30"
+  - Bild zeigt mehrere: "2+2" und "3×3" → Rückgabe: "4, 9"

@@ -22,7 +22,7 @@ Deutschland
 
 Der Entwickler hat eine Software‑Anwendung ("Software") nach den Spezifikationen des Kunden erstellt.
 Der Entwickler verpflichtet sich, die Software an den Kunden zu liefern, und der Kunde verpflichtet sich, das vereinbarte Entgelt zu zahlen, jeweils nach Maßgabe dieses Vertrags.
-Die vereinbarten technischen Spezifikationen sind in SPECIFICATION.pdf (Anlage: Flow‑Spezifikation) festgehalten und bilden einen integrierten Bestandteil dieses Vertrags.
+Die vereinbarten technischen Spezifikationen sind in Funktionale Spezifikation „Flow“ (Nicht‑Technisch) v1.0 (Anlage: Flow‑Spezifikation) festgehalten und bilden einen integrierten Bestandteil dieses Vertrags.
 
 ## 2. Lieferung und Abnahme
 
@@ -74,7 +74,7 @@ Der Entwickler behält sämtliche Rechte an geistigem Eigentum an der Software, 
 
 ## 5. Vergütung
 
-5.1 Die Gesamtvergütung für die Software beträgt **2.500 EUR (zweitausendfünfhundert Euro) zzgl. gesetzlicher USt.**
+5.1 Die Gesamtvergütung für die Software beträgt **3.000 EUR (dreitausend Euro) zzgl. gesetzlicher USt.**
 5.2 Die Vergütung ist innerhalb von 14 Tagen nach Lieferung und Abnahme fällig.
 5.3 Der Kunde erlangt die Nutzungsrechte erst nach vollständigem Zahlungseingang.
 
@@ -100,15 +100,53 @@ Beide Parteien behandeln im Rahmen dieses Vertrags erlangte geschäftliche oder 
 
 7.8 Rangfolge und Gesamtabrede. Dieser Vertrag stellt die Gesamtabrede der Parteien in Bezug auf die Software dar und geht entgegenstehenden Bedingungen vor, sofern die Parteien nicht ausdrücklich schriftlich etwas anderes vereinbaren.
 
+## 8. Einhaltung von Recht und Nutzungsbedingungen
+
+Der Kunde sichert zu und gewährleistet, dass die Nutzung der Software sämtlichen anwendbaren Gesetzen, Verordnungen und vertraglichen Verpflichtungen (einschließlich Nutzungsbedingungen Dritter oder Zugriffs­beschränkungen) entspricht. Der Kunde darf die Software nicht in einer Weise nutzen oder nutzen lassen, die einen unrechtmäßigen Zugriff auf oder eine missbräuchliche Verwendung von Computersystemen, Netzen oder Diensten darstellt oder erleichtert.
+
+## 9. Verantwortlichkeit für die Nutzung
+
+Der Kunde erkennt an, dass der Entwickler keinen Einfluss darauf hat, wie die Software genutzt wird. Der Kunde trägt die alleinige Verantwortung für Installation, Konfiguration und Betrieb der Software und dafür, dass eine solche Nutzung rechtmäßig ist. Der Entwickler billigt oder autorisiert keinen bestimmten Anwendungsfall.
+
+## 10. Freistellung
+
+10.1 Der Kunde stellt den Entwickler sowie dessen Organe, Mitarbeiter, Vertreter und Unterauftragnehmer von sämtlichen Ansprüchen, Forderungen, Klagen, Schäden, Bußgeldern, Strafen, Verbindlichkeiten, Kosten und Aufwendungen (einschließlich angemessener Rechtsanwalts- und Gerichtskosten) frei, verteidigt sie und hält sie schadlos, die sich aus oder im Zusammenhang mit Folgendem ergeben:
+
+(a) der Nutzung der Software durch den Kunden, einschließlich jeglicher Nutzung, die gegen geltende Gesetze, Vorschriften oder vertragliche Bedingungen Dritter (einschließlich, aber nicht beschränkt auf Website‑Nutzungsbedingungen, Plattformregeln oder technische Schutzmaßnahmen) verstößt,
+(b) der Behauptung, dass die Nutzung der Software durch den Kunden einem Dritten Schaden zugefügt hat oder in Systeme oder Dienste eines Dritten eingegriffen hat, oder
+(c) jedem Verstoß gegen Zusicherungen, Verpflichtungen oder Pflichten aus diesem Vertrag.
+
+10.2 Die Freistellungsverpflichtung gilt unabhängig davon, ob der Anspruch eines Dritten auf Vertrag, Delikt, gesetzliche Vorschriften oder andere Anspruchsgrundlagen gestützt wird.
+
+10.3 Der Kunde erstattet dem Entwickler auf erste Anforderung sämtliche im Zusammenhang mit der Abwehr solcher Ansprüche entstehenden Kosten, einschließlich angemessener Rechtsanwalts- und Gerichtskosten, wobei der Entwickler den Kunden bei der Verteidigung in zumutbarer Weise unterstützt.
+
+## 11. Kündigung bei rechtswidriger Nutzung
+
+Der Entwickler ist berechtigt, diesen Vertrag mit sofortiger Wirkung zu kündigen, wenn er Kenntnis davon erlangt, dass die Software unter Verstoß gegen geltendes Recht oder in einer Weise genutzt wird, die den Entwickler rechtlichen Risiken aussetzt. In diesem Fall enden alle dem Kunden eingeräumten Rechte automatisch, unbeschadet sonstiger Rechte oder Rechtsbehelfe des Entwicklers.
+
+## 12. Abschluss, Aussetzung und (optionale) vorzeitige Beendigung
+
+1) Einmalige Beauftragung; keine allgemeine Kündigung
+Diese Vereinbarung betrifft eine einmalige Lieferung. Sie endet automatisch mit Übergabe der vereinbarten Leistungen und Zahlung der Schlussrechnung. Abgesehen von der gesonderten Regelung zur rechtswidrigen/unerlaubten Nutzung besteht kein fortlaufendes Kündigungsrecht.
+
+2) Aussetzung bei Zahlungsverzug oder Sicherheitsrisiken
+Wir dürfen die Arbeit pausieren oder die Übergabe zurückhalten, wenn (a) Rechnungen überfällig sind, (b) die Leistung nach unserer vernünftigen Einschätzung rechtswidrig genutzt wird oder Rechte Dritter verletzt, oder (c) die Fortführung Sicherheits‑, Schutz‑ oder Compliance‑Risiken verursachen würde. Eine Aussetzung berührt unsere Ansprüche auf Vergütung und sonstige Rechte nicht.
+
+3) Optional — Beendigung durch den Auftraggeber vor Abschluss
+Vor der endgültigen Übergabe kann der Auftraggeber schriftlich beenden. In diesem Fall verpflichtet er sich zur Zahlung (i) der bis dahin erbrachten Leistungen, (ii) nicht stornierbarer Drittaufwände, und (iii) einer Abbruchpauschale von 30 % des Restauftragswerts (d. h. bis zu 900 EUR, abhängig vom noch offenen Auftragswert). Nach Zahlung stellen wir den Zwischenstand „wie besehen“ zur Verfügung. Nach endgültiger Abnahme bestehen keine Rückzahlungsansprüche.
+
+4) Rechtsfolgen; Fortgeltung
+Bereits für vollständig bezahlte Leistungen eingeräumte Rechte bleiben bestehen. Vertraulichkeit, Urheber‑/IP‑Regelungen, Zahlungspflichten, Haftungsbegrenzungen und Gewährleistungsausschlüsse gelten auch nach Beendigung, Aussetzung oder Abschluss fort.
+
 **Unterschriften**
 
 Amadou Cisse (Entwickler)
 
 
-Datum: ______________________________
+______________________________
 
 
 Patrycjusz Szmidt (Kunde)
 
 
-Datum: ______________________________
+______________________________

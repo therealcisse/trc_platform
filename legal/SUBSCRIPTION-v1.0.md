@@ -18,9 +18,15 @@ Am Casinopark 15
 Germany
 ("Customer")
 
+### Definitions
+
+- “API” means the Provider’s application programming interface for accessing the services.
+- “API Call” means a single request to the API as recorded by the system.
+- “Management UI” means the administrative interface for configuration, administration, and viewing usage/billing data.
+
 ## 1. Subject of the Agreement
 
-1.1 The Provider offers the Customer access to an API service ("API") for use in connection with the application delivered under the Software License and Delivery Agreement dated September 23, 2025.
+1.1 The Provider offers the Customer access to an API service ("API") for use in connection with the application delivered under the Software License and Delivery Agreement dated 26 September 2025.
 1.2 The API enables the Customer to make requests, with each request incurring a fee as defined in Section 3.
 1.3 The Provider also supplies a management interface ("Management UI") that allows the Customer to register and manage API tokens, monitor usage, view costs, and access billing information.
 
@@ -57,6 +63,8 @@ Germany
 5.2 The Provider reserves the right to suspend access if the API is used in violation of the Agreement or to cause harm to the system.
 5.3 Rate Limits. The Provider may enforce reasonable rate limits and quotas to protect system stability. Default limits are displayed in the Management UI and may be adjusted upon reasonable notice. The Customer will implement retry/backoff and respect HTTP 429 responses.
 
+5.4 Compliance with Law and Terms of Use. The Customer warrants and represents that the use of the API will comply with all applicable laws, regulations, and contractual obligations (including third-party terms of service or access restrictions). The Customer shall not use, or permit the use of, the API in any manner that constitutes or facilitates unlawful access to or misuse of computer systems, networks, or services.
+
 ## 6. Liability
 
 6.1 Liability Carve-outs. Nothing in this Agreement limits or excludes liability for intent, gross negligence, injury to life, body or health, or under the German Product Liability Act.
@@ -69,6 +77,8 @@ Germany
 7.2 Either party may terminate with one month’s notice to the end of a billing period.
 7.3 The Provider may suspend or terminate the Agreement immediately if the Customer is in payment default or violates the acceptable use terms.
 7.4 Data Export. Upon termination, the Customer may export available usage and billing data through the Management UI for 30 days; thereafter the Provider may delete the Customer’s account data, except where retention is required by law.
+
+7.5 Termination for Unlawful Use. The Provider may terminate this Agreement with immediate effect if it becomes aware that the API is being used in violation of applicable law or in a manner that exposes the Provider to legal risk. In such case, all rights granted to the Customer shall automatically cease, without prejudice to the Provider’s other rights or remedies.
 
 ## 8. Miscellaneous
 
@@ -83,7 +93,7 @@ Germany
 
 ## 9. Data Protection and Security
 
-9.1 Roles. To the extent the Provider processes personal data on behalf of the Customer in providing the API, the Data Processing Agreement attached as Annex DPA (legal/DPA-ANNEX-v1.0.md) forms part of this Agreement and governs such processing (Art. 28 GDPR). The Provider will implement appropriate technical and organizational measures (TOMs) as described therein.
+9.1 Roles. To the extent the Provider processes personal data on behalf of the Customer in providing the API, the Data Processing Agreement attached as Annex titled “Data Processing Agreement (Art. 28 GDPR) — Annex DPA” forms part of this Agreement and governs such processing (Art. 28 GDPR). The Provider will implement appropriate technical and organizational measures (TOMs) as described therein.
 
 9.2 Security and Breach Notification. The Provider will maintain reasonable administrative, technical, and organizational measures to protect the API and Customer data and will notify the Customer without undue delay after becoming aware of a personal data breach affecting the Customer’s data.
 
@@ -94,6 +104,30 @@ Germany
 10.1 The Provider may release new API versions. Backwards-incompatible changes will be announced with reasonable prior notice.
 
 10.2 Deprecation. The Provider will provide at least 60 days’ notice before deprecating a stable API version, and at least 30 days’ notice for material changes that are not backwards compatible, unless required to address security, legal, or system stability issues.
+
+## 11. Responsibility for Use
+
+The Customer acknowledges that the Provider has no control over how the API is used. The Customer assumes sole responsibility for the installation, configuration, and operation of the API and for ensuring that such use is lawful. The Provider does not endorse or authorize any particular use case.
+
+## 12. Indemnification
+
+12.1 The Customer shall indemnify, defend, and hold harmless the Provider, its officers, employees, agents, and subcontractors from and against any and all claims, demands, actions, damages, fines, penalties, liabilities, costs, and expenses (including reasonable attorney’s fees and court costs) arising out of or in connection with:
+
+(a) the Customer’s use of the API, including any use that violates applicable law, regulations, or third-party contractual terms (including but not limited to website terms of service, platform rules, or technical protection measures),
+(b) any allegation that the Customer’s use of the API caused damage to a third party or interfered with a third party’s systems or services, or
+(c) any breach of the warranties, covenants, or obligations set forth in this Agreement.
+
+12.2 The indemnification obligation applies irrespective of whether the third party claim is based on contract, tort, statutory law, or other grounds.
+
+12.3 The Customer shall reimburse the Provider immediately upon request for all costs incurred in connection with the defense of such claims, including reasonable attorney’s fees, provided that the Provider will reasonably cooperate with the Customer in the defense.
+
+## 13. Audit Rights
+
+The Customer may audit service usage and billing once per 12‑month period with at least 14 days’ prior notice during business hours. The audit is limited to necessary records (usage and metering logs), is subject to confidentiality, and must not unreasonably disrupt operations. If an undercharge to the Customer exceeding 5% is found, the Provider will pay reasonable audit costs; otherwise the Customer bears them. Statutory rights remain unaffected.
+
+## 14. Export Controls and Compliance
+
+Both parties will comply with applicable export control, sanctions, and trade laws (including EU, German, and, where applicable, US laws). The Customer will not export, re‑export, provide, or otherwise make available the Services to sanctioned countries, listed parties, or prohibited end‑uses and will obtain required licenses. The Provider may suspend performance where a breach is reasonably suspected.
 
 **Signatures**
 
