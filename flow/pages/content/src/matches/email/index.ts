@@ -68,9 +68,7 @@ class EmailMatcher implements Matcher {
       const response = await sendBackgroundCommand('email.openUnreadAndClickLink', {
         selectors: {
           unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
-          itemTitle: 'p:nth-child(2)',
-          itemLink: 'a',
-          emailBody: '#x_body',
+          emailBody: '#x_body a[title*="item.php"]',
           markAsReadButton: 'span',
         },
       });
@@ -173,6 +171,11 @@ export async function executeEmailWorkflow(
       return document.querySelectorAll(selectors.unreadEmail);
     }
 
+    function getAnchorTitle(el: Element): string | null {
+      if (el instanceof HTMLAnchorElement) return el.title || null;
+      return el.getAttribute('title'); // fallback for non-anchors, returns string|null
+    }
+
     async function processEmails(): Promise<void> {
       try {
         // Find all unread emails
@@ -196,24 +199,24 @@ export async function executeEmailWorkflow(
           await sleep(1000);
 
           try {
-            const emailBody = await waitForSelector(selectors.emailBody, {
+            // Find link in email body
+            const linkElement = await waitForSelector(selectors.emailBody, {
               timeout: 3000,
               visible: true,
             });
 
-            // Find link in email body
-            const linkElement = emailBody.querySelector(selectors.itemLink);
-
             if (linkElement instanceof HTMLAnchorElement) {
-              const href = linkElement.href;
+              const href = getAnchorTitle(linkElement);
+
+              if (!href) {
+                continue;
+              }
+
               let id: string;
 
               try {
-                const titleElement = emailBody.querySelector(selectors.itemTitle);
-                const title = titleElement?.textContent ?? '';
-
                 // Parse ID from path as per requirement
-                id = FlowUtils.parseIDFromTitle(title);
+                id = FlowUtils.parseIDFromHref(href);
               } catch (e) {
                 const errorMsg = `Failed to parse ID from ${href}: ${e}`;
                 log.error(errorMsg);
@@ -301,7 +304,6 @@ export async function executeEmailWorkflow(
       executorName: 'email',
       data: {
         processedCount,
-        visitedUrls: Object.keys(visitedUrls),
         refreshSeconds: randomRefreshSeconds,
       },
       telemetry: {
