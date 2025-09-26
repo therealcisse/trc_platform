@@ -69,7 +69,7 @@ class MyOfferMatcher implements Matcher {
     const response = await sendBackgroundCommand('myOffer.clickProductLink', {
       selectors: {
         itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
-        titleLink: 'h3.panel-title',
+        titleLink: '.message_center_message thead tr:nth-child(2) td:nth-child(2)',
       },
     });
 
