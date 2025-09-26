@@ -172,6 +172,30 @@ export async function executeEmailWorkflow(
       return document.querySelectorAll(selectors.unreadEmail);
     }
 
+    function getOriginalUrl(input: string): string | null {
+      try {
+        const u = new URL(input);
+        const raw = u.searchParams.get("originalUrl");
+        if (!raw) return null;
+
+        // Decode up to 3 times to handle double encoded values safely.
+        let prev = raw;
+        for (let i = 0; i < 3; i++) {
+          try {
+            const next = decodeURIComponent(prev);
+            if (next === prev) break;
+            prev = next;
+          } catch {
+            // Stop if the current layer is not valid percent encoding.
+            break;
+          }
+        }
+        return prev;
+      } catch {
+        return null;
+      }
+    }
+
     async function processEmails(): Promise<void> {
       try {
         // Find all unread emails
@@ -202,12 +226,12 @@ export async function executeEmailWorkflow(
             });
 
             if (linkElement instanceof HTMLAnchorElement) {
-              const href = linkElement.href;
+              const href = getOriginalUrl(linkElement.href) || linkElement.href;
               let id: string;
 
               try {
                 // Parse ID from path as per requirement
-                id = FlowUtils.parseIDFromPath(href);
+                id = FlowUtils.parseIDFromHref(href);
               } catch (e) {
                 const errorMsg = `Failed to parse ID from ${href}: ${e}`;
                 log.error(errorMsg);
