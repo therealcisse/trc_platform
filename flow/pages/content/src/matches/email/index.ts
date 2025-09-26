@@ -68,7 +68,9 @@ class EmailMatcher implements Matcher {
       const response = await sendBackgroundCommand('email.openUnreadAndClickLink', {
         selectors: {
           unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
-          emailBody: '#x_body a',
+          itemTitle: 'p:nth-child(2)',
+          itemLink: 'a',
+          emailBody: '#x_body',
           markAsReadButton: 'span',
         },
       });
@@ -139,7 +141,6 @@ export async function executeEmailWorkflow(
   const startTime = Date.now();
   const errors: Error[] = [];
   let processedCount = 0;
-  const visitedUrls: Record<string, boolean> = {}; // local url tracking within this email session
 
   try {
     // Get configuration
@@ -172,30 +173,6 @@ export async function executeEmailWorkflow(
       return document.querySelectorAll(selectors.unreadEmail);
     }
 
-    function getOriginalUrl(input: string): string | null {
-      try {
-        const u = new URL(input);
-        const raw = u.searchParams.get("originalUrl");
-        if (!raw) return null;
-
-        // Decode up to 3 times to handle double encoded values safely.
-        let prev = raw;
-        for (let i = 0; i < 3; i++) {
-          try {
-            const next = decodeURIComponent(prev);
-            if (next === prev) break;
-            prev = next;
-          } catch {
-            // Stop if the current layer is not valid percent encoding.
-            break;
-          }
-        }
-        return prev;
-      } catch {
-        return null;
-      }
-    }
-
     async function processEmails(): Promise<void> {
       try {
         // Find all unread emails
@@ -219,19 +196,24 @@ export async function executeEmailWorkflow(
           await sleep(1000);
 
           try {
-            // Find link in email body
-            const linkElement = await waitForSelector(selectors.emailBody, {
+            const emailBody = await waitForSelector(selectors.emailBody, {
               timeout: 3000,
               visible: true,
             });
 
+            // Find link in email body
+            const linkElement = emailBody.querySelector(selectors.itemLink);
+
             if (linkElement instanceof HTMLAnchorElement) {
-              const href = getOriginalUrl(linkElement.href) || linkElement.href;
+              const href = linkElement.href;
               let id: string;
 
               try {
+                const titleElement = emailBody.querySelector(selectors.itemTitle);
+                const title = titleElement?.textContent ?? '';
+
                 // Parse ID from path as per requirement
-                id = FlowUtils.parseIDFromHref(href);
+                id = FlowUtils.parseIDFromTitle(title);
               } catch (e) {
                 const errorMsg = `Failed to parse ID from ${href}: ${e}`;
                 log.error(errorMsg);
@@ -258,30 +240,23 @@ export async function executeEmailWorkflow(
               flowLog.info(`Processing new email flow`, { href });
 
               // Check if we've already visited this URL
-              if (!visitedUrls[href]) {
-                visitedUrls[href] = true;
+              // Mark email as read
+              await markEmailAsRead(selectors.markAsReadButton);
 
-                // Mark email as read
-                await markEmailAsRead(selectors.markAsReadButton);
+              flowLog.info(`Opening link: ${href}`);
 
-                flowLog.info(`Opening link: ${href}`);
-
-                if (!context.dryRun) {
-                  // Open link in new managed tab
-                  await sendBackgroundCommand('tab.manage', {
-                    action: 'open',
-                    url: href,
-                  });
-                } else {
-                  flowLog.debug('Dry run: Would open link in new tab');
-                }
-
-                await flowLog.write();
-                processedCount++;
+              if (!context.dryRun) {
+                // Open link in new managed tab
+                await sendBackgroundCommand('tab.manage', {
+                  action: 'open',
+                  url: href,
+                });
               } else {
-                flowLog.info('Link already visited, skipping');
-                await flowLog.write();
+                flowLog.debug('Dry run: Would open link in new tab');
               }
+
+              await flowLog.write();
+              processedCount++;
             }
           } catch (error) {
             log.error(`Error processing email content: ${error}`);

@@ -201,6 +201,8 @@ export interface EmailCommand {
 export interface EmailSelectors {
   unreadEmail: string;
   emailBody: string;
+  itemTitle: string;
+  itemLink: string;
   markAsReadButton: string;
 }
 
