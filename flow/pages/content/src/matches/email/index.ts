@@ -163,14 +163,14 @@ export async function executeEmailWorkflow(
     // Process emails
     await processEmails();
 
-    const getUnreadEmails = async (maxRetries = 3, interval = 500): Promise<NodeListOf<Element>> => {
+    async function getUnreadEmails(maxRetries = 3, interval = 500): Promise<NodeListOf<Element>> {
       for (let i = 0; i < maxRetries; i++) {
         const emails = document.querySelectorAll(selectors.unreadEmail);
         if (emails.length > 0) return emails;
         await sleep(interval * Math.pow(2, i)); // Exponential backoff
       }
       return document.querySelectorAll(selectors.unreadEmail);
-    };
+    }
 
     async function processEmails(): Promise<void> {
       try {
