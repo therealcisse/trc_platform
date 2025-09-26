@@ -50,11 +50,6 @@ command -v zip >/dev/null 2>&1 || die "zip not found"
 
 git rev-parse --is-inside-work-tree >/dev/null 2>&1 || die "Not a git repository."
 
-echo "Running build"
-pnpm build
-
-[[ -d "$DIST_DIR" ]] || die "Dist folder '$DIST_DIR' does not exist."
-
 # =========================
 # Version bump, commit
 # =========================
@@ -66,6 +61,11 @@ else
   VERSION="$(node -p "require('./package.json').version")"
   echo "Using existing version: $VERSION"
 fi
+
+echo "Running build"
+pnpm build
+
+[[ -d "$DIST_DIR" ]] || die "Dist folder '$DIST_DIR' does not exist."
 
 echo "Staging and committing build changes"
 git add -A

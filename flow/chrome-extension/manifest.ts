@@ -69,7 +69,7 @@ const manifest = {
     {
       matches: [
         'http://localhost:8082/myOffer/*',
-        'https://auktion.hansemerkur.de/my_message_center_show_message.php',
+        'https://auktion.hansemerkur.de/my_message_center_show_message.php*',
       ],
       js: ['content/myOffer.iife.js'],
       run_at: 'document_end',

@@ -456,7 +456,7 @@ const Options = () => {
                   <div className="flex items-center justify-between">
                     <h3 className="font-medium">{t('options_cancer_insurance')}</h3>
                     <Switch
-                      checked={config.people || false}
+                      checked={config.cancer || false}
                       onCheckedChange={() => handleConfigToggle('cancer')}
                       className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                     />
