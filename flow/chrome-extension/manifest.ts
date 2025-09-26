@@ -53,7 +53,7 @@ const manifest = {
     {
       matches: [
         'http://localhost:8082/item/*',
-        'https://auktion.hansemerkur.de/item.php',
+        'https://auktion.hansemerkur.de/item.php*',
       ],
       js: ['content/item.iife.js'],
       run_at: 'document_end',
