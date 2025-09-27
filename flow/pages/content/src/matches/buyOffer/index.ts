@@ -317,6 +317,28 @@ export async function executeBuyOfferWorkflow(
 
     log.info('Flow validation successful');
 
+    function getImageToDataURL(img: HTMLImageElement, type: string = 'image/png', quality?: number): string {
+      if (!img.complete || img.naturalWidth === 0) {
+        throw new Error('Image not loaded yet');
+      }
+      const dpr = window.devicePixelRatio || 1;
+      const w = img.naturalWidth;
+      const h = img.naturalHeight;
+
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(w * dpr);
+      canvas.height = Math.round(h * dpr);
+
+      const ctx = canvas.getContext('2d');
+      if (!ctx) throw new Error('2D context not available');
+
+      // Scale for high DPI only if you plan to draw at CSS size later
+      ctx.scale(dpr, dpr);
+      ctx.drawImage(img, 0, 0, w, h);
+
+      return canvas.toDataURL(type, quality);
+    }
+
     // Process captcha
     log.info('Starting captcha processing');
     const imgElement = (await waitForSelector(selectors.img, {
@@ -332,12 +354,8 @@ export async function executeBuyOfferWorkflow(
 
     // Convert image to data URL once
     log.info('Converting captcha image to data URL for processing');
-    const reader = new FileReader();
-    const imageDataUrl = await new Promise<string>(async (resolve, reject) => {
-      reader.onloadend = () => resolve(reader.result as string);
-      reader.onerror = reject;
-      reader.readAsDataURL(await fetchImageAsBlob(imgElement.src));
-    });
+
+    const imageDataUrl = getImageToDataURL(imgElement);
 
     const answer = await captchaProcessor.solveCaptcha(imgElement.src, imageDataUrl, flow.id);
 

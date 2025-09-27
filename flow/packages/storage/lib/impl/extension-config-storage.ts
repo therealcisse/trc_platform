@@ -15,7 +15,7 @@ import { LocalTime } from '@extension/types';
 export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
   enabled: false,
   min: LocalTime.of(8, 0),
-  max: LocalTime.of(17, 0),
+  max: LocalTime.of(20, 0),
 } as const;
 
 export const DEFAULT_CONFIG: ExtensionStorage = {
