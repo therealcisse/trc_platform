@@ -23,10 +23,6 @@ const manifest = {
   default_locale: 'en',
   name: 'trc_platform_extension',
   browser_specific_settings: {
-    gecko: {
-      id: 'example@example.com',
-      strict_min_version: '109.0',
-    },
   },
   version: packageJson.version,
   description: 'TRC Platform Extension',
@@ -86,7 +82,7 @@ const manifest = {
   web_accessible_resources: [
     {
       resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
-      matches: ['*://*/*'],
+      matches: ['<all_urls>'],
     },
   ],
 } satisfies ManifestType;

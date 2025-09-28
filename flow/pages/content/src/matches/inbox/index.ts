@@ -159,6 +159,113 @@ class InboxMatcher implements Matcher {
 // Register and run matcher
 const inboxMatcher = new InboxMatcher();
 
+// Keep the extension's service worker active from the inbox content script.
+// - Connect a long-lived port named 'keepAlive'.
+// - Send a lightweight ping every 15s for observability.
+// - Auto-reconnect on disconnect (Chrome will force-close ports ~5 minutes after connect).
+// - Clean up on page unload.
+(function setupInboxKeepAlive() {
+  const KEEPALIVE_PORT_NAME = 'keepAlive';
+  const PING_INTERVAL_MS = 15_000;
+  const RECONNECT_BASE_DELAY_MS = 500;
+  const RECONNECT_MAX_DELAY_MS = 30_000;
+
+  interface KeepAliveWindow extends Window {
+    __INBOX_KEEPALIVE_STARTED__?: boolean;
+    __INBOX_KEEPALIVE_STOPPING__?: boolean;
+    __INBOX_KEEPALIVE_PORT__?: chrome.runtime.Port;
+    __INBOX_KEEPALIVE_PING_TIMER__?: number;
+    __INBOX_KEEPALIVE_RECONNECT_TIMER__?: number;
+    __INBOX_KEEPALIVE_RECONNECT_DELAY__?: number;
+  }
+  const w = window as unknown as KeepAliveWindow;
+
+  function startPingLoop() {
+    if (w.__INBOX_KEEPALIVE_PING_TIMER__) return;
+    w.__INBOX_KEEPALIVE_PING_TIMER__ = window.setInterval(() => {
+      try {
+        w.__INBOX_KEEPALIVE_PORT__?.postMessage({ type: 'keepAlive.ping', ts: Date.now() });
+      } catch {
+        // ignore; reconnect logic will handle when port is gone
+      }
+    }, PING_INTERVAL_MS);
+  }
+
+  function stopPingLoop() {
+    if (w.__INBOX_KEEPALIVE_PING_TIMER__) {
+      clearInterval(w.__INBOX_KEEPALIVE_PING_TIMER__);
+      w.__INBOX_KEEPALIVE_PING_TIMER__ = undefined;
+    }
+  }
+
+  function scheduleReconnect() {
+    if (w.__INBOX_KEEPALIVE_STOPPING__) return;
+
+    const delay = w.__INBOX_KEEPALIVE_RECONNECT_DELAY__ ?? RECONNECT_BASE_DELAY_MS;
+    if (w.__INBOX_KEEPALIVE_RECONNECT_TIMER__) return; // already scheduled
+
+    w.__INBOX_KEEPALIVE_RECONNECT_TIMER__ = window.setTimeout(() => {
+      w.__INBOX_KEEPALIVE_RECONNECT_TIMER__ = undefined;
+      connectKeepAlivePort();
+    }, delay);
+
+    // exponential backoff with cap
+    w.__INBOX_KEEPALIVE_RECONNECT_DELAY__ = Math.min(delay * 2, RECONNECT_MAX_DELAY_MS);
+  }
+
+  function connectKeepAlivePort() {
+    if (w.__INBOX_KEEPALIVE_STOPPING__) return;
+    try {
+      const port = chrome.runtime.connect({ name: KEEPALIVE_PORT_NAME });
+      w.__INBOX_KEEPALIVE_PORT__ = port;
+      w.__INBOX_KEEPALIVE_RECONNECT_DELAY__ = RECONNECT_BASE_DELAY_MS; // reset backoff
+
+      startPingLoop();
+
+      port.onDisconnect.addListener(() => {
+        stopPingLoop();
+        w.__INBOX_KEEPALIVE_PORT__ = undefined;
+        if (!w.__INBOX_KEEPALIVE_STOPPING__) {
+          scheduleReconnect();
+        }
+      });
+
+      // Optional: handle messages from background if needed
+      port.onMessage.addListener(_msg => {
+        // no-op
+      });
+    } catch {
+      scheduleReconnect();
+    }
+  }
+
+  function startInboxKeepAlive() {
+    if (w.__INBOX_KEEPALIVE_STARTED__) return;
+    w.__INBOX_KEEPALIVE_STARTED__ = true;
+    w.__INBOX_KEEPALIVE_STOPPING__ = false;
+    connectKeepAlivePort();
+  }
+
+  function stopInboxKeepAlive() {
+    w.__INBOX_KEEPALIVE_STOPPING__ = true;
+    try {
+      w.__INBOX_KEEPALIVE_PORT__?.disconnect();
+    } catch {}
+    w.__INBOX_KEEPALIVE_PORT__ = undefined;
+    stopPingLoop();
+    if (w.__INBOX_KEEPALIVE_RECONNECT_TIMER__) {
+      clearTimeout(w.__INBOX_KEEPALIVE_RECONNECT_TIMER__);
+      w.__INBOX_KEEPALIVE_RECONNECT_TIMER__ = undefined;
+    }
+    w.__INBOX_KEEPALIVE_RECONNECT_DELAY__ = undefined;
+    w.__INBOX_KEEPALIVE_STARTED__ = false;
+  }
+
+  // start now and cleanup on unload
+  startInboxKeepAlive();
+  window.addEventListener('beforeunload', stopInboxKeepAlive);
+})();
+
 function checkAndRun() {
   const currentUrl = window.location.href;
   const matches = inboxMatcher.urlPatterns.some(pattern => {

@@ -57,6 +57,21 @@ function setupMessageHandlers() {
   );
 }
 
+// Keep-alive support: accept long-lived 'keepAlive' port connections from inbox content script.
+// The active connection keeps the service worker running. We don't force-disconnect here;
+// the content script will auto-reconnect when Chrome closes the port ~5 minutes after connect.
+const KEEPALIVE_PORT_NAME = 'keepAlive';
+chrome.runtime.onConnect.addListener(port => {
+  if (port.name !== KEEPALIVE_PORT_NAME) return;
+  // Optional: observe pings
+  port.onMessage.addListener((_msg) => {
+    // no-op
+  });
+  port.onDisconnect.addListener(() => {
+    // no-op
+  });
+});
+
 // Handle incoming messages
 async function handleMessage(
   message: { type: keyof BackgroundCommands; payload: any },
