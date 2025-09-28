@@ -1,7 +1,10 @@
 import base64
 from typing import Any
+from io import StringIO
 
 from django.contrib import admin
+from django.contrib import messages
+from django.core.management import call_command
 from django.http import HttpRequest
 from django.utils.html import format_html
 
@@ -160,6 +163,19 @@ class RequestImageAdmin(admin.ModelAdmin):
     ]
     date_hierarchy = "created_at"
     ordering = ["-created_at"]
+
+    actions = ["run_cleanup_old_images"]
+
+    def run_cleanup_old_images(self, request: HttpRequest, queryset: Any) -> None:
+        buf = StringIO()
+        try:
+            call_command("cleanup_old_images", stdout=buf)
+            output = buf.getvalue().strip() or "Cleanup completed."
+            self.message_user(request, output, level=messages.SUCCESS)
+        except Exception as e:
+            self.message_user(request, f"Cleanup failed: {e}", level=messages.ERROR)
+
+    run_cleanup_old_images.short_description = "Clean up old images using defaults"  # type: ignore[attr-defined]
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         # Make RequestImage read-only in admin
