@@ -18,6 +18,7 @@ class RequestLogAdmin(admin.ModelAdmin):
         "request_ts",
         "duration_ms",
         "result",  # Display result in list view
+        "flow_id",  # Display flow id after result
     ]
     list_filter = ["status", "service", "request_ts"]
     search_fields = ["request_id", "user__email", "error_code", "result"]
