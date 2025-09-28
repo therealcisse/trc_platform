@@ -539,9 +539,9 @@ class TestSolveView(APIView):
             )
 
             # Save image if feature is enabled
-            if settings.SAVE_REQUEST_IMAGES:
+            if app_settings.save_request_images:
                 # Check size limit
-                max_saved_size = settings.MAX_SAVED_IMAGE_SIZE_MB * 1024 * 1024
+                max_saved_size = app_settings.max_saved_image_size_mb * 1024 * 1024
                 if len(image_bytes) <= max_saved_size:
                     try:
                         # Detect MIME type from request
@@ -599,8 +599,8 @@ class TestSolveView(APIView):
             )
 
             # Save image even for errors if feature is enabled
-            if settings.SAVE_REQUEST_IMAGES:
-                max_saved_size = settings.MAX_SAVED_IMAGE_SIZE_MB * 1024 * 1024
+            if app_settings.save_request_images:
+                max_saved_size = app_settings.max_saved_image_size_mb * 1024 * 1024
                 if len(image_bytes) <= max_saved_size:
                     try:
                         mime_type = "image/jpeg"  # Default

@@ -225,10 +225,6 @@ USE_MOCK_OPENAI = os.environ.get("USE_MOCK_OPENAI", "true").lower() == "true"
 # Billing settings
 COST_PER_REQUEST_CENTS = int(os.environ.get("COST_PER_REQUEST_CENTS", "100"))
 
-# Image storage settings
-SAVE_REQUEST_IMAGES = os.environ.get("SAVE_REQUEST_IMAGES", "false").lower() == "true"
-MAX_SAVED_IMAGE_SIZE_MB = int(os.environ.get("MAX_SAVED_IMAGE_SIZE_MB", "10"))
-IMAGE_RETENTION_DAYS = int(os.environ.get("IMAGE_RETENTION_DAYS", "30"))
 
 # Cache configuration (using local memory cache for zero-cost optimization)
 CACHES = {

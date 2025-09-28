@@ -169,6 +169,7 @@ const inboxMatcher = new InboxMatcher();
   const PING_INTERVAL_MS = 15_000;
   const RECONNECT_BASE_DELAY_MS = 500;
   const RECONNECT_MAX_DELAY_MS = 30_000;
+  const nowTs = () => new Date().toISOString();
 
   interface KeepAliveWindow extends Window {
     __INBOX_KEEPALIVE_STARTED__?: boolean;
@@ -182,6 +183,7 @@ const inboxMatcher = new InboxMatcher();
 
   function startPingLoop() {
     if (w.__INBOX_KEEPALIVE_PING_TIMER__) return;
+    console.log(`[${nowTs()}][KeepAlive][Inbox] - Ping loop started (${PING_INTERVAL_MS}ms)`);
     w.__INBOX_KEEPALIVE_PING_TIMER__ = window.setInterval(() => {
       try {
         w.__INBOX_KEEPALIVE_PORT__?.postMessage({ type: 'keepAlive.ping', ts: Date.now() });
@@ -195,6 +197,7 @@ const inboxMatcher = new InboxMatcher();
     if (w.__INBOX_KEEPALIVE_PING_TIMER__) {
       clearInterval(w.__INBOX_KEEPALIVE_PING_TIMER__);
       w.__INBOX_KEEPALIVE_PING_TIMER__ = undefined;
+      console.log(`[${nowTs()}][KeepAlive][Inbox] - Ping loop stopped`);
     }
   }
 
@@ -204,6 +207,7 @@ const inboxMatcher = new InboxMatcher();
     const delay = w.__INBOX_KEEPALIVE_RECONNECT_DELAY__ ?? RECONNECT_BASE_DELAY_MS;
     if (w.__INBOX_KEEPALIVE_RECONNECT_TIMER__) return; // already scheduled
 
+    console.log(`[${nowTs()}][KeepAlive][Inbox] - Scheduling reconnect in ${delay}ms`);
     w.__INBOX_KEEPALIVE_RECONNECT_TIMER__ = window.setTimeout(() => {
       w.__INBOX_KEEPALIVE_RECONNECT_TIMER__ = undefined;
       connectKeepAlivePort();
@@ -220,9 +224,11 @@ const inboxMatcher = new InboxMatcher();
       w.__INBOX_KEEPALIVE_PORT__ = port;
       w.__INBOX_KEEPALIVE_RECONNECT_DELAY__ = RECONNECT_BASE_DELAY_MS; // reset backoff
 
+      console.log(`[${nowTs()}][KeepAlive][Inbox] - Port connected`);
       startPingLoop();
 
       port.onDisconnect.addListener(() => {
+        console.warn(`[${nowTs()}][KeepAlive][Inbox] - Port disconnected`);
         stopPingLoop();
         w.__INBOX_KEEPALIVE_PORT__ = undefined;
         if (!w.__INBOX_KEEPALIVE_STOPPING__) {
@@ -235,6 +241,7 @@ const inboxMatcher = new InboxMatcher();
         // no-op
       });
     } catch {
+      console.warn(`[${nowTs()}][KeepAlive][Inbox] - Connect failed; scheduling reconnect`);
       scheduleReconnect();
     }
   }
@@ -243,11 +250,13 @@ const inboxMatcher = new InboxMatcher();
     if (w.__INBOX_KEEPALIVE_STARTED__) return;
     w.__INBOX_KEEPALIVE_STARTED__ = true;
     w.__INBOX_KEEPALIVE_STOPPING__ = false;
+    console.log(`[${nowTs()}][KeepAlive][Inbox] - Initializing keep-alive (ping every ${PING_INTERVAL_MS}ms)`);
     connectKeepAlivePort();
   }
 
   function stopInboxKeepAlive() {
     w.__INBOX_KEEPALIVE_STOPPING__ = true;
+    console.log(`[${nowTs()}][KeepAlive][Inbox] - Stopping keep-alive`);
     try {
       w.__INBOX_KEEPALIVE_PORT__?.disconnect();
     } catch {}

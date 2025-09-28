@@ -35,6 +35,17 @@ class SettingsAdmin(admin.ModelAdmin):
             },
         ),
         (
+            "Image Storage Settings",
+            {
+                "fields": [
+                    "save_request_images",
+                    "max_saved_image_size_mb",
+                    "image_retention_days",
+                ],
+                "description": "Control storing request images and retention policy",
+            },
+        ),
+        (
             "Application Settings",
             {
                 "fields": ["app_domain"],

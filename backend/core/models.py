@@ -44,6 +44,21 @@ class Settings(models.Model):
         verbose_name="Application Domain",
         validators=[FlexibleURLValidator()],
     )
+
+    # Image storage settings
+    save_request_images = models.BooleanField(
+        default=False,
+        help_text="Enable saving request images associated with RequestLog entries",
+    )
+    max_saved_image_size_mb = models.IntegerField(
+        default=10,
+        help_text="Maximum image size to save in megabytes",
+    )
+    image_retention_days = models.IntegerField(
+        default=30,
+        help_text="Retention period in days for saved images, used by cleanup commands",
+    )
+
     updated_at = models.DateTimeField(auto_now=True)
 
     class Meta:

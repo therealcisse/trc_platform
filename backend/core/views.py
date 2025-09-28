@@ -241,16 +241,16 @@ class SolveView(APIView):
 
                 # Skip image saving in critical path
                 # This can be done asynchronously or conditionally
-                if settings.SAVE_REQUEST_IMAGES and self._should_save_image(image_bytes):
+                if app_settings.save_request_images and self._should_save_image(image_bytes, app_settings):
                     self._schedule_image_save(request_log.id, image_bytes)
 
         except Exception as e:
             # Log but don't fail the request
             logger.error(f"Failed to log request {request_id}: {e}")
 
-    def _should_save_image(self, image_bytes: bytes) -> bool:
-        """Determine if image should be saved based on size and settings."""
-        max_size = settings.MAX_SAVED_IMAGE_SIZE_MB * 1024 * 1024
+    def _should_save_image(self, image_bytes: bytes, app_settings: Settings) -> bool:
+        """Determine if image should be saved based on size and app settings."""
+        max_size = app_settings.max_saved_image_size_mb * 1024 * 1024
         return len(image_bytes) <= max_size
 
     def _schedule_image_save(self, request_log_id: str, image_bytes: bytes) -> None:

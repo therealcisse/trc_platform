@@ -15,6 +15,7 @@ django.setup()
 from django.conf import settings
 from django.contrib.auth import get_user_model
 
+from core.models import Settings as AppSettings
 from usage.models import RequestImage, RequestLog
 
 User = get_user_model()
@@ -27,9 +28,10 @@ def test_image_storage() -> bool:
 
     # Check configuration
     print("\n1. Configuration Check:")
-    print(f"   SAVE_REQUEST_IMAGES: {settings.SAVE_REQUEST_IMAGES}")
-    print(f"   MAX_SAVED_IMAGE_SIZE_MB: {settings.MAX_SAVED_IMAGE_SIZE_MB}")
-    print(f"   IMAGE_RETENTION_DAYS: {settings.IMAGE_RETENTION_DAYS}")
+    app_settings = AppSettings.get_settings()
+    print(f"   save_request_images: {app_settings.save_request_images}")
+    print(f"   max_saved_image_size_mb: {app_settings.max_saved_image_size_mb}")
+    print(f"   image_retention_days: {app_settings.image_retention_days}")
 
     # Check models
     print("\n2. Model Check:")
@@ -110,10 +112,12 @@ def test_image_storage() -> bool:
     print("\n" + "=" * 60)
     print("✓ ALL TESTS PASSED!")
     print("=" * 60)
-    print("\nTo enable the feature, set environment variable:")
-    print("  export SAVE_REQUEST_IMAGES=true")
+    print("\nTo enable or configure image saving, use the management command:")
+    print("  uv run python manage.py set_save_images --on")
+    print("  uv run python manage.py set_save_images --off")
+    print("  uv run python manage.py set_save_images --max-size-mb 8 --retention-days 45")
     print("\nTo test with actual images:")
-    print("  1. Enable the feature with the environment variable")
+    print("  1. Enable the feature with the command above")
     print("  2. Send requests to /api/core/solve with images")
     print("  3. Check Django admin at /admin/usage/requestimage/")
     print("  4. View stats at /api/usage/image-performance-stats (admin only)")

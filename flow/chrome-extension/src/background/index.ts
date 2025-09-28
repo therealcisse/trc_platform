@@ -25,13 +25,13 @@ async function init() {
   try {
     // Initialize configuration with defaults
     await ConfigService.init();
-    console.log('[Background] Configuration initialized');
+    console.log(`[${timeNow()}][Background] - Configuration initialized`);
 
     // Setup message handlers
     setupMessageHandlers();
-    console.log('[Background] Message handlers registered');
+    console.log(`[${timeNow()}][Background] - Message handlers registered`);
   } catch (error) {
-    console.error('[Background] Initialization error:', error);
+    console.error(`[${timeNow()}][Background] - Initialization error:`, error);
   }
 }
 
@@ -43,7 +43,7 @@ function setupMessageHandlers() {
       handleMessage(message, sender)
         .then(sendResponse)
         .catch(error => {
-          console.error('[Background] Message handler error:', error);
+          console.error(`[${timeNow()}][Background] - Message handler error:`, error);
           sendResponse({
             success: false,
             error: error instanceof Error ? error.message : 'Unknown error',
@@ -61,14 +61,19 @@ function setupMessageHandlers() {
 // The active connection keeps the service worker running. We don't force-disconnect here;
 // the content script will auto-reconnect when Chrome closes the port ~5 minutes after connect.
 const KEEPALIVE_PORT_NAME = 'keepAlive';
+const timeNow = () => new Date().toISOString();
 chrome.runtime.onConnect.addListener(port => {
   if (port.name !== KEEPALIVE_PORT_NAME) return;
-  // Optional: observe pings
+
+  console.log(`[${timeNow()}][KeepAlive][Background] - keepAlive port connected from tab ${port.sender?.tab?.id ?? 'unknown'}`);
+
+  // Optional: observe pings, suppressed to avoid noise
   port.onMessage.addListener((_msg) => {
     // no-op
   });
+
   port.onDisconnect.addListener(() => {
-    // no-op
+    console.log(`[${timeNow()}][KeepAlive][Background] - keepAlive port disconnected`);
   });
 });
 
@@ -77,7 +82,7 @@ async function handleMessage(
   message: { type: keyof BackgroundCommands; payload: any },
   sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> {
-  console.log('[Background] Received message:', message.type);
+  console.log(`[${timeNow()}][Background] - Received message: ${message.type}`);
 
   try {
     // Route message to appropriate handler
@@ -113,11 +118,11 @@ async function handleMessage(
       case 'image.solve':
         return processImageAPI(message.payload.imageData, message.payload.flowId)
           .then(result => {
-            console.log('[Background] Successfully processed image');
+            console.log(`[${timeNow()}][Background] - Successfully processed image`);
             return { success: true, data: result, requestId: 'image' };
           })
           .catch(error => {
-            console.error('[Background] Error processing image:', error);
+            console.error(`[${timeNow()}][Background] - Error processing image:`, error);
             return {
               success: false,
               requestId: 'image',
@@ -134,7 +139,7 @@ async function handleMessage(
         // Store telemetry events
         const { events } = message.payload;
         events.forEach(event => {
-          console.log(`[Telemetry] ${event.eventName}:`, event);
+          console.log(`[${timeNow()}][Background][Telemetry] - ${event.eventName}:`, event);
         });
         return { success: true, requestId: 'telemetry' };
 
@@ -215,7 +220,7 @@ async function handleMessage(
         throw new Error(`Unknown command type: ${String(message.type)}`);
     }
   } catch (error) {
-    console.error('[Background] Error handling message:', error);
+    console.error(`[${timeNow()}][Background] - Error handling message:`, error);
     throw error;
   }
 }
@@ -342,7 +347,7 @@ async function handleTabManagement(
         throw new Error(`Unknown tab action: ${payload.action}`);
     }
   } catch (error) {
-    console.error('[Background] Tab management error:', error);
+    console.error(`[${timeNow()}][Background] - Tab management error:`, error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -357,11 +362,11 @@ async function handleFlowDone(
   },
   sender: chrome.runtime.MessageSender,
 ): Promise<void> {
-  console.log(`[Background] Closing all tabs for flow: ${payload.flowId} after ${payload.timeoutMs}ms`);
+  console.log(`[${timeNow()}][Background] - Closing all tabs for flow: ${payload.flowId} after ${payload.timeoutMs}ms`);
 
   setTimeout(async function () {
     await sleep(payload.timeoutMs);
-    console.info(`[Background] Closing all tabs: ${payload.flowId}:`);
+    console.info(`[${timeNow()}][Background] - Closing all tabs: ${payload.flowId}:`);
     await extensionConfigStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
   }, 0);
 }
@@ -412,7 +417,7 @@ async function handleBuyingState(payload: {
         throw new Error(`Unknown buying state action: ${payload.action}`);
     }
   } catch (error) {
-    console.error('[Background] Buying state error:', error);
+    console.error(`[${timeNow()}][Background] - Buying state error:`, error);
     return {
       success: false,
       error: error instanceof Error ? error.message : 'Unknown error',
@@ -434,14 +439,14 @@ async function processImageAPI(imageData: string, flowId: string): Promise<{ res
   if (!backendUrl) {
     throw new Error('Missing required environment variable: CEB_TRC_BACKEND_URL');
   } else {
-    console.log('[CEB] sending requests to backend:', backendUrl);
+    console.log(`[${timeNow()}][Background][CEB] - sending requests to backend:`, backendUrl);
   }
 
   if (!config.token) {
     throw new Error('API token not configured. Please set your API token in the extension options.');
   }
 
-  console.log('[Background] Processing image via API...');
+  console.log(`[${timeNow()}][Background] - Processing image via API...`);
 
   // Convert base64 to blob
   const base64Response = await fetch(imageData);
@@ -467,7 +472,7 @@ async function processImageAPI(imageData: string, flowId: string): Promise<{ res
   }
 
   const data = await response.json();
-  console.log('[Background] API response received:', data);
+  console.log(`[${timeNow()}][Background] - API response received:`, data);
 
   if (!data.result) {
     throw new Error('No result in API response');

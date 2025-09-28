@@ -23,7 +23,6 @@ from customers.models import ApiToken
 User = get_user_model()
 
 
-@override_settings(SAVE_REQUEST_IMAGES=False)
 class TokenAuthenticationTestCase(TestCase):
     """Test API token authentication for the solver endpoint."""
 

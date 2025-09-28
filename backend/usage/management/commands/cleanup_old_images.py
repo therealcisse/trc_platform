@@ -1,10 +1,10 @@
 from datetime import timedelta
 from typing import Any
 
-from django.conf import settings
 from django.core.management.base import BaseCommand
 from django.utils import timezone
 
+from core.models import Settings
 from usage.models import RequestImage
 
 
@@ -15,8 +15,8 @@ class Command(BaseCommand):
         parser.add_argument(
             "--days",
             type=int,
-            default=settings.IMAGE_RETENTION_DAYS,
-            help="Number of days to retain images (default: from settings)",
+            default=None,
+            help="Number of days to retain images (default: from DB settings)",
         )
         parser.add_argument(
             "--dry-run",
@@ -25,8 +25,14 @@ class Command(BaseCommand):
         )
 
     def handle(self, *args: Any, **options: Any) -> None:
-        days = options["days"]
+        days_opt = options["days"]
         dry_run = options["dry_run"]
+
+        # Default to DB-backed settings if --days not provided
+        if days_opt is None:
+            days = Settings.get_settings().image_retention_days
+        else:
+            days = days_opt
 
         cutoff_date = timezone.now() - timedelta(days=days)
         old_images = RequestImage.objects.filter(created_at__lt=cutoff_date)
