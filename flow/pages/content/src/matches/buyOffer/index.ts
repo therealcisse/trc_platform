@@ -1,17 +1,8 @@
-import { Log, FlowUtils, ProductFactory, ConfigService } from '@extension/shared';
+import { Log, FlowUtils, ProductFactory, ConfigService, BackgroundUtils } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher, waitForSelector, clickWithVerification, sleep, fetchImageAsBlob } from '@src/lib';
-import { sendBackgroundCommand } from '@extension/shared';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
-import type {
-  CommandResponse,
-  ExecutionConfig,
-  Matcher,
-  ExecutionContext,
-  ExecutionResult,
-  BuyOfferSelectors,
-  Flow,
-} from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 import { TabManager } from '@extension/shared';
 
 /**
@@ -59,18 +50,9 @@ class BuyOfferMatcher implements Matcher {
     try {
       // Get configuration and check if enabled
       log.debug('Fetching extension configuration');
-      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
-        config: ExecutionConfig;
-        enabled: boolean;
-      }>;
-      const result = configResponse.data;
-      if (!result) {
-        log.warn('No configuration found - extension may not be initialized');
-        await log.write();
-        return;
-      }
+      const { config, enabled } = await BackgroundUtils.getExtensionConfig();
 
-      if (!result.enabled) {
+      if (!enabled) {
         log.info('Extension is currently disabled');
         await log.write();
         return;
@@ -80,12 +62,9 @@ class BuyOfferMatcher implements Matcher {
 
       // Check if this flow is already being purchased
       log.info('Checking if flow is already being purchased');
-      const buyingStateResponse = await sendBackgroundCommand('state.buying', {
-        action: 'check',
-        flowId,
-      });
+      const buying = await BackgroundUtils.isBuying(flowId);
 
-      if (buyingStateResponse.data?.buying) {
+      if (buying) {
         log.info(`Flow ${flowId} is already being purchased by another tab`);
         log.debug('Closing this duplicate tab');
         await log.write();
@@ -102,39 +81,31 @@ class BuyOfferMatcher implements Matcher {
 
       // Mark flow as being purchased
       log.info('Marking flow as being purchased to prevent duplicates');
-      await sendBackgroundCommand('state.buying', {
-        action: 'mark',
-        flowId,
-        timeout,
-      });
+      await BackgroundUtils.markBuying({ flowId, timeout });
 
       log.info(`🎯 Starting purchase process for flow ${flowId}`);
       log.debug(`Timeout set to: ${new Date(timeout).toISOString()}`);
 
       // Send command to execute purchase
       log.info('Triggering buy offer executor');
-      const response = await sendBackgroundCommand('buyOffer.execute', {
-        id: flowId,
-        selectors: {
-          input: '#captcha_code',
-          img: '#page_buy_now_captcha label img',
-          productTitle: '.col-sm-9 h2',
-          buyFormButton: 'button[name="action"]',
-        },
-      });
-
-      if (response.success) {
+      try {
+        const data = await BackgroundUtils.executeBuyOffer({
+          id: flowId,
+          selectors: {
+            input: '#captcha_code',
+            img: '#page_buy_now_captcha label img',
+            productTitle: '.col-sm-9 h2',
+            buyFormButton: 'button[name="action"]',
+          },
+        });
         log.info('✅ Buy offer executor triggered successfully');
-        log.debug('Executor response', { data: response.data });
-      } else {
-        log.error(`❌ Buy offer executor failed: ${response.error}`);
+        log.debug('Executor response', { data });
+      } catch (e: any) {
+        log.error(`❌ Buy offer executor failed: ${e?.message || String(e)}`);
         log.debug('Clearing buying state after executor failure');
 
         // Clear buying state on failure
-        await sendBackgroundCommand('state.buying', {
-          action: 'clear',
-          flowId,
-        });
+        await BackgroundUtils.clearBuying(flowId);
         log.info('Buying state cleared');
       }
 
@@ -376,10 +347,7 @@ export async function executeBuyOfferWorkflow(
       log.info(`Flow ${flow.id} marked as completed`);
       // Clear buying state on success
       log.debug('Clearing buying state');
-      await sendBackgroundCommand('state.buying', {
-        action: 'clear',
-        flowId: flow.id,
-      });
+      await BackgroundUtils.clearBuying(flow.id);
 
       // Calculate remaining time
       const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
@@ -390,7 +358,7 @@ export async function executeBuyOfferWorkflow(
 
       const timeoutMs = remainingTime * 1000 + 5000;
       log.info(`Closing all tabs for flow: ${flow.id} after ${timeoutMs}ms`);
-      await sendBackgroundCommand('flows.scheduleCloseAfterNavigation', {
+      await BackgroundUtils.scheduleCloseAfterNavigation({
         flowId: flow.id,
         timeoutMs: timeoutMs,
       });
@@ -468,10 +436,7 @@ export async function executeBuyOfferWorkflow(
     // Clear buying state on failure
     try {
       log.debug('Attempting to clear buying state after error');
-      await sendBackgroundCommand('state.buying', {
-        action: 'clear',
-        flowId: flow.id,
-      });
+      await BackgroundUtils.clearBuying(flow.id);
       log.info('Buying state cleared after error');
     } catch (cleanupError) {
       console.error('[BuyOfferExecutor] Error clearing buying state:', cleanupError);

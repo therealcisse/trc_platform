@@ -130,4 +130,23 @@ export class TabManager {
 
     return false;
   }
+
+  // Descriptive alias for isTabManaged
+  async checkTab(tabId: number): Promise<boolean> {
+    return this.isTabManaged(tabId);
+  }
+
+  // Open a new tab without marking it as managed
+  async openUnmanagedTab(url: string): Promise<number> {
+    const response = await sendBackgroundCommand('tab.manage', {
+      action: 'open',
+      url,
+    });
+
+    if (!response.success || !response.data?.tabId) {
+      throw new Error('Failed to open tab');
+    }
+
+    return response.data.tabId;
+  }
 }

@@ -8,7 +8,7 @@ import type {
 } from '@extension/types';
 import { LocalTime, LocalTimeUtils } from '@extension/types';
 
-import { sendBackgroundCommand } from '@extension/shared';
+import { BackgroundUtils, TabManager } from '@extension/shared';
 
 // LocalDate utility class
 export class LocalDate implements LocalDateType {
@@ -123,10 +123,8 @@ export async function clickWithVerification(element: Element, options: ClickOpti
 
 export async function safeNavigate(url: string): Promise<void> {
   try {
-    await sendBackgroundCommand('tab.manage', {
-      action: 'open',
-      url,
-    });
+    const tabManager = TabManager.getInstance();
+    await tabManager.openUnmanagedTab(url);
   } catch (error) {
     console.error('[Extension] Error navigating to URL:', error);
     throw error;
@@ -148,7 +146,7 @@ export function logEvent(event: TelemetryEvent): void {
         telemetryQueue.length = 0;
 
         try {
-          await sendBackgroundCommand('extension.telemetry', { events });
+          await BackgroundUtils.sendTelemetry(events);
         } catch (error) {
           console.error('[Extension] Error sending telemetry:', error);
         }

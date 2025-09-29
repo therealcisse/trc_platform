@@ -1,15 +1,7 @@
-import { ProductFactory, Log, FlowUtils, ConfigService } from '@extension/shared';
+import { ProductFactory, Log, FlowUtils, ConfigService, BackgroundUtils, TabManager } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher } from '@src/lib';
-import { sendBackgroundCommand, TabManager } from '@extension/shared';
-import type {
-  Matcher,
-  ExecutionContext,
-  ExecutionResult,
-  MyOfferSelectors,
-  ExecutionConfig,
-  CommandResponse,
-} from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors } from '@extension/types';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing
@@ -39,24 +31,15 @@ class MyOfferMatcher implements Matcher {
 
     try {
       // Get configuration and check if enabled
-      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
-        config: ExecutionConfig;
-        enabled: boolean;
-      }>;
-      const result = configResponse.data;
-      if (!result) {
-        log.warn('No configuration found');
-        await log.write();
-        return;
-      }
+      const { config, enabled } = await BackgroundUtils.getExtensionConfig();
 
-      if (!result.enabled) {
+      if (!enabled) {
         log.info('Extension disabled');
         await log.write();
         return;
       }
 
-      await this.handleBrowseMyOffer(result.config, log);
+      await this.handleBrowseMyOffer(config, log);
     } catch (error) {
       log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
       await log.write();
@@ -66,17 +49,16 @@ class MyOfferMatcher implements Matcher {
 
   private async handleBrowseMyOffer(config: any, log: Log): Promise<void> {
     // Send command to process browse myOffer
-    const response = await sendBackgroundCommand('myOffer.clickProductLink', {
-      selectors: {
-        itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
-        titleLink: '.message_center_message thead tr:nth-child(2) td:nth-child(2)',
-      },
-    });
-
-    if (response.success) {
+    try {
+      await BackgroundUtils.openMyOfferItemLink({
+        selectors: {
+          itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
+          titleLink: '.message_center_message thead tr:nth-child(2) td:nth-child(2)',
+        },
+      });
       log.info('Browse myOffer executor triggered successfully');
-    } else {
-      log.error(`Browse myOffer executor failed: ${response.error}`);
+    } catch (e: any) {
+      log.error(`Browse myOffer executor failed: ${e?.message || String(e)}`);
     }
     await log.write();
   }

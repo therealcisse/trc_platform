@@ -1,15 +1,7 @@
-import { FlowUtils, Log } from '@extension/shared';
+import { FlowUtils, Log, BackgroundUtils, TabManager } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { sendBackgroundCommand, TabManager } from '@extension/shared';
 import { isValidTimeOfDay, registerMatcher, sleep } from '@src/lib';
-import type {
-  CommandResponse,
-  ExecutionConfig,
-  Matcher,
-  ExecutionContext,
-  ExecutionResult,
-  InboxSelectors,
-} from '@extension/types';
+import type { ExecutionConfig, Matcher, ExecutionContext, ExecutionResult, InboxSelectors } from '@extension/types';
 
 /**
  * Inbox Matcher - Monitors HanseMerkur inbox for new messages
@@ -38,31 +30,19 @@ class InboxMatcher implements Matcher {
 
     try {
       // Get configuration
-      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
-        config: ExecutionConfig;
-        enabled: boolean;
-      }>;
+      const { config, enabled } = await BackgroundUtils.getExtensionConfig();
 
-      const result = configResponse.data;
-      if (!result) {
-        log.warn('No configuration found');
-        await log.write();
-        return;
-      }
-
-      if (!result.enabled) {
+      if (!enabled) {
         log.info('Extension disabled');
         await log.write();
         return;
       }
 
-      if (!result.config.inboxMode) {
+      if (!config.inboxMode) {
         log.info('Inbox mode disabled');
         await log.write();
         return;
       }
-
-      const config = result.config;
       const timeAllowed = isValidTimeOfDay(config);
 
       // Check if we need to handle a scheduled reload
@@ -135,18 +115,17 @@ class InboxMatcher implements Matcher {
       log.info('Scanning for new links');
 
       // Just send the command to background - all processing happens there
-      const response = await sendBackgroundCommand('inbox.openMyOfferLink', {
-        selectors: {
-          rows: 'table.browse_list tr',
-          titleLinks: 'table.browse_list tr td:nth-child(3) a',
-          requestTimestampElement: 'td:nth-child(4)', // Erhalten column
-        },
-      });
-
-      if (response.success) {
-        log.info('Link scan completed successfully', response.data);
-      } else {
-        log.error(`Link scan failed: ${response.error}`);
+      try {
+        const data = await BackgroundUtils.scanInboxAndOpenMyOfferLink({
+          selectors: {
+            rows: 'table.browse_list tr',
+            titleLinks: 'table.browse_list tr td:nth-child(3) a',
+            requestTimestampElement: 'td:nth-child(4)', // Erhalten column
+          },
+        });
+        log.info('Link scan completed successfully', data);
+      } catch (e: any) {
+        log.error(`Link scan failed: ${e?.message || String(e)}`);
       }
     } catch (error) {
       log.error(`Scan error: ${error}`);
@@ -387,13 +366,12 @@ export async function executeInboxWorkflow(
       try {
         if (!context.dryRun) {
           // Start flow for this link
-          const startFlowResponse = await sendBackgroundCommand('extension.startFlow', {
-            type: 'inbox',
+          const { existed } = await BackgroundUtils.startInboxFlow({
             id: link.id,
             requestTimestamp: link.requestTimestamp,
           });
 
-          if (startFlowResponse.success && startFlowResponse.data === true) {
+          if (existed) {
             // Flow already exists - this is our duplicate detection
             flowLog.info(`Flow already exists, skipping`);
             skippedCount++;

@@ -1,15 +1,7 @@
-import { FlowUtils, Log } from '@extension/shared';
+import { FlowUtils, Log, BackgroundUtils, TabManager } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { registerMatcher, waitForSelector, clickWithVerification, safeNavigate, random, sleep } from '@src/lib';
-import { sendBackgroundCommand } from '@extension/shared';
-import type {
-  CommandResponse,
-  ExecutionConfig,
-  Matcher,
-  ExecutionContext,
-  ExecutionResult,
-  EmailSelectors,
-} from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing
@@ -37,25 +29,15 @@ class EmailMatcher implements Matcher {
 
     try {
       // Get configuration and check if enabled
-      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
-        config: ExecutionConfig;
-        enabled: boolean;
-      }>;
+      const { config, enabled } = await BackgroundUtils.getExtensionConfig();
 
-      const result = configResponse.data;
-      if (!result) {
-        log.warn('No configuration found');
-        await log.write();
-        return;
-      }
-
-      if (!result.enabled) {
+      if (!enabled) {
         log.info('Extension disabled');
         await log.write();
         return;
       }
 
-      if (!result.config.emailMode) {
+      if (!config.emailMode) {
         log.info('Email mode disabled');
         await log.write();
         return;
@@ -65,19 +47,18 @@ class EmailMatcher implements Matcher {
       await log.write();
 
       // Send command to background to run email executor
-      const response = await sendBackgroundCommand('email.openUnreadAndClickLink', {
-        selectors: {
-          unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
-          emailBody: '#x_body a[title*="item.php"]',
-          markAsReadButton: 'span',
-        },
-      });
-
-      if (response.success) {
+      try {
+        await BackgroundUtils.openUnreadEmailAndClickItemLink({
+          selectors: {
+            unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
+            emailBody: '#x_body a[title*="item.php"]',
+            markAsReadButton: 'span',
+          },
+        });
         log.info('Email executor triggered successfully');
         await log.write();
-      } else {
-        log.error(`Email executor failed: ${response.error}`);
+      } catch (e: any) {
+        log.error(`Email executor failed: ${e?.message || String(e)}`);
         await log.write();
       }
     } catch (error) {
@@ -224,12 +205,9 @@ export async function executeEmailWorkflow(
               }
 
               // Start flow and check if it already exists
-              const startFlowResult = await sendBackgroundCommand('extension.startFlow', {
-                type: 'email',
-                id,
-              });
+              const { existed } = await BackgroundUtils.startEmailFlow({ id });
 
-              if (startFlowResult.success && startFlowResult.data === true) {
+              if (existed) {
                 // Flow already exists, skip this link
                 // Create a new log with flowId for this specific email
                 const flowLog = Log.withFlow(MATCHER_IDS.EMAIL, id);
@@ -250,10 +228,8 @@ export async function executeEmailWorkflow(
 
               if (!context.dryRun) {
                 // Open link in new managed tab
-                await sendBackgroundCommand('tab.manage', {
-                  action: 'open',
-                  url: href,
-                });
+                const tabManager = TabManager.getInstance();
+                await tabManager.openTab(href, id);
               } else {
                 flowLog.debug('Dry run: Would open link in new tab');
               }

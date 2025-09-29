@@ -1,16 +1,7 @@
-import { ProductFactory, FlowUtils, ConfigService, Log } from '@extension/shared';
+import { ProductFactory, FlowUtils, ConfigService, Log, BackgroundUtils, TabManager } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import { sendBackgroundCommand, TabManager } from '@extension/shared';
 import { registerMatcher, isValidTimeOfDay, waitForSelector, clickWithVerification, sleep } from '@src/lib';
-import type {
-  Matcher,
-  ExecutionContext,
-  ExecutionResult,
-  ItemSelectors,
-  ExecutionConfig,
-  CommandResponse,
-  Flow,
-} from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
 
 /**
  * Item Matcher - Detects item pages and triggers item processing
@@ -39,24 +30,15 @@ class ItemMatcher implements Matcher {
 
     try {
       // Get configuration and check if enabled
-      const configResponse = (await sendBackgroundCommand('extension.getConfig', {})) as CommandResponse<{
-        config: ExecutionConfig;
-        enabled: boolean;
-      }>;
-      const result = configResponse.data;
-      if (!result) {
-        log.warn('No configuration found');
-        await log.write();
-        return;
-      }
+      const { config, enabled } = await BackgroundUtils.getExtensionConfig();
 
-      if (!result.enabled) {
+      if (!enabled) {
         log.info('Extension disabled');
         await log.write();
         return;
       }
 
-      await this.handleBrowseItem(result.config, id, log);
+      await this.handleBrowseItem(config, id, log);
     } catch (error) {
       log.error(`Error: ${error instanceof Error ? error.message : 'Unknown error'}`, { error });
       await log.write();
@@ -66,17 +48,16 @@ class ItemMatcher implements Matcher {
 
   private async handleBrowseItem(config: any, id: string, log: Log): Promise<void> {
     // Send command to process browse item
-    const response = await sendBackgroundCommand('item.clickProductLink', {
-      id,
-      selectors: {
-        buyButton: '.buy_now a.btn',
-      },
-    });
-
-    if (response.success) {
+    try {
+      await BackgroundUtils.clickItemBuyButton({
+        id,
+        selectors: {
+          buyButton: '.buy_now a.btn',
+        },
+      });
       log.info('Browse item executor triggered successfully');
-    } else {
-      log.error(`Browse item executor failed: ${response.error}`);
+    } catch (e: any) {
+      log.error(`Browse item executor failed: ${e?.message || String(e)}`);
     }
     await log.write();
   }
