@@ -1,6 +1,13 @@
 import { Log, FlowUtils, ProductFactory, ConfigService, BackgroundUtils } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import { registerMatcher, waitForSelector, clickWithVerification, sleep, fetchImageAsBlob } from '@src/lib';
+import {
+  registerMatcher,
+  waitForSelector,
+  clickWithVerification,
+  sleep,
+  fetchImageAsBlob,
+  ensureFocus,
+} from '@src/lib';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 import { TabManager } from '@extension/shared';
@@ -142,7 +149,7 @@ function checkAndRun() {
       document.addEventListener('DOMContentLoaded', () => buyOfferMatcher.run());
     } else {
       // Small delay to ensure everything is ready
-      setTimeout(() => buyOfferMatcher.run(), 1000);
+      setTimeout(() => buyOfferMatcher.run(), 0);
     }
   }
 }
@@ -163,6 +170,28 @@ export async function executeBuyOfferWorkflow(
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
   const captchaProcessor = CaptchaProcessor.getInstance();
+
+  // Wait for and focus captcha input first
+  log.debug('Waiting for captcha input element');
+  const inputElement = (await waitForSelector(selectors.input, {
+    timeout: 5000,
+    visible: true,
+  })) as HTMLInputElement;
+
+  if (!inputElement) {
+    throw new Error('Captcha input not found');
+  }
+  log.info('Captcha input element found and ready');
+
+  // Focus the input with verification and retries
+  await ensureFocus(inputElement, {
+    preventScroll: true,
+    scrollIntoView: false,
+    timeoutMs: 1500,
+    intervalMs: 16,
+    ensureEnabled: true,
+  });
+  log.debug('Captcha input focused', { focused: document.activeElement === inputElement });
 
   // Check if this is a managed tab
   const isManagedTab = tabManager.isTabManaged(context.tabId);
@@ -255,22 +284,6 @@ export async function executeBuyOfferWorkflow(
       };
     }
 
-    // Wait for and focus captcha input first
-    log.debug('Waiting for captcha input element');
-    const inputElement = (await waitForSelector(selectors.input, {
-      timeout: 5000,
-      visible: true,
-    })) as HTMLInputElement;
-
-    if (!inputElement) {
-      throw new Error('Captcha input not found');
-    }
-    log.info('Captcha input element found and ready');
-
-    // Focus the input
-    inputElement.focus();
-    log.debug('Captcha input focused');
-
     // Get buy button
     log.debug('Locating buy button');
     const buyButton = await waitForSelector(selectors.buyFormButton, {
@@ -350,11 +363,7 @@ export async function executeBuyOfferWorkflow(
       await BackgroundUtils.clearBuying(flow.id);
 
       // Calculate remaining time
-      const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(
-        product,
-        flow.requestTimestamp,
-        context.config,
-      );
+      const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(product, flow.timestamp, context.config);
 
       const timeoutMs = remainingTime * 1000 + 5000;
       log.info(`Closing all tabs for flow: ${flow.id} after ${timeoutMs}ms`);

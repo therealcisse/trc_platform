@@ -90,6 +90,95 @@ export async function waitForSelector(selector: string, options: WaitOptions = {
   });
 }
 
+export async function ensureFocus(
+  target: HTMLElement | string,
+  opts?: {
+    selectorContext?: ParentNode;
+    timeoutMs?: number;
+    intervalMs?: number;
+    preventScroll?: boolean;
+    scrollIntoView?: boolean;
+    ensureTabbable?: boolean;
+    ensureEnabled?: boolean;
+  },
+): Promise<HTMLElement> {
+  const {
+    selectorContext = document,
+    timeoutMs = 1500,
+    intervalMs = 16,
+    preventScroll = true,
+    scrollIntoView = false,
+    ensureTabbable = false,
+    ensureEnabled = true,
+  } = opts ?? {};
+
+  const resolveElement = (): HTMLElement | null => {
+    if (typeof target === 'string') {
+      const el = selectorContext.querySelector(target);
+      return el instanceof HTMLElement ? el : null;
+    }
+    return target;
+  };
+
+  let el = resolveElement();
+  if (!el) throw new Error('ensureFocus: element not found');
+
+  if (scrollIntoView) {
+    el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+  }
+
+  if (ensureTabbable && el.tabIndex < 0 && !(el instanceof HTMLInputElement)) {
+    el.tabIndex = 0;
+  }
+
+  const waitForEnabled = async (node: HTMLElement) => {
+    if (!ensureEnabled) return;
+    if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement) {
+      const deadline = performance.now() + timeoutMs;
+      while ((node.disabled || node.getAttribute('aria-disabled') === 'true') && performance.now() < deadline) {
+        await new Promise(r => setTimeout(r, intervalMs));
+      }
+    }
+  };
+
+  // Double RAF to allow styles and layout to settle
+  await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+
+  const deadline = performance.now() + timeoutMs;
+
+  while (performance.now() < deadline) {
+    // Re-resolve if the node was replaced
+    if (!el.isConnected) {
+      const next = resolveElement();
+      if (next) el = next;
+    }
+
+    await waitForEnabled(el);
+
+    if (preventScroll) {
+      (el as HTMLElement).focus({ preventScroll: true });
+    } else {
+      el.focus();
+    }
+
+    if (document.activeElement === el) {
+      if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+        try {
+          const len = el.value?.length ?? 0;
+          el.setSelectionRange(len, len);
+        } catch {
+          // ignore if not applicable
+        }
+      }
+      return el;
+    }
+
+    await new Promise(r => setTimeout(r, intervalMs));
+  }
+
+  throw new Error('ensureFocus: failed to focus element within timeout');
+}
+
 export async function clickWithVerification(element: Element, options: ClickOptions = {}): Promise<boolean> {
   const { verify = true, scroll = true } = options;
 
