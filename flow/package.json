@@ -1,16 +1,18 @@
 {
-  "name": "chrome-extension-boilerplate-react-vite",
+  "name": "trc_platform_extension",
   "version": "1.0.10",
-  "description": "chrome extension boilerplate",
+  "description": "TRC Platform Extension",
   "license": "MIT",
   "private": true,
   "sideEffects": false,
   "repository": {
     "type": "git",
-    "url": "https://github.com/Jonghakseo/chrome-extension-boilerplate-react-vite.git"
+    "url": "https://github.com/therealcisse/trc_platform.git"
   },
   "type": "module",
   "scripts": {
+    "test": "vitest",
+    "coverage": "vitest run --coverage",
     "clean:bundle": "rimraf dist && turbo clean:bundle",
     "clean:node_modules": "pnpx rimraf node_modules && pnpx turbo clean:node_modules",
     "clean:turbo": "rimraf .turbo && turbo clean:turbo",
@@ -82,7 +84,8 @@
     "typescript": "^5.8.3",
     "typescript-eslint": "^8.32.1",
     "vite": "^6.3.5",
-    "vite-plugin-node-polyfills": "^0.23.0"
+    "vite-plugin-node-polyfills": "^0.23.0",
+    "vitest": "^3.2.4"
   },
   "lint-staged": {
     "*.{js,jsx,ts,tsx,json}": [

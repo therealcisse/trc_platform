@@ -433,10 +433,14 @@ async function handleBuyingState(payload: {
 // Initialize background service
 init();
 
+async function dataUrlToBlobFetch(dataUrl: string): Promise<Blob> {
+  const res = await fetch(dataUrl);
+  return res.blob();
+}
 /**
  * Process an image by sending it to the TRC backend API
  */
-async function processImageAPI(imageData: string, flowId: string): Promise<{ result: string }> {
+async function processImageAPI(imageData: string, flowId: string) {
   const backendUrl = process.env['CEB_TRC_BACKEND_URL'];
   const config = await ConfigService.getConfig();
 
@@ -452,35 +456,23 @@ async function processImageAPI(imageData: string, flowId: string): Promise<{ res
 
   console.log(`[${timeNow()}][Background] - Processing image via API...`);
 
-  // Convert base64 to blob
-  const base64Response = await fetch(imageData);
-  const blob = await base64Response.blob();
+  const blob = await dataUrlToBlobFetch(imageData);
 
-  // Prepare form data for API
+  const filename = `${flowId}.image.png`;
+
   const formData = new FormData();
-  formData.append('file', blob, 'image.png');
+  formData.append('file', blob, filename);
   formData.append('flow_id', flowId);
 
-  // Send to API - No CORS restrictions in background script!
   const response = await fetch(`${backendUrl}/api/core/solve`, {
     method: 'POST',
-    headers: {
-      Authorization: `Bearer ${config.token}`,
-    },
+    headers: { Authorization: `Bearer ${config.token}` },
     body: formData,
   });
-
-  if (!response.ok) {
-    const errorText = await response.text();
-    throw new Error(`API request failed (${response.status}): ${errorText}`);
-  }
+  if (!response.ok) throw new Error(`API request failed (${response.status}): ${await response.text()}`);
 
   const data = await response.json();
-  console.log(`[${timeNow()}][Background] - API response received:`, data);
-
-  if (!data.result) {
-    throw new Error('No result in API response');
-  }
-
+  if (!data.result) throw new Error('No result in API response');
   return data;
 }
+

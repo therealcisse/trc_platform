@@ -92,7 +92,6 @@ class InboxMatcher implements Matcher {
     // Check every second
     this.schedulerInterval = setInterval(() => {
       if (!timeAllowed) {
-        log.debug('[startReloadScheduler] - Outside operational hours, skipping initial scan');
         return;
       }
 

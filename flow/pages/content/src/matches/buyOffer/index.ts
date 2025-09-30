@@ -355,8 +355,6 @@ export async function executeBuyOfferWorkflow(
     log.info('EXECUTING FINAL PURCHASE');
 
     if (!context.dryRun) {
-      log.info('Clicking buy button to complete purchase');
-
       log.info(`Flow ${flow.id} marked as completed`);
       // Clear buying state on success
       log.debug('Clearing buying state');
@@ -388,6 +386,8 @@ export async function executeBuyOfferWorkflow(
 
       log.info(`✅ Buy offer workflow completed successfully for flow ${flow.id}`);
       await log.write();
+
+      log.info('Clicking buy button to complete purchase');
 
       await clickWithVerification(buyButton, {
         verify: false,
