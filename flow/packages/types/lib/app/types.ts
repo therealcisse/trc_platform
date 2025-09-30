@@ -233,7 +233,6 @@ export interface PDFCommand {}
 
 export interface ItemSelectors {
   buyButton: string;
-  pdfLink: string;
 }
 
 export interface MyOfferCommand {
@@ -243,6 +242,7 @@ export interface MyOfferCommand {
 export interface MyOfferSelectors {
   titleLink: string;
   itemLink: string;
+  pdfLink: string;
 }
 
 export interface BuyOfferCommand {

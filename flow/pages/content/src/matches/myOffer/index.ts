@@ -54,6 +54,7 @@ class MyOfferMatcher implements Matcher {
         selectors: {
           itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
           titleLink: '.message_center_message thead tr:nth-child(2) td:nth-child(2)',
+          pdfLink: '.message_center_message td a[href*="/item/id/"]',
         },
       });
       log.info('Browse myOffer executor triggered successfully');
@@ -128,13 +129,7 @@ export async function executeMyOfferWorkflow(
     // Process browse myOffer (list view)
     async function processMyOffer(): Promise<void> {
       try {
-        const itemLlink = document.querySelector(selectors.itemLink) as HTMLAnchorElement;
         const titleLink = document.querySelector(selectors.titleLink) as HTMLElement;
-
-        if (!itemLlink) {
-          log.info('No item link found, skipping');
-          return;
-        }
 
         if (!titleLink) {
           log.info('No title found, skipping');
@@ -145,17 +140,43 @@ export async function executeMyOfferWorkflow(
 
         log.info(`Product: ${title}`);
 
-        const href = itemLlink.href;
-        log.info(`Opening myOffer: ${href}`);
-
         const id = FlowUtils.parseIDFromTitle(title);
-        const flowLog = Log.withFlow(context.matcherId, id);
 
         const flow = await ConfigService.getFlow(id);
-        if (flow && (flow.status === 'done' || flow.status === 'failed')) {
+
+        const flowLog = Log.withFlow(context.matcherId, id);
+
+        if (!flow) {
+          flowLog.info('❌ Flow not found');
+          return;
+        }
+
+        if (flow.status === 'done' || flow.status === 'failed') {
           flowLog.info('❌ Flow is already done, closing all tabs');
           await tabManager.closeAllTabs(flow.id);
         }
+
+        let href: string;
+        if (flow.type == 'pdf') {
+          const pdf = document.querySelector(selectors.pdfLink) as HTMLAnchorElement;
+
+          if (!pdf) {
+            log.info('No pdf button found, skipping');
+            return;
+          }
+
+          href = pdf.href;
+        } else {
+          const itemLink = document.querySelector(selectors.itemLink) as HTMLAnchorElement;
+          if (!itemLink) {
+            log.info('No item link found, skipping');
+            return;
+          }
+
+          href = itemLink.href;
+        }
+
+        log.info(`Opening myOffer: ${href}`);
 
         if (!context.dryRun) {
           // Open link in new managed tab
