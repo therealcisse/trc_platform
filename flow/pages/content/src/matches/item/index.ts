@@ -53,6 +53,7 @@ class ItemMatcher implements Matcher {
         id,
         selectors: {
           buyButton: '.buy_now a.btn',
+          pdfLink: '.message_center_message td a[href*="/item/id/"]',
         },
       });
       log.info('Browse item executor triggered successfully');
@@ -131,18 +132,33 @@ export async function executeItemWorkflow(
     // Process browse item (list view)
     async function processItem(): Promise<void> {
       try {
-        const buyButton = document.querySelector(selectors.buyButton) as HTMLAnchorElement;
+        let href: string;
 
-        if (!buyButton) {
-          log.info('No buy button found, skipping');
-          return;
+        if (flow.type == 'pdf') {
+          const pdf = document.querySelector(selectors.pdfLink) as HTMLAnchorElement;
+
+          if (!pdf) {
+            log.info('No pdf button found, skipping');
+            return;
+          }
+
+          href = pdf.href;
+        } else {
+          const buyButton = document.querySelector(selectors.buyButton) as HTMLAnchorElement;
+
+          if (!buyButton) {
+            log.info('No buy button found, skipping');
+            return;
+          }
+
+          href = buyButton.href;
         }
 
         // Open the item
-        log.info(`Opening item: ${buyButton.href}`);
+        log.info(`Opening item: ${href}`);
 
         if (!context.dryRun) {
-          tabManager.openTab(buyButton.href, flow.id);
+          tabManager.openTab(href, flow.id);
         } else {
           log.debug('Dry run: Would open item in new tab');
         }

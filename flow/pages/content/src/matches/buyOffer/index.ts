@@ -374,7 +374,7 @@ export async function executeBuyOfferWorkflow(
 
       if (remainingTime > 0) {
         log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
-        await sleep(remainingTime - 100);
+        await sleep(remainingTime * 1000 - 100);
         log.debug('Processing time wait completed');
       } else {
         log.info(`Buying immediately ${flow.requestTimestamp}`);

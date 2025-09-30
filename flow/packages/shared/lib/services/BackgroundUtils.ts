@@ -7,6 +7,7 @@ import type {
   ItemSelectors,
   MyOfferSelectors,
   EmailSelectors,
+  FlowAction,
 } from '@extension/types';
 
 /**
@@ -36,6 +37,7 @@ export class BackgroundUtils {
     const response = await sendBackgroundCommand('extension.startFlow', {
       type: 'email',
       id: args.id,
+      action: 'offer',
     });
 
     if (!response.success) {
@@ -49,11 +51,16 @@ export class BackgroundUtils {
    * Start a new inbox flow or check if it already exists
    * @returns { existed: boolean } - true if flow already existed, false if newly created
    */
-  static async startInboxFlow(args: { id: string; requestTimestamp: number }): Promise<{ existed: boolean }> {
+  static async startInboxFlow(args: {
+    id: string;
+    requestTimestamp: number;
+    action: FlowAction;
+  }): Promise<{ existed: boolean }> {
     const response = await sendBackgroundCommand('extension.startFlow', {
       type: 'inbox',
       id: args.id,
       requestTimestamp: args.requestTimestamp,
+      action: args.action,
     });
 
     if (!response.success) {
@@ -141,6 +148,17 @@ export class BackgroundUtils {
     }
 
     return response.data;
+  }
+
+  /**
+   * Print PDF
+   */
+  static async printPdf(): Promise<void> {
+    const response = await sendBackgroundCommand('item.printProductConfirmation', {});
+
+    if (!response.success) {
+      throw new Error(`Failed to execute buy offer: ${response.error}`);
+    }
   }
 
   /**

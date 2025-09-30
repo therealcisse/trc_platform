@@ -45,6 +45,14 @@ export const StoredProductStrategySchema = z.object({
 // Ensure we're validating against StoredProductStrategy
 export const ProductStrategySchema = StoredProductStrategySchema;
 
+export const ProcessingTimeWindowSchema = z.object({
+  id: z.string(),
+  min: LocalTimeSchema,
+  max: LocalTimeSchema,
+  duration: z.number().int().positive(),
+  enabled: z.boolean(),
+});
+
 export const ExecutionConfigSchema = z.object({
   // Inbox mode configuration
   inboxMode: z.boolean().default(true),
@@ -67,18 +75,21 @@ export const ExecutionConfigSchema = z.object({
   animalTimerMin: z.number(),
   animalTimerMax: z.number(),
   animalProcessingTimeSeconds: z.number(),
+  animalProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 
   // Cancer scan product strategy
   cancer: z.boolean(),
   cancerTimerMin: z.number(),
   cancerTimerMax: z.number(),
   cancerProcessingTimeSeconds: z.number(),
+  cancerProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 
   // People insurance product strategy
   people: z.boolean(),
   peopleTimerMin: z.number(),
   peopleTimerMax: z.number(),
   peopleProcessingTimeSeconds: z.number(),
+  peopleProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 });
 
 export const BuyingOfferSchema = z.object({
@@ -97,6 +108,7 @@ export const FlowSchema = z.object({
   requestTimestamp: z.number(),
   status: z.enum(['running', 'done', 'failed']),
   source: z.enum(['email', 'inbox']),
+  type: z.enum(['pdf', 'offer']),
   doneTimestamp: z.number().optional(),
 });
 
@@ -128,5 +140,6 @@ export type ValidatedProductStrategy = z.infer<typeof ProductStrategySchema>;
 export type ValidatedFlow = z.infer<typeof FlowSchema>;
 export type ValidatedManagedTabInfo = z.infer<typeof ManagedTabInfoSchema>;
 export type ValidatedExtensionStorage = z.infer<typeof ExtensionStorageSchema>;
+export type ValidatedProcessingTimeWindow = z.infer<typeof ProcessingTimeWindowSchema>;
 export type ValidatedProductConfig = z.infer<typeof ProductConfigSchema>;
 export type ValidatedDelayConfig = z.infer<typeof DelayConfigSchema>;

@@ -3,6 +3,7 @@ import { buyOfferCommandHandler } from './commands/buyOffer';
 import { emailCommandHandler } from './commands/email';
 import { inboxCommandHandler } from './commands/inbox';
 import { itemCommandHandler } from './commands/item';
+import { pdfCommandHandler } from './commands/pdf';
 import { myOfferCommandHandler } from './commands/myOffer';
 import { BackgroundLoggerService } from './services/logger-service';
 import {
@@ -96,6 +97,9 @@ async function handleMessage(
       case 'item.clickProductLink':
         return itemCommandHandler(message.payload, sender);
 
+      case 'item.printProductConfirmation':
+        return pdfCommandHandler(message.payload, sender);
+
       case 'myOffer.clickProductLink':
         return myOfferCommandHandler(message.payload, sender);
 
@@ -161,8 +165,8 @@ async function handleMessage(
         const payload = message.payload as FlowPayload;
         const flow =
           payload.type === 'email'
-            ? FlowUtils.email(payload.id)
-            : FlowUtils.inbox(payload.id, payload.requestTimestamp);
+            ? FlowUtils.email(payload.id, payload.action)
+            : FlowUtils.inbox(payload.id, payload.requestTimestamp, payload.action);
 
         const existed = await ConfigService.startFlow(flow);
         return {

@@ -1,4 +1,11 @@
-import type { ExecutionConfig, Product, ParsedTitle } from '@extension/types';
+import {
+  type ExecutionConfig,
+  type Product,
+  type ParsedTitle,
+  type ProcessingTimeWindow,
+  LocalTime,
+  LocalTimeUtils,
+} from '@extension/types';
 
 export class ProductFactory {
   /**
@@ -114,33 +121,57 @@ export class ProductFactory {
     };
   }
 
+  static findProcessingTimeOverride(windows: ProcessingTimeWindow[], now: LocalTime): number | undefined {
+    const nowMinutes = LocalTimeUtils.toMinutesOfDay(now);
+
+    return windows.find(w => {
+      if (!w.enabled) return false;
+
+      const minMinutes = LocalTimeUtils.toMinutesOfDay(w.min);
+      const maxMinutes = LocalTimeUtils.toMinutesOfDay(w.max);
+
+      if (minMinutes <= maxMinutes) {
+        // normal case: e.g., 09:00–17:00
+        return nowMinutes >= minMinutes && nowMinutes <= maxMinutes;
+      } else {
+        // wrap-around case: e.g., 22:00–06:00 (crosses midnight)
+        return nowMinutes >= minMinutes || nowMinutes <= maxMinutes;
+      }
+    })?.duration;
+  }
+
   /**
    * Calculate remaining processing time for a product
    */
-  static getRemainingProcessingTimeSeconds(
-    product: Product,
-    requestTimestamp: number,
-    config: ExecutionConfig,
-  ): number {
+  static getRemainingProcessingTimeSeconds(product: Product, timestamp: number, config: ExecutionConfig): number {
     if (!product || !config || product.type === 'INVALID') return 0;
 
     // Get processing time based on product type
     let processingTime = 0;
+    const now = LocalTime.now();
+
     switch (product.type) {
       case 'ANIMAL':
-        processingTime = config.animalProcessingTimeSeconds;
+        processingTime =
+          ProductFactory.findProcessingTimeOverride(config.animalProcessingTimeWindows, now) ??
+          config.animalProcessingTimeSeconds;
         break;
       case 'CANCER':
-        processingTime = config.cancerProcessingTimeSeconds;
+        processingTime =
+          ProductFactory.findProcessingTimeOverride(config.cancerProcessingTimeWindows, now) ??
+          config.cancerProcessingTimeSeconds;
         break;
       case 'PEOPLE':
-        processingTime = config.peopleProcessingTimeSeconds;
+        processingTime =
+          ProductFactory.findProcessingTimeOverride(config.peopleProcessingTimeWindows, now) ??
+          config.peopleProcessingTimeSeconds;
         break;
     }
 
     // Calculate elapsed time since request started
-    // requestTimestamp is in seconds, Date.now() is in milliseconds
-    const elapsedSeconds = Math.floor((Date.now() - requestTimestamp) / 1000);
+    // timestamp is expected to be in milliseconds since epoch
+    // If you only have seconds, multiply by 1000 before calling this function
+    const elapsedSeconds = Math.floor((Date.now() - timestamp) / 1000);
 
     // Return remaining time, minimum 0
     return Math.max(0, processingTime - elapsedSeconds);

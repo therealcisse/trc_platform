@@ -50,18 +50,21 @@ export interface ExecutionConfig {
   animalTimerMin: number;
   animalTimerMax: number;
   animalProcessingTimeSeconds: number;
+  animalProcessingTimeWindows: ProcessingTimeWindow[];
 
   // Cancer scan product strategy
   cancer: boolean;
   cancerTimerMin: number;
   cancerTimerMax: number;
   cancerProcessingTimeSeconds: number;
+  cancerProcessingTimeWindows: ProcessingTimeWindow[];
 
   // People insurance product strategy
   people: boolean;
   peopleTimerMin: number;
   peopleTimerMax: number;
   peopleProcessingTimeSeconds: number;
+  peopleProcessingTimeWindows: ProcessingTimeWindow[];
 }
 
 export interface OperationalHours {
@@ -70,6 +73,14 @@ export interface OperationalHours {
     min: LocalTime;
     max: LocalTime;
   };
+}
+
+export interface ProcessingTimeWindow {
+  id: string;
+  min: LocalTime;
+  max: LocalTime;
+  duration: number;
+  enabled: boolean;
 }
 
 export interface DelayConfig {
@@ -145,21 +156,26 @@ export interface CommandResponse<T = any> {
   requestId: string;
 }
 
+export type FlowAction = 'pdf' | 'offer';
+
 // Background command definitions
 export interface EmailFlowPayload {
   type: 'email';
+  action: FlowAction;
   id: string;
 }
 
 export interface InboxFlowPayload {
   type: 'inbox';
   id: string;
+  action: FlowAction;
   requestTimestamp: number;
 }
 
 export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
 
 export interface BackgroundCommands {
+  'item.printProductConfirmation': PDFCommand;
   'inbox.openMyOfferLink': InboxCommand;
   'email.openUnreadAndClickLink': EmailCommand;
   'buyOffer.execute': BuyOfferCommand;
@@ -213,8 +229,11 @@ export interface ItemCommand {
   selectors: ItemSelectors;
 }
 
+export interface PDFCommand {}
+
 export interface ItemSelectors {
   buyButton: string;
+  pdfLink: string;
 }
 
 export interface MyOfferCommand {
@@ -311,6 +330,7 @@ export interface Flow {
   requestTimestamp: number;
   status: 'running' | 'done' | 'failed';
   source: 'email' | 'inbox';
+  type: FlowAction;
   doneTimestamp?: number;
 }
 

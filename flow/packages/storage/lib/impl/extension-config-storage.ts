@@ -48,16 +48,19 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     animalTimerMin: 30,
     animalTimerMax: 60,
     animalProcessingTimeSeconds: 0,
+    animalProcessingTimeWindows: [],
 
     cancer: true,
     cancerTimerMin: 30,
     cancerTimerMax: 60,
     cancerProcessingTimeSeconds: 0,
+    cancerProcessingTimeWindows: [],
 
     people: true,
     peopleTimerMin: 30,
     peopleTimerMax: 60,
     peopleProcessingTimeSeconds: 0,
+    peopleProcessingTimeWindows: [],
   },
   // Initialize empty storage collections
   logs: [],

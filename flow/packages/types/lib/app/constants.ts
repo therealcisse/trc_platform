@@ -4,6 +4,7 @@ export const MATCHER_IDS = {
   ITEM: 'item',
   MY_OFFER: 'my-offer',
   INBOX: 'inbox',
+  PDF: 'pdf',
 } as const;
 
 export type MatcherId = (typeof MATCHER_IDS)[keyof typeof MATCHER_IDS];

@@ -295,8 +295,8 @@ export async function executeInboxWorkflow(
 
     async function parseInboxLinks(
       selectors: InboxSelectors,
-    ): Promise<Array<{ id: string; href: string; requestTimestamp: number }>> {
-      const links: Array<{ id: string; href: string; requestTimestamp: number }> = [];
+    ): Promise<Array<{ id: string; href: string; requestTimestamp: number; isLead: boolean }>> {
+      const links: Array<{ id: string; href: string; requestTimestamp: number; isLead: boolean }> = [];
       const rows = document.querySelectorAll(selectors.rows);
 
       for (const row of rows) {
@@ -335,6 +335,7 @@ export async function executeInboxWorkflow(
           id,
           href: anchor.href,
           requestTimestamp,
+          isLead: FlowUtils.isLead(title),
         });
       }
 
@@ -369,6 +370,7 @@ export async function executeInboxWorkflow(
           const { existed } = await BackgroundUtils.startInboxFlow({
             id: link.id,
             requestTimestamp: link.requestTimestamp,
+            action: link.isLead ? 'pdf' : 'offer',
           });
 
           if (existed) {

@@ -1,6 +1,11 @@
-import type { Flow } from '@extension/types';
+import type { Flow, FlowAction } from '@extension/types';
 
 export class FlowUtils {
+  static isLead(text: string): boolean {
+    const regex = /^Lead \d+ erfolgreich ersteigert\.$/;
+    return regex.test(text);
+  }
+
   static parseDateToEpoch(dateStr: string): number {
     // Example input: "15.09.2025 – 18:46:04"
     // Normalize dash and trim
@@ -69,7 +74,7 @@ export class FlowUtils {
     return match[1];
   }
 
-  static email(id: string): Flow {
+  static email(id: string, action: FlowAction): Flow {
     const now = Date.now();
     return {
       id,
@@ -77,16 +82,18 @@ export class FlowUtils {
       requestTimestamp: now,
       status: 'running',
       source: 'email',
+      type: action,
     };
   }
 
-  static inbox(id: string, requestTimestamp: number): Flow {
+  static inbox(id: string, requestTimestamp: number, action: FlowAction): Flow {
     return {
       id,
       timestamp: Date.now(),
       requestTimestamp,
       status: 'running',
       source: 'inbox',
+      type: action,
     };
   }
 }
