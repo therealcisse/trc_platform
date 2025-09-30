@@ -53,7 +53,7 @@ class InboxMatcher implements Matcher {
 
         if (timeAllowed) {
           // Wait for configured delay
-          await sleep(config.inboxPostReloadDelayMs);
+          config.inboxPostReloadDelayMs > 0 && (await sleep(config.inboxPostReloadDelayMs));
 
           // Trigger scan
           await this.scanAndOpenLinks();
@@ -70,7 +70,7 @@ class InboxMatcher implements Matcher {
       }
 
       // Start reload scheduler
-      this.startReloadScheduler(config);
+      this.startReloadScheduler(config, timeAllowed);
 
       await log.write();
     } catch (error) {
@@ -80,7 +80,7 @@ class InboxMatcher implements Matcher {
     }
   }
 
-  private startReloadScheduler(config: ExecutionConfig): void {
+  private startReloadScheduler(config: ExecutionConfig, timeAllowed: boolean): void {
     const reloadSeconds = config.inboxReloadSeconds;
     const log = new Log(MATCHER_IDS.INBOX);
 
@@ -91,6 +91,11 @@ class InboxMatcher implements Matcher {
 
     // Check every second
     this.schedulerInterval = setInterval(() => {
+      if (!timeAllowed) {
+        log.debug('[startReloadScheduler] - Outside operational hours, skipping initial scan');
+        return;
+      }
+
       const now = new Date();
       const currentSecond = now.getSeconds();
 

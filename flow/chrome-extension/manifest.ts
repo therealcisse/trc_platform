@@ -27,7 +27,14 @@ const manifest = {
   version: packageJson.version,
   description: 'TRC Platform Extension',
   host_permissions: ['<all_urls>'],
-  permissions: ['storage', 'scripting', 'tabs', 'notifications'],
+  permissions: [
+    'storage',
+    'scripting',
+    'notifications',
+    "downloads",
+    "debugger",
+    "tabs",
+  ],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',

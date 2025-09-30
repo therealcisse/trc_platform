@@ -33,7 +33,7 @@ export class CaptchaProcessor {
     return Date.now() - cacheEntry.timestamp < this.cacheDuration;
   }
 
-  async solveCaptcha(imgSrc: string, imageDataUrl: string, flowId: string, maxRetries = 3): Promise<string> {
+  async solveCaptcha(imgSrc: string, imageDataUrl: string, flowId: string, maxRetries = 7): Promise<string> {
     const log = Log.withFlow(MATCHER_IDS.BUY_OFFER, flowId);
     const cacheKey = this.getCacheKey(imgSrc, flowId);
     const cached = this.cache.get(cacheKey);
