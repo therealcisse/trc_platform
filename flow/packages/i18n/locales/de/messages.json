@@ -257,5 +257,53 @@
   },
   "actions_success_deleted": {
     "message": "Flow-Datenbank erfolgreich gelöscht"
+  },
+  "options_processing_time_windows": {
+    "message": "Verarbeitungszeitfenster"
+  },
+  "options_processing_time_windows_help": {
+    "message": "Fenster überschreiben die Basis-Verarbeitungszeit, wenn die aktuelle Zeit innerhalb eines aktivierten Fensters liegt. Das erste passende aktivierte Fenster in der Listenreihenfolge gilt."
+  },
+  "options_processing_time_window_enabled": {
+    "message": "Aktiviert"
+  },
+  "options_processing_time_window_from": {
+    "message": "Von"
+  },
+  "options_processing_time_window_to": {
+    "message": "bis"
+  },
+  "options_processing_time_window_duration": {
+    "message": "Dauer (Sekunden)"
+  },
+  "options_processing_time_window_active_now": {
+    "message": "Jetzt aktiv"
+  },
+  "options_processing_time_window_add": {
+    "message": "Fenster hinzufügen"
+  },
+  "options_processing_time_window_clear_all": {
+    "message": "Alle löschen"
+  },
+  "options_processing_time_window_sort_by_start": {
+    "message": "Nach Startzeit sortieren"
+  },
+  "options_processing_time_window_duplicate": {
+    "message": "Duplizieren"
+  },
+  "options_processing_time_window_delete": {
+    "message": "Löschen"
+  },
+  "options_processing_time_window_move_up": {
+    "message": "Nach oben"
+  },
+  "options_processing_time_window_move_down": {
+    "message": "Nach unten"
+  },
+  "options_processing_time_window_duration_error": {
+    "message": "Die Dauer muss eine positive ganze Zahl sein"
+  },
+  "options_processing_time_window_empty": {
+    "message": "Keine Fenster konfiguriert."
   }
 }

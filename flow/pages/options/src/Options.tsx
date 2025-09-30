@@ -5,8 +5,8 @@ import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from 
 import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { Fragment, useState } from 'react';
-import type { ExecutionConfig, OperationalHours } from '@extension/types';
-import { LocalTime } from '@extension/types';
+import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow } from '@extension/types';
+import { LocalTime, LocalTimeUtils } from '@extension/types';
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => ({ value: h, label: String(h).padStart(2, '0') }));
 const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, m) => ({ value: m, label: String(m).padStart(2, '0') }));
@@ -45,6 +45,251 @@ function TimePicker({
 }
 
 type DayName = (typeof DAYS)[number];
+
+type ProductWindowsKey = 'animalProcessingTimeWindows' | 'peopleProcessingTimeWindows' | 'cancerProcessingTimeWindows';
+
+type ProcessingTimeWindowsEditorProps = {
+  windows: ProcessingTimeWindow[];
+  disabled?: boolean;
+  productWindowsKey: ProductWindowsKey;
+  baseSeconds: number;
+};
+
+function ProcessingTimeWindowsEditor({
+  windows,
+  disabled,
+  productWindowsKey,
+  baseSeconds,
+}: ProcessingTimeWindowsEditorProps) {
+  const isWindowActiveNow = (w: ProcessingTimeWindow): boolean => {
+    if (!w.enabled) return false;
+    const now = LocalTime.now();
+    const nowM = LocalTimeUtils.toMinutesOfDay(now);
+    const minM = LocalTimeUtils.toMinutesOfDay(w.min);
+    const maxM = LocalTimeUtils.toMinutesOfDay(w.max);
+    if (minM <= maxM) return nowM >= minM && nowM <= maxM;
+    return nowM >= minM || nowM <= maxM; // wrap-around
+  };
+
+  const updateWindows = (next: ProcessingTimeWindow[]) => {
+    // Persist only the specific windows array
+    extensionConfigStorage.updateConfig({ [productWindowsKey]: next } as unknown as Partial<ExecutionConfig>);
+  };
+
+  const addWindow = () => {
+    const newWindow: ProcessingTimeWindow = {
+      id: (globalThis.crypto?.randomUUID?.() ?? `win_${Math.random().toString(36).slice(2)}_${Date.now()}`) as string,
+      min: LocalTime.of(9, 0),
+      max: LocalTime.of(17, 0),
+      duration: baseSeconds > 0 ? baseSeconds : 10,
+      enabled: true,
+    };
+    updateWindows([...(windows ?? []), newWindow]);
+  };
+
+  const updateWindow = (id: string, patch: Partial<ProcessingTimeWindow>) => {
+    const next = (windows ?? []).map(w => (w.id === id ? { ...w, ...patch } : w));
+    updateWindows(next);
+  };
+
+  const moveWindow = (index: number, direction: -1 | 1) => {
+    const arr = [...(windows ?? [])];
+    const newIndex = index + direction;
+    if (newIndex < 0 || newIndex >= arr.length) return;
+    const [item] = arr.splice(index, 1);
+    arr.splice(newIndex, 0, item);
+    updateWindows(arr);
+  };
+
+  const duplicateWindow = (index: number) => {
+    const arr = [...(windows ?? [])];
+    const item = arr[index];
+    if (!item) return;
+    const clone: ProcessingTimeWindow = {
+      ...item,
+      id: (globalThis.crypto?.randomUUID?.() ?? `win_${Math.random().toString(36).slice(2)}_${Date.now()}`) as string,
+    };
+    arr.splice(index + 1, 0, clone);
+    updateWindows(arr);
+  };
+
+  const deleteWindow = (id: string) => {
+    const next = (windows ?? []).filter(w => w.id !== id);
+    updateWindows(next);
+  };
+
+  const clearAll = () => {
+    updateWindows([]);
+  };
+
+  const sortByStart = () => {
+    const sorted = [...(windows ?? [])].sort((a, b) => {
+      const aMin = LocalTimeUtils.toMinutesOfDay(a.min);
+      const bMin = LocalTimeUtils.toMinutesOfDay(b.min);
+      return aMin - bMin;
+    });
+    updateWindows(sorted);
+  };
+
+  return (
+    <div className="space-y-3 rounded-md border border-gray-700 bg-gray-900 p-3">
+      <div className="flex items-center justify-between">
+        <div>
+          <h4 className="text-sm font-medium">{t('options_processing_time_windows')}</h4>
+          <p className="text-xs text-gray-400">{t('options_processing_time_windows_help')}</p>
+        </div>
+        <div className="flex items-center gap-2">
+          <button
+            type="button"
+            onClick={addWindow}
+            disabled={disabled}
+            className={cn(
+              'rounded-md bg-gray-700 px-3 py-1.5 text-xs text-gray-200 hover:bg-gray-600',
+              disabled && 'opacity-50',
+            )}>
+            {t('options_processing_time_window_add')}
+          </button>
+          <button
+            type="button"
+            onClick={sortByStart}
+            disabled={disabled || (windows ?? []).length < 2}
+            className={cn(
+              'rounded-md bg-gray-700 px-3 py-1.5 text-xs text-gray-200 hover:bg-gray-600',
+              (disabled || (windows ?? []).length < 2) && 'opacity-50',
+            )}>
+            {t('options_processing_time_window_sort_by_start')}
+          </button>
+          <button
+            type="button"
+            onClick={clearAll}
+            disabled={disabled || (windows ?? []).length === 0}
+            className={cn(
+              'rounded-md bg-gray-700 px-3 py-1.5 text-xs text-gray-200 hover:bg-gray-600',
+              (disabled || (windows ?? []).length === 0) && 'opacity-50',
+            )}>
+            {t('options_processing_time_window_clear_all')}
+          </button>
+        </div>
+      </div>
+
+      <div className="space-y-2">
+        {(windows ?? []).length === 0 ? (
+          <p className="text-xs text-gray-400">{t('options_processing_time_window_empty')}</p>
+        ) : (
+          (windows ?? []).map((w, idx) => {
+            const active = isWindowActiveNow(w);
+            return (
+              <div
+                key={w.id}
+                className={cn(
+                  'flex flex-wrap items-center gap-3 rounded-md bg-gray-800 p-3',
+                  !w.enabled && 'opacity-60',
+                )}>
+                <div className="flex items-center gap-1">
+                  <button
+                    type="button"
+                    onClick={() => moveWindow(idx, -1)}
+                    disabled={disabled || idx === 0}
+                    className={cn(
+                      'h-7 w-7 rounded bg-gray-700 text-gray-200 hover:bg-gray-600',
+                      (disabled || idx === 0) && 'opacity-50',
+                    )}>
+                    ↑
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => moveWindow(idx, 1)}
+                    disabled={disabled || idx === (windows?.length ?? 0) - 1}
+                    className={cn(
+                      'h-7 w-7 rounded bg-gray-700 text-gray-200 hover:bg-gray-600',
+                      (disabled || idx === (windows?.length ?? 0) - 1) && 'opacity-50',
+                    )}>
+                    ↓
+                  </button>
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">{t('options_processing_time_window_enabled')}</span>
+                  <Switch
+                    checked={w.enabled}
+                    disabled={disabled}
+                    onCheckedChange={checked => updateWindow(w.id, { enabled: !!checked })}
+                    className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <span className="text-xs text-gray-400">{t('options_processing_time_window_from')}</span>
+                  <TimePicker
+                    value={w.min}
+                    disabled={disabled || !w.enabled}
+                    onChange={lt => updateWindow(w.id, { min: lt })}
+                  />
+                  <span className="text-xs text-gray-400">{t('options_processing_time_window_to')}</span>
+                  <TimePicker
+                    value={w.max}
+                    disabled={disabled || !w.enabled}
+                    onChange={lt => updateWindow(w.id, { max: lt })}
+                  />
+                </div>
+
+                <div className="flex items-center gap-2">
+                  <label className="text-xs text-gray-400" htmlFor={`duration_${w.id}`}>
+                    {t('options_processing_time')}
+                  </label>
+                  <input
+                    id={`duration_${w.id}`}
+                    type="number"
+                    min={1}
+                    step={1}
+                    value={w.duration}
+                    disabled={disabled || !w.enabled}
+                    onChange={e => {
+                      const val = parseInt(e.target.value, 10);
+                      updateWindow(w.id, { duration: Number.isFinite(val) && val > 0 ? val : 1 });
+                    }}
+                    className={cn(
+                      'w-28 rounded-md border border-gray-600 bg-gray-700 px-2 py-1 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500',
+                    )}
+                  />
+                </div>
+
+                <div className="ml-auto flex items-center gap-2">
+                  {active && w.enabled && (
+                    <span className="rounded bg-green-700 px-2 py-0.5 text-xs text-green-100">
+                      {t('options_processing_time_window_active_now')}
+                    </span>
+                  )}
+
+                  <button
+                    type="button"
+                    onClick={() => duplicateWindow(idx)}
+                    disabled={disabled}
+                    className={cn(
+                      'rounded-md bg-gray-700 px-2 py-1 text-xs text-gray-200 hover:bg-gray-600',
+                      disabled && 'opacity-50',
+                    )}>
+                    {t('options_processing_time_window_duplicate')}
+                  </button>
+                  <button
+                    type="button"
+                    onClick={() => deleteWindow(w.id)}
+                    disabled={disabled}
+                    className={cn(
+                      'rounded-md bg-gray-700 px-2 py-1 text-xs text-gray-200 hover:bg-gray-600',
+                      disabled && 'opacity-50',
+                    )}>
+                    {t('options_processing_time_window_delete')}
+                  </button>
+                </div>
+              </div>
+            );
+          })
+        )}
+      </div>
+    </div>
+  );
+}
 
 const JsonDisplay = ({ data, onClose }: { data: any; onClose: () => void }) => {
   const [copied, setCopied] = useState(false);
@@ -398,18 +643,18 @@ const Options = () => {
             {/* Product Strategies */}
             <section>
               <h2 className="mb-4 text-xl font-medium">{t('options_product_strategies')}</h2>
-              <div className="grid grid-cols-1 gap-4 md:grid-cols-3">
+              <div className="flex flex-col gap-4">
                 {/* Animals */}
-                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{t('options_animal_insurance')}</h3>
-                    <Switch
-                      checked={config.animals || false}
-                      onCheckedChange={() => handleConfigToggle('animals')}
-                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-                    />
-                  </div>
-                  <div className="space-y-3">
+                <div className="rounded-lg bg-gray-800 p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">{t('options_animal_insurance')}</h3>
+                      <Switch
+                        checked={config.animals || false}
+                        onCheckedChange={() => handleConfigToggle('animals')}
+                        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                      />
+                    </div>
                     <div>
                       <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
                       <input
@@ -423,19 +668,26 @@ const Options = () => {
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+
+                    <ProcessingTimeWindowsEditor
+                      windows={config.animalProcessingTimeWindows || []}
+                      disabled={!config.animals}
+                      productWindowsKey="animalProcessingTimeWindows"
+                      baseSeconds={config.animalProcessingTimeSeconds || 0}
+                    />
                   </div>
                 </div>
                 {/* People */}
-                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{t('options_people_insurance')}</h3>
-                    <Switch
-                      checked={config.people || false}
-                      onCheckedChange={() => handleConfigToggle('people')}
-                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-                    />
-                  </div>
-                  <div className="space-y-3">
+                <div className="rounded-lg bg-gray-800 p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">{t('options_people_insurance')}</h3>
+                      <Switch
+                        checked={config.people || false}
+                        onCheckedChange={() => handleConfigToggle('people')}
+                        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                      />
+                    </div>
                     <div>
                       <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
                       <input
@@ -449,19 +701,26 @@ const Options = () => {
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+
+                    <ProcessingTimeWindowsEditor
+                      windows={config.peopleProcessingTimeWindows || []}
+                      disabled={!config.people}
+                      productWindowsKey="peopleProcessingTimeWindows"
+                      baseSeconds={config.peopleProcessingTimeSeconds || 0}
+                    />
                   </div>
                 </div>
                 {/* Cancer */}
-                <div className="space-y-4 rounded-lg bg-gray-800 p-4">
-                  <div className="flex items-center justify-between">
-                    <h3 className="font-medium">{t('options_cancer_insurance')}</h3>
-                    <Switch
-                      checked={config.cancer || false}
-                      onCheckedChange={() => handleConfigToggle('cancer')}
-                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-                    />
-                  </div>
-                  <div className="space-y-3">
+                <div className="rounded-lg bg-gray-800 p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">{t('options_cancer_insurance')}</h3>
+                      <Switch
+                        checked={config.cancer || false}
+                        onCheckedChange={() => handleConfigToggle('cancer')}
+                        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                      />
+                    </div>
                     <div>
                       <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
                       <input
@@ -475,6 +734,13 @@ const Options = () => {
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
+
+                    <ProcessingTimeWindowsEditor
+                      windows={config.cancerProcessingTimeWindows || []}
+                      disabled={!config.cancer}
+                      productWindowsKey="cancerProcessingTimeWindows"
+                      baseSeconds={config.cancerProcessingTimeSeconds || 0}
+                    />
                   </div>
                 </div>
               </div>

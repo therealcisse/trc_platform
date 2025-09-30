@@ -257,5 +257,53 @@
   },
   "actions_success_deleted": {
     "message": "Flow DB deleted successfully"
+  },
+  "options_processing_time_windows": {
+    "message": "Processing time windows"
+  },
+  "options_processing_time_windows_help": {
+    "message": "Windows override the base processing time when current time falls within an enabled window. First enabled match in list order wins."
+  },
+  "options_processing_time_window_enabled": {
+    "message": "Enabled"
+  },
+  "options_processing_time_window_from": {
+    "message": "From"
+  },
+  "options_processing_time_window_to": {
+    "message": "to"
+  },
+  "options_processing_time_window_duration": {
+    "message": "Duration (seconds)"
+  },
+  "options_processing_time_window_active_now": {
+    "message": "Active now"
+  },
+  "options_processing_time_window_add": {
+    "message": "Add window"
+  },
+  "options_processing_time_window_clear_all": {
+    "message": "Clear all"
+  },
+  "options_processing_time_window_sort_by_start": {
+    "message": "Sort by start"
+  },
+  "options_processing_time_window_duplicate": {
+    "message": "Duplicate"
+  },
+  "options_processing_time_window_delete": {
+    "message": "Delete"
+  },
+  "options_processing_time_window_move_up": {
+    "message": "Move up"
+  },
+  "options_processing_time_window_move_down": {
+    "message": "Move down"
+  },
+  "options_processing_time_window_duration_error": {
+    "message": "Duration must be a positive integer"
+  },
+  "options_processing_time_window_empty": {
+    "message": "No windows configured."
   }
 }
