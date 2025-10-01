@@ -229,10 +229,16 @@ export interface ItemCommand {
   selectors: ItemSelectors;
 }
 
-export interface PDFCommand {}
+export interface PDFCommand {
+  selectors: PdfSelectors;
+}
 
 export interface ItemSelectors {
   buyButton: string;
+}
+
+export interface PdfSelectors {
+  productTitle: string;
 }
 
 export interface MyOfferCommand {

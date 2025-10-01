@@ -1,4 +1,4 @@
-import { ConfigService } from '@extension/shared';
+import { ConfigService, sleep, TabManager } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import type { PDFCommand, CommandResponse, ExecutionContext, MessageHandler } from '@extension/types';
 
@@ -30,13 +30,69 @@ export const pdfCommandHandler: MessageHandler<'item.printProductConfirmation'> 
       };
     }
 
-    const id = await exportTabToPdf(tabId);
+    await exportTabToPdf(tabId);
+
+    await sleep(5000);
+
+    // Create execution context
+    const context: ExecutionContext = {
+      tabId,
+      url: sender.tab.url || '',
+      matcherId: MATCHER_IDS.PDF,
+      config,
+      timeout: 30000, // 30 seconds timeout
+      dryRun: false,
+    };
+
+    // Inject and execute the pdf workflow
+    const result = await chrome.scripting.executeScript({
+      target: { tabId },
+      func: async (contextJson: string, selectorsJson: string) => {
+        // This runs in the content script context
+        const context = JSON.parse(contextJson);
+        const selectors = JSON.parse(selectorsJson);
+
+        // Check if executor is available
+        if (typeof (window as any).__pdfExecutor === 'function') {
+          return await (window as any).__pdfExecutor(context, selectors);
+        }
+
+        // If not, we need to load it first
+        // In production, this would be injected via manifest
+        return {
+          success: false,
+          error: 'pdf executor not loaded',
+          matcherId: context.matcherId,
+          executorName: 'pdf',
+        };
+      },
+      args: [
+        JSON.stringify(context),
+        JSON.stringify(payload.selectors),
+      ],
+    });
+
+    // Extract result from script execution
+    const executionResult = result[0]?.result;
+
+    if (!executionResult) {
+      throw new Error('No result from pdf executor');
+    }
+
+    // Log the execution
+    if (executionResult.success) {
+      console.log('[Background] pdf workflow completed successfully:', executionResult.data);
+    } else {
+      console.error('[Background] pdf workflow failed:', executionResult.error);
+    }
 
     return {
-      success: true,
-      data: {downloadId: id},
-      requestId: 'PDF',
+      success: executionResult.success,
+      data: executionResult,
+      error: executionResult.error,
+      requestId: "PDF",
     };
+
   } catch (error) {
     console.error('[Background] Error handling pdf command:', error);
 
@@ -49,7 +105,7 @@ export const pdfCommandHandler: MessageHandler<'item.printProductConfirmation'> 
 };
 
 // Helper function to ensure pdf executor is loaded
-export async function ensureItemExecutorLoaded(tabId: number): Promise<void> {
+export async function ensurePdfExecutorLoaded(tabId: number): Promise<void> {
   try {
     // Check if executor is already loaded
     const checkResult = await chrome.scripting.executeScript({

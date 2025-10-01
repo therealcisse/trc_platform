@@ -372,7 +372,7 @@ export async function executeInboxWorkflow(
         if (!context.dryRun) {
           // Start flow for this link
           const { existed } = await BackgroundUtils.startInboxFlow({
-            id: link.id,
+            id: link.isLead ? `${link.id}-pdf` : link.id,
             requestTimestamp: link.requestTimestamp,
             action: link.isLead ? 'pdf' : 'offer',
           });

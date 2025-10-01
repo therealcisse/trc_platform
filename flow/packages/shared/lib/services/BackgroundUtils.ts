@@ -8,6 +8,7 @@ import type {
   MyOfferSelectors,
   EmailSelectors,
   FlowAction,
+  PDFCommand,
 } from '@extension/types';
 
 /**
@@ -153,8 +154,8 @@ export class BackgroundUtils {
   /**
    * Print PDF
    */
-  static async printPdf(): Promise<void> {
-    const response = await sendBackgroundCommand('item.printProductConfirmation', {});
+  static async printPdf(payload: PDFCommand): Promise<void> {
+    const response = await sendBackgroundCommand('item.printProductConfirmation', payload);
 
     if (!response.success) {
       throw new Error(`Failed to execute buy offer: ${response.error}`);

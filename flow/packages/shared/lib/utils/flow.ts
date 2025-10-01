@@ -54,6 +54,12 @@ export class FlowUtils {
       return leadMatch[1];
     }
 
+    // Try to match "Leadnummer: 1455952 ..." format (anything starting with Lead followed by a number)
+    const leadnummerMatch = /Leadnummer:\s+(\d+)/.exec(title);
+    if (leadnummerMatch) {
+      return leadnummerMatch[1];
+    }
+
     throw new Error('Could not parse ID from title');
   }
 
