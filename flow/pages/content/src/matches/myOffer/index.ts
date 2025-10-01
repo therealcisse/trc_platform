@@ -1,7 +1,7 @@
 import { ProductFactory, Log, FlowUtils, ConfigService, BackgroundUtils, TabManager } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher } from '@src/lib';
-import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors } from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors, Flow } from '@extension/types';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing
@@ -140,9 +140,21 @@ export async function executeMyOfferWorkflow(
 
         log.info(`Product: ${title}`);
 
-        const id = FlowUtils.parseIDFromTitle(title);
+        let id = FlowUtils.parseIDFromTitle(title);
 
-        const flow = await ConfigService.getFlow(id);
+        let flow: Flow | undefined;
+
+        try {
+          flow = await ConfigService.getFlow(id);
+
+          if (!flow) {
+            id = `${id}-pdf`;
+            flow = await ConfigService.getFlow(id);
+          }
+        } catch {
+          id = `${id}-pdf`;
+          flow = await ConfigService.getFlow(id);
+        }
 
         const flowLog = Log.withFlow(context.matcherId, id);
 
