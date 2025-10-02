@@ -95,14 +95,14 @@ pnpm build
 if [[ -n "$KEY_PATH" ]]; then
   echo "Packaging Chrome extension with key: $KEY_PATH"
   [[ -f "$KEY_PATH" ]] || die "Key file not found: $KEY_PATH"
-  
+
   PACKAGE_NAME="$(node -p "require('./package.json').name")"
   CRX_NAME="${PACKAGE_NAME}_v${VERSION}.crx"
-  
+
   "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
     --pack-extension="./$DIST_DIR" \
     --pack-extension-key="$KEY_PATH"
-  
+
   # Chrome creates the .crx in the parent directory of dist
   if [[ -f "${DIST_DIR}.crx" ]]; then
     mv "${DIST_DIR}.crx" "$CRX_NAME"
