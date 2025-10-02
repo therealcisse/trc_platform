@@ -370,9 +370,11 @@ export async function executeInboxWorkflow(
 
       try {
         if (!context.dryRun) {
+          const id = link.isLead ? `${link.id}-pdf` : link.id;
+
           // Start flow for this link
           const { existed } = await BackgroundUtils.startInboxFlow({
-            id: link.isLead ? `${link.id}-pdf` : link.id,
+            id: id,
             requestTimestamp: link.requestTimestamp,
             action: link.isLead ? 'pdf' : 'offer',
           });
@@ -385,13 +387,13 @@ export async function executeInboxWorkflow(
             continue;
           }
 
-          flowLog.info(`Processing new inbox flow: ${link.id}`);
+          flowLog.info(`Processing new inbox flow: ${id}`);
 
           flowLog.info(`Opening link: ${link.href}`);
 
           if (!context.dryRun) {
             // Flow created successfully - no need for separate tracking
-            tabManager.openTab(link.href, link.id);
+            tabManager.openTab(link.href, id);
             openedCount++;
             flowLog.info(`Flow started successfully`);
           } else {
