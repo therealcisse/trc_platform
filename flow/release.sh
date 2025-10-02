@@ -153,6 +153,17 @@ if [[ -n "$CRX_NAME" && -f "$CRX_NAME" ]]; then
   CRX_CHECKSUM="$(sha256_file "$RELEASE_DIR/$CRX_NAME")"
   echo "$CRX_CHECKSUM  $CRX_NAME" | tee -a "$RELEASE_DIR/$OUTPUT_SUM" >/dev/null
   echo "Chrome extension moved to: $RELEASE_DIR/$CRX_NAME"
+  
+  # Zip the .crx file
+  CRX_ZIP_NAME="${CRX_NAME%.crx}.crx.zip"
+  echo "Creating crx archive: $RELEASE_DIR/$CRX_ZIP_NAME"
+  (
+    cd "$RELEASE_DIR"
+    zip -q "$CRX_ZIP_NAME" "$CRX_NAME"
+  )
+  CRX_ZIP_CHECKSUM="$(sha256_file "$RELEASE_DIR/$CRX_ZIP_NAME")"
+  echo "$CRX_ZIP_CHECKSUM  $CRX_ZIP_NAME" | tee -a "$RELEASE_DIR/$OUTPUT_SUM" >/dev/null
+  echo "Chrome extension zip created: $RELEASE_DIR/$CRX_ZIP_NAME"
 fi
 
 # =========================
@@ -195,6 +206,9 @@ echo "Delivery artifacts created in $RELEASE_DIR:"
 echo "  Archive:        $ZIP_PATH"
 if [[ -n "$CRX_NAME" && -f "$RELEASE_DIR/$CRX_NAME" ]]; then
   echo "  Extension:      $RELEASE_DIR/$CRX_NAME"
+  if [[ -f "$RELEASE_DIR/$CRX_ZIP_NAME" ]]; then
+    echo "  Extension zip:  $RELEASE_DIR/$CRX_ZIP_NAME"
+  fi
 fi
 echo "  Checksum file:  $RELEASE_DIR/$OUTPUT_SUM"
 echo "  Email template: $RELEASE_DIR/$OUTPUT_EMAIL"
