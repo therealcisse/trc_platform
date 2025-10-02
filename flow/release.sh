@@ -39,7 +39,29 @@ validity_date() {
 # =========================
 # Arguments
 # =========================
-VERSION="${1:-}"
+VERSION=""
+KEY_PATH=""
+
+while [[ $# -gt 0 ]]; do
+  case "$1" in
+    --key)
+      KEY_PATH="$2"
+      shift 2
+      ;;
+    --key=*)
+      KEY_PATH="${1#*=}"
+      shift
+      ;;
+    *)
+      if [[ -z "$VERSION" ]]; then
+        VERSION="$1"
+      else
+        die "Unknown argument: $1"
+      fi
+      shift
+      ;;
+  esac
+done
 
 # =========================
 # Preflight checks
@@ -66,6 +88,33 @@ echo "Running build"
 pnpm build
 
 [[ -d "$DIST_DIR" ]] || die "Dist folder '$DIST_DIR' does not exist."
+
+# =========================
+# Package Chrome extension
+# =========================
+if [[ -n "$KEY_PATH" ]]; then
+  echo "Packaging Chrome extension with key: $KEY_PATH"
+  [[ -f "$KEY_PATH" ]] || die "Key file not found: $KEY_PATH"
+  
+  PACKAGE_NAME="$(node -p "require('./package.json').name")"
+  CRX_NAME="${PACKAGE_NAME}_v${VERSION}.crx"
+  
+  "/Applications/Google Chrome.app/Contents/MacOS/Google Chrome" \
+    --pack-extension="./$DIST_DIR" \
+    --pack-extension-key="$KEY_PATH"
+  
+  # Chrome creates the .crx in the parent directory of dist
+  if [[ -f "${DIST_DIR}.crx" ]]; then
+    mv "${DIST_DIR}.crx" "$CRX_NAME"
+    echo "Chrome extension packaged: $CRX_NAME"
+  else
+    echo "Warning: Chrome extension .crx file not found"
+    CRX_NAME=""  # Clear the variable if packaging failed
+  fi
+else
+  echo "Skipping Chrome extension packaging (no --key provided)"
+  CRX_NAME=""
+fi
 
 echo "Staging and committing build changes"
 git add -A
@@ -97,6 +146,14 @@ echo "Creating archive: $ZIP_PATH"
 echo "Computing SHA-256 checksum"
 CHECKSUM="$(sha256_file "$ZIP_PATH")"
 echo "$CHECKSUM  $ZIP_NAME" | tee "$RELEASE_DIR/$OUTPUT_SUM" >/dev/null
+
+# Move .crx to release directory if it exists
+if [[ -n "$CRX_NAME" && -f "$CRX_NAME" ]]; then
+  mv "$CRX_NAME" "$RELEASE_DIR/$CRX_NAME"
+  CRX_CHECKSUM="$(sha256_file "$RELEASE_DIR/$CRX_NAME")"
+  echo "$CRX_CHECKSUM  $CRX_NAME" | tee -a "$RELEASE_DIR/$OUTPUT_SUM" >/dev/null
+  echo "Chrome extension moved to: $RELEASE_DIR/$CRX_NAME"
+fi
 
 # =========================
 # Generate email
@@ -136,5 +193,8 @@ echo "$EMAIL_BODY" | tee "$RELEASE_DIR/$OUTPUT_EMAIL" >/dev/null
 echo
 echo "Delivery artifacts created in $RELEASE_DIR:"
 echo "  Archive:        $ZIP_PATH"
+if [[ -n "$CRX_NAME" && -f "$RELEASE_DIR/$CRX_NAME" ]]; then
+  echo "  Extension:      $RELEASE_DIR/$CRX_NAME"
+fi
 echo "  Checksum file:  $RELEASE_DIR/$OUTPUT_SUM"
 echo "  Email template: $RELEASE_DIR/$OUTPUT_EMAIL"
