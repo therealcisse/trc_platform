@@ -650,7 +650,7 @@ const Options = () => {
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">{t('options_animal_insurance')}</h3>
                       <Switch
-                        checked={config.animals || false}
+                        checked={config.animals}
                         onCheckedChange={() => handleConfigToggle('animals')}
                         className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                       />
@@ -660,7 +660,7 @@ const Options = () => {
                       <input
                         type="number"
                         min="0"
-                        value={config.animalProcessingTimeSeconds || 0}
+                        value={config.animalProcessingTimeSeconds}
                         disabled={!config.animals}
                         onChange={e =>
                           extensionConfigStorage.updateConfig({ animalProcessingTimeSeconds: Number(e.target.value) })
@@ -670,10 +670,10 @@ const Options = () => {
                     </div>
 
                     <ProcessingTimeWindowsEditor
-                      windows={config.animalProcessingTimeWindows || []}
+                      windows={config.animalProcessingTimeWindows}
                       disabled={!config.animals}
                       productWindowsKey="animalProcessingTimeWindows"
-                      baseSeconds={config.animalProcessingTimeSeconds || 0}
+                      baseSeconds={config.animalProcessingTimeSeconds}
                     />
                   </div>
                 </div>
@@ -693,7 +693,7 @@ const Options = () => {
                       <input
                         type="number"
                         min="0"
-                        value={config.peopleProcessingTimeSeconds || 0}
+                        value={config.peopleProcessingTimeSeconds}
                         disabled={!config.people}
                         onChange={e =>
                           extensionConfigStorage.updateConfig({ peopleProcessingTimeSeconds: Number(e.target.value) })
@@ -703,10 +703,10 @@ const Options = () => {
                     </div>
 
                     <ProcessingTimeWindowsEditor
-                      windows={config.peopleProcessingTimeWindows || []}
+                      windows={config.peopleProcessingTimeWindows}
                       disabled={!config.people}
                       productWindowsKey="peopleProcessingTimeWindows"
-                      baseSeconds={config.peopleProcessingTimeSeconds || 0}
+                      baseSeconds={config.peopleProcessingTimeSeconds}
                     />
                   </div>
                 </div>
@@ -726,7 +726,7 @@ const Options = () => {
                       <input
                         type="number"
                         min="0"
-                        value={config.cancerProcessingTimeSeconds || 0}
+                        value={config.cancerProcessingTimeSeconds}
                         disabled={!config.cancer}
                         onChange={e =>
                           extensionConfigStorage.updateConfig({ cancerProcessingTimeSeconds: Number(e.target.value) })
@@ -736,10 +736,10 @@ const Options = () => {
                     </div>
 
                     <ProcessingTimeWindowsEditor
-                      windows={config.cancerProcessingTimeWindows || []}
+                      windows={config.cancerProcessingTimeWindows}
                       disabled={!config.cancer}
                       productWindowsKey="cancerProcessingTimeWindows"
-                      baseSeconds={config.cancerProcessingTimeSeconds || 0}
+                      baseSeconds={config.cancerProcessingTimeSeconds}
                     />
                   </div>
                 </div>

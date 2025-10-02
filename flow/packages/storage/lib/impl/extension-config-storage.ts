@@ -47,20 +47,38 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     animals: true,
     animalTimerMin: 30,
     animalTimerMax: 60,
-    animalProcessingTimeSeconds: 0,
-    animalProcessingTimeWindows: [],
+    animalProcessingTimeSeconds: 14,
+    animalProcessingTimeWindows: [
+      {
+        id: "animals-8am",
+        min: LocalTime.of(8, 0),
+        max: LocalTime.of(8, 1),
+        duration: 3,
+        enabled: true,
+      },
+
+    ],
 
     cancer: true,
     cancerTimerMin: 30,
     cancerTimerMax: 60,
-    cancerProcessingTimeSeconds: 0,
+    cancerProcessingTimeSeconds: 15,
     cancerProcessingTimeWindows: [],
 
     people: true,
     peopleTimerMin: 30,
     peopleTimerMax: 60,
-    peopleProcessingTimeSeconds: 0,
-    peopleProcessingTimeWindows: [],
+    peopleProcessingTimeSeconds: 12,
+    peopleProcessingTimeWindows: [
+      {
+        id: "people-8am",
+        min: LocalTime.of(8, 0),
+        max: LocalTime.of(8, 1),
+        duration: 3,
+        enabled: true,
+      },
+
+    ],
   },
   // Initialize empty storage collections
   logs: [],
