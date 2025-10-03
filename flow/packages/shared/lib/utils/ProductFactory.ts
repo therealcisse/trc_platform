@@ -27,7 +27,7 @@ export class ProductFactory {
 
     // Animal insurance products
     if ((config.animal.dogs || config.animal.cats) && name === 'Tier KV KW') {
-      if ((insuredType === 'Hund' || insuredType === 'katze') && typeof insuredAge === 'number' && insuredAge <= 3) {
+      if ((insuredType === 'Hund' || insuredType?.toLowerCase() === 'katze') && typeof insuredAge === 'number' && insuredAge <= 3) {
         return {
           type: 'ANIMAL',
           name,
