@@ -26,8 +26,8 @@ export class ProductFactory {
     const { name, insuredType, insuredAge, meta } = parsed;
 
     // Animal insurance products
-    if (config.animals && name === 'Tier KV KW') {
-      if (insuredType === 'Hund' && typeof insuredAge === 'number' && insuredAge <= 3) {
+    if ((config.animal.dogs || config.animal.cats) && name === 'Tier KV KW') {
+      if ((insuredType === 'Hund' || insuredType === 'katze') && typeof insuredAge === 'number' && insuredAge <= 3) {
         return {
           type: 'ANIMAL',
           name,

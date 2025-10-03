@@ -53,7 +53,7 @@ export const mockFlow: Flow = {
 export const mockConfig: ExecutionConfig = {
   enabled: true,
   token: 'test-token',
-  animals: true,
+  animal: { dogs: true, cats: true },
   animalProcessingTimeSeconds: 30,
 };
 

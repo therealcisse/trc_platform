@@ -308,5 +308,8 @@
   },
   "options_processing_time_window_empty": {
     "message": "No windows configured."
-  }
+  },
+  "animals_title": { "message": "Animal insurance" },
+  "animals_dogs": { "message": "Dogs" },
+  "animals_cats": { "message": "Cats" }
 }

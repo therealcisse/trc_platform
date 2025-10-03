@@ -44,7 +44,7 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     inboxInterOpenDelayMs: 400,
 
     // Product strategies
-    animals: true,
+    animal: { dogs: true, cats: true },
     animalProcessingTimeSeconds: 14,
     animalProcessingTimeWindows: [
       {

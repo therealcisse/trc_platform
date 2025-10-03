@@ -308,5 +308,8 @@
   },
   "options_processing_time_window_empty": {
     "message": "Keine Fenster konfiguriert."
-  }
+  },
+  "animals_title": { "message": "Tierversicherung" },
+  "animals_dogs": { "message": "Hunde" },
+  "animals_cats": { "message": "Katzen" }
 }

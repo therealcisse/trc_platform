@@ -71,7 +71,7 @@ export const ExecutionConfigSchema = z.object({
   products: z.array(ProductConfigSchema),
 
   // Animal insurance product strategy
-  animals: z.boolean(),
+  animal: z.object({ dogs: z.boolean(), cats: z.boolean() }),
   animalProcessingTimeSeconds: z.number(),
   animalProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 

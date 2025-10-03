@@ -46,7 +46,12 @@ function TimePicker({
 
 type DayName = (typeof DAYS)[number];
 
-type ProductWindowsKey = 'animalProcessingTimeWindows' | 'peopleProcessingTimeWindows' | 'cancerProcessingTimeWindows';
+type ProductWindowsKey =
+  | 'animalProcessingTimeWindows'
+  | 'peopleProcessingTimeWindows'
+  | 'cancerProcessingTimeWindows'
+  | 'accidentProcessingTimeWindows'
+  | 'healthProcessingTimeWindows';
 
 type ProcessingTimeWindowsEditorProps = {
   windows: ProcessingTimeWindow[];
@@ -656,58 +661,94 @@ const Options = () => {
                         className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                       />
                     </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={config.accidentProcessingTimeSeconds}
-                        disabled={!config.accidents}
-                        onChange={e =>
-                          extensionConfigStorage.updateConfig({ accidentProcessingTimeSeconds: Number(e.target.value) })
-                        }
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+                    {config.accidents && (
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={config.accidentProcessingTimeSeconds}
+                          disabled={!config.accidents}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({
+                              accidentProcessingTimeSeconds: Number(e.target.value),
+                            })
+                          }
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
 
-                    <ProcessingTimeWindowsEditor
-                      windows={config.accidentProcessingTimeWindows}
-                      disabled={!config.accidents}
-                      productWindowsKey="accidentProcessingTimeWindows"
-                      baseSeconds={config.accidentProcessingTimeSeconds}
-                    />
+                    {config.accidents && (
+                      <ProcessingTimeWindowsEditor
+                        windows={config.accidentProcessingTimeWindows}
+                        disabled={!config.accidents}
+                        productWindowsKey="accidentProcessingTimeWindows"
+                        baseSeconds={config.accidentProcessingTimeSeconds}
+                      />
+                    )}
                   </div>
                 </div>
                 <div className="rounded-lg bg-gray-800 p-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
-                      <h3 className="font-medium">{t('options_animal_insurance')}</h3>
-                      <Switch
-                        checked={config.animals}
-                        onCheckedChange={() => handleConfigToggle('animals')}
-                        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-                      />
-                    </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={config.animalProcessingTimeSeconds}
-                        disabled={!config.animals}
-                        onChange={e =>
-                          extensionConfigStorage.updateConfig({ animalProcessingTimeSeconds: Number(e.target.value) })
-                        }
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
+                      <h3 className="font-medium">{t('animals_title')}</h3>
                     </div>
 
-                    <ProcessingTimeWindowsEditor
-                      windows={config.animalProcessingTimeWindows}
-                      disabled={!config.animals}
-                      productWindowsKey="animalProcessingTimeWindows"
-                      baseSeconds={config.animalProcessingTimeSeconds}
-                    />
+                    {/* New centered row for Dogs and Cats switches, wrapped like Processing time windows */}
+                    <div className="space-y-3 rounded-md border border-gray-700 bg-gray-900 p-3">
+                      <div className="flex w-full items-center justify-center gap-12 py-2">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-300">{t('animals_dogs')}</span>
+                          <Switch
+                            checked={config.animal.dogs}
+                            onCheckedChange={checked =>
+                              extensionConfigStorage.updateConfig({
+                                animal: { ...config.animal, dogs: !!checked },
+                              })
+                            }
+                            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                          />
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm text-gray-300">{t('animals_cats')}</span>
+                          <Switch
+                            checked={config.animal.cats}
+                            onCheckedChange={checked =>
+                              extensionConfigStorage.updateConfig({
+                                animal: { ...config.animal, cats: !!checked },
+                              })
+                            }
+                            className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                          />
+                        </div>
+                      </div>
+                    </div>
+
+                    {(config.animal.dogs || config.animal.cats) && (
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={config.animalProcessingTimeSeconds}
+                          disabled={!config.animal.dogs && !config.animal.cats}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({ animalProcessingTimeSeconds: Number(e.target.value) })
+                          }
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
+
+                    {(config.animal.dogs || config.animal.cats) && (
+                      <ProcessingTimeWindowsEditor
+                        windows={config.animalProcessingTimeWindows}
+                        productWindowsKey="animalProcessingTimeWindows"
+                        disabled={!config.animal.dogs && !config.animal.cats}
+                        baseSeconds={config.animalProcessingTimeSeconds}
+                      />
+                    )}
                   </div>
                 </div>
                 {/* Health */}
@@ -721,26 +762,30 @@ const Options = () => {
                         className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                       />
                     </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={config.healthProcessingTimeSeconds}
-                        disabled={!config.health}
-                        onChange={e =>
-                          extensionConfigStorage.updateConfig({ healthProcessingTimeSeconds: Number(e.target.value) })
-                        }
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+                    {config.health && (
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={config.healthProcessingTimeSeconds}
+                          disabled={!config.health}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({ healthProcessingTimeSeconds: Number(e.target.value) })
+                          }
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
 
-                    <ProcessingTimeWindowsEditor
-                      windows={config.healthProcessingTimeWindows}
-                      disabled={!config.health}
-                      productWindowsKey="healthProcessingTimeWindows"
-                      baseSeconds={config.healthProcessingTimeSeconds}
-                    />
+                    {config.health && (
+                      <ProcessingTimeWindowsEditor
+                        windows={config.healthProcessingTimeWindows}
+                        disabled={!config.health}
+                        productWindowsKey="healthProcessingTimeWindows"
+                        baseSeconds={config.healthProcessingTimeSeconds}
+                      />
+                    )}
                   </div>
                 </div>
                 {/* Cancer */}
@@ -754,26 +799,30 @@ const Options = () => {
                         className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                       />
                     </div>
-                    <div>
-                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
-                      <input
-                        type="number"
-                        min="0"
-                        value={config.cancerProcessingTimeSeconds}
-                        disabled={!config.cancer}
-                        onChange={e =>
-                          extensionConfigStorage.updateConfig({ cancerProcessingTimeSeconds: Number(e.target.value) })
-                        }
-                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
-                      />
-                    </div>
+                    {config.cancer && (
+                      <div>
+                        <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
+                        <input
+                          type="number"
+                          min="0"
+                          value={config.cancerProcessingTimeSeconds}
+                          disabled={!config.cancer}
+                          onChange={e =>
+                            extensionConfigStorage.updateConfig({ cancerProcessingTimeSeconds: Number(e.target.value) })
+                          }
+                          className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                        />
+                      </div>
+                    )}
 
-                    <ProcessingTimeWindowsEditor
-                      windows={config.cancerProcessingTimeWindows}
-                      disabled={!config.cancer}
-                      productWindowsKey="cancerProcessingTimeWindows"
-                      baseSeconds={config.cancerProcessingTimeSeconds}
-                    />
+                    {config.cancer && (
+                      <ProcessingTimeWindowsEditor
+                        windows={config.cancerProcessingTimeWindows}
+                        disabled={!config.cancer}
+                        productWindowsKey="cancerProcessingTimeWindows"
+                        baseSeconds={config.cancerProcessingTimeSeconds}
+                      />
+                    )}
                   </div>
                 </div>
               </div>

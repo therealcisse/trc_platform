@@ -46,7 +46,10 @@ export interface ExecutionConfig {
   products: ProductConfig[];
 
   // Animal insurance product strategy
-  animals: boolean;
+  animal: {
+    dogs: boolean;
+    cats: boolean;
+  };
   animalProcessingTimeSeconds: number;
   animalProcessingTimeWindows: ProcessingTimeWindow[];
 
