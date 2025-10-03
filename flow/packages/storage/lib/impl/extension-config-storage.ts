@@ -50,13 +50,12 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     animalProcessingTimeSeconds: 14,
     animalProcessingTimeWindows: [
       {
-        id: "animals-8am",
+        id: 'animals-8am',
         min: LocalTime.of(8, 0),
         max: LocalTime.of(8, 1),
         duration: 3,
         enabled: true,
       },
-
     ],
 
     cancer: true,
@@ -71,13 +70,12 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     peopleProcessingTimeSeconds: 12,
     peopleProcessingTimeWindows: [
       {
-        id: "people-8am",
+        id: 'people-8am',
         min: LocalTime.of(8, 0),
         max: LocalTime.of(8, 1),
         duration: 3,
         enabled: true,
       },
-
     ],
   },
   // Initialize empty storage collections
