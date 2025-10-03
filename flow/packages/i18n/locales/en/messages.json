@@ -249,6 +249,18 @@
   "options_show_flow_db_description": {
     "message": "View flows data as formatted JSON"
   },
+  "options_show_extension_config": {
+    "message": "Show Extension Config"
+  },
+  "options_show_extension_config_description": {
+    "message": "View extension configuration as formatted JSON"
+  },
+  "json_display_flow_database_title": {
+    "message": "Flow Database"
+  },
+  "json_display_extension_config_title": {
+    "message": "Extension Configuration"
+  },
   "actions_confirm_restore": {
     "message": "Are you sure you want to restore default settings? This will reset all your configuration."
   },

@@ -296,7 +296,7 @@ function ProcessingTimeWindowsEditor({
   );
 }
 
-const JsonDisplay = ({ data, onClose }: { data: any; onClose: () => void }) => {
+const JsonDisplay = ({ data, title, onClose }: { data: any; title: string; onClose: () => void }) => {
   const [copied, setCopied] = useState(false);
 
   const handleCopy = async () => {
@@ -313,7 +313,7 @@ const JsonDisplay = ({ data, onClose }: { data: any; onClose: () => void }) => {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-50">
       <div className="flex h-[80vh] w-full max-w-4xl flex-col rounded-lg bg-gray-800 p-6">
         <div className="mb-4 flex items-center justify-between">
-          <h3 className="text-lg font-medium text-gray-100">Flow Database</h3>
+          <h3 className="text-lg font-medium text-gray-100">{title}</h3>
           <div className="flex items-center gap-2">
             <button
               onClick={handleCopy}
@@ -355,6 +355,8 @@ const Options = () => {
   const { enabled, config } = useStorage(extensionConfigStorage);
   const [showJsonModal, setShowJsonModal] = useState(false);
   const [flowData, setFlowData] = useState(null);
+  const [showConfigModal, setShowConfigModal] = useState(false);
+  const [configData, setConfigData] = useState(null);
 
   const handleOperationalHoursChange = (
     day: DayName,
@@ -426,6 +428,17 @@ const Options = () => {
       setShowJsonModal(true);
     } catch (error) {
       console.error('Failed to get flow data:', error);
+    }
+  };
+
+  const handleShowExtensionConfig = async () => {
+    try {
+      const currentData = await extensionConfigStorage.get();
+      const { flows, ...configOnly } = currentData;
+      setConfigData(configOnly);
+      setShowConfigModal(true);
+    } catch (error) {
+      console.error('Failed to get extension config:', error);
     }
   };
 
@@ -870,11 +883,37 @@ const Options = () => {
                     {t('options_show_flow_db')}
                   </button>
                 </div>
+
+                {/* Show Extension Config */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_show_extension_config')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_show_extension_config_description')}</p>
+                  </div>
+                  <button
+                    onClick={handleShowExtensionConfig}
+                    className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
+                    {t('options_show_extension_config')}
+                  </button>
+                </div>
               </div>
             </section>
           </div>
         )}
-        {showJsonModal && flowData && <JsonDisplay data={flowData} onClose={() => setShowJsonModal(false)} />}
+        {showJsonModal && flowData && (
+          <JsonDisplay
+            data={flowData}
+            title={t('json_display_flow_database_title')}
+            onClose={() => setShowJsonModal(false)}
+          />
+        )}
+        {showConfigModal && configData && (
+          <JsonDisplay
+            data={configData}
+            title={t('json_display_extension_config_title')}
+            onClose={() => setShowConfigModal(false)}
+          />
+        )}
       </div>
     </div>
   );

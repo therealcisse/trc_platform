@@ -249,6 +249,18 @@
   "options_show_flow_db_description": {
     "message": "Flows-Daten als formatiertes JSON anzeigen"
   },
+  "options_show_extension_config": {
+    "message": "Erweiterungskonfiguration anzeigen"
+  },
+  "options_show_extension_config_description": {
+    "message": "Erweiterungskonfiguration als formatiertes JSON anzeigen"
+  },
+  "json_display_flow_database_title": {
+    "message": "Flow-Datenbank"
+  },
+  "json_display_extension_config_title": {
+    "message": "Erweiterungskonfiguration"
+  },
   "actions_confirm_restore": {
     "message": "Sind Sie sicher, dass Sie die Standardeinstellungen wiederherstellen möchten? Dadurch werden alle Ihre Konfigurationen zurückgesetzt."
   },
