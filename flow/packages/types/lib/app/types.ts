@@ -47,24 +47,18 @@ export interface ExecutionConfig {
 
   // Animal insurance product strategy
   animals: boolean;
-  animalTimerMin: number;
-  animalTimerMax: number;
   animalProcessingTimeSeconds: number;
   animalProcessingTimeWindows: ProcessingTimeWindow[];
 
   // Cancer scan product strategy
   cancer: boolean;
-  cancerTimerMin: number;
-  cancerTimerMax: number;
   cancerProcessingTimeSeconds: number;
   cancerProcessingTimeWindows: ProcessingTimeWindow[];
 
-  // People insurance product strategy
-  people: boolean;
-  peopleTimerMin: number;
-  peopleTimerMax: number;
-  peopleProcessingTimeSeconds: number;
-  peopleProcessingTimeWindows: ProcessingTimeWindow[];
+  // Health insurance product strategy
+  health: boolean;
+  healthProcessingTimeSeconds: number;
+  healthProcessingTimeWindows: ProcessingTimeWindow[];
 
   // Accident insurance product strategy
   accidents: boolean;
@@ -415,7 +409,7 @@ export interface BuyingStateService {
 }
 
 // Product type discriminator
-export type ProductType = 'PEOPLE' | 'ANIMAL' | 'CANCER' | 'ACCIDENT' | 'INVALID';
+export type ProductType = 'HEALTH' | 'ANIMAL' | 'CANCER' | 'ACCIDENT' | 'INVALID';
 
 // Base interface for valid products
 interface BaseValidProduct {
@@ -423,9 +417,9 @@ interface BaseValidProduct {
   allowed: boolean;
 }
 
-// People product interface
-export interface PeopleProduct extends BaseValidProduct {
-  type: 'PEOPLE';
+// Health product interface
+export interface HealthProduct extends BaseValidProduct {
+  type: 'HEALTH';
   insuredAge: number;
   aboveIncomeLimit?: boolean;
 }
@@ -456,7 +450,7 @@ export interface InvalidProduct {
 }
 
 // Union type of all possible products
-export type Product = PeopleProduct | AnimalProduct | CancerProduct | AccidentProduct | InvalidProduct;
+export type Product = HealthProduct | AnimalProduct | CancerProduct | AccidentProduct | InvalidProduct;
 
 // Helper type for title parsing results
 export interface ParsedTitle {
@@ -470,8 +464,8 @@ export interface ParsedTitle {
 }
 
 // Type guards
-export function isPeopleProduct(product: Product): product is PeopleProduct {
-  return product.type === 'PEOPLE';
+export function isHealthProduct(product: Product): product is HealthProduct {
+  return product.type === 'HEALTH';
 }
 
 export function isAnimalProduct(product: Product): product is AnimalProduct {

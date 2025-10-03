@@ -72,24 +72,18 @@ export const ExecutionConfigSchema = z.object({
 
   // Animal insurance product strategy
   animals: z.boolean(),
-  animalTimerMin: z.number(),
-  animalTimerMax: z.number(),
   animalProcessingTimeSeconds: z.number(),
   animalProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 
   // Cancer scan product strategy
   cancer: z.boolean(),
-  cancerTimerMin: z.number(),
-  cancerTimerMax: z.number(),
   cancerProcessingTimeSeconds: z.number(),
   cancerProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 
-  // People insurance product strategy
-  people: z.boolean(),
-  peopleTimerMin: z.number(),
-  peopleTimerMax: z.number(),
-  peopleProcessingTimeSeconds: z.number(),
-  peopleProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
+  // Health insurance product strategy
+  health: z.boolean(),
+  healthProcessingTimeSeconds: z.number(),
+  healthProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 
   // Accident insurance product strategy
   accidents: z.boolean(),

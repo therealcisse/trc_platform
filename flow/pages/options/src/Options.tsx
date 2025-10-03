@@ -710,14 +710,14 @@ const Options = () => {
                     />
                   </div>
                 </div>
-                {/* People */}
+                {/* Health */}
                 <div className="rounded-lg bg-gray-800 p-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
                       <h3 className="font-medium">{t('options_people_insurance')}</h3>
                       <Switch
-                        checked={config.people || false}
-                        onCheckedChange={() => handleConfigToggle('people')}
+                        checked={config.health}
+                        onCheckedChange={() => handleConfigToggle('health')}
                         className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
                       />
                     </div>
@@ -726,20 +726,20 @@ const Options = () => {
                       <input
                         type="number"
                         min="0"
-                        value={config.peopleProcessingTimeSeconds}
-                        disabled={!config.people}
+                        value={config.healthProcessingTimeSeconds}
+                        disabled={!config.health}
                         onChange={e =>
-                          extensionConfigStorage.updateConfig({ peopleProcessingTimeSeconds: Number(e.target.value) })
+                          extensionConfigStorage.updateConfig({ healthProcessingTimeSeconds: Number(e.target.value) })
                         }
                         className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                       />
                     </div>
 
                     <ProcessingTimeWindowsEditor
-                      windows={config.peopleProcessingTimeWindows}
-                      disabled={!config.people}
-                      productWindowsKey="peopleProcessingTimeWindows"
-                      baseSeconds={config.peopleProcessingTimeSeconds}
+                      windows={config.healthProcessingTimeWindows}
+                      disabled={!config.health}
+                      productWindowsKey="healthProcessingTimeWindows"
+                      baseSeconds={config.healthProcessingTimeSeconds}
                     />
                   </div>
                 </div>

@@ -45,8 +45,6 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
 
     // Product strategies
     animals: true,
-    animalTimerMin: 30,
-    animalTimerMax: 60,
     animalProcessingTimeSeconds: 14,
     animalProcessingTimeWindows: [
       {
@@ -59,18 +57,14 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     ],
 
     cancer: true,
-    cancerTimerMin: 30,
-    cancerTimerMax: 60,
     cancerProcessingTimeSeconds: 15,
     cancerProcessingTimeWindows: [],
 
-    people: true,
-    peopleTimerMin: 30,
-    peopleTimerMax: 60,
-    peopleProcessingTimeSeconds: 12,
-    peopleProcessingTimeWindows: [
+    health: true,
+    healthProcessingTimeSeconds: 12,
+    healthProcessingTimeWindows: [
       {
-        id: 'people-8am',
+        id: 'health-8am',
         min: LocalTime.of(8, 0),
         max: LocalTime.of(8, 1),
         duration: 3,

@@ -56,12 +56,12 @@ export class ProductFactory {
       };
     }
 
-    // People insurance products
-    if (config.people && typeof insuredAge === 'number' && insuredAge <= 60) {
+    // Health insurance products
+    if (config.health && typeof insuredAge === 'number' && insuredAge <= 60) {
       switch (name) {
         case 'KV-Voll Selbstständige KW':
           return {
-            type: 'PEOPLE',
+            type: 'HEALTH',
             name,
             insuredAge,
             allowed: true,
@@ -69,7 +69,7 @@ export class ProductFactory {
 
         case 'KV-Voll Arbeitnehmer KW':
           return {
-            type: 'PEOPLE',
+            type: 'HEALTH',
             name,
             insuredAge,
             allowed: meta.aboveIncomeLimit || false,
@@ -170,10 +170,10 @@ export class ProductFactory {
           ProductFactory.findProcessingTimeOverride(config.cancerProcessingTimeWindows, now) ??
           config.cancerProcessingTimeSeconds;
         break;
-      case 'PEOPLE':
+      case 'HEALTH':
         processingTime =
-          ProductFactory.findProcessingTimeOverride(config.peopleProcessingTimeWindows, now) ??
-          config.peopleProcessingTimeSeconds;
+          ProductFactory.findProcessingTimeOverride(config.healthProcessingTimeWindows, now) ??
+          config.healthProcessingTimeSeconds;
         break;
       case 'ACCIDENT':
         processingTime =
