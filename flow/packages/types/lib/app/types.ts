@@ -65,6 +65,11 @@ export interface ExecutionConfig {
   peopleTimerMax: number;
   peopleProcessingTimeSeconds: number;
   peopleProcessingTimeWindows: ProcessingTimeWindow[];
+
+  // Accident insurance product strategy
+  accidents: boolean;
+  accidentProcessingTimeSeconds: number;
+  accidentProcessingTimeWindows: ProcessingTimeWindow[];
 }
 
 export interface OperationalHours {
@@ -410,7 +415,7 @@ export interface BuyingStateService {
 }
 
 // Product type discriminator
-export type ProductType = 'PEOPLE' | 'ANIMAL' | 'CANCER' | 'INVALID';
+export type ProductType = 'PEOPLE' | 'ANIMAL' | 'CANCER' | 'ACCIDENT' | 'INVALID';
 
 // Base interface for valid products
 interface BaseValidProduct {
@@ -437,6 +442,11 @@ export interface CancerProduct extends BaseValidProduct {
   type: 'CANCER';
 }
 
+// Accident product interface
+export interface AccidentProduct extends BaseValidProduct {
+  type: 'ACCIDENT';
+}
+
 // Invalid product interface
 export interface InvalidProduct {
   type: 'INVALID';
@@ -446,7 +456,7 @@ export interface InvalidProduct {
 }
 
 // Union type of all possible products
-export type Product = PeopleProduct | AnimalProduct | CancerProduct | InvalidProduct;
+export type Product = PeopleProduct | AnimalProduct | CancerProduct | AccidentProduct | InvalidProduct;
 
 // Helper type for title parsing results
 export interface ParsedTitle {
@@ -470,6 +480,10 @@ export function isAnimalProduct(product: Product): product is AnimalProduct {
 
 export function isCancerProduct(product: Product): product is CancerProduct {
   return product.type === 'CANCER';
+}
+
+export function isAccidentProduct(product: Product): product is AccidentProduct {
+  return product.type === 'ACCIDENT';
 }
 
 export function isInvalidProduct(product: Product): product is InvalidProduct {

@@ -123,6 +123,9 @@
   "options_cancer_insurance": {
     "message": "Krebsversicherung"
   },
+  "options_accident_insurance": {
+    "message": "Unfallversicherung"
+  },
   "options_processing_time": {
     "message": "Verarbeitungszeit (Sekunden)"
   },

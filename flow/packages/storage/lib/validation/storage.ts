@@ -90,6 +90,11 @@ export const ExecutionConfigSchema = z.object({
   peopleTimerMax: z.number(),
   peopleProcessingTimeSeconds: z.number(),
   peopleProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
+
+  // Accident insurance product strategy
+  accidents: z.boolean(),
+  accidentProcessingTimeSeconds: z.number(),
+  accidentProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 });
 
 export const BuyingOfferSchema = z.object({

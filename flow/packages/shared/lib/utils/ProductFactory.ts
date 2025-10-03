@@ -47,6 +47,15 @@ export class ProductFactory {
       };
     }
 
+    // Accident insurance products
+    if (config.accidents && name === 'Unfallversicherung KW') {
+      return {
+        type: 'ACCIDENT',
+        name,
+        allowed: true,
+      };
+    }
+
     // People insurance products
     if (config.people && typeof insuredAge === 'number' && insuredAge <= 60) {
       switch (name) {
@@ -165,6 +174,11 @@ export class ProductFactory {
         processingTime =
           ProductFactory.findProcessingTimeOverride(config.peopleProcessingTimeWindows, now) ??
           config.peopleProcessingTimeSeconds;
+        break;
+      case 'ACCIDENT':
+        processingTime =
+          ProductFactory.findProcessingTimeOverride(config.accidentProcessingTimeWindows, now) ??
+          config.accidentProcessingTimeSeconds;
         break;
     }
 

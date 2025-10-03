@@ -77,6 +77,11 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
         enabled: true,
       },
     ],
+
+    // Accident defaults
+    accidents: true,
+    accidentProcessingTimeSeconds: 15,
+    accidentProcessingTimeWindows: [],
   },
   // Initialize empty storage collections
   logs: [],

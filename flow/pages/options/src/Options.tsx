@@ -645,6 +645,39 @@ const Options = () => {
               <h2 className="mb-4 text-xl font-medium">{t('options_product_strategies')}</h2>
               <div className="flex flex-col gap-4">
                 {/* Animals */}
+                {/* Accident */}
+                <div className="rounded-lg bg-gray-800 p-4">
+                  <div className="space-y-4">
+                    <div className="flex items-center justify-between">
+                      <h3 className="font-medium">{t('options_accident_insurance')}</h3>
+                      <Switch
+                        checked={config.accidents}
+                        onCheckedChange={() => handleConfigToggle('accidents')}
+                        className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                      />
+                    </div>
+                    <div>
+                      <label className="mb-1 block text-sm text-gray-300">{t('options_processing_time')}</label>
+                      <input
+                        type="number"
+                        min="0"
+                        value={config.accidentProcessingTimeSeconds}
+                        disabled={!config.accidents}
+                        onChange={e =>
+                          extensionConfigStorage.updateConfig({ accidentProcessingTimeSeconds: Number(e.target.value) })
+                        }
+                        className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
+                      />
+                    </div>
+
+                    <ProcessingTimeWindowsEditor
+                      windows={config.accidentProcessingTimeWindows}
+                      disabled={!config.accidents}
+                      productWindowsKey="accidentProcessingTimeWindows"
+                      baseSeconds={config.accidentProcessingTimeSeconds}
+                    />
+                  </div>
+                </div>
                 <div className="rounded-lg bg-gray-800 p-4">
                   <div className="space-y-4">
                     <div className="flex items-center justify-between">
