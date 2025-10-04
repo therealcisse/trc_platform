@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ProductFactory } from './ProductFactory.js';
-import type { ExecutionConfig } from '@extension/types';
+import { LocalTime, isInvalidProduct, type ExecutionConfig } from '@extension/types';
 
 describe('ProductFactory.parseTitle', () => {
   // Test fixtures for parseTitle
@@ -34,20 +34,52 @@ describe('ProductFactory.parseTitle', () => {
 
   // Helper to create a minimal config that allows all products
   const createTestConfig = (): ExecutionConfig => ({
+    // Inbox mode configuration
+    inboxMode: false,
+    inboxReloadSeconds: [],
+    inboxPostReloadDelayMs: 0,
+    inboxMaxLinksPerScan: 0,
+    inboxInterOpenDelayMs: 0,
+
+    // API Authentication
+    token: undefined,
+
+    // Operational hours
+    operationalHours: {
+      Test: { enabled: false, min: LocalTime.of(0, 0), max: LocalTime.of(23, 59) },
+    },
+
+    // Email mode settings
+    emailMode: false,
+    emailRefreshMin: 0,
+    emailRefreshMax: 0,
+
+    // Product strategy list
+    products: [],
+
+    // Product strategy toggles
     accidents: true,
     cancer: true,
     health: true,
+
+    // Animal insurance product strategy
     animal: {
       dogs: true,
       cats: true,
     },
     animalProcessingTimeSeconds: 0,
-    cancerProcessingTimeSeconds: 0,
-    healthProcessingTimeSeconds: 0,
-    accidentProcessingTimeSeconds: 0,
     animalProcessingTimeWindows: [],
+
+    // Cancer scan product strategy
+    cancerProcessingTimeSeconds: 0,
     cancerProcessingTimeWindows: [],
+
+    // Health insurance product strategy
+    healthProcessingTimeSeconds: 0,
     healthProcessingTimeWindows: [],
+
+    // Accident insurance product strategy
+    accidentProcessingTimeSeconds: 0,
     accidentProcessingTimeWindows: [],
   });
 
@@ -114,7 +146,10 @@ describe('ProductFactory.parseTitle', () => {
 
       expect(result.type).toBe('INVALID');
       expect(result.allowed).toBe(false);
-      expect(result.error).toBe('Invalid product format');
+      expect(isInvalidProduct(result)).toBe(true);
+      if (isInvalidProduct(result)) {
+        expect(result.error).toBe('Invalid product format');
+      }
     });
 
     it('should return INVALID for animal insurance with age > 3', () => {
@@ -137,7 +172,10 @@ describe('ProductFactory.parseTitle', () => {
 
       expect(result.type).toBe('INVALID');
       expect(result.allowed).toBe(false);
-      expect(result.error).toBe('Product not allowed by configuration');
+      expect(isInvalidProduct(result)).toBe(true);
+      if (isInvalidProduct(result)) {
+        expect(result.error).toBe('Product not allowed by configuration');
+      }
     });
   });
 });
