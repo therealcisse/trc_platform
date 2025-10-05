@@ -43,8 +43,6 @@ export interface ExecutionConfig {
   emailRefreshMin: number;
   emailRefreshMax: number;
 
-  products: ProductConfig[];
-
   // Animal insurance product strategy
   animal: {
     dogs: boolean;
@@ -85,11 +83,6 @@ export interface ProcessingTimeWindow {
   enabled: boolean;
 }
 
-export interface DelayConfig {
-  min: number;
-  max: number;
-}
-
 export interface InboxSelectors {
   titleLinks: string; // Selector for title column links
   rows: string; // Selector for message rows
@@ -106,50 +99,8 @@ export interface ExecutionResult {
 }
 
 // Product strategy abstraction
-export interface ProductStrategy {
-  id: string;
-  name: string;
-  patterns: ProductPattern[];
-  isMatch(doc: Document): boolean;
-  selectActionTargets(doc: Document): Element[];
-  extractMetadata(doc: Document): ProductMetadata;
-}
-
-export interface ProductPattern {
-  insuredType?: string;
-  insuredAge?: { min: number; max: number };
-  meta?: Record<string, any>;
-}
-
-export interface StoredProductStrategy {
-  id: string;
-  name: string;
-  patterns: ProductPattern[];
-}
-
-export interface ProductConfig {
-  text: string;
-  insuredType: string;
-  insuredAge: { min: number; max: number };
-  meta?: Record<string, any>;
-}
-
-export interface ProductMetadata {
-  name: string;
-  insuredType: string;
-  insuredAge: number;
-  price?: number;
-  validity?: string;
-  rawText?: string;
-}
 
 // Message types for background communication
-export interface BackgroundMessage<T = any> {
-  type: string;
-  payload: T;
-  timestamp: number;
-  requestId: string;
-}
 
 export interface CommandResponse<T = any> {
   success: boolean;
@@ -354,7 +305,6 @@ export interface ExtensionStorage {
   schemaVersion: 0; // later 0 | 1 | ...
   enabled: boolean;
   config: ExecutionConfig;
-  productStrategies: StoredProductStrategy[];
 }
 
 export interface ExtensionRuntime {

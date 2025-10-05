@@ -52,20 +52,6 @@ export class ConfigService {
   }
 
   /**
-   * Get product strategies
-   */
-  static async getProductStrategies(): Promise<ExtensionStorage['productStrategies']> {
-    return extensionConfigStorage.productStrategies.get();
-  }
-
-  /**
-   * Update product strategies
-   */
-  static async setProductStrategies(strategies: ExtensionStorage['productStrategies']): Promise<void> {
-    await extensionConfigStorage.productStrategies.set(strategies);
-  }
-
-  /**
    * Start a new flow or check if it already exists
    * @returns true if flow already exists, false if newly added
    */

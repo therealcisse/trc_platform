@@ -54,9 +54,6 @@ describe('ProductFactory.parseTitle', () => {
     emailRefreshMin: 0,
     emailRefreshMax: 0,
 
-    // Product strategy list
-    products: [],
-
     // Product strategy toggles
     accidents: true,
     cancer: true,

@@ -1,12 +1,5 @@
 import { z } from 'zod';
-import {
-  ExecutionConfigSchema,
-  BuyingOfferSchema,
-  LogEntrySchema,
-  ManagedTabInfoSchema,
-  StoredProductStrategySchema,
-  FlowSchema,
-} from './primitives.js';
+import { ExecutionConfigSchema } from './primitives.js';
 
 /**
  * Versioned schemas for ExtensionStorage
@@ -21,11 +14,6 @@ export const ExtensionStorageSchemaV0 = z.object({
   schemaVersion: z.literal(0),
   enabled: z.boolean(),
   config: ExecutionConfigSchema,
-  logs: z.array(LogEntrySchema),
-  managedTabs: z.record(z.string(), ManagedTabInfoSchema),
-  buyingOffers: z.record(z.string(), BuyingOfferSchema),
-  productStrategies: z.array(StoredProductStrategySchema),
-  flows: z.record(z.string(), FlowSchema),
 });
 
 // Latest aliases

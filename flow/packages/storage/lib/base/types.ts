@@ -1,5 +1,4 @@
 import type { StorageEnum } from './index.js';
-import type { ValidatedProductStrategy } from '../validation/storage.js';
 import type { ExecutionConfig, ExtensionRuntime, ExtensionStorage, Flow } from '@extension/types';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
@@ -55,13 +54,6 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
   // Core methods
   toggleEnabled(): Promise<void>;
   updateConfig(updates: Partial<ExecutionConfig>): Promise<void>;
-
-  // Product strategies namespace
-  productStrategies: {
-    get(): Promise<ValidatedProductStrategy[]>;
-    set(strategies: ValidatedProductStrategy[]): Promise<void>;
-    clear(): Promise<void>;
-  };
 
   // Actions methods
   restoreDefaults(): Promise<void>;

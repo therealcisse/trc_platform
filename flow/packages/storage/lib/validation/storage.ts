@@ -18,33 +18,6 @@ export const OperationalHoursSchema = z.record(
   }),
 );
 
-export const DelayConfigSchema = z.object({
-  min: z.number(),
-  max: z.number(),
-});
-
-export const ProductPatternSchema = z.object({
-  insuredType: z.string().optional(),
-  insuredAge: DelayConfigSchema.optional(),
-  meta: z.record(z.string(), z.unknown()).optional(),
-});
-
-export const ProductConfigSchema = z.object({
-  text: z.string(),
-  insuredType: z.string(),
-  insuredAge: DelayConfigSchema,
-  meta: z.record(z.string(), z.unknown()).optional(),
-});
-
-export const StoredProductStrategySchema = z.object({
-  id: z.string(),
-  name: z.string(),
-  patterns: z.array(ProductPatternSchema),
-});
-
-// Ensure we're validating against StoredProductStrategy
-export const ProductStrategySchema = StoredProductStrategySchema;
-
 export const ProcessingTimeWindowSchema = z.object({
   id: z.string(),
   min: LocalTimeSchema,
@@ -68,7 +41,6 @@ export const ExecutionConfigSchema = z.object({
   emailMode: z.boolean(),
   emailRefreshMin: z.number(),
   emailRefreshMax: z.number(),
-  products: z.array(ProductConfigSchema),
 
   // Animal insurance product strategy
   animal: z.object({ dogs: z.boolean(), cats: z.boolean() }),
@@ -100,8 +72,5 @@ export function validateStorageData<T>(schema: z.ZodSchema<T>, data: unknown): T
 
 // Type inference helpers
 export type ValidatedExecutionConfig = z.infer<typeof ExecutionConfigSchema>;
-export type ValidatedProductStrategy = z.infer<typeof ProductStrategySchema>;
 export type { ExtensionStorageLatest as ValidatedExtensionStorage } from './versioned-storage.js';
 export type ValidatedProcessingTimeWindow = z.infer<typeof ProcessingTimeWindowSchema>;
-export type ValidatedProductConfig = z.infer<typeof ProductConfigSchema>;
-export type ValidatedDelayConfig = z.infer<typeof DelayConfigSchema>;

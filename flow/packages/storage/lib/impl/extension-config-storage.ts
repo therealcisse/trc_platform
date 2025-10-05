@@ -1,12 +1,7 @@
 import { createStorage, StorageEnum } from '../base/index.js';
-import {
-  validateStorageData,
-  ExtensionStorageSchema,
-  ProductStrategySchema,
-  StoredProductStrategySchema,
-} from '../validation/storage.js';
+import { validateStorageData, ExtensionStorageSchema } from '../validation/storage.js';
 import type { ExtensionStorageType } from '../base/index.js';
-import type { ExecutionConfig, ExtensionStorage, Flow, StoredProductStrategy } from '@extension/types';
+import type { ExecutionConfig, ExtensionStorage } from '@extension/types';
 import { LocalTime } from '@extension/types';
 
 export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
@@ -31,8 +26,6 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     emailMode: false,
     emailRefreshMin: 30,
     emailRefreshMax: 60,
-
-    products: [],
 
     // Inbox mode defaults
     inboxMode: true,
@@ -75,8 +68,6 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     accidentProcessingTimeSeconds: 15,
     accidentProcessingTimeWindows: [],
   },
-  // Initialize empty storage collections
-  productStrategies: [],
 };
 
 const storage = createStorage<ExtensionStorage>('extension-config-storage-key', DEFAULT_CONFIG, {
@@ -107,43 +98,6 @@ export const extensionConfigStorage: ExtensionStorageType = {
         },
       }),
     );
-  },
-
-  // Product strategies namespace
-  productStrategies: {
-    async get() {
-      const current = await storage.get();
-      return current.productStrategies.map(strategy => validateStorageData(ProductStrategySchema, strategy));
-    },
-
-    async set(strategies) {
-      // Convert ProductStrategy to StoredProductStrategy
-      const storedStrategies: StoredProductStrategy[] = strategies.map(strategy => ({
-        id: strategy.id,
-        name: strategy.name,
-        patterns: strategy.patterns,
-      }));
-
-      const validatedStrategies = storedStrategies.map(strategy =>
-        validateStorageData(StoredProductStrategySchema, strategy),
-      );
-
-      await storage.set(currentState =>
-        validateStorageData(ExtensionStorageSchema, {
-          ...currentState,
-          productStrategies: validatedStrategies,
-        }),
-      );
-    },
-
-    async clear() {
-      await storage.set(currentState =>
-        validateStorageData(ExtensionStorageSchema, {
-          ...currentState,
-          productStrategies: [],
-        }),
-      );
-    },
   },
 
   // Actions methods
