@@ -118,15 +118,8 @@ export const ManagedTabInfoSchema = z.object({
   lastActive: z.number(),
 });
 
-export const ExtensionStorageSchema = z.object({
-  enabled: z.boolean(),
-  config: ExecutionConfigSchema,
-  logs: z.array(LogEntrySchema),
-  managedTabs: z.record(z.string(), ManagedTabInfoSchema),
-  buyingOffers: z.record(z.string(), BuyingOfferSchema),
-  productStrategies: z.array(StoredProductStrategySchema),
-  flows: z.record(z.string(), FlowSchema),
-});
+// Use versioned schema for ExtensionStorage; latest points to V0 today
+export { ExtensionStorageSchemaLatest as ExtensionStorageSchema } from './versioned-storage.js';
 
 export function validateStorageData<T>(schema: z.ZodSchema<T>, data: unknown): T {
   return schema.parse(data);
@@ -139,7 +132,7 @@ export type ValidatedLogEntry = z.infer<typeof LogEntrySchema>;
 export type ValidatedProductStrategy = z.infer<typeof ProductStrategySchema>;
 export type ValidatedFlow = z.infer<typeof FlowSchema>;
 export type ValidatedManagedTabInfo = z.infer<typeof ManagedTabInfoSchema>;
-export type ValidatedExtensionStorage = z.infer<typeof ExtensionStorageSchema>;
+export type { ExtensionStorageLatest as ValidatedExtensionStorage } from './versioned-storage.js';
 export type ValidatedProcessingTimeWindow = z.infer<typeof ProcessingTimeWindowSchema>;
 export type ValidatedProductConfig = z.infer<typeof ProductConfigSchema>;
 export type ValidatedDelayConfig = z.infer<typeof DelayConfigSchema>;

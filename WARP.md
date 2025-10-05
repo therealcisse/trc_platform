@@ -329,3 +329,32 @@ Editor/Agent Notes
 Cursor/Copilot Rules
 - No .cursor or Copilot rules detected in this repo at time of writing. If added later (e.g., .cursor/rules/, .cursorrules, .github/copilot-instructions.md), mirror their key points here.
 
+
+## Agent Rules for Extension Storage Migrations
+
+Trigger: When a diff modifies any of the following, automatically propose a migration plan and changes unless the change is strictly non-breaking.
+
+- files:
+  - flow/packages/types/lib/app/types.ts
+    - if the interface ExtensionStorage or ExecutionConfig changes in any way
+  - flow/packages/storage/lib/impl/extension-config-storage.ts
+    - if DEFAULT_CONFIG shape or keys change
+  - flow/packages/storage/lib/validation/storage.ts
+    - if ExecutionConfigSchema, ProductStrategy schemas, or any schema referenced by ExtensionStorage changes
+  - flow/packages/storage/lib/validation/versioned-storage.ts
+    - if LATEST_SCHEMA_VERSION or ExtensionStorageSchemaLatest changes
+
+Proposal must include:
+- Whether schemaVersion needs to be bumped
+- The exact vN schema and vN+1 schema delta
+- A migration step draft from N -> N+1 (typed), placed in flow/packages/storage/lib/migrations/registry.ts
+- Any necessary DEFAULT_CONFIG updates
+- Notes on deep-merge defaults for write paths
+
+Implementation checklist to apply:
+1) Add new versioned schema, update LATEST_SCHEMA_VERSION and ExtensionStorageSchemaLatest
+2) Add typed migration step in registry.ts, with an up function converting old data to new
+3) Update DEFAULT_CONFIG.schemaVersion and shape
+4) Ensure background init still calls ensureMigrated before other storage operations
+5) Add or adjust tests for idempotency and empty-storage behavior
+

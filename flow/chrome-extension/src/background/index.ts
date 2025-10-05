@@ -13,7 +13,7 @@ import {
   BuyingStateService,
   sleep,
 } from '@extension/shared';
-import { extensionConfigStorage } from '@extension/storage';
+import { extensionConfigStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
 import { MATCHER_IDS } from '@extension/types';
 import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
 
@@ -24,7 +24,8 @@ const buyingService = new BuyingStateService(extensionConfigStorage);
 // Initialize background service
 async function init() {
   try {
-    // Initialize configuration with defaults
+    // Migrate storage to latest schema and initialize configuration with defaults
+    await ensureMigrated(extensionConfigStorage, DEFAULT_CONFIG, msg => extensionConfigStorage.logs.addLog(msg));
     await ConfigService.init();
     console.log(`[${timeNow()}][Background] - Configuration initialized`);
 

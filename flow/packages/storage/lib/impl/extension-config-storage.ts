@@ -19,6 +19,7 @@ export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
 } as const;
 
 export const DEFAULT_CONFIG: ExtensionStorage = {
+  schemaVersion: 0,
   enabled: true,
   config: {
     operationalHours: {

@@ -351,6 +351,7 @@ export interface ManagedTabInfo {
 }
 
 export interface ExtensionStorage {
+  schemaVersion: 0; // later 0 | 1 | ...
   enabled: boolean;
   config: ExecutionConfig;
   logs: {
