@@ -1,6 +1,6 @@
 import type { StorageEnum } from './index.js';
-import type { ValidatedBuyingOffer, ValidatedLogEntry, ValidatedProductStrategy } from '../validation/storage.js';
-import type { ExecutionConfig, ExtensionStorage, Flow } from '@extension/types';
+import type { ValidatedProductStrategy } from '../validation/storage.js';
+import type { ExecutionConfig, ExtensionRuntime, ExtensionStorage, Flow } from '@extension/types';
 
 export type ValueOrUpdateType<D> = D | ((prev: D) => Promise<D> | D);
 
@@ -56,6 +56,18 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
   toggleEnabled(): Promise<void>;
   updateConfig(updates: Partial<ExecutionConfig>): Promise<void>;
 
+  // Product strategies namespace
+  productStrategies: {
+    get(): Promise<ValidatedProductStrategy[]>;
+    set(strategies: ValidatedProductStrategy[]): Promise<void>;
+    clear(): Promise<void>;
+  };
+
+  // Actions methods
+  restoreDefaults(): Promise<void>;
+};
+
+export type ExtensionRuntimeType = BaseStorageType<ExtensionRuntime> & {
   // Buying state namespace
   buyingState: {
     markBuying(flowId: string, timeout: number): Promise<void>;
@@ -63,7 +75,13 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
     clearBuying(flowId: string): Promise<void>;
     purgeBuying(flowId: string): Promise<void>;
     clearExpired(): Promise<void>;
-    getBuyingOffer(flowId: string): Promise<ValidatedBuyingOffer | undefined>;
+    getBuyingOffer(flowId: string): Promise<
+      | {
+          id: string;
+          timeout: number;
+        }
+      | undefined
+    >;
   };
 
   // Tab management namespace
@@ -83,15 +101,13 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
   // Logs namespace
   logs: {
     addLog(message: string): Promise<void>;
-    getLogs(): Promise<ValidatedLogEntry[]>;
+    getLogs(): Promise<
+      {
+        timestamp: number;
+        message: string;
+      }[]
+    >;
     clearLogs(): Promise<void>;
-  };
-
-  // Product strategies namespace
-  productStrategies: {
-    get(): Promise<ValidatedProductStrategy[]>;
-    set(strategies: ValidatedProductStrategy[]): Promise<void>;
-    clear(): Promise<void>;
   };
 
   flows: {

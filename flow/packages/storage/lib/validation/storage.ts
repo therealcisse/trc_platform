@@ -1,5 +1,4 @@
 import { z } from 'zod';
-import type { ProductStrategy, DelayConfig } from '@extension/types';
 import { LocalTime } from '@extension/types';
 
 export const LocalTimeSchema = z
@@ -92,32 +91,6 @@ export const ExecutionConfigSchema = z.object({
   accidentProcessingTimeWindows: z.array(ProcessingTimeWindowSchema),
 });
 
-export const BuyingOfferSchema = z.object({
-  id: z.string(),
-  timeout: z.number(),
-});
-
-export const LogEntrySchema = z.object({
-  timestamp: z.number(),
-  message: z.string(),
-});
-
-export const FlowSchema = z.object({
-  id: z.string(),
-  timestamp: z.number(),
-  requestTimestamp: z.number(),
-  status: z.enum(['running', 'done', 'failed']),
-  source: z.enum(['email', 'inbox']),
-  type: z.enum(['pdf', 'offer']),
-  doneTimestamp: z.number().optional(),
-});
-
-export const ManagedTabInfoSchema = z.object({
-  flowId: z.string(),
-  createdAt: z.number(),
-  lastActive: z.number(),
-});
-
 // Use versioned schema for ExtensionStorage; latest points to V0 today
 export { ExtensionStorageSchemaLatest as ExtensionStorageSchema } from './versioned-storage.js';
 
@@ -127,11 +100,7 @@ export function validateStorageData<T>(schema: z.ZodSchema<T>, data: unknown): T
 
 // Type inference helpers
 export type ValidatedExecutionConfig = z.infer<typeof ExecutionConfigSchema>;
-export type ValidatedBuyingOffer = z.infer<typeof BuyingOfferSchema>;
-export type ValidatedLogEntry = z.infer<typeof LogEntrySchema>;
 export type ValidatedProductStrategy = z.infer<typeof ProductStrategySchema>;
-export type ValidatedFlow = z.infer<typeof FlowSchema>;
-export type ValidatedManagedTabInfo = z.infer<typeof ManagedTabInfoSchema>;
 export type { ExtensionStorageLatest as ValidatedExtensionStorage } from './versioned-storage.js';
 export type ValidatedProcessingTimeWindow = z.infer<typeof ProcessingTimeWindowSchema>;
 export type ValidatedProductConfig = z.infer<typeof ProductConfigSchema>;

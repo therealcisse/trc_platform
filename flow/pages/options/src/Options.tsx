@@ -2,7 +2,7 @@ import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { TabManager } from '@extension/shared';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { extensionConfigStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
+import { extensionConfigStorage, extensionRuntimeStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { Fragment, useState } from 'react';
 import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow } from '@extension/types';
@@ -398,8 +398,8 @@ const Options = () => {
     if (confirm(t('actions_confirm_delete_db'))) {
       try {
         // Clear storage-based flows and simple logs
-        const flows = await extensionConfigStorage.flows.getAllFlowIds();
-        await extensionConfigStorage.clearFlowDatabase();
+        const flows = await extensionRuntimeStorage.flows.getAllFlowIds();
+        await extensionRuntimeStorage.clearFlowDatabase();
 
         for (const id of flows) {
           await TabManager.getInstance().closeAllTabs(id);
@@ -423,7 +423,7 @@ const Options = () => {
 
   const handleShowFlowDb = async () => {
     try {
-      const currentData = await extensionConfigStorage.get();
+      const currentData = await extensionRuntimeStorage.get();
       setFlowData({ flows: currentData.flows });
       setShowJsonModal(true);
     } catch (error) {

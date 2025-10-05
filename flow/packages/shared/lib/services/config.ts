@@ -1,5 +1,5 @@
-import { extensionConfigStorage } from '@extension/storage';
-import type { ExtensionStorage } from '@extension/types';
+import { extensionConfigStorage, extensionRuntimeStorage } from '@extension/storage';
+import type { ExtensionStorage, ExtensionRuntime } from '@extension/types';
 
 /**
  * Config service for managing extension configuration
@@ -69,11 +69,11 @@ export class ConfigService {
    * Start a new flow or check if it already exists
    * @returns true if flow already exists, false if newly added
    */
-  static async startFlow(flow: ExtensionStorage['flows'][string]): Promise<boolean> {
-    const exists = await extensionConfigStorage.flows.startFlow(flow);
+  static async startFlow(flow: ExtensionRuntime['flows'][string]): Promise<boolean> {
+    const exists = await extensionRuntimeStorage.flows.startFlow(flow);
 
     // Log flow events
-    await extensionConfigStorage.logs.addLog(
+    await extensionRuntimeStorage.logs.addLog(
       exists
         ? `[Flow] Skipped existing flow ${flow.id} (${flow.source})`
         : `[Flow] Started new flow ${flow.id} (${flow.source})`,
@@ -85,29 +85,29 @@ export class ConfigService {
   /**
    * Get flow by ID
    */
-  static async getFlow(id: string): Promise<ExtensionStorage['flows'][string] | undefined> {
-    return extensionConfigStorage.flows.getFlow(id);
+  static async getFlow(id: string): Promise<ExtensionRuntime['flows'][string] | undefined> {
+    return extensionRuntimeStorage.flows.getFlow(id);
   }
 
   /**
    * Get all flows
    */
-  static async getAllFlows(): Promise<ExtensionStorage['flows'][string][]> {
-    return extensionConfigStorage.flows.getAllFlows();
+  static async getAllFlows(): Promise<ExtensionRuntime['flows'][string][]> {
+    return extensionRuntimeStorage.flows.getAllFlows();
   }
 
   /**
    * Mark a flow as done
    */
   static async doneFlow(id: string): Promise<void> {
-    await extensionConfigStorage.flows.doneFlow(id);
-    await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
+    await extensionRuntimeStorage.flows.doneFlow(id);
+    await extensionRuntimeStorage.logs.addLog(`[Flow] Marked flow ${id} as done`);
   }
   /**
    * Mark a flow as done
    */
   static async failedFlow(id: string): Promise<void> {
-    await extensionConfigStorage.flows.failedFlow(id);
-    await extensionConfigStorage.logs.addLog(`[Flow] Marked flow ${id} as failed`);
+    await extensionRuntimeStorage.flows.failedFlow(id);
+    await extensionRuntimeStorage.logs.addLog(`[Flow] Marked flow ${id} as failed`);
   }
 }

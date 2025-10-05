@@ -13,19 +13,19 @@ import {
   BuyingStateService,
   sleep,
 } from '@extension/shared';
-import { extensionConfigStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
+import { extensionConfigStorage, extensionRuntimeStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
 import { MATCHER_IDS } from '@extension/types';
 import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
 
 // Service instances
-const tabService = new TabManagementService(extensionConfigStorage);
-const buyingService = new BuyingStateService(extensionConfigStorage);
+const tabService = new TabManagementService(extensionRuntimeStorage);
+const buyingService = new BuyingStateService(extensionRuntimeStorage);
 
 // Initialize background service
 async function init() {
   try {
     // Migrate storage to latest schema and initialize configuration with defaults
-    await ensureMigrated(extensionConfigStorage, DEFAULT_CONFIG, msg => extensionConfigStorage.logs.addLog(msg));
+    await ensureMigrated(extensionConfigStorage, DEFAULT_CONFIG, msg => extensionRuntimeStorage.logs.addLog(msg));
     await ConfigService.init();
     console.log(`[${timeNow()}][Background] - Configuration initialized`);
 
@@ -306,7 +306,7 @@ async function handleTabManagement(
         if (!payload.tabId || !payload.flowId) {
           throw new Error('Tab ID and Flow ID required for addManagedTab action');
         }
-        await extensionConfigStorage.tabManagement.markManaged(payload.tabId, payload.flowId);
+        await extensionRuntimeStorage.tabManagement.markManaged(payload.tabId, payload.flowId);
         return {
           success: true,
           requestId,
@@ -316,14 +316,14 @@ async function handleTabManagement(
         if (!payload.tabId) {
           throw new Error('Tab ID required for updateActivity action');
         }
-        await extensionConfigStorage.tabManagement.updateActivity(payload.tabId);
+        await extensionRuntimeStorage.tabManagement.updateActivity(payload.tabId);
         return {
           success: true,
           requestId,
         };
 
       case 'getTabCount':
-        const count = await extensionConfigStorage.tabManagement.getTabCount();
+        const count = await extensionRuntimeStorage.tabManagement.getTabCount();
         return {
           success: true,
           data: { count },
@@ -334,14 +334,14 @@ async function handleTabManagement(
         if (!payload.flowId) {
           throw new Error('Flow ID required for closeAllTabs action');
         }
-        await extensionConfigStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
+        await extensionRuntimeStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
         return {
           success: true,
           requestId,
         };
 
       case 'cleanupStale':
-        const cleanedCount = await extensionConfigStorage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
+        const cleanedCount = await extensionRuntimeStorage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
         return {
           success: true,
           data: { cleanedCount },
@@ -372,7 +372,7 @@ async function handleFlowDone(
   setTimeout(async function () {
     await sleep(payload.timeoutMs);
     console.info(`[${timeNow()}][Background] - Closing all tabs: ${payload.flowId}:`);
-    await extensionConfigStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
+    await extensionRuntimeStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
   }, 0);
 }
 

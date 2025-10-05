@@ -1,8 +1,8 @@
-import type { ExtensionStorageType } from '@extension/storage';
+import type { ExtensionRuntimeType } from '@extension/storage';
 import type { BuyingStateService as IBuyingStateService } from '@extension/types';
 
 export class BuyingStateService implements IBuyingStateService {
-  constructor(private storage: ExtensionStorageType) {}
+  constructor(private storage: ExtensionRuntimeType) {}
 
   async markBuying(flowId: string, timeout: number): Promise<void> {
     await this.storage.buyingState.markBuying(flowId, timeout);

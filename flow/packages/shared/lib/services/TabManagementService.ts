@@ -1,8 +1,8 @@
-import type { ExtensionStorageType } from '@extension/storage';
+import type { ExtensionRuntimeType } from '@extension/storage';
 import type { TabManagementService as ITabManagementService } from '@extension/types';
 
 export class TabManagementService implements ITabManagementService {
-  constructor(private storage: ExtensionStorageType) {}
+  constructor(private storage: ExtensionRuntimeType) {}
 
   async openTab(url: string, managedTab = false, flowId?: string): Promise<chrome.tabs.Tab> {
     const tab = await chrome.tabs.create({ url });
