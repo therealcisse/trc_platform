@@ -267,7 +267,7 @@ class SolveView(APIView):
 from django.db import models
 
 
-@api_view(["GET"])
+@api_view(["GET", "HEAD"])
 @permission_classes([])
 def healthz(request: Request) -> Response:
     """
