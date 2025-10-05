@@ -255,6 +255,30 @@
   "options_show_extension_config_description": {
     "message": "Erweiterungskonfiguration als formatiertes JSON anzeigen"
   },
+  "options_backup_config": {
+    "message": "Konfiguration sichern"
+  },
+  "options_backup_config_description": {
+    "message": "Laden Sie Ihre Konfiguration als JSON-Datei herunter"
+  },
+  "options_restore_config": {
+    "message": "Konfiguration wiederherstellen"
+  },
+  "options_restore_config_description": {
+    "message": "Wählen Sie eine JSON-Datei aus, um Ihre Konfiguration zu ersetzen"
+  },
+  "actions_confirm_restore_from_file": {
+    "message": "Sind Sie sicher, dass Sie die Konfiguration aus der ausgewählten Datei wiederherstellen möchten? Dadurch werden Ihre aktuellen Einstellungen überschrieben."
+  },
+  "actions_error_backup": {
+    "message": "Sicherung konnte nicht gespeichert werden. Bitte erneut versuchen."
+  },
+  "actions_error_restore_invalid": {
+    "message": "Ungültige oder beschädigte Konfigurationsdatei"
+  },
+  "actions_success_restore": {
+    "message": "Konfiguration erfolgreich wiederhergestellt"
+  },
   "json_display_flow_database_title": {
     "message": "Flow-Datenbank"
   },

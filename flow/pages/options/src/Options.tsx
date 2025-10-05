@@ -2,7 +2,13 @@ import '@src/Options.css';
 import { t } from '@extension/i18n';
 import { TabManager } from '@extension/shared';
 import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
-import { extensionConfigStorage, extensionRuntimeStorage, DEFAULT_OPERATIONAL_HOURS_CONFIG } from '@extension/storage';
+import {
+  extensionConfigStorage,
+  extensionRuntimeStorage,
+  DEFAULT_OPERATIONAL_HOURS_CONFIG,
+  migrateToLatest,
+  DEFAULT_CONFIG,
+} from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { Fragment, useState } from 'react';
 import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow } from '@extension/types';
@@ -439,6 +445,82 @@ const Options = () => {
       setShowConfigModal(true);
     } catch (error) {
       console.error('Failed to get extension config:', error);
+    }
+  };
+
+  const handleBackupConfig = async () => {
+    try {
+      const data = await extensionConfigStorage.get();
+      const json = JSON.stringify(data, null, 2);
+      const suggestedName = `extension-config-${new Date().toISOString().replace(/[:]/g, '-')}.json`;
+
+      const anyWindow = window as unknown as { showSaveFilePicker?: Function };
+      if (typeof anyWindow.showSaveFilePicker === 'function') {
+        // Use File System Access API when available
+        const handle = await anyWindow.showSaveFilePicker({
+          suggestedName,
+          types: [
+            {
+              description: 'JSON Files',
+              accept: { 'application/json': ['.json'] },
+            },
+          ],
+        });
+        const writable = await handle.createWritable();
+        await writable.write(new Blob([json], { type: 'application/json' }));
+        await writable.close();
+      } else {
+        // Fallback to an anchor download for broad browser support
+        const blob = new Blob([json], { type: 'application/json' });
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = suggestedName;
+        document.body.appendChild(a);
+        a.click();
+        a.remove();
+        URL.revokeObjectURL(url);
+      }
+    } catch (error) {
+      console.error('Failed to backup config:', error);
+      alert(t('actions_error_backup'));
+    }
+  };
+
+  const handleRestoreConfig = async () => {
+    try {
+      const input = document.createElement('input');
+      input.type = 'file';
+      input.accept = 'application/json';
+
+      input.onchange = async () => {
+        const file = input.files?.[0];
+        if (!file) return;
+        try {
+          const text = await file.text();
+          const raw = JSON.parse(text);
+
+          if (!confirm(t('actions_confirm_restore_from_file'))) {
+            return;
+          }
+
+          const migrated = await migrateToLatest(raw, DEFAULT_CONFIG);
+          await extensionConfigStorage.set(migrated);
+
+          alert(t('actions_success_restore'));
+        } catch (err) {
+          console.error('Failed to restore config:', err);
+          alert(t('actions_error_restore_invalid'));
+        } finally {
+          input.remove();
+        }
+      };
+
+      // Trigger the file chooser
+      input.click();
+    } catch (error) {
+      console.error('Restore dialog failed:', error);
+      alert(t('actions_error_restore_invalid'));
     }
   };
 
@@ -894,6 +976,32 @@ const Options = () => {
                     onClick={handleShowExtensionConfig}
                     className="rounded bg-blue-600 px-4 py-2 text-sm font-medium text-white hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500">
                     {t('options_show_extension_config')}
+                  </button>
+                </div>
+
+                {/* Backup Config */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_backup_config')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_backup_config_description')}</p>
+                  </div>
+                  <button
+                    onClick={handleBackupConfig}
+                    className="rounded bg-indigo-600 px-4 py-2 text-sm font-medium text-white hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+                    {t('options_backup_config')}
+                  </button>
+                </div>
+
+                {/* Restore Config */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_restore_config')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_restore_config_description')}</p>
+                  </div>
+                  <button
+                    onClick={handleRestoreConfig}
+                    className="rounded bg-green-600 px-4 py-2 text-sm font-medium text-white hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500">
+                    {t('options_restore_config')}
                   </button>
                 </div>
               </div>

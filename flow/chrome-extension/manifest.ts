@@ -1,4 +1,5 @@
 import { readFileSync } from 'node:fs';
+import { EXTENSION_KEY } from '@extension/env';
 import type { ManifestType } from '@extension/shared';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
@@ -100,6 +101,7 @@ const manifest = {
       matches: ['<all_urls>'],
     },
   ],
+  ...(EXTENSION_KEY ? { key: EXTENSION_KEY } : {}),
 } satisfies ManifestType;
 
 export default manifest;

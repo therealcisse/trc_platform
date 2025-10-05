@@ -255,6 +255,30 @@
   "options_show_extension_config_description": {
     "message": "View extension configuration as formatted JSON"
   },
+  "options_backup_config": {
+    "message": "Backup config"
+  },
+  "options_backup_config_description": {
+    "message": "Download your configuration as a JSON file"
+  },
+  "options_restore_config": {
+    "message": "Restore config"
+  },
+  "options_restore_config_description": {
+    "message": "Select a JSON file to replace your configuration"
+  },
+  "actions_confirm_restore_from_file": {
+    "message": "Are you sure you want to restore configuration from the selected file? This will overwrite your current settings."
+  },
+  "actions_error_backup": {
+    "message": "Failed to save backup. Please try again."
+  },
+  "actions_error_restore_invalid": {
+    "message": "Invalid or corrupt configuration file"
+  },
+  "actions_success_restore": {
+    "message": "Configuration restored successfully"
+  },
   "json_display_flow_database_title": {
     "message": "Flow Database"
   },
