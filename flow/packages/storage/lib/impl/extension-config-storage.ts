@@ -14,8 +14,8 @@ import { LocalTime } from '@extension/types';
 
 export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
   enabled: false,
-  min: LocalTime.of(8, 0),
-  max: LocalTime.of(20, 0),
+  min: LocalTime.of(8, 0, 0),
+  max: LocalTime.of(20, 0, 0),
 } as const;
 
 export const DEFAULT_CONFIG: ExtensionStorage = {
@@ -49,8 +49,8 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     animalProcessingTimeWindows: [
       {
         id: 'animals-8am',
-        min: LocalTime.of(8, 0),
-        max: LocalTime.of(8, 1),
+        min: LocalTime.of(8, 0, 0),
+        max: LocalTime.of(8, 1, 0),
         duration: 3,
         enabled: true,
       },
@@ -65,8 +65,8 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     healthProcessingTimeWindows: [
       {
         id: 'health-8am',
-        min: LocalTime.of(8, 0),
-        max: LocalTime.of(8, 1),
+        min: LocalTime.of(8, 0, 0),
+        max: LocalTime.of(8, 1, 0),
         duration: 3,
         enabled: true,
       },

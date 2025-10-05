@@ -135,20 +135,20 @@ export class ProductFactory {
   }
 
   static findProcessingTimeOverride(windows: ProcessingTimeWindow[], now: LocalTime): number | undefined {
-    const nowMinutes = LocalTimeUtils.toMinutesOfDay(now);
+    const nowSeconds = LocalTimeUtils.toSecondsOfDay(now);
 
     return windows.find(w => {
       if (!w.enabled) return false;
 
-      const minMinutes = LocalTimeUtils.toMinutesOfDay(w.min);
-      const maxMinutes = LocalTimeUtils.toMinutesOfDay(w.max);
+      const minSeconds = LocalTimeUtils.toSecondsOfDay(w.min);
+      const maxSeconds = LocalTimeUtils.toSecondsOfDay(w.max);
 
-      if (minMinutes <= maxMinutes) {
-        // normal case: e.g., 09:00–17:00
-        return nowMinutes >= minMinutes && nowMinutes <= maxMinutes;
+      if (minSeconds <= maxSeconds) {
+        // normal case: [min, max)
+        return nowSeconds >= minSeconds && nowSeconds < maxSeconds;
       } else {
-        // wrap-around case: e.g., 22:00–06:00 (crosses midnight)
-        return nowMinutes >= minMinutes || nowMinutes <= maxMinutes;
+        // wrap-around case: [min, 24h) U [0, max)
+        return nowSeconds >= minSeconds || nowSeconds < maxSeconds;
       }
     })?.duration;
   }

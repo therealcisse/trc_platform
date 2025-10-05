@@ -6,8 +6,9 @@ export const LocalTimeSchema = z
   .object({
     hour: z.number().int().min(0).max(23),
     minute: z.number().int().min(0).max(59),
+    second: z.number().int().min(0).max(59).default(0).optional(),
   })
-  .transform(({ hour, minute }) => LocalTime.of(hour, minute));
+  .transform(({ hour, minute, second }) => LocalTime.of(hour, minute, second ?? 0));
 
 export const OperationalHoursSchema = z.record(
   z.enum(['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday']),

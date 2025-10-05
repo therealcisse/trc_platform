@@ -43,7 +43,7 @@ class InboxMatcher implements Matcher {
         await log.write();
         return;
       }
-      const timeAllowed = isValidTimeOfDay(config);
+      const timeAllowed = () => isValidTimeOfDay(config);
 
       // Check if we need to handle a scheduled reload
       const shouldScanAfterReload = sessionStorage.getItem('inbox_scan_after_reload') === '1';
@@ -51,7 +51,7 @@ class InboxMatcher implements Matcher {
         sessionStorage.removeItem('inbox_scan_after_reload');
         log.info('Performing post-reload scan');
 
-        if (timeAllowed) {
+        if (timeAllowed()) {
           // Wait for configured delay
           config.inboxPostReloadDelayMs > 0 && (await sleep(config.inboxPostReloadDelayMs));
 
@@ -61,7 +61,7 @@ class InboxMatcher implements Matcher {
           log.warn('Outside operational hours, skipping initial scan');
         }
       } else {
-        if (timeAllowed) {
+        if (timeAllowed()) {
           // Initial scan on page load
           await this.scanAndOpenLinks();
         } else {
@@ -80,7 +80,7 @@ class InboxMatcher implements Matcher {
     }
   }
 
-  private startReloadScheduler(config: ExecutionConfig, timeAllowed: boolean): void {
+  private startReloadScheduler(config: ExecutionConfig, timeAllowed: () => boolean): void {
     const reloadSeconds = config.inboxReloadSeconds;
     const log = new Log(MATCHER_IDS.INBOX);
 
@@ -91,7 +91,7 @@ class InboxMatcher implements Matcher {
 
     // Check every second
     this.schedulerInterval = setInterval(() => {
-      if (!timeAllowed) {
+      if (!timeAllowed()) {
         return;
       }
 

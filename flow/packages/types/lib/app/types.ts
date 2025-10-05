@@ -491,51 +491,61 @@ export function isInvalidProduct(product: Product): product is InvalidProduct {
 export class LocalTime {
   readonly hour: number;
   readonly minute: number;
+  readonly second: number;
 
-  private constructor(hour: number, minute: number) {
+  private constructor(hour: number, minute: number, second: number = 0) {
     if (!Number.isInteger(hour) || hour < 0 || hour > 23) {
       throw new RangeError('Hour must be 0–23');
     }
     if (!Number.isInteger(minute) || minute < 0 || minute > 59) {
       throw new RangeError('Minute must be 0–59');
     }
+    if (!Number.isInteger(second) || second < 0 || second > 59) {
+      throw new RangeError('Second must be 0–59');
+    }
     this.hour = hour;
     this.minute = minute;
+    this.second = second ?? 0;
   }
 
-  static of(hour: number, minute: number): LocalTime {
-    return new LocalTime(hour, minute);
+  static of(hour: number, minute: number, second: number = 0): LocalTime {
+    return new LocalTime(hour, minute, second);
   }
 
   static now(): LocalTime {
     const d = new Date();
-    return new LocalTime(d.getHours(), d.getMinutes());
+    return new LocalTime(d.getHours(), d.getMinutes(), d.getSeconds());
   }
 
   static parse(str: string): LocalTime {
-    const match = /^(\d{2}):(\d{2})$/.exec(str);
+    const match = /^(\d{2}):(\d{2})(?::(\d{2}))?$/.exec(str);
     if (!match) throw new Error('Invalid time string: ' + str);
-    const [, h, m] = match;
-    return new LocalTime(+h, +m);
+    const [, h, m, s] = match;
+    return new LocalTime(+h, +m, s ? +s : 0);
   }
 
   toString(): string {
     const pad = (n: number) => String(n).padStart(2, '0');
-    return `${pad(this.hour)}:${pad(this.minute)}`;
+    return `${pad(this.hour)}:${pad(this.minute)}:${pad(this.second)}`;
   }
 
   toMinutesOfDay(): number {
     return LocalTimeUtils.toMinutesOfDay(this);
   }
 
+  toSecondsOfDay(): number {
+    return LocalTimeUtils.toSecondsOfDay(this);
+  }
+
   compareTo(other: LocalTime): number {
-    return this.toMinutesOfDay() - other.toMinutesOfDay();
+    return this.toSecondsOfDay() - other.toSecondsOfDay();
   }
 
   plusMinutes(mins: number): LocalTime {
-    const total = (this.toMinutesOfDay() + mins + 24 * 60) % (24 * 60);
-    const hour = Math.floor(total / 60);
-    const minute = total % 60;
-    return new LocalTime(hour, minute);
+    const totalSeconds = (this.toSecondsOfDay() + mins * 60 + 24 * 60 * 60) % (24 * 60 * 60);
+    const hour = Math.floor(totalSeconds / 3600);
+    const minute = Math.floor((totalSeconds % 3600) / 60);
+    const second = totalSeconds % 60;
+    return new LocalTime(hour, minute, second);
   }
 }

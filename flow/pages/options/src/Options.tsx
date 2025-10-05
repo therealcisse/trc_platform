@@ -27,7 +27,7 @@ function TimePicker({
     <div className="flex items-center gap-2">
       <Select
         value={value.hour}
-        onChange={v => onChange(LocalTime.of(Number(v), value.minute))}
+        onChange={v => onChange(LocalTime.of(Number(v), value.minute, 0))}
         disabled={disabled}
         options={HOUR_OPTIONS}
         className="w-20 border-gray-600 bg-gray-700 text-gray-100"
@@ -35,7 +35,7 @@ function TimePicker({
       <span className="text-gray-400">:</span>
       <Select
         value={value.minute}
-        onChange={v => onChange(LocalTime.of(value.hour, Number(v)))}
+        onChange={v => onChange(LocalTime.of(value.hour, Number(v), 0))}
         disabled={disabled}
         options={MINUTE_OPTIONS}
         className="w-20 border-gray-600 bg-gray-700 text-gray-100"
@@ -69,11 +69,11 @@ function ProcessingTimeWindowsEditor({
   const isWindowActiveNow = (w: ProcessingTimeWindow): boolean => {
     if (!w.enabled) return false;
     const now = LocalTime.now();
-    const nowM = LocalTimeUtils.toMinutesOfDay(now);
-    const minM = LocalTimeUtils.toMinutesOfDay(w.min);
-    const maxM = LocalTimeUtils.toMinutesOfDay(w.max);
-    if (minM <= maxM) return nowM >= minM && nowM <= maxM;
-    return nowM >= minM || nowM <= maxM; // wrap-around
+    const nowS = LocalTimeUtils.toSecondsOfDay(now);
+    const minS = LocalTimeUtils.toSecondsOfDay(w.min);
+    const maxS = LocalTimeUtils.toSecondsOfDay(w.max);
+    if (minS <= maxS) return nowS >= minS && nowS < maxS; // half-open [min, max)
+    return nowS >= minS || nowS < maxS; // wrap-around
   };
 
   const updateWindows = (next: ProcessingTimeWindow[]) => {
@@ -84,8 +84,8 @@ function ProcessingTimeWindowsEditor({
   const addWindow = () => {
     const newWindow: ProcessingTimeWindow = {
       id: (globalThis.crypto?.randomUUID?.() ?? `win_${Math.random().toString(36).slice(2)}_${Date.now()}`) as string,
-      min: LocalTime.of(9, 0),
-      max: LocalTime.of(17, 0),
+      min: LocalTime.of(8, 0, 0),
+      max: LocalTime.of(20, 0, 0),
       duration: baseSeconds > 0 ? baseSeconds : 10,
       enabled: true,
     };
@@ -129,8 +129,8 @@ function ProcessingTimeWindowsEditor({
 
   const sortByStart = () => {
     const sorted = [...(windows ?? [])].sort((a, b) => {
-      const aMin = LocalTimeUtils.toMinutesOfDay(a.min);
-      const bMin = LocalTimeUtils.toMinutesOfDay(b.min);
+      const aMin = LocalTimeUtils.toSecondsOfDay(a.min);
+      const bMin = LocalTimeUtils.toSecondsOfDay(b.min);
       return aMin - bMin;
     });
     updateWindows(sorted);
