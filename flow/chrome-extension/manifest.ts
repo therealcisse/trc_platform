@@ -89,7 +89,7 @@ const manifest = {
     {
       matches: [
         'http://localhost:8082/inbox.html',
-        'https://auktion.hansemerkur.de/my_message_center_inbox.html',
+        'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
       ],
       js: ['content/inbox.iife.js'],
       run_at: 'document_end',

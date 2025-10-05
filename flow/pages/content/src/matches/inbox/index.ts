@@ -12,7 +12,7 @@ class InboxMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['http://localhost:8082/inbox.html', 'https://auktion.hansemerkur.de/my_message_center_inbox.html'];
+  urlPatterns = ['http://localhost:8082/inbox.html', 'https://auktion.hansemerkur.de/my_message_center_inbox.html*'];
 
   domPreconditions = [
     {
