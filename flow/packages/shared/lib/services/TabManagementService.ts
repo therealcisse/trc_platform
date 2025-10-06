@@ -1,5 +1,6 @@
 import type { ExtensionRuntimeType } from '@extension/storage';
 import type { TabManagementService as ITabManagementService } from '@extension/types';
+import { ConfigService } from './config.js';
 
 export class TabManagementService implements ITabManagementService {
   constructor(private storage: ExtensionRuntimeType) {}
@@ -13,8 +14,10 @@ export class TabManagementService implements ITabManagementService {
   }
 
   async closeTab(tabId: number): Promise<void> {
-    await chrome.tabs.remove(tabId);
-    await this.storage.tabManagement.unmarkManaged(tabId);
+    if (!ConfigService.isDebugMode()) {
+      await chrome.tabs.remove(tabId);
+      await this.storage.tabManagement.unmarkManaged(tabId);
+    }
   }
 
   async reloadTab(tabId: number): Promise<void> {
@@ -46,7 +49,9 @@ export class TabManagementService implements ITabManagementService {
   }
 
   async closeAllTabsForFlow(flowId: string): Promise<void> {
-    await this.storage.tabManagement.closeAllTabsForFlow(flowId);
+    if (!ConfigService.isDebugMode()) {
+      await this.storage.tabManagement.closeAllTabsForFlow(flowId);
+    }
   }
 
   async cleanupStaleTabs(): Promise<number> {

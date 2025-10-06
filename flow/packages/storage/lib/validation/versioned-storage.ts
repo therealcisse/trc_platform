@@ -13,6 +13,7 @@ import { ExecutionConfigSchema } from './primitives.js';
 export const ExtensionStorageSchemaV0 = z.object({
   schemaVersion: z.literal(0),
   enabled: z.boolean(),
+  debugMode: z.boolean().default(false),
   config: ExecutionConfigSchema,
 });
 

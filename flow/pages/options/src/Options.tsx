@@ -358,7 +358,7 @@ const JsonDisplay = ({ data, title, onClose }: { data: any; title: string; onClo
 };
 
 const Options = () => {
-  const { enabled, config } = useStorage(extensionConfigStorage);
+  const { enabled, debugMode, config } = useStorage(extensionConfigStorage);
   const [showJsonModal, setShowJsonModal] = useState(false);
   const [flowData, setFlowData] = useState(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
@@ -927,6 +927,18 @@ const Options = () => {
             <section>
               <h2 className="mb-4 text-xl font-medium">{t('options_actions')}</h2>
               <div className="space-y-4">
+                {/* Enable Debug Mode */}
+                <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
+                  <div>
+                    <h3 className="font-medium">{t('options_enable_debug_mode')}</h3>
+                    <p className="text-sm text-gray-400">{t('options_enable_debug_mode_description')}</p>
+                  </div>
+                  <Switch
+                    checked={!!debugMode}
+                    onCheckedChange={() => extensionConfigStorage.toggleDebugMode()}
+                    className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                  />
+                </div>
                 {/* Restore Default Settings */}
                 <div className="flex items-center justify-between rounded-lg bg-gray-800 p-4">
                   <div>

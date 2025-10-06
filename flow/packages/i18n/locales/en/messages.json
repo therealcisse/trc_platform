@@ -347,5 +347,9 @@
   },
   "animals_title": { "message": "Animal insurance" },
   "animals_dogs": { "message": "Dogs" },
-  "animals_cats": { "message": "Cats" }
+  "animals_cats": { "message": "Cats" },
+  "options_enable_debug_mode": { "message": "Enable Debug Mode" },
+  "options_enable_debug_mode_description": {
+    "message": "When enabled, the extension collects and prints verbose debug information for troubleshooting."
+  }
 }

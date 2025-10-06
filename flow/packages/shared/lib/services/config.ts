@@ -45,6 +45,14 @@ export class ConfigService {
   }
 
   /**
+   * Check if isDebugMode is enabled
+   */
+  static async isDebugMode(): Promise<boolean> {
+    const storage = await extensionConfigStorage.get();
+    return storage.debugMode;
+  }
+
+  /**
    * Set extension enabled state
    */
   static async toggleEnabled(): Promise<void> {

@@ -84,7 +84,7 @@ async function handleMessage(
   message: { type: keyof BackgroundCommands; payload: any },
   sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> {
-  console.log(`[${timeNow()}][Background] - Received message: ${message.type}: ${message.payload}`);
+  console.log(`[${timeNow()}][Background] - Received message: ${message.type}`, message.payload);
 
   try {
     // Route message to appropriate handler

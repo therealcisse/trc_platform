@@ -347,5 +347,9 @@
   },
   "animals_title": { "message": "Tierversicherung" },
   "animals_dogs": { "message": "Hunde" },
-  "animals_cats": { "message": "Katzen" }
+  "animals_cats": { "message": "Katzen" },
+  "options_enable_debug_mode": { "message": "Debug-Modus aktivieren" },
+  "options_enable_debug_mode_description": {
+    "message": "Bei Aktivierung werden detaillierte Debug-Informationen zur Fehlerbehebung gesammelt und ausgegeben."
+  }
 }

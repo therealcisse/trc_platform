@@ -13,6 +13,7 @@ export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
 export const DEFAULT_CONFIG: ExtensionStorage = {
   schemaVersion: 0,
   enabled: true,
+  debugMode: false,
   config: {
     operationalHours: {
       Sunday: { ...DEFAULT_OPERATIONAL_HOURS_CONFIG, enabled: true },
@@ -84,6 +85,15 @@ export const extensionConfigStorage: ExtensionStorageType = {
       validateStorageData(ExtensionStorageSchema, {
         ...currentState,
         enabled: !currentState.enabled,
+      }),
+    );
+  },
+
+  toggleDebugMode: async () => {
+    await storage.set(currentState =>
+      validateStorageData(ExtensionStorageSchema, {
+        ...currentState,
+        debugMode: !currentState.debugMode,
       }),
     );
   },

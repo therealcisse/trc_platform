@@ -53,6 +53,7 @@ export interface ExtensionStateType {
 export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
   // Core methods
   toggleEnabled(): Promise<void>;
+  toggleDebugMode(): Promise<void>;
   updateConfig(updates: Partial<ExecutionConfig>): Promise<void>;
 
   // Actions methods
