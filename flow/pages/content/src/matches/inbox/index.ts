@@ -1,18 +1,25 @@
-import { FlowUtils, Log, BackgroundUtils, TabManager } from '@extension/shared';
+import { FlowUtils, Log, BackgroundUtils, TabManager, installGlobalErrorHandlers } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { isValidTimeOfDay, registerMatcher, sleep } from '@src/lib';
+import { IS_DEV } from '@extension/env';
 import type { ExecutionConfig, Matcher, ExecutionContext, ExecutionResult, InboxSelectors } from '@extension/types';
 
 /**
  * Inbox Matcher - Monitors HanseMerkur inbox for new messages
  */
+// Install global error handlers early
+installGlobalErrorHandlers({ matcherId: MATCHER_IDS.INBOX });
+
 class InboxMatcher implements Matcher {
   id = MATCHER_IDS.INBOX;
   name = 'Inbox Link Monitor';
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['http://localhost:8082/inbox.html', 'https://auktion.hansemerkur.de/my_message_center_inbox.html*'];
+  urlPatterns = [
+    ...(IS_DEV ? ['http://localhost:8082/inbox.html'] : []),
+    'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
+  ];
 
   domPreconditions = [
     {
@@ -335,11 +342,13 @@ export async function executeInboxWorkflow(
           continue;
         }
 
+        const isLead = FlowUtils.isLead(title);
+
         links.push({
-          id,
+          id: isLead ? `${id}-pdf` : id,
           href: anchor.href,
           requestTimestamp,
-          isLead: FlowUtils.isLead(title),
+          isLead,
         });
       }
 
@@ -370,7 +379,7 @@ export async function executeInboxWorkflow(
 
       try {
         if (!context.dryRun) {
-          const id = link.isLead ? `${link.id}-pdf` : link.id;
+          const id = link.id;
 
           // Start flow for this link
           const { existed } = await BackgroundUtils.startInboxFlow({

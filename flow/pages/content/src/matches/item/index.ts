@@ -1,18 +1,39 @@
-import { ProductFactory, FlowUtils, ConfigService, Log, BackgroundUtils, TabManager } from '@extension/shared';
+import {
+  ProductFactory,
+  FlowUtils,
+  ConfigService,
+  Log,
+  BackgroundUtils,
+  TabManager,
+  installGlobalErrorHandlers,
+} from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
+import { IS_DEV } from '@extension/env';
 import { registerMatcher, isValidTimeOfDay, waitForSelector, clickWithVerification, sleep } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
 
 /**
  * Item Matcher - Detects item pages and triggers item processing
  */
+// Install global error handlers early
+installGlobalErrorHandlers({
+  matcherId: MATCHER_IDS.ITEM,
+  getFlowId: () => {
+    try {
+      return FlowUtils.parseIDFromHref(window.location.href);
+    } catch {
+      return undefined;
+    }
+  },
+});
+
 class ItemMatcher implements Matcher {
   id = MATCHER_IDS.ITEM;
   name = 'Item Clicking Workflow';
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['http://localhost:8082/item/*', 'https://auktion.hansemerkur.de/item.php'];
+  urlPatterns = [...(IS_DEV ? ['http://localhost:8082/item/*'] : []), 'https://auktion.hansemerkur.de/item.php'];
 
   domPreconditions = [
     {

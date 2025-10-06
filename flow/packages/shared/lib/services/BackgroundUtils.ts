@@ -9,6 +9,7 @@ import type {
   EmailSelectors,
   FlowAction,
   PDFCommand,
+  ErrorReport,
 } from '@extension/types';
 
 /**
@@ -212,5 +213,20 @@ export class BackgroundUtils {
     }
 
     return response.data;
+  }
+
+  /**
+   * Report an error to the background script
+   */
+  static async reportError(payload: Omit<ErrorReport, 'timestamp'> & { timestamp?: number }): Promise<void> {
+    const finalPayload: ErrorReport = {
+      timestamp: Date.now(),
+      ...payload,
+    } as ErrorReport;
+
+    const response = await sendBackgroundCommand('extension.error', finalPayload);
+    if (!response.success) {
+      throw new Error(`Failed to report error: ${response.error}`);
+    }
   }
 }

@@ -1,18 +1,29 @@
-import { Log, BackgroundUtils, TabManager, ConfigService, FlowUtils } from '@extension/shared';
+import {
+  Log,
+  BackgroundUtils,
+  TabManager,
+  ConfigService,
+  FlowUtils,
+  installGlobalErrorHandlers,
+} from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { registerMatcher, waitForSelector } from '@src/lib';
+import { IS_DEV } from '@extension/env';
 import type { Matcher, ExecutionContext, ExecutionResult, PdfSelectors } from '@extension/types';
 
 /**
  * PDF Matcher - Detects pdf pages and triggers pdf processing
  */
+// Install global error handlers early
+installGlobalErrorHandlers({ matcherId: MATCHER_IDS.PDF });
+
 class PDFMatcher implements Matcher {
   id = MATCHER_IDS.PDF;
   name = 'PDF Clicking Workflow';
   enabled = true;
   priority = 10;
 
-  urlPatterns = ['http://localhost:8082/pdf.html', 'https://auktion.hansemerkur.de/item/id/*'];
+  urlPatterns = [...(IS_DEV ? ['http://localhost:8082/pdf.html'] : []), 'https://auktion.hansemerkur.de/item/id/*'];
 
   domPreconditions = [
     {

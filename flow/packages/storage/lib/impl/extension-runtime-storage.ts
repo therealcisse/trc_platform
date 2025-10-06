@@ -10,7 +10,7 @@ export const DEFAULT_RUNTIME: ExtensionRuntime = {
 };
 
 const storage = createStorage<ExtensionRuntime>('extension-runtime-storage-key', DEFAULT_RUNTIME, {
-  storageEnum: StorageEnum.Session,
+  storageEnum: StorageEnum.Local,
   sessionAccessForContentScripts: true,
   liveUpdate: true,
 });

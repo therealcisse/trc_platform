@@ -1,11 +1,23 @@
-import { ProductFactory, Log, FlowUtils, ConfigService, BackgroundUtils, TabManager } from '@extension/shared';
+import {
+  ProductFactory,
+  Log,
+  FlowUtils,
+  ConfigService,
+  BackgroundUtils,
+  TabManager,
+  installGlobalErrorHandlers,
+} from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher } from '@src/lib';
+import { IS_DEV } from '@extension/env';
 import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors, Flow } from '@extension/types';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing
  */
+// Install global error handlers early
+installGlobalErrorHandlers({ matcherId: MATCHER_IDS.MY_OFFER });
+
 class MyOfferMatcher implements Matcher {
   id = MATCHER_IDS.MY_OFFER;
   name = 'MyOffer Clicking Workflow';
@@ -13,7 +25,7 @@ class MyOfferMatcher implements Matcher {
   priority = 10;
 
   urlPatterns = [
-    'http://localhost:8082/myOffer/*',
+    ...(IS_DEV ? ['http://localhost:8082/myOffer/*'] : []),
     'https://auktion.hansemerkur.de/my_message_center_show_message.php',
   ];
 

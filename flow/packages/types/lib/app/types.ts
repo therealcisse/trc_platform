@@ -143,6 +143,7 @@ export interface BackgroundCommands {
     metadata?: Record<string, any>;
     timestamp: number;
   };
+  'extension.error': ErrorReport;
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
   'extension.toggleEnabled': {};
@@ -256,6 +257,24 @@ export interface TelemetryEvent {
   executorName?: string;
   metadata?: Record<string, any>;
   timestamp: number;
+}
+
+// Error reporting from content scripts to background
+export interface ErrorReport {
+  matcherId: string;
+  flowId?: string;
+  source: 'window.error' | 'unhandledrejection' | 'manual' | string;
+  message: string;
+  name?: string;
+  stack?: string;
+  filename?: string;
+  lineno?: number;
+  colno?: number;
+  reason?: unknown;
+  url?: string;
+  userAgent?: string;
+  timestamp: number;
+  metadata?: Record<string, unknown>;
 }
 
 export interface TelemetryData {

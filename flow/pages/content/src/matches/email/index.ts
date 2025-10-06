@@ -1,4 +1,4 @@
-import { FlowUtils, Log, BackgroundUtils, TabManager } from '@extension/shared';
+import { FlowUtils, Log, BackgroundUtils, TabManager, installGlobalErrorHandlers } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { registerMatcher, waitForSelector, clickWithVerification, safeNavigate, random, sleep } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
@@ -6,6 +6,9 @@ import type { Matcher, ExecutionContext, ExecutionResult, EmailSelectors } from 
 /**
  * Email Matcher - Detects Outlook email pages and triggers email processing
  */
+// Install global error handlers early
+installGlobalErrorHandlers({ matcherId: MATCHER_IDS.EMAIL });
+
 class EmailMatcher implements Matcher {
   id = MATCHER_IDS.EMAIL;
   name = 'Email Clicking Workflow';

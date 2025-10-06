@@ -1,4 +1,11 @@
-import { Log, FlowUtils, ProductFactory, ConfigService, BackgroundUtils } from '@extension/shared';
+import {
+  Log,
+  FlowUtils,
+  ProductFactory,
+  ConfigService,
+  BackgroundUtils,
+  installGlobalErrorHandlers,
+} from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import {
   registerMatcher,
@@ -8,6 +15,7 @@ import {
   fetchImageAsBlob,
   ensureFocus,
 } from '@src/lib';
+import { IS_DEV } from '@extension/env';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 import { TabManager } from '@extension/shared';
@@ -15,13 +23,28 @@ import { TabManager } from '@extension/shared';
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
  */
+// Install global error handlers early
+installGlobalErrorHandlers({
+  matcherId: MATCHER_IDS.BUY_OFFER,
+  getFlowId: () => {
+    try {
+      return FlowUtils.parseIDFromPath(window.location.href);
+    } catch {
+      return undefined;
+    }
+  },
+});
+
 class BuyOfferMatcher implements Matcher {
   id = MATCHER_IDS.BUY_OFFER;
   name = 'Buy Offer Workflow';
   enabled = true;
   priority = 20; // Higher priority than email/offers
 
-  urlPatterns = ['http://localhost:8082/buy_now/id/*', 'https://auktion.hansemerkur.de/buy_now/id/*'];
+  urlPatterns = [
+    ...(IS_DEV ? ['http://localhost:8082/buy_now/id/*'] : []),
+    'https://auktion.hansemerkur.de/buy_now/id/*',
+  ];
 
   domPreconditions = [
     {

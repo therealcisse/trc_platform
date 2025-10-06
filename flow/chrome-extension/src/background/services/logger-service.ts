@@ -1,6 +1,6 @@
 import { LogManager } from '@extension/shared';
 import type { LogEntry } from '@extension/shared';
-import type { MatcherId } from '@extension/types';
+import type { MatcherId, ErrorReport } from '@extension/types';
 
 // Initialize LogManager in background context
 const logManager = LogManager.getInstance();
@@ -30,7 +30,35 @@ export class BackgroundLoggerService {
       });
     });
 
-    console.log(`[LoggerService] Stored ${messages.length} log entries for ${flowId || matcherId}`);
+  }
+
+  /**
+   * Process incoming error reports from content scripts
+   */
+  static handleErrorReport(payload: ErrorReport, sender?: chrome.runtime.MessageSender): void {
+    const { matcherId, flowId, source, message, timestamp } = payload;
+    const tabId = sender?.tab?.id;
+    const tabUrl = sender?.tab?.url;
+
+    const ts = new Date(timestamp || Date.now()).toISOString();
+    const flowSuffix = flowId ? `[${flowId}]` : '';
+    console.error(`[${ts}][Background][Error][${matcherId}]${flowSuffix} [${source}] ${message}`, payload, {
+      tabId,
+      tabUrl,
+    });
+
+    logManager.addEntry({
+      timestamp: timestamp || Date.now(),
+      matcherId,
+      flowId,
+      level: 'error',
+      message: `[${source}] ${message}`,
+      metadata: {
+        ...payload,
+        tabId,
+        tabUrl,
+      },
+    });
   }
 
   /**

@@ -84,7 +84,7 @@ async function handleMessage(
   message: { type: keyof BackgroundCommands; payload: any },
   sender: chrome.runtime.MessageSender,
 ): Promise<CommandResponse> {
-  console.log(`[${timeNow()}][Background] - Received message: ${message.type}`);
+  console.log(`[${timeNow()}][Background] - Received message: ${message.type}: ${message.payload}`);
 
   try {
     // Route message to appropriate handler
@@ -139,6 +139,11 @@ async function handleMessage(
         // Store logs in background LogManager
         BackgroundLoggerService.handleLogMessage(message.payload);
         return { success: true, requestId: 'log' };
+
+      case 'extension.error':
+        // Receive error reports from content scripts and log them
+        BackgroundLoggerService.handleErrorReport(message.payload, sender);
+        return { success: true, requestId: 'error' };
 
       case 'extension.telemetry':
         // Store telemetry events
