@@ -171,8 +171,8 @@ async function handleMessage(
         const payload = message.payload as FlowPayload;
         const flow =
           payload.type === 'email'
-            ? FlowUtils.email(payload.id, payload.action)
-            : FlowUtils.inbox(payload.id, payload.requestTimestamp, payload.action);
+            ? FlowUtils.email(payload.id)
+            : FlowUtils.inbox(payload.id, payload.requestTimestamp);
 
         const existed = await ConfigService.startFlow(flow);
         return {

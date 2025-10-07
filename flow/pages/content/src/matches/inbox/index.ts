@@ -385,7 +385,6 @@ export async function executeInboxWorkflow(
           const { existed } = await BackgroundUtils.startInboxFlow({
             id: id,
             requestTimestamp: link.requestTimestamp,
-            action: link.isLead ? 'pdf' : 'offer',
           });
 
           if (existed) {

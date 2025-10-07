@@ -1,4 +1,4 @@
-import type { Flow, FlowAction } from '@extension/types';
+import type { Flow } from '@extension/types';
 
 export class FlowUtils {
   static isLead(text: string): boolean {
@@ -80,7 +80,7 @@ export class FlowUtils {
     return match[1];
   }
 
-  static email(id: string, action: FlowAction): Flow {
+  static email(id: string): Flow {
     const now = Date.now();
     return {
       id,
@@ -88,18 +88,16 @@ export class FlowUtils {
       requestTimestamp: now,
       status: 'running',
       source: 'email',
-      type: action,
     };
   }
 
-  static inbox(id: string, requestTimestamp: number, action: FlowAction): Flow {
+  static inbox(id: string, requestTimestamp: number): Flow {
     return {
       id,
       timestamp: Date.now(),
       requestTimestamp,
       status: 'running',
       source: 'inbox',
-      type: action,
     };
   }
 }

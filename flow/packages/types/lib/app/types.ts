@@ -109,19 +109,15 @@ export interface CommandResponse<T = any> {
   requestId: string;
 }
 
-export type FlowAction = 'pdf' | 'offer';
-
 // Background command definitions
 export interface EmailFlowPayload {
   type: 'email';
-  action: FlowAction;
   id: string;
 }
 
 export interface InboxFlowPayload {
   type: 'inbox';
   id: string;
-  action: FlowAction;
   requestTimestamp: number;
 }
 
@@ -308,7 +304,6 @@ export interface Flow {
   requestTimestamp: number;
   status: 'running' | 'done' | 'failed';
   source: 'email' | 'inbox';
-  type: FlowAction;
   doneTimestamp?: number;
 }
 
