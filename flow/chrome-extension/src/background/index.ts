@@ -16,6 +16,7 @@ import {
 import { extensionConfigStorage, extensionRuntimeStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
 import { MATCHER_IDS } from '@extension/types';
 import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
+import { BACKEND_URL } from '@extension/env';
 
 // Service instances
 const tabService = new TabManagementService(extensionRuntimeStorage);
@@ -447,14 +448,10 @@ async function dataUrlToBlobFetch(dataUrl: string): Promise<Blob> {
  * Process an image by sending it to the TRC backend API
  */
 async function processImageAPI(imageData: string, flowId: string) {
-  const backendUrl = process.env['CEB_TRC_BACKEND_URL'];
+  const backendUrl = BACKEND_URL;
   const config = await ConfigService.getConfig();
 
-  if (!backendUrl) {
-    throw new Error('Missing required environment variable: CEB_TRC_BACKEND_URL');
-  } else {
-    console.log(`[${timeNow()}][Background][CEB] - sending requests to backend:`, backendUrl);
-  }
+  console.log(`[${timeNow()}][Background][CEB] - sending requests to backend:`, backendUrl);
 
   if (!config.token) {
     throw new Error('API token not configured. Please set your API token in the extension options.');

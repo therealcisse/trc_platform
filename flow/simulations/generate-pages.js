@@ -16,10 +16,6 @@ const INBOX_DATA = [
     "betreffLink": "./myOffer/13853631.html",
   },
   {
-    "betreff": "Lead 1455952 erfolgreich ersteigert.",
-    "betreffLink": "./myOffer/13853277.html",
-  },
-  {
     "betreff": "Es ist eine Auktion (ID 1456031) mit dem Sofortkaufpreis 15,00 EUR -- PLZ 25474 eingegangen.",
     "betreffLink": "./myOffer/13852658.html",
   },
@@ -330,6 +326,28 @@ function generateBuyNowPages(inboxData, template) {
 function main() {
   console.log('Starting page generation...');
 
+  // Cleanup previous outputs before generating anything
+  try {
+    const dirsToDelete = [
+      path.join(__dirname, 'buy_now'),
+      path.join(__dirname, 'item'),
+      path.join(__dirname, 'myOffer'),
+    ];
+    for (const d of dirsToDelete) {
+      if (fs.existsSync(d)) {
+        fs.rmSync(d, { recursive: true, force: true });
+        console.log(`Deleted directory: ${d}`);
+      }
+    }
+    const inboxPathDel = path.join(__dirname, 'inbox.html');
+    if (fs.existsSync(inboxPathDel)) {
+      fs.rmSync(inboxPathDel, { force: true });
+      console.log(`Deleted file: ${inboxPathDel}`);
+    }
+  } catch (cleanupErr) {
+    console.warn('Warning during cleanup:', cleanupErr);
+  }
+
   try {
     // Read template files
     const offerTemplatePath = path.join(__dirname, 'myOffer.html');
@@ -340,13 +358,102 @@ function main() {
     const itemTemplate = fs.readFileSync(itemTemplatePath, 'utf8');
     const buyNowTemplate = fs.readFileSync(buyNowTemplatePath, 'utf8');
 
-    // Generate all types of pages
-    generateOfferPages(INBOX_DATA, offerTemplate);
-    generateItemPages(INBOX_DATA, itemTemplate);
-    generateBuyNowPages(INBOX_DATA, buyNowTemplate);
+    // Build dynamic INBOX_DATA for this run from the static base above
+    const base = INBOX_DATA;
+
+    const idRegexes = [
+      /\(ID (\d+)\)/,    // e.g. (ID 1456218)
+    ];
+
+    function extractIdMatch(str) {
+      for (const re of idRegexes) {
+        const m = String(str).match(re);
+        if (m && m[1]) return m[1];
+      }
+      return null;
+    }
+
+    // Determine slug length from base data
+    let inferredSlugLen = 12;
+    for (const it of base) {
+      const m = String(it?.betreffLink || '').match(/\.\/myOffer\/([A-Za-z0-9_-]+)\.html$/);
+      if (m) {
+        inferredSlugLen = m[1].length;
+        break;
+      }
+    }
+
+    function genNumeric(len, avoidLeadingZero = true) {
+      if (!len || len <= 0) return '';
+      const min = avoidLeadingZero ? Math.pow(10, Math.max(0, len - 1)) : 0;
+      const max = Math.pow(10, len) - 1;
+      let n = Math.floor(Math.random() * (max - min + 1)) + min;
+      let s = String(n);
+      if (!avoidLeadingZero && s.length < len) s = s.padStart(len, '0');
+      if (avoidLeadingZero && s.length < len) {
+        s = String(Math.pow(10, len - 1)) + s.padStart(len - 1, '0');
+        s = s.slice(0, len);
+      }
+      return s;
+    }
+
+    function compileBetreff(template, newId) {
+      let t = String(template || '');
+      if (!String(template || '').includes('$MY_ID')) {
+        t = t.replace(/\(ID \d+\)/g, `(ID ${newId})`);
+        t = t.replace(/(Lead )\d+/g, `$1${newId}`);
+      }
+      return t;
+    }
+
+    const usedIds = new Set();
+    const usedSlugs = new Set();
+
+    const runInboxData = base.map((item) => {
+      const sampleId = extractIdMatch(item.betreff);
+      const idLen = sampleId ? sampleId.length : 7;
+      let id;
+      do { id = genNumeric(idLen, true); } while (usedIds.has(id));
+      usedIds.add(id);
+
+      let slug;
+      do { slug = genNumeric(inferredSlugLen, true); } while (usedSlugs.has(slug));
+      usedSlugs.add(slug);
+
+      const betreff = compileBetreff(item.betreff, id);
+      const betreffLink = `./myOffer/${slug}.html`;
+
+      return { betreff, betreffLink };
+    });
+
+    // Generate all types of pages from the per-run data
+    generateOfferPages(runInboxData, offerTemplate);
+    generateItemPages(runInboxData, itemTemplate);
+    generateBuyNowPages(runInboxData, buyNowTemplate);
+
+    // Inject the two-field array into inbox.html as INBOX_DATA
+    const inboxTemplatePath = path.join(__dirname, 'inbox.template.html');
+    const origHtml = fs.readFileSync(inboxTemplatePath, 'utf8');
+    const pretty = JSON.stringify(runInboxData, null, 2);
+
+    const assignRe = /(\b(?:const)\s+INBOX_DATA\s*=\s*)(null)(\s*;?)/;
+    let nextHtml;
+    if (assignRe.test(origHtml)) {
+      nextHtml = origHtml.replace(assignRe, (_, pre, _old, post) => `${pre}${pretty}${post}`);
+    } else {
+      const bodyClose = origHtml.lastIndexOf('</body>');
+      const scriptBlock = `\n<script>\nvar INBOX_DATA = ${pretty};\n</script>\n`;
+      if (bodyClose !== -1) {
+        nextHtml = origHtml.slice(0, bodyClose) + scriptBlock + origHtml.slice(bodyClose);
+      } else {
+        nextHtml = origHtml + scriptBlock;
+      }
+    }
+    const inboxPath = path.join(__dirname, 'inbox.html');
+    fs.writeFileSync(inboxPath, nextHtml, 'utf8');
 
     console.log('\n=== Generation Complete ===');
-    console.log(`Total processed: ${INBOX_DATA.length} items`);
+    console.log(`Total processed: ${runInboxData.length} items`);
 
   } catch (err) {
     console.error('Error during page generation:', err);
