@@ -359,8 +359,25 @@ function main() {
     const buyNowTemplate = fs.readFileSync(buyNowTemplatePath, 'utf8');
 
     // Build dynamic INBOX_DATA for this run from the static base above
-    const base = INBOX_DATA;
+    // Parse optional --count <COUNT> argument, must be number > 0
+    const argv = process.argv.slice(2);
+    let count = undefined;
+    const idx = argv.indexOf('--count');
+    if (idx !== -1) {
+      const val = argv[idx + 1];
+      if (val == null) {
+        console.error('Error: --count requires a value');
+        process.exit(2);
+      }
+      const parsed = Number(val);
+      if (!Number.isFinite(parsed) || parsed <= 0) {
+        console.error('Error: --count must be a number strictly greater than 0');
+        process.exit(2);
+      }
+      count = parsed;
+    }
 
+    const base = count ? INBOX_DATA.slice(0, count) : INBOX_DATA;
     const idRegexes = [
       /\(ID (\d+)\)/,    // e.g. (ID 1456218)
     ];
