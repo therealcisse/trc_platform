@@ -152,21 +152,10 @@ export async function executeMyOfferWorkflow(
 
         log.info(`Product: ${title}`);
 
-        let id = FlowUtils.parseIDFromTitle(title);
+        const isLead = FlowUtils.isLead(title);
+        const id = isLead ? `${FlowUtils.parseIDFromTitle(title)}-pdf` : FlowUtils.parseIDFromTitle(title);
 
-        let flow: Flow | undefined;
-
-        try {
-          flow = await ConfigService.getFlow(id);
-
-          if (!flow) {
-            id = `${id}-pdf`;
-            flow = await ConfigService.getFlow(id);
-          }
-        } catch {
-          id = `${id}-pdf`;
-          flow = await ConfigService.getFlow(id);
-        }
+        const flow = await ConfigService.getFlow(id);
 
         const flowLog = Log.withFlow(context.matcherId, id);
 
@@ -181,7 +170,7 @@ export async function executeMyOfferWorkflow(
         }
 
         let href: string;
-        if (flow.type == 'pdf') {
+        if (isLead) {
           const pdf = document.querySelector(selectors.pdfLink) as HTMLAnchorElement;
 
           if (!pdf) {
