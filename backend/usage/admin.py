@@ -7,6 +7,8 @@ from django.contrib import messages
 from django.core.management import call_command
 from django.http import HttpRequest
 from django.utils.html import format_html
+from django.utils.timezone import localtime
+from django.utils import dateformat
 
 from .models import BillingPeriod, RequestImage, RequestLog
 
@@ -18,7 +20,7 @@ class RequestLogAdmin(admin.ModelAdmin):
         "user",
         "service",
         "status",
-        "request_ts",
+        "request_ts_display",
         "duration_ms",
         "result",  # Display result in list view
         "flow_id",  # Display flow id after result
@@ -41,6 +43,14 @@ class RequestLogAdmin(admin.ModelAdmin):
         "billing_period",
     ]
     ordering = ["-request_ts"]
+
+    def request_ts_display(self, obj: RequestLog) -> str:
+        dt = localtime(obj.request_ts)
+        # Format example: "Oct. 9, 2025, 2:58:00 p.m."
+        return dateformat.format(dt, "M j, Y, g:i:s a")
+
+    request_ts_display.short_description = "REQUEST TS"  # type: ignore[attr-defined]
+    request_ts_display.admin_order_field = "request_ts"
 
     def has_add_permission(self, request: HttpRequest) -> bool:
         # Make RequestLog read-only in admin
@@ -146,7 +156,7 @@ class RequestImageAdmin(admin.ModelAdmin):
         "file_size_display",
         "dimensions",
         "mime_type",
-        "created_at",
+        "created_at_display",
     ]
     list_filter = ["mime_type", "created_at"]
     search_fields = ["request_log__request_id", "image_hash"]
@@ -163,6 +173,14 @@ class RequestImageAdmin(admin.ModelAdmin):
     ]
     date_hierarchy = "created_at"
     ordering = ["-created_at"]
+
+    def created_at_display(self, obj: RequestImage) -> str:
+        dt = localtime(obj.created_at)
+        # Example: "Oct. 9, 2025, 2:58:00 p.m."
+        return dateformat.format(dt, "M j, Y, g:i:s a")
+
+    created_at_display.short_description = "Created at"  # type: ignore[attr-defined]
+    created_at_display.admin_order_field = "created_at"
 
     actions = ["run_cleanup_old_images"]
 
