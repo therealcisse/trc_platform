@@ -239,26 +239,26 @@ export class FlowLog {
   }
 
   async write(): Promise<void> {
-    // Dynamic import to avoid circular dependency
-    if (this.messages.length > 0 && typeof window !== 'undefined') {
-      try {
-        // Check if we're in a content script context
-        if (chrome?.runtime?.sendMessage) {
-          await chrome.runtime.sendMessage({
-            type: 'extension.log',
-            payload: {
-              matcherId: this.matcherId,
-              flowId: this.flowId,
-              messages: this.messages,
-              metadata: this.metadata,
-              timestamp: Date.now(),
-            },
-          });
-        }
-      } catch (error) {
-        console.error('Failed to send log to background:', error);
-      }
-    }
+    // // Dynamic import to avoid circular dependency
+    // if (this.messages.length > 0 && typeof window !== 'undefined') {
+    //   try {
+    //     // Check if we're in a content script context
+    //     if (chrome?.runtime?.sendMessage) {
+    //       await chrome.runtime.sendMessage({
+    //         type: 'extension.log',
+    //         payload: {
+    //           matcherId: this.matcherId,
+    //           flowId: this.flowId,
+    //           messages: this.messages,
+    //           metadata: this.metadata,
+    //           timestamp: Date.now(),
+    //         },
+    //       });
+    //     }
+    //   } catch (error) {
+    //     console.error('Failed to send log to background:', error);
+    //   }
+    // }
   }
 
   // Static methods for querying logs

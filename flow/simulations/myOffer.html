@@ -11635,6 +11635,14 @@ document.addEventListener("DOMContentLoaded", function(){
         if (HM_ZAHN_LINK.text) theLink.textContent = HM_ZAHN_LINK.text;
       }
     }
+
+    var titleElement = document.querySelector('.message_center_message thead tr:nth-child(2) td:nth-child(2)');
+    if (titleElement) {
+      if (HM_ZAHN_LINK && HM_ZAHN_LINK.text){
+        titleElement.textContent = HM_ZAHN_LINK.text;
+      }
+
+    }
   } catch(e){
     console.warn("HM init error", e);
   }
