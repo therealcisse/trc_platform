@@ -79,16 +79,14 @@ class ItemMatcher implements Matcher {
 
     // Reload the page
     window.location.reload();
-
   }
 
   private async startManualSchedulingMode(config: ExecutionConfig, id: string, log: Log): Promise<void> {
-    const reloadSeconds = config.inboxReloadSeconds;
+    const reloadSeconds = [0];
     const timeAllowed = () => isValidTimeOfDay(config);
 
     if (timeAllowed()) {
       return this.startFlowAndReload(id, log);
-
     } else {
       log.warn('Outside operational hours, scheduling manual mode');
     }
@@ -187,7 +185,6 @@ export async function executeItemWorkflow(
 
   try {
     if (managed) {
-
       // Check if this is a managed tab
       const isManagedTab = await tabManager.isPageManaged();
 
@@ -201,14 +198,12 @@ export async function executeItemWorkflow(
           error: 'Tab is not managed',
         };
       }
-
     }
 
     if (flow.status === 'done' || flow.status === 'failed') {
       log.info('❌ Flow is already completed, closing all tabs');
       if (managed) {
         await tabManager.closeAllTabs(flow.id);
-
       } else {
         await tabManager.closeCurrentTab();
       }

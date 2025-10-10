@@ -101,11 +101,16 @@ export async function ensureFocus(
     ensureTabbable?: boolean;
     ensureEnabled?: boolean;
   },
-): Promise<HTMLElement> {
+): Promise<HTMLElement | undefined> {
+  // Check if the document is visible; if not, return immediately
+  if (document.visibilityState !== 'visible') {
+    return undefined;
+  }
+
   const {
     selectorContext = document,
-    timeoutMs = 1500,
-    intervalMs = 16,
+    timeoutMs = 200,
+    intervalMs = 8,
     preventScroll = true,
     scrollIntoView = false,
     ensureTabbable = false,
@@ -125,42 +130,48 @@ export async function ensureFocus(
 
   if (scrollIntoView) {
     el.scrollIntoView({ block: 'nearest', inline: 'nearest' });
+    await new Promise<void>(r => requestAnimationFrame(() => r()));
   }
 
   if (ensureTabbable && el.tabIndex < 0 && !(el instanceof HTMLInputElement)) {
     el.tabIndex = 0;
   }
 
-  const waitForEnabled = async (node: HTMLElement) => {
-    if (!ensureEnabled) return;
-    if (node instanceof HTMLInputElement || node instanceof HTMLTextAreaElement || node instanceof HTMLSelectElement) {
-      const deadline = performance.now() + timeoutMs;
-      while ((node.disabled || node.getAttribute('aria-disabled') === 'true') && performance.now() < deadline) {
-        await new Promise(r => setTimeout(r, intervalMs));
+  if (
+    ensureEnabled &&
+    (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement || el instanceof HTMLSelectElement)
+  ) {
+    const deadline = performance.now() + timeoutMs;
+    while ((el.disabled || el.getAttribute('aria-disabled') === 'true') && performance.now() < deadline) {
+      await new Promise(r => setTimeout(r, intervalMs));
+    }
+    if (el.disabled || el.getAttribute('aria-disabled') === 'true') {
+      throw new Error('ensureFocus: element remained disabled');
+    }
+  }
+
+  el.focus({ preventScroll });
+  if (document.activeElement === el) {
+    if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
+      try {
+        const len = el.value?.length ?? 0;
+        el.setSelectionRange(len, len);
+      } catch {
+        // ignore if not applicable
       }
     }
-  };
-
-  // Double RAF to allow styles and layout to settle
-  await new Promise<void>(r => requestAnimationFrame(() => requestAnimationFrame(() => r())));
+    return el;
+  }
 
   const deadline = performance.now() + timeoutMs;
-
   while (performance.now() < deadline) {
-    // Re-resolve if the node was replaced
     if (!el.isConnected) {
       const next = resolveElement();
       if (next) el = next;
+      else throw new Error('ensureFocus: element not found');
     }
 
-    await waitForEnabled(el);
-
-    if (preventScroll) {
-      (el as HTMLElement).focus({ preventScroll: true });
-    } else {
-      el.focus();
-    }
-
+    el.focus({ preventScroll });
     if (document.activeElement === el) {
       if (el instanceof HTMLInputElement || el instanceof HTMLTextAreaElement) {
         try {

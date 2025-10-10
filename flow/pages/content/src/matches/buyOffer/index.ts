@@ -206,18 +206,13 @@ export async function executeBuyOfferWorkflow(
   }
   log.info('Captcha input element found and ready');
 
-  // Focus the input with verification and retries
-  await ensureFocus(inputElement, {
-    preventScroll: true,
-    scrollIntoView: false,
-    timeoutMs: 1500,
-    intervalMs: 16,
-    ensureEnabled: true,
-  });
-  log.debug('Captcha input focused', { focused: document.activeElement === inputElement });
+  try {
+    // Focus the input with verification and retries
+    await ensureFocus(inputElement);
+    log.debug('Captcha input focused', { focused: document.activeElement === inputElement });
+  } catch {}
 
   if (managed) {
-
     // Check if this is a managed tab
     const isManagedTab = await tabManager.isPageManaged();
 
@@ -233,27 +228,25 @@ export async function executeBuyOfferWorkflow(
     }
   }
 
-
   if (flow.status === 'done' || flow.status === 'failed') {
-      log.info('❌ Flow is already completed, closing all tabs');
-      if (managed) {
-        await tabManager.closeAllTabs(flow.id);
+    log.info('❌ Flow is already completed, closing all tabs');
+    if (managed) {
+      await tabManager.closeAllTabs(flow.id);
+    } else {
+      await tabManager.closeCurrentTab();
+    }
 
-      } else {
-        await tabManager.closeCurrentTab();
-      }
-
-      return {
-        success: false,
-        matcherId: context.matcherId,
-        executorName: 'buyOffer',
-        data: {},
-        telemetry: {
-          startTime,
-          endTime: Date.now(),
-          errors,
-        },
-      };
+    return {
+      success: false,
+      matcherId: context.matcherId,
+      executorName: 'buyOffer',
+      data: {},
+      telemetry: {
+        startTime,
+        endTime: Date.now(),
+        errors,
+      },
+    };
   }
 
   try {
