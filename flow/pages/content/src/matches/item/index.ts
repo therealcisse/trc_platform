@@ -7,7 +7,7 @@ import {
   installGlobalErrorHandlers,
 } from '@extension/shared';
 import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
-import { registerMatcher } from '@src/lib';
+import { registerMatcher, clickWithVerification } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
 
 /**
@@ -175,7 +175,10 @@ export async function executeItemWorkflow(
         log.info(`Opening item: ${href}`);
 
         if (!context.dryRun) {
-          tabManager.openTab(href, flow.id);
+          await clickWithVerification(buyButton, {
+            verify: false,
+            scroll: false,
+          });
         } else {
           log.debug('Dry run: Would open item in new tab');
         }

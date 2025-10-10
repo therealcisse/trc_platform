@@ -241,7 +241,9 @@ class SolveView(APIView):
 
                 # Skip image saving in critical path
                 # This can be done asynchronously or conditionally
-                if app_settings.save_request_images and self._should_save_image(image_bytes, app_settings):
+                if app_settings.save_request_images and self._should_save_image(
+                    image_bytes, app_settings
+                ):
                     self._schedule_image_save(request_log.id, image_bytes)
 
         except Exception as e:

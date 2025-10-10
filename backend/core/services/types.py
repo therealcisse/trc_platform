@@ -29,6 +29,23 @@ class ModelType(str, Enum):
     """Supported OpenAI model types."""
 
     GPT5_NANO = "gpt-5-nano-2025-08-07"
+    GPT41_MINI = "gpt-4.1-2025-04-14"
+    O4_MINI = "o4-mini-2025-04-16"
+
+    @property
+    def title(self) -> str:
+        """Human-friendly title for the model for use in UIs."""
+        titles = {
+            ModelType.GPT5_NANO: "GPT-5 Nano (2025-08-07)",
+            ModelType.GPT41_MINI: "GPT-4.1 Mini (2025-04-14)",
+            ModelType.O4_MINI: "O4 Mini (2025-04-16)",
+        }
+        return titles[self]
+
+    @classmethod
+    def choices(cls) -> list[tuple[str, str]]:
+        """Return Django-friendly (value, label) choices with clean titles."""
+        return [(m.value, m.title) for m in cls]
 
 
 @dataclass(frozen=True)

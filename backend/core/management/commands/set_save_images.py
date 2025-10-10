@@ -14,9 +14,7 @@ class Command(BaseCommand):
         group.add_argument("--on", action="store_true", help="Enable saving request images")
         group.add_argument("--off", action="store_true", help="Disable saving request images")
         parser.add_argument("--max-size-mb", type=int, help="Set maximum saved image size in MB")
-        parser.add_argument(
-            "--retention-days", type=int, help="Set image retention period in days"
-        )
+        parser.add_argument("--retention-days", type=int, help="Set image retention period in days")
         parser.add_argument(
             "--show",
             action="store_true",

@@ -7,7 +7,7 @@ import {
   installGlobalErrorHandlers,
 } from '@extension/shared';
 import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
-import { registerMatcher } from '@src/lib';
+import { clickWithVerification, registerMatcher } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors } from '@extension/types';
 
 /**
@@ -170,6 +170,7 @@ export async function executeMyOfferWorkflow(
         }
 
         let href: string;
+        let link: HTMLAnchorElement;
         if (isLead) {
           const pdf = document.querySelector(selectors.pdfLink) as HTMLAnchorElement;
 
@@ -178,6 +179,7 @@ export async function executeMyOfferWorkflow(
             return;
           }
 
+          link = pdf;
           href = pdf.href;
         } else {
           const itemLink = document.querySelector(selectors.itemLink) as HTMLAnchorElement;
@@ -186,16 +188,20 @@ export async function executeMyOfferWorkflow(
             return;
           }
 
+          link = itemLink;
           href = itemLink.href;
         }
 
         log.info(`Opening myOffer: ${href}`);
 
         if (!context.dryRun) {
-          // Open link in new managed tab
-          tabManager.openTab(href, id);
           flowLog.info(`Opening myOffer link: ${href}`);
           log.info(`Opened myOffer link in managed tab: ${href}`);
+
+          await clickWithVerification(link, {
+            verify: false,
+            scroll: false,
+          });
         } else {
           log.debug('Dry run: Would open myOffer in new tab');
         }

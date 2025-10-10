@@ -78,7 +78,7 @@ class BaseOpenAIClient(ABC):
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: str | None = None,
+        model: str,
         timeout: TimeoutSeconds | None = None,
     ) -> SolveImageResult:
         """Process an image containing a math problem."""
@@ -158,7 +158,7 @@ class MockOpenAIClient(BaseOpenAIClient):
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: str | None = None,
+        model: str,
         timeout: TimeoutSeconds | None = None,
     ) -> SolveImageResult:
         """Return a mock math solution response."""
@@ -236,7 +236,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: str | None = None,
+        model: str,
         timeout: TimeoutSeconds | None = None,
     ) -> SolveImageResult:
         """
@@ -260,7 +260,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
             InvalidResponseError: If the response is malformed
         """
         start_time = time.time()
-        model = model or ModelType.GPT5_NANO.value
         timeout = timeout or self.timeout
 
         # Validate image before processing
@@ -508,7 +507,7 @@ class OpenAIClient:
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: str | None = None,
+        model: str,
         timeout: TimeoutSeconds | None = None,
         *,
         return_dict: Literal[True],
@@ -518,7 +517,7 @@ class OpenAIClient:
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: str | None = None,
+        model: str,
         timeout: TimeoutSeconds | None = None,
         *,
         return_dict: Literal[False] = False,
@@ -527,7 +526,7 @@ class OpenAIClient:
     def solve_image(
         self,
         image_bytes: ImageBytes,
-        model: str | None = None,
+        model: str,
         timeout: TimeoutSeconds | None = None,
         return_dict: bool = False,
     ) -> SolveImageResult | ResponseDict:

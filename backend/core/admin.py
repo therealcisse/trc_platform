@@ -1,14 +1,43 @@
 from typing import Any
 
+from django import forms
 from django.contrib import admin
 from django.http import HttpRequest, HttpResponseRedirect
 from django.utils.html import format_html
 
 from .models import Settings
+from .services import ModelType
+
+
+class SettingsAdminForm(forms.ModelForm):
+    """Admin form to render openai_model as a dropdown with clean titles.
+
+    If the current database value is not in ModelType, include it as a
+    one-off choice so the form remains valid and editable.
+    """
+
+    openai_model = forms.ChoiceField(choices=[], required=True)
+
+    def __init__(self, *args: Any, **kwargs: Any) -> None:
+        super().__init__(*args, **kwargs)
+        choices = ModelType.choices()
+        # Ensure existing value remains selectable even if not in ModelType
+        current_value = self.initial.get("openai_model") or getattr(
+            self.instance, "openai_model", None
+        )
+        values = [v for v, _ in choices]
+        if current_value and current_value not in values:
+            choices = [(current_value, f"Custom value: {current_value}")] + choices
+        self.fields["openai_model"].choices = choices
+
+    class Meta:
+        model = Settings
+        fields = "__all__"
 
 
 @admin.register(Settings)
 class SettingsAdmin(admin.ModelAdmin):
+    form = SettingsAdminForm
     list_display = [
         "display_title",
         "cost_per_request_cents",

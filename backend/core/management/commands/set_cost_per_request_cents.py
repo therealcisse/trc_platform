@@ -41,7 +41,5 @@ class Command(BaseCommand):
 
         dollars = cents / 100.0
         self.stdout.write(
-            self.style.SUCCESS(
-                f"Cost per request updated to {cents} cents (${dollars:.2f})."
-            )
+            self.style.SUCCESS(f"Cost per request updated to {cents} cents (${dollars:.2f}).")
         )
