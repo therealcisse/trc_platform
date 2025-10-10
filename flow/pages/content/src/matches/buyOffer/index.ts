@@ -192,6 +192,7 @@ export async function executeBuyOfferWorkflow(
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
   const captchaProcessor = CaptchaProcessor.getInstance();
+  const managed = flow.source !== 'manual';
 
   // Wait for and focus captcha input first
   log.debug('Waiting for captcha input element');
@@ -215,23 +216,44 @@ export async function executeBuyOfferWorkflow(
   });
   log.debug('Captcha input focused', { focused: document.activeElement === inputElement });
 
-  // Check if this is a managed tab
-  const isManagedTab = await tabManager.isPageManaged();
+  if (managed) {
 
-  if (!isManagedTab) {
-    log.warn('Tab is not managed, skipping');
-    await log.write();
-    return {
-      success: false,
-      matcherId: context.matcherId,
-      executorName: 'myOffer',
-      error: 'Tab is not managed',
-    };
+    // Check if this is a managed tab
+    const isManagedTab = await tabManager.isPageManaged();
+
+    if (!isManagedTab) {
+      log.warn('Tab is not managed, skipping');
+      await log.write();
+      return {
+        success: false,
+        matcherId: context.matcherId,
+        executorName: 'myOffer',
+        error: 'Tab is not managed',
+      };
+    }
   }
 
+
   if (flow.status === 'done' || flow.status === 'failed') {
-    log.info('❌ Flow is already done, closing all tabs');
-    await tabManager.closeAllTabs(flow.id);
+      log.info('❌ Flow is already completed, closing all tabs');
+      if (managed) {
+        await tabManager.closeAllTabs(flow.id);
+
+      } else {
+        await tabManager.closeCurrentTab();
+      }
+
+      return {
+        success: false,
+        matcherId: context.matcherId,
+        executorName: 'buyOffer',
+        data: {},
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          errors,
+        },
+      };
   }
 
   try {

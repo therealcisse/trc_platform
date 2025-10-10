@@ -115,13 +115,18 @@ export interface EmailFlowPayload {
   id: string;
 }
 
+export interface ManualFlowPayload {
+  type: 'manual';
+  id: string;
+}
+
 export interface InboxFlowPayload {
   type: 'inbox';
   id: string;
   requestTimestamp: number;
 }
 
-export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
+export type FlowPayload = EmailFlowPayload | ManualFlowPayload | InboxFlowPayload;
 
 export interface BackgroundCommands {
   'item.printProductConfirmation': PDFCommand;
@@ -264,7 +269,7 @@ export interface Flow {
   timestamp: number;
   requestTimestamp: number;
   status: 'running' | 'done' | 'failed';
-  source: 'email' | 'inbox';
+  source: 'email' | 'inbox' | 'manual';
   doneTimestamp?: number;
 }
 

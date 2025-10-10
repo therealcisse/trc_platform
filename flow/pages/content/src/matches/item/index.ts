@@ -5,9 +5,10 @@ import {
   BackgroundUtils,
   TabManager,
   installGlobalErrorHandlers,
+  startPreciseSecondTicker,
 } from '@extension/shared';
 import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
-import { registerMatcher, clickWithVerification } from '@src/lib';
+import { registerMatcher, clickWithVerification, isValidTimeOfDay } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
 
 /**
@@ -65,12 +66,58 @@ class ItemMatcher implements Matcher {
     }
   }
 
+  private async startFlowAndReload(id: string, log: Log): Promise<void> {
+    // Start flow for this link
+    const { existed } = await BackgroundUtils.startManualFlow({
+      id,
+    });
+
+    if (existed) {
+      log.info(`Flow already exists, skipping`);
+      await log.write();
+    }
+
+    // Reload the page
+    window.location.reload();
+
+  }
+
+  private async startManualSchedulingMode(config: ExecutionConfig, id: string, log: Log): Promise<void> {
+    const reloadSeconds = config.inboxReloadSeconds;
+    const timeAllowed = () => isValidTimeOfDay(config);
+
+    if (timeAllowed()) {
+      return this.startFlowAndReload(id, log);
+
+    } else {
+      log.warn('Outside operational hours, scheduling manual mode');
+    }
+
+    await startPreciseSecondTicker(
+      async ({ scheduledWallTimeMs, receivedWallTimeMs, driftMs, workerId, seq, startCount }) => {
+        if (!timeAllowed()) {
+          return;
+        }
+
+        const now = new Date();
+        const currentSecond = now.getSeconds();
+
+        if (reloadSeconds.includes(currentSecond)) {
+          this.startFlowAndReload(id, log);
+        }
+      },
+    );
+
+    log.info(`Manual reload scheduler started for seconds: ${reloadSeconds.join(', ')}`);
+  }
+
   private async handleBrowseItem(config: ExecutionConfig, id: string, log: Log): Promise<void> {
     // Send command to process browse item
     try {
       const flow = await ConfigService.getFlow(id);
       if (!flow) {
-        log.error(`Flow not found: ${id}`);
+        log.error(`Flow not found: ${id}, starting manual scheduling mode`);
+        await this.startManualSchedulingMode(config, id, log);
       } else {
         const context: ExecutionContext = {
           matcherId: MATCHER_IDS.ITEM,
@@ -136,25 +183,47 @@ export async function executeItemWorkflow(
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
+  const managed = flow.source !== 'manual';
 
   try {
-    // Check if this is a managed tab
-    const isManagedTab = await tabManager.isPageManaged();
+    if (managed) {
 
-    if (!isManagedTab) {
-      log.warn('Tab is not managed, skipping');
-      await log.write();
-      return {
-        success: false,
-        matcherId: context.matcherId,
-        executorName: 'item',
-        error: 'Tab is not managed',
-      };
+      // Check if this is a managed tab
+      const isManagedTab = await tabManager.isPageManaged();
+
+      if (!isManagedTab) {
+        log.warn('Tab is not managed, skipping');
+        await log.write();
+        return {
+          success: false,
+          matcherId: context.matcherId,
+          executorName: 'item',
+          error: 'Tab is not managed',
+        };
+      }
+
     }
 
     if (flow.status === 'done' || flow.status === 'failed') {
       log.info('❌ Flow is already completed, closing all tabs');
-      await tabManager.closeAllTabs(flow.id);
+      if (managed) {
+        await tabManager.closeAllTabs(flow.id);
+
+      } else {
+        await tabManager.closeCurrentTab();
+      }
+
+      return {
+        success: false,
+        matcherId: context.matcherId,
+        executorName: 'item',
+        data: {},
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          errors,
+        },
+      };
     }
 
     await processItem();

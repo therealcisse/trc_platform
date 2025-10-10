@@ -91,6 +91,17 @@ export class FlowUtils {
     };
   }
 
+  static manual(id: string): Flow {
+    const now = Date.now();
+    return {
+      id,
+      timestamp: now,
+      requestTimestamp: now,
+      status: 'running',
+      source: 'manual',
+    };
+  }
+
   static inbox(id: string, requestTimestamp: number): Flow {
     return {
       id,

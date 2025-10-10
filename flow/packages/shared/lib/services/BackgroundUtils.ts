@@ -56,6 +56,23 @@ export class BackgroundUtils {
   }
 
   /**
+   * Start a new manual flow or check if it already exists
+   * @returns { existed: boolean } - true if flow already existed, false if newly created
+   */
+  static async startManualFlow(args: { id: string }): Promise<{ existed: boolean }> {
+    const response = await sendBackgroundCommand('extension.startFlow', {
+      type: 'manual',
+      id: args.id,
+    });
+
+    if (!response.success) {
+      throw new Error(`Failed to start inbox flow: ${response.error}`);
+    }
+
+    return { existed: response.data === true };
+  }
+
+  /**
    * Schedule tab closure after navigation with timeout
    */
   static async scheduleCloseAfterNavigation(args: { flowId: string; timeoutMs: number }): Promise<void> {

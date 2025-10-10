@@ -9,7 +9,7 @@ import {
   sleep,
 } from '@extension/shared';
 import { extensionConfigStorage, extensionRuntimeStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
-import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
+import type { FlowPayload, BackgroundCommands, CommandResponse, Flow } from '@extension/types';
 import { BACKEND_URL } from '@extension/env';
 
 // Service instances
@@ -149,10 +149,16 @@ async function handleMessage(
 
       case 'extension.startFlow': {
         const payload = message.payload as FlowPayload;
-        const flow =
-          payload.type === 'email'
-            ? FlowUtils.email(payload.id)
-            : FlowUtils.inbox(payload.id, payload.requestTimestamp);
+
+        let flow: Flow;
+
+        if (payload.type === 'email') {
+          flow = FlowUtils.email(payload.id);
+        } else if (payload.type === 'inbox') {
+          flow = FlowUtils.inbox(payload.id, payload.requestTimestamp);
+        } else if (payload.type === 'manual') {
+          flow = FlowUtils.manual(payload.id);
+        }
 
         const existed = await ConfigService.startFlow(flow);
         return {
