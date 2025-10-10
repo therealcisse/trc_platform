@@ -312,7 +312,7 @@ async function handleTabManagement(
         if (!payload.tabId || !payload.flowId) {
           throw new Error('Tab ID and Flow ID required for addManagedTab action');
         }
-        await extensionRuntimeStorage.tabManagement.markManaged(payload.tabId, payload.flowId);
+        await tabService.markManaged(payload.tabId, payload.flowId);
         return {
           success: true,
           requestId,
@@ -322,14 +322,14 @@ async function handleTabManagement(
         if (!payload.tabId) {
           throw new Error('Tab ID required for updateActivity action');
         }
-        await extensionRuntimeStorage.tabManagement.updateActivity(payload.tabId);
+        await tabService.updateActivity(payload.tabId);
         return {
           success: true,
           requestId,
         };
 
       case 'getTabCount':
-        const count = await extensionRuntimeStorage.tabManagement.getTabCount();
+        const count = await tabService.getTabCount();
         return {
           success: true,
           data: { count },
@@ -340,14 +340,14 @@ async function handleTabManagement(
         if (!payload.flowId) {
           throw new Error('Flow ID required for closeAllTabs action');
         }
-        await extensionRuntimeStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
+        await tabService.closeAllTabsForFlow(payload.flowId);
         return {
           success: true,
           requestId,
         };
 
       case 'cleanupStale':
-        const cleanedCount = await extensionRuntimeStorage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
+        const cleanedCount = await tabService.cleanupStaleTabs();
         return {
           success: true,
           data: { cleanedCount },
@@ -376,10 +376,9 @@ async function handleFlowDone(
   console.log(`[${timeNow()}][Background] - Closing all tabs for flow: ${payload.flowId} after ${payload.timeoutMs}ms`);
 
   setTimeout(async function () {
-    await sleep(payload.timeoutMs);
     console.info(`[${timeNow()}][Background] - Closing all tabs: ${payload.flowId}:`);
-    await extensionRuntimeStorage.tabManagement.closeAllTabsForFlow(payload.flowId);
-  }, 0);
+    await tabService.closeAllTabsForFlow(payload.flowId);
+  }, payload.timeoutMs);
 }
 
 // Handle buying state commands

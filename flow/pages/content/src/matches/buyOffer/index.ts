@@ -7,15 +7,7 @@ import {
   installGlobalErrorHandlers,
 } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import {
-  registerMatcher,
-  waitForSelector,
-  clickWithVerification,
-  sleep,
-  fetchImageAsBlob,
-  ensureFocus,
-} from '@src/lib';
-import { IS_DEV } from '@extension/env';
+import { registerMatcher, waitForSelector, clickWithVerification, sleep, ensureFocus } from '@src/lib';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 import { TabManager } from '@extension/shared';
@@ -41,10 +33,7 @@ class BuyOfferMatcher implements Matcher {
   enabled = true;
   priority = 20; // Higher priority than email/offers
 
-  urlPatterns = [
-    ...(IS_DEV ? ['http://localhost:8082/buy_now/id/*'] : []),
-    'https://auktion.hansemerkur.de/buy_now/id/*',
-  ];
+  urlPatterns = ['http://localhost:8082/buy_now/id/*', 'https://auktion.hansemerkur.de/buy_now/id/*'];
 
   domPreconditions = [
     {

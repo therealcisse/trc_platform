@@ -1,7 +1,13 @@
-import { FlowUtils, Log, BackgroundUtils, TabManager, installGlobalErrorHandlers } from '@extension/shared';
+import {
+  FlowUtils,
+  Log,
+  BackgroundUtils,
+  TabManager,
+  installGlobalErrorHandlers,
+  startPreciseSecondTicker,
+} from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { isValidTimeOfDay, registerMatcher, sleep } from '@src/lib';
-import { IS_DEV } from '@extension/env';
 import type { ExecutionConfig, Matcher, ExecutionContext, ExecutionResult, InboxSelectors } from '@extension/types';
 
 /**
@@ -16,10 +22,7 @@ class InboxMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = [
-    ...(IS_DEV ? ['http://localhost:8082/inbox.html'] : []),
-    'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
-  ];
+  urlPatterns = ['http://localhost:8082/inbox.html', 'https://auktion.hansemerkur.de/my_message_center_inbox.html*'];
 
   domPreconditions = [
     {
@@ -29,7 +32,7 @@ class InboxMatcher implements Matcher {
     },
   ];
 
-  private schedulerInterval: NodeJS.Timeout | null = null;
+  // private schedulerInterval: NodeJS.Timeout | null = null;
 
   async run(): Promise<void> {
     const log = new Log(MATCHER_IDS.INBOX);
@@ -77,7 +80,7 @@ class InboxMatcher implements Matcher {
       }
 
       // Start reload scheduler
-      this.startReloadScheduler(config, timeAllowed);
+      await this.startReloadScheduler(config, timeAllowed);
 
       await log.write();
     } catch (error) {
@@ -87,36 +90,70 @@ class InboxMatcher implements Matcher {
     }
   }
 
-  private startReloadScheduler(config: ExecutionConfig, timeAllowed: () => boolean): void {
+  private async startReloadScheduler(config: ExecutionConfig, timeAllowed: () => boolean): Promise<void> {
     const reloadSeconds = config.inboxReloadSeconds;
     const log = new Log(MATCHER_IDS.INBOX);
 
-    // Clear any existing scheduler
-    if (this.schedulerInterval) {
-      clearInterval(this.schedulerInterval);
-    }
+    await startPreciseSecondTicker(
+      ({ scheduledWallTimeMs, receivedWallTimeMs, driftMs, workerId, seq, startCount }) => {
+        // // Avoid heavy DOM work here if you want to keep variance low.
+        // // For visibility while testing:
+        // // eslint-disable-next-line no-console
+        // console.log(
+        //   'tick',
+        //   new Date(receivedWallTimeMs).toISOString(),
+        //   "id=" + workerId,
+        //   "seq=" + seq,
+        //   "startCount=" + startCount,
+        //   'scheduled=' + new Date(scheduledWallTimeMs).toISOString(),
+        //   'driftMs=' + driftMs.toFixed(3),
+        // );
 
-    // Check every second
-    this.schedulerInterval = setInterval(() => {
-      if (!timeAllowed()) {
-        return;
-      }
+        if (!timeAllowed()) {
+          return;
+        }
 
-      const now = new Date();
-      const currentSecond = now.getSeconds();
+        const now = new Date();
+        const currentSecond = now.getSeconds();
 
-      if (reloadSeconds.includes(currentSecond)) {
-        log.info(`Scheduled reload at second ${currentSecond}`);
+        if (reloadSeconds.includes(currentSecond)) {
+          log.info(`Scheduled reload at second ${currentSecond}`);
 
-        // Mark for post-reload scan
-        sessionStorage.setItem('inbox_scan_after_reload', '1');
+          // Mark for post-reload scan
+          sessionStorage.setItem('inbox_scan_after_reload', '1');
 
-        // Reload the page
-        window.location.reload();
-      }
-    }, 1000);
+          // Reload the page
+          window.location.reload();
+        }
+      },
+    );
 
-    log.info(`Reload scheduler started for seconds: ${reloadSeconds.join(', ')}`);
+    // // Clear any existing scheduler
+    // if (this.schedulerInterval) {
+    //   clearInterval(this.schedulerInterval);
+    // }
+    //
+    // // Check every second
+    // this.schedulerInterval = setInterval(() => {
+    //   if (!timeAllowed()) {
+    //     return;
+    //   }
+    //
+    //   const now = new Date();
+    //   const currentSecond = now.getSeconds();
+    //
+    //   if (reloadSeconds.includes(currentSecond)) {
+    //     log.info(`Scheduled reload at second ${currentSecond}`);
+    //
+    //     // Mark for post-reload scan
+    //     sessionStorage.setItem('inbox_scan_after_reload', '1');
+    //
+    //     // Reload the page
+    //     window.location.reload();
+    //   }
+    // }, 1000);
+    //
+    // log.info(`Reload scheduler started for seconds: ${reloadSeconds.join(', ')}`);
   }
 
   private async scanAndOpenLinks(): Promise<void> {

@@ -9,7 +9,6 @@ import {
 } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
 import { registerMatcher } from '@src/lib';
-import { IS_DEV } from '@extension/env';
 import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors, Flow } from '@extension/types';
 
 /**
@@ -25,7 +24,7 @@ class MyOfferMatcher implements Matcher {
   priority = 10;
 
   urlPatterns = [
-    ...(IS_DEV ? ['http://localhost:8082/myOffer/*'] : []),
+    'http://localhost:8082/myOffer/*',
     'https://auktion.hansemerkur.de/my_message_center_show_message.php',
   ];
 

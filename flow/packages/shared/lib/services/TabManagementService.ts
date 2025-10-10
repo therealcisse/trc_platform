@@ -14,7 +14,7 @@ export class TabManagementService implements ITabManagementService {
   }
 
   async closeTab(tabId: number): Promise<void> {
-    if (!ConfigService.isDebugMode()) {
+    if (!(await ConfigService.isDebugMode())) {
       await chrome.tabs.remove(tabId);
       await this.storage.tabManagement.unmarkManaged(tabId);
     }
@@ -49,13 +49,17 @@ export class TabManagementService implements ITabManagementService {
   }
 
   async closeAllTabsForFlow(flowId: string): Promise<void> {
-    if (!ConfigService.isDebugMode()) {
+    if (!(await ConfigService.isDebugMode())) {
       await this.storage.tabManagement.closeAllTabsForFlow(flowId);
     }
   }
 
   async cleanupStaleTabs(): Promise<number> {
-    return this.storage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
+    if (!(await ConfigService.isDebugMode())) {
+      return this.storage.tabManagement.cleanupStaleTabs(5 * 60 * 1000);
+    }
+
+    return 0;
   }
 
   async validateExistingTabs(): Promise<number> {

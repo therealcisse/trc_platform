@@ -25,6 +25,7 @@
   "dependencies": {
     "@extension/storage": "workspace:*",
     "@extension/types": "workspace:*",
+    "@extension/env": "workspace:*",
     "react-error-boundary": "^6.0.0"
   },
   "devDependencies": {

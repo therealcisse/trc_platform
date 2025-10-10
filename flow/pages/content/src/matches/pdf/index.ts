@@ -8,7 +8,6 @@ import {
 } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { registerMatcher, waitForSelector } from '@src/lib';
-import { IS_DEV } from '@extension/env';
 import type { Matcher, ExecutionContext, ExecutionResult, PdfSelectors } from '@extension/types';
 
 /**
@@ -23,7 +22,7 @@ class PDFMatcher implements Matcher {
   enabled = true;
   priority = 10;
 
-  urlPatterns = [...(IS_DEV ? ['http://localhost:8082/pdf.html'] : []), 'https://auktion.hansemerkur.de/item/id/*'];
+  urlPatterns = ['http://localhost:8082/pdf.html', 'https://auktion.hansemerkur.de/item/id/*'];
 
   domPreconditions = [
     {

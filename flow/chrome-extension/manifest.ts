@@ -1,5 +1,7 @@
 import { readFileSync } from 'node:fs';
-import { EXTENSION_KEY, IS_DEV } from '@extension/env';
+import {
+  EXTENSION_KEY,
+} from '@extension/env';
 import type { ManifestType } from '@extension/shared';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
@@ -56,7 +58,7 @@ const manifest = {
     },
     {
       matches: [
-        ...(IS_DEV ? ['http://localhost:8082/item/*'] : []),
+          'http://localhost:8082/item/*',
         'https://auktion.hansemerkur.de/item.php*',
       ],
       js: ['content/item.iife.js'],
@@ -64,7 +66,7 @@ const manifest = {
     },
     {
       matches: [
-        ...(IS_DEV ? ['http://localhost:8082/buy_now/id/*'] : []),
+          'http://localhost:8082/buy_now/id/*',
         'https://auktion.hansemerkur.de/buy_now/id/*',
       ],
       js: ['content/buyOffer.iife.js'],
@@ -72,7 +74,7 @@ const manifest = {
     },
     {
       matches: [
-        ...(IS_DEV ? ['http://localhost:8082/myOffer/*'] : []),
+          'http://localhost:8082/myOffer/*',
         'https://auktion.hansemerkur.de/my_message_center_show_message.php*',
       ],
       js: ['content/myOffer.iife.js'],
@@ -80,7 +82,7 @@ const manifest = {
     },
     {
       matches: [
-        ...(IS_DEV ? ['http://localhost:8082/pdf.html'] : []),
+          'http://localhost:8082/pdf.html',
         'https://auktion.hansemerkur.de/item/id/*',
       ],
       js: ['content/pdf.iife.js'],
@@ -88,7 +90,7 @@ const manifest = {
     },
     {
       matches: [
-        ...(IS_DEV ? ['http://localhost:8082/inbox.html'] : []),
+          'http://localhost:8082/inbox.html',
         'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
       ],
       js: ['content/inbox.iife.js'],
@@ -97,7 +99,14 @@ const manifest = {
   ],
   web_accessible_resources: [
     {
-      resources: ['*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
+      resources: [
+        'content/ticker.iife.js',
+        '*.js',
+        '*.css',
+        '*.svg',
+        'icon-128.png',
+        'icon-34.png',
+      ],
       matches: ['<all_urls>'],
     },
   ],
