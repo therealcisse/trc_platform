@@ -19,7 +19,6 @@ export interface DomPrecondition {
 
 // Execution context and results
 export interface ExecutionContext {
-  tabId: number;
   url: string;
   matcherId: string;
   config: ExecutionConfig;
@@ -126,11 +125,6 @@ export type FlowPayload = EmailFlowPayload | InboxFlowPayload;
 
 export interface BackgroundCommands {
   'item.printProductConfirmation': PDFCommand;
-  'inbox.openMyOfferLink': InboxCommand;
-  'email.openUnreadAndClickLink': EmailCommand;
-  'buyOffer.execute': BuyOfferCommand;
-  'matcher.register': MatcherRegistration;
-  'executor.run': ExecutorRequest;
   'tab.manage': TabManagementCommand;
   'state.buying': BuyingStateCommand;
   'extension.log': {
@@ -144,8 +138,6 @@ export interface BackgroundCommands {
   'extension.telemetry': { events: TelemetryEvent[] };
   'extension.getConfig': {};
   'extension.toggleEnabled': {};
-  'item.clickProductLink': ItemCommand;
-  'myOffer.clickProductLink': MyOfferCommand;
   'image.solve': { imageData: string; flowId: string };
   'flows.scheduleCloseAfterNavigation': { flowId: string; timeoutMs: number };
   'extension.startFlow': FlowPayload;
@@ -160,24 +152,10 @@ export interface BackgroundCommands {
   'logs.stats': {};
 }
 
-export interface EmailCommand {
-  visitedUrls?: Record<string, boolean>;
-  selectors?: EmailSelectors;
-}
-
 export interface EmailSelectors {
   unreadEmail: string;
   emailBody: string;
   markAsReadButton: string;
-}
-
-export interface InboxCommand {
-  selectors: InboxSelectors;
-}
-
-export interface ItemCommand {
-  id: string;
-  selectors: ItemSelectors;
 }
 
 export interface PDFCommand {
@@ -192,19 +170,10 @@ export interface PdfSelectors {
   productTitle: string;
 }
 
-export interface MyOfferCommand {
-  selectors: MyOfferSelectors;
-}
-
 export interface MyOfferSelectors {
   titleLink: string;
   itemLink: string;
   pdfLink: string;
-}
-
-export interface BuyOfferCommand {
-  id: string;
-  selectors: BuyOfferSelectors;
 }
 
 export interface BuyOfferSelectors {
@@ -212,15 +181,6 @@ export interface BuyOfferSelectors {
   img: string;
   productTitle: string;
   buyFormButton: string;
-}
-
-export interface MatcherRegistration {
-  matcher: Matcher;
-}
-
-export interface ExecutorRequest {
-  executorName: string;
-  context: ExecutionContext;
 }
 
 export interface TabManagementCommand {

@@ -89,7 +89,7 @@ class BuyOfferMatcher implements Matcher {
         await log.write();
 
         // Close duplicate tab
-        await tabManager.closeTab(window.tabId);
+        await tabManager.closeCurrentTab();
         return;
       }
 
@@ -105,20 +105,32 @@ class BuyOfferMatcher implements Matcher {
       log.info(`🎯 Starting purchase process for flow ${flowId}`);
       log.debug(`Timeout set to: ${new Date(timeout).toISOString()}`);
 
-      // Send command to execute purchase
+      // Execute purchase directly
       log.info('Triggering buy offer executor');
       try {
-        const data = await BackgroundUtils.executeBuyOffer({
-          id: flowId,
-          selectors: {
-            input: '#captcha_code',
-            img: '#page_buy_now_captcha label img',
-            productTitle: '.col-sm-9 h2',
-            buyFormButton: 'button[name="action"]',
-          },
-        });
-        log.info('✅ Buy offer executor triggered successfully');
-        log.debug('Executor response', { data });
+        const flow = await ConfigService.getFlow(flowId);
+        if (!flow) {
+          log.error('Flow not found, aborting buy offer execution');
+        } else {
+          const context: ExecutionContext = {
+            matcherId: MATCHER_IDS.BUY_OFFER,
+            url: currentUrl,
+            config,
+            dryRun: false,
+          };
+          const result = await executeBuyOfferWorkflow(
+            context,
+            {
+              input: '#captcha_code',
+              img: '#page_buy_now_captcha label img',
+              productTitle: '.col-sm-9 h2',
+              buyFormButton: 'button[name="action"]',
+            },
+            flow,
+          );
+          log.info(`✅ Buy offer executor completed: ${result.success ? 'success' : 'failure'}`);
+          log.debug('Executor response', { result });
+        }
       } catch (e: any) {
         log.error(`❌ Buy offer executor failed: ${e?.message || String(e)}`);
         log.debug('Clearing buying state after executor failure');
@@ -175,9 +187,7 @@ export async function executeBuyOfferWorkflow(
   flow: Flow,
 ): Promise<ExecutionResult> {
   const log = Log.withFlow(context.matcherId, flow.id);
-  log
-    .info(`Starting buy offer workflow for tab ${context.tabId}`)
-    .setMetadata({ tabId: context.tabId, url: context.url });
+  log.info(`Starting buy offer workflow`).setMetadata({ url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
@@ -206,7 +216,7 @@ export async function executeBuyOfferWorkflow(
   log.debug('Captcha input focused', { focused: document.activeElement === inputElement });
 
   // Check if this is a managed tab
-  const isManagedTab = tabManager.isTabManaged(context.tabId);
+  const isManagedTab = await tabManager.isPageManaged();
 
   if (!isManagedTab) {
     log.warn('Tab is not managed, skipping');
@@ -484,8 +494,4 @@ export async function executeBuyOfferWorkflow(
       },
     };
   }
-}
-// Export for background script to inject
-if (typeof window !== 'undefined') {
-  (window as any).__buyOfferExecutor = executeBuyOfferWorkflow;
 }

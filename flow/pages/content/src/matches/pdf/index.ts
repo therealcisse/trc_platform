@@ -104,14 +104,14 @@ checkAndRun();
  */
 export async function executePdfWorkflow(context: ExecutionContext, selectors: PdfSelectors): Promise<ExecutionResult> {
   const log = new Log(MATCHER_IDS.PDF);
-  log.info(`Starting pdf workflow for tab ${context.tabId}`).setMetadata({ tabId: context.tabId, url: context.url });
+  log.info(`Starting pdf workflow`).setMetadata({ url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
 
   try {
     // Check if this is a managed tab
-    const isManagedTab = tabManager.isTabManaged(context.tabId);
+    const isManagedTab = await tabManager.isPageManaged();
 
     if (!isManagedTab) {
       log.warn('Tab is not managed, skipping');

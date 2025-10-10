@@ -1,5 +1,4 @@
 import {
-  ProductFactory,
   FlowUtils,
   ConfigService,
   Log,
@@ -7,8 +6,8 @@ import {
   TabManager,
   installGlobalErrorHandlers,
 } from '@extension/shared';
-import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import { registerMatcher, isValidTimeOfDay, waitForSelector, clickWithVerification, sleep } from '@src/lib';
+import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
+import { registerMatcher } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
 
 /**
@@ -66,16 +65,28 @@ class ItemMatcher implements Matcher {
     }
   }
 
-  private async handleBrowseItem(config: any, id: string, log: Log): Promise<void> {
+  private async handleBrowseItem(config: ExecutionConfig, id: string, log: Log): Promise<void> {
     // Send command to process browse item
     try {
-      await BackgroundUtils.clickItemBuyButton({
-        id,
-        selectors: {
-          buyButton: '.buy_now a.btn',
-        },
-      });
-      log.info('Browse item executor triggered successfully');
+      const flow = await ConfigService.getFlow(id);
+      if (!flow) {
+        log.error(`Flow not found: ${id}`);
+      } else {
+        const context: ExecutionContext = {
+          matcherId: MATCHER_IDS.ITEM,
+          url: window.location.href,
+          config,
+          dryRun: false,
+        };
+        const result = await executeItemWorkflow(
+          context,
+          {
+            buyButton: '.buy_now a.btn',
+          },
+          flow,
+        );
+        log.info(`Browse item executor completed: ${result.success ? 'success' : 'failure'}`);
+      }
     } catch (e: any) {
       log.error(`Browse item executor failed: ${e?.message || String(e)}`);
     }
@@ -121,14 +132,14 @@ export async function executeItemWorkflow(
   flow: Flow,
 ): Promise<ExecutionResult> {
   const log = Log.withFlow(context.matcherId, flow.id);
-  log.info(`Starting item workflow for tab ${context.tabId}`).setMetadata({ tabId: context.tabId, url: context.url });
+  log.info(`Starting item workflow`).setMetadata({ url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
 
   try {
     // Check if this is a managed tab
-    const isManagedTab = tabManager.isTabManaged(context.tabId);
+    const isManagedTab = await tabManager.isPageManaged();
 
     if (!isManagedTab) {
       log.warn('Tab is not managed, skipping');
@@ -204,9 +215,4 @@ export async function executeItemWorkflow(
       },
     };
   }
-}
-
-// Export for background script to inject
-if (typeof window !== 'undefined') {
-  (window as any).__itemExecutor = executeItemWorkflow;
 }

@@ -1,5 +1,4 @@
 import {
-  ProductFactory,
   Log,
   FlowUtils,
   ConfigService,
@@ -7,9 +6,9 @@ import {
   TabManager,
   installGlobalErrorHandlers,
 } from '@extension/shared';
-import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
+import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
 import { registerMatcher } from '@src/lib';
-import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors, Flow } from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors } from '@extension/types';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing
@@ -58,17 +57,21 @@ class MyOfferMatcher implements Matcher {
     }
   }
 
-  private async handleBrowseMyOffer(config: any, log: Log): Promise<void> {
+  private async handleBrowseMyOffer(config: ExecutionConfig, log: Log): Promise<void> {
     // Send command to process browse myOffer
     try {
-      await BackgroundUtils.openMyOfferItemLink({
-        selectors: {
-          itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
-          titleLink: '.message_center_message thead tr:nth-child(2) td:nth-child(2)',
-          pdfLink: '.message_center_message td a[href*="/item/id/"]',
-        },
+      const context: ExecutionContext = {
+        matcherId: MATCHER_IDS.MY_OFFER,
+        url: window.location.href,
+        config,
+        dryRun: false,
+      };
+      const result = await executeMyOfferWorkflow(context, {
+        itemLink: '.message_center_message tbody tr:first-child td.content p:nth-child(2) a',
+        titleLink: '.message_center_message thead tr:nth-child(2) td:nth-child(2)',
+        pdfLink: '.message_center_message td a[href*="/item/id/"]',
       });
-      log.info('Browse myOffer executor triggered successfully');
+      log.info(`Browse myOffer executor completed: ${result.success ? 'success' : 'failure'}`);
     } catch (e: any) {
       log.error(`Browse myOffer executor failed: ${e?.message || String(e)}`);
     }
@@ -113,16 +116,14 @@ export async function executeMyOfferWorkflow(
   selectors: MyOfferSelectors,
 ): Promise<ExecutionResult> {
   const log = new Log(context.matcherId);
-  log
-    .info(`Starting myOffer workflow for tab ${context.tabId}`)
-    .setMetadata({ tabId: context.tabId, url: context.url });
+  log.info(`Starting myOffer workflow`).setMetadata({ url: context.url });
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
 
   try {
     // Check if this is a managed tab
-    const isManagedTab = tabManager.isTabManaged(context.tabId);
+    const isManagedTab = await tabManager.isPageManaged();
 
     if (!isManagedTab) {
       log.warn('Tab is not managed, skipping');
@@ -236,9 +237,4 @@ export async function executeMyOfferWorkflow(
       },
     };
   }
-}
-
-// Export for background script to inject
-if (typeof window !== 'undefined') {
-  (window as any).__myOfferExecutor = executeMyOfferWorkflow;
 }

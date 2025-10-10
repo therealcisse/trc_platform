@@ -1,10 +1,5 @@
 import 'webextension-polyfill';
-import { buyOfferCommandHandler } from './commands/buyOffer';
-import { emailCommandHandler } from './commands/email';
-import { inboxCommandHandler } from './commands/inbox';
-import { itemCommandHandler } from './commands/item';
 import { pdfCommandHandler } from './commands/pdf';
-import { myOfferCommandHandler } from './commands/myOffer';
 import { BackgroundLoggerService } from './services/logger-service';
 import {
   ConfigService,
@@ -14,7 +9,6 @@ import {
   sleep,
 } from '@extension/shared';
 import { extensionConfigStorage, extensionRuntimeStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
-import { MATCHER_IDS } from '@extension/types';
 import type { FlowPayload, BackgroundCommands, CommandResponse } from '@extension/types';
 import { BACKEND_URL } from '@extension/env';
 
@@ -90,23 +84,8 @@ async function handleMessage(
   try {
     // Route message to appropriate handler
     switch (message.type) {
-      case 'inbox.openMyOfferLink':
-        return inboxCommandHandler(message.payload, sender);
-
-      case 'email.openUnreadAndClickLink':
-        return emailCommandHandler(message.payload, sender);
-
-      case 'item.clickProductLink':
-        return itemCommandHandler(message.payload, sender);
-
       case 'item.printProductConfirmation':
         return pdfCommandHandler(message.payload, sender);
-
-      case 'myOffer.clickProductLink':
-        return myOfferCommandHandler(message.payload, sender);
-
-      case 'buyOffer.execute':
-        return buyOfferCommandHandler(message.payload, sender);
 
       case 'tab.manage':
         return handleTabManagement(message.payload, sender);
@@ -298,10 +277,11 @@ async function handleTabManagement(
         };
 
       case 'isManaged':
-        if (!payload.tabId) {
+        const isManagedTabId = sender.tab?.id;
+        if (!isManagedTabId) {
           throw new Error('Tab ID required for isManaged action');
         }
-        const isManaged = await tabService.isManaged(payload.tabId);
+        const isManaged = await tabService.isManaged(isManagedTabId);
         return {
           success: true,
           data: { isManaged },

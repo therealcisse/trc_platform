@@ -93,6 +93,17 @@ export class TabManager {
     }
   }
 
+  async closeCurrentTab(): Promise<void> {
+    try {
+      await sendBackgroundCommand('tab.manage', {
+        action: 'close',
+      });
+      this.log.info(`Closed current tab`);
+    } catch (error) {
+      this.log.error(`Failed to close current tab`, { error });
+    }
+  }
+
   async closeAllTabs(flowId: string): Promise<void> {
     const response = await sendBackgroundCommand('tab.manage', {
       action: 'closeAllTabs',
@@ -118,10 +129,9 @@ export class TabManager {
     return 0;
   }
 
-  async isTabManaged(tabId: number): Promise<boolean> {
+  async isPageManaged(): Promise<boolean> {
     const response = await sendBackgroundCommand('tab.manage', {
       action: 'isManaged',
-      tabId,
     });
 
     if (response.success && response.data?.isManaged !== undefined) {
@@ -129,11 +139,6 @@ export class TabManager {
     }
 
     return false;
-  }
-
-  // Descriptive alias for isTabManaged
-  async checkTab(tabId: number): Promise<boolean> {
-    return this.isTabManaged(tabId);
   }
 
   // Open a new tab without marking it as managed

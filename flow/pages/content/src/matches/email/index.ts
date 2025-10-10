@@ -1,6 +1,6 @@
 import { FlowUtils, Log, BackgroundUtils, TabManager, installGlobalErrorHandlers } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { registerMatcher, waitForSelector, clickWithVerification, safeNavigate, random, sleep } from '@src/lib';
+import { registerMatcher, waitForSelector, clickWithVerification, random, sleep } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
 
 /**
@@ -49,16 +49,20 @@ class EmailMatcher implements Matcher {
       log.info('Triggering email executor');
       await log.write();
 
-      // Send command to background to run email executor
+      // Execute email workflow directly
       try {
-        await BackgroundUtils.openUnreadEmailAndClickItemLink({
-          selectors: {
-            unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
-            emailBody: '#x_body a[title*="item.php"]',
-            markAsReadButton: 'span',
-          },
+        const context: ExecutionContext = {
+          matcherId: MATCHER_IDS.EMAIL,
+          url: window.location.href,
+          config,
+          dryRun: false,
+        };
+        const result = await executeEmailWorkflow(context, {
+          unreadEmail: '[aria-label^="Ungelesen HanseMerkur AuktionsPlattform"]',
+          emailBody: '#x_body a[title*="item.php"]',
+          markAsReadButton: 'span',
         });
-        log.info('Email executor triggered successfully');
+        log.info(`Email executor completed: ${result.success ? 'success' : 'failure'}`);
         await log.write();
       } catch (e: any) {
         log.error(`Email executor failed: ${e?.message || String(e)}`);
@@ -119,7 +123,7 @@ export async function executeEmailWorkflow(
 ): Promise<ExecutionResult> {
   // Email executor doesn't have flowId initially
   const log = new Log(context.matcherId);
-  log.info(`Starting email workflow for tab ${context.tabId}`);
+  log.info(`Starting email workflow`);
   const startTime = Date.now();
   const errors: Error[] = [];
   let processedCount = 0;
@@ -308,9 +312,4 @@ export async function executeEmailWorkflow(
       },
     };
   }
-}
-
-// Export for background script to inject
-if (typeof window !== 'undefined') {
-  (window as any).__emailExecutor = executeEmailWorkflow;
 }

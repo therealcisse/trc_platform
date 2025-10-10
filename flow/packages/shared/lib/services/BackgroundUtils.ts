@@ -1,15 +1,5 @@
 import { sendBackgroundCommand } from './sendBackgroundCommand.js';
-import type {
-  ExecutionConfig,
-  TelemetryEvent,
-  BuyOfferSelectors,
-  InboxSelectors,
-  ItemSelectors,
-  MyOfferSelectors,
-  EmailSelectors,
-  PDFCommand,
-  ErrorReport,
-} from '@extension/types';
+import type { ExecutionConfig, TelemetryEvent, PDFCommand, ErrorReport } from '@extension/types';
 
 /**
  * Typed client utilities for background commands used by content scripts.
@@ -133,19 +123,6 @@ export class BackgroundUtils {
   }
 
   /**
-   * Execute buy offer workflow
-   */
-  static async executeBuyOffer(args: { id: string; selectors: BuyOfferSelectors }): Promise<any> {
-    const response = await sendBackgroundCommand('buyOffer.execute', args);
-
-    if (!response.success) {
-      throw new Error(`Failed to execute buy offer: ${response.error}`);
-    }
-
-    return response.data;
-  }
-
-  /**
    * Print PDF
    */
   static async printPdf(payload: PDFCommand): Promise<void> {
@@ -154,58 +131,6 @@ export class BackgroundUtils {
     if (!response.success) {
       throw new Error(`Failed to execute buy offer: ${response.error}`);
     }
-  }
-
-  /**
-   * Scan inbox and open MyOffer links
-   */
-  static async scanInboxAndOpenMyOfferLink(args: { selectors: InboxSelectors }): Promise<any> {
-    const response = await sendBackgroundCommand('inbox.openMyOfferLink', args);
-
-    if (!response.success) {
-      throw new Error(`Failed to scan inbox and open links: ${response.error}`);
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Click item buy button
-   */
-  static async clickItemBuyButton(args: { id: string; selectors: ItemSelectors }): Promise<any> {
-    const response = await sendBackgroundCommand('item.clickProductLink', args);
-
-    if (!response.success) {
-      throw new Error(`Failed to click item buy button: ${response.error}`);
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Open MyOffer item link
-   */
-  static async openMyOfferItemLink(args: { selectors: MyOfferSelectors }): Promise<any> {
-    const response = await sendBackgroundCommand('myOffer.clickProductLink', args);
-
-    if (!response.success) {
-      throw new Error(`Failed to open MyOffer item link: ${response.error}`);
-    }
-
-    return response.data;
-  }
-
-  /**
-   * Open unread email and click item link
-   */
-  static async openUnreadEmailAndClickItemLink(args: { selectors: EmailSelectors }): Promise<any> {
-    const response = await sendBackgroundCommand('email.openUnreadAndClickLink', args);
-
-    if (!response.success) {
-      throw new Error(`Failed to open unread email and click link: ${response.error}`);
-    }
-
-    return response.data;
   }
 
   /**

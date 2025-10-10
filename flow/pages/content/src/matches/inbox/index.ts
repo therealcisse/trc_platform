@@ -66,14 +66,14 @@ class InboxMatcher implements Matcher {
           config.inboxPostReloadDelayMs > 0 && (await sleep(config.inboxPostReloadDelayMs));
 
           // Trigger scan
-          await this.scanAndOpenLinks();
+          await this.scanAndOpenLinks(config);
         } else {
           log.warn('Outside operational hours, skipping initial scan');
         }
       } else {
         if (timeAllowed()) {
           // Initial scan on page load
-          await this.scanAndOpenLinks();
+          await this.scanAndOpenLinks(config);
         } else {
           log.warn('Outside operational hours, skipping initial scan');
         }
@@ -96,19 +96,6 @@ class InboxMatcher implements Matcher {
 
     await startPreciseSecondTicker(
       ({ scheduledWallTimeMs, receivedWallTimeMs, driftMs, workerId, seq, startCount }) => {
-        // // Avoid heavy DOM work here if you want to keep variance low.
-        // // For visibility while testing:
-        // // eslint-disable-next-line no-console
-        // console.log(
-        //   'tick',
-        //   new Date(receivedWallTimeMs).toISOString(),
-        //   "id=" + workerId,
-        //   "seq=" + seq,
-        //   "startCount=" + startCount,
-        //   'scheduled=' + new Date(scheduledWallTimeMs).toISOString(),
-        //   'driftMs=' + driftMs.toFixed(3),
-        // );
-
         if (!timeAllowed()) {
           return;
         }
@@ -117,7 +104,7 @@ class InboxMatcher implements Matcher {
         const currentSecond = now.getSeconds();
 
         if (reloadSeconds.includes(currentSecond)) {
-          log.info(`Scheduled reload at second ${currentSecond}`);
+          // log.info(`Scheduled reload at second ${currentSecond}`);
 
           // Mark for post-reload scan
           sessionStorage.setItem('inbox_scan_after_reload', '1');
@@ -128,48 +115,27 @@ class InboxMatcher implements Matcher {
       },
     );
 
-    // // Clear any existing scheduler
-    // if (this.schedulerInterval) {
-    //   clearInterval(this.schedulerInterval);
-    // }
-    //
-    // // Check every second
-    // this.schedulerInterval = setInterval(() => {
-    //   if (!timeAllowed()) {
-    //     return;
-    //   }
-    //
-    //   const now = new Date();
-    //   const currentSecond = now.getSeconds();
-    //
-    //   if (reloadSeconds.includes(currentSecond)) {
-    //     log.info(`Scheduled reload at second ${currentSecond}`);
-    //
-    //     // Mark for post-reload scan
-    //     sessionStorage.setItem('inbox_scan_after_reload', '1');
-    //
-    //     // Reload the page
-    //     window.location.reload();
-    //   }
-    // }, 1000);
-    //
-    // log.info(`Reload scheduler started for seconds: ${reloadSeconds.join(', ')}`);
+    log.info(`Reload scheduler started for seconds: ${reloadSeconds.join(', ')}`);
   }
 
-  private async scanAndOpenLinks(): Promise<void> {
+  private async scanAndOpenLinks(config: ExecutionConfig): Promise<void> {
     const log = new Log(MATCHER_IDS.INBOX);
 
     try {
       log.info('Scanning for new links');
 
-      // Just send the command to background - all processing happens there
+      // Execute inbox workflow directly in-page
       try {
-        const data = await BackgroundUtils.scanInboxAndOpenMyOfferLink({
-          selectors: {
-            rows: 'table.browse_list tr',
-            titleLinks: 'table.browse_list tr td:nth-child(3) a',
-            requestTimestampElement: 'td:nth-child(4)', // Erhalten column
-          },
+        const context: ExecutionContext = {
+          matcherId: MATCHER_IDS.INBOX,
+          url: window.location.href,
+          config,
+          dryRun: false,
+        };
+        const data = await executeInboxWorkflow(context, {
+          rows: 'table.browse_list tr',
+          titleLinks: 'table.browse_list tr td:nth-child(3) a',
+          requestTimestampElement: 'td:nth-child(4)', // Erhalten column
         });
         log.info('Link scan completed successfully', data);
       } catch (e: any) {
@@ -337,7 +303,7 @@ export async function executeInboxWorkflow(
   selectors: InboxSelectors,
 ): Promise<ExecutionResult> {
   const log = new Log(context.matcherId);
-  log.info(`Extracting inbox links for tab ${context.tabId}`);
+  log.info(`Extracting inbox links`);
   const startTime = Date.now();
   const tabManager = TabManager.getInstance();
 
@@ -511,9 +477,4 @@ export async function executeInboxWorkflow(
       },
     };
   }
-}
-
-// Export for background script
-if (typeof window !== 'undefined') {
-  (window as any).__inboxExecutor = executeInboxWorkflow;
 }

@@ -36,7 +36,6 @@ export const pdfCommandHandler: MessageHandler<'item.printProductConfirmation'> 
 
     // Create execution context
     const context: ExecutionContext = {
-      tabId,
       url: sender.tab.url || '',
       matcherId: MATCHER_IDS.PDF,
       config,
