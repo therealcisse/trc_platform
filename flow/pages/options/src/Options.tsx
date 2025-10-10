@@ -257,7 +257,7 @@ function ProcessingTimeWindowsEditor({
                     disabled={disabled || !w.enabled}
                     onChange={e => {
                       const val = parseInt(e.target.value, 10);
-                      updateWindow(w.id, { duration: Number.isFinite(val) && val > 0 ? val : 1 });
+                      updateWindow(w.id, { duration: Number.isFinite(val) && val >= 0 ? val : 1 });
                     }}
                     className={cn(
                       'w-28 rounded-md border border-gray-600 bg-gray-700 px-2 py-1 text-gray-100 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500',
