@@ -33,6 +33,7 @@ export const ExecutionConfigSchema = z.object({
   inboxPostReloadDelayMs: z.number().default(0),
   inboxMaxLinksPerScan: z.number().default(10),
   inboxInterOpenDelayMs: z.number().default(400),
+  inboxBuysImmediately: z.boolean().default(true),
 
   token: z.string().optional(),
 

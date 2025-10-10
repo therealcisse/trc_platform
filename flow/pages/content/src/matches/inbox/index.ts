@@ -183,6 +183,11 @@ class InboxMatcher implements Matcher {
   }
 }
 
+// Helper to resolve the base URL for building Buy Offer links
+function getBaseUrl(): string {
+  return window.location.origin;
+}
+
 // Register and run matcher
 const inboxMatcher = new InboxMatcher();
 
@@ -410,6 +415,19 @@ export async function executeInboxWorkflow(
       // Create flow-specific log for this link
       const flowLog = Log.withFlow(MATCHER_IDS.INBOX, link.id);
 
+      // Determine target URL: if configured, go directly to Buy Offer for non-leads
+      const targetHref = (() => {
+        try {
+          if (!link.isLead && context.config.inboxBuysImmediately) {
+            const base = getBaseUrl();
+            return `${base.replace(/\/+$/, '')}/buy_now/id/${link.id}.html`;
+          }
+        } catch {
+          // fall back to original link on any error
+        }
+        return link.href;
+      })();
+
       if (openedCount >= maxLinks) {
         break;
       }
@@ -438,7 +456,7 @@ export async function executeInboxWorkflow(
 
           if (!context.dryRun) {
             // Flow created successfully - no need for separate tracking
-            tabManager.openTab(link.href, id);
+            tabManager.openTab(targetHref, id);
             openedCount++;
             flowLog.info(`Flow started successfully`);
           } else {

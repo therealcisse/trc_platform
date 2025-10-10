@@ -40,6 +40,7 @@ describe('ProductFactory.parseTitle', () => {
     inboxPostReloadDelayMs: 0,
     inboxMaxLinksPerScan: 0,
     inboxInterOpenDelayMs: 0,
+    inboxBuysImmediately: true,
 
     // API Authentication
     token: undefined,

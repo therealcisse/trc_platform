@@ -351,5 +351,11 @@
   "options_enable_debug_mode": { "message": "Enable Debug Mode" },
   "options_enable_debug_mode_description": {
     "message": "When enabled, the extension collects and prints verbose debug information for troubleshooting."
+  },
+  "options_inbox_buys_immediately": {
+    "message": "Buy immediately from Inbox"
+  },
+  "options_inbox_buys_immediately_description": {
+    "message": "Open the Buy Offer page directly for non-lead messages, skipping the normal flow."
   }
 }

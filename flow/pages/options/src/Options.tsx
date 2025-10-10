@@ -627,6 +627,17 @@ const Options = () => {
 
                   {config.inboxMode && (
                     <div className="space-y-3 border-t border-gray-700 pt-3">
+                      <div className="flex items-center justify-between">
+                        <div>
+                          <h4 className="font-medium">{t('options_inbox_buys_immediately')}</h4>
+                          <p className="text-sm text-gray-400">{t('options_inbox_buys_immediately_description')}</p>
+                        </div>
+                        <Switch
+                          checked={!!config.inboxBuysImmediately}
+                          onCheckedChange={() => handleConfigToggle('inboxBuysImmediately')}
+                          className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                        />
+                      </div>
                       <div>
                         <label className="mb-1 block text-sm text-gray-300">{t('options_reload_seconds')}</label>
                         <input

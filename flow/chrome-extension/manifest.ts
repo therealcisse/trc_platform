@@ -58,7 +58,7 @@ const manifest = {
     },
     {
       matches: [
-          'http://localhost:8082/item/*',
+        'http://localhost:8082/item/*',
         'https://auktion.hansemerkur.de/item.php*',
       ],
       js: ['content/item.iife.js'],
@@ -66,7 +66,7 @@ const manifest = {
     },
     {
       matches: [
-          'http://localhost:8082/buy_now/id/*',
+        'http://localhost:8082/buy_now/id/*',
         'https://auktion.hansemerkur.de/buy_now/id/*',
       ],
       js: ['content/buyOffer.iife.js'],
@@ -74,7 +74,7 @@ const manifest = {
     },
     {
       matches: [
-          'http://localhost:8082/myOffer/*',
+        'http://localhost:8082/myOffer/*',
         'https://auktion.hansemerkur.de/my_message_center_show_message.php*',
       ],
       js: ['content/myOffer.iife.js'],
@@ -82,7 +82,7 @@ const manifest = {
     },
     {
       matches: [
-          'http://localhost:8082/pdf.html',
+        'http://localhost:8082/pdf.html',
         'https://auktion.hansemerkur.de/item/id/*',
       ],
       js: ['content/pdf.iife.js'],
@@ -90,7 +90,7 @@ const manifest = {
     },
     {
       matches: [
-          'http://localhost:8082/inbox.html',
+        'http://localhost:8082/inbox.html',
         'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
       ],
       js: ['content/inbox.iife.js'],

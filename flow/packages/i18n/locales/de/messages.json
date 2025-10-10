@@ -351,5 +351,11 @@
   "options_enable_debug_mode": { "message": "Debug-Modus aktivieren" },
   "options_enable_debug_mode_description": {
     "message": "Bei Aktivierung werden detaillierte Debug-Informationen zur Fehlerbehebung gesammelt und ausgegeben."
+  },
+  "options_inbox_buys_immediately": {
+    "message": "Sofort aus dem Posteingang kaufen"
+  },
+  "options_inbox_buys_immediately_description": {
+    "message": "Öffnet die Kaufseite direkt für Nachrichten ohne Lead und überspringt den normalen Ablauf."
   }
 }

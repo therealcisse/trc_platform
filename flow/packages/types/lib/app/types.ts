@@ -34,6 +34,7 @@ export interface ExecutionConfig {
   inboxPostReloadDelayMs: number; // Delay after reload before scanning
   inboxMaxLinksPerScan: number; // Max links to open per scan
   inboxInterOpenDelayMs: number; // Delay between opening links
+  inboxBuysImmediately: boolean; // When true, non-lead inbox items open Buy Offer directly
 
   // API Authentication
   token?: string;
