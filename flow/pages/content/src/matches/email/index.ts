@@ -1,6 +1,6 @@
 import { FlowUtils, Log, BackgroundUtils, TabManager, installGlobalErrorHandlers } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { registerMatcher, waitForSelector, clickWithVerification, random, sleep } from '@src/lib';
+import { clickWithVerification, random, sleep } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, EmailSelectors } from '@extension/types';
 
 /**
@@ -90,7 +90,6 @@ function checkAndRun() {
 
   if (matches) {
     console.log('[EmailMatcher] URL matches, registering matcher');
-    registerMatcher(emailMatcher);
 
     // Run the matcher after DOM is ready
     if (document.readyState === 'loading') {
@@ -188,10 +187,7 @@ export async function executeEmailWorkflow(
 
           try {
             // Find link in email body
-            const linkElement = await waitForSelector(selectors.emailBody, {
-              timeout: 3000,
-              visible: true,
-            });
+            const linkElement = document.querySelector(selectors.emailBody);
 
             if (linkElement instanceof HTMLAnchorElement) {
               const href = getAnchorTitle(linkElement);

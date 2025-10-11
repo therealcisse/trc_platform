@@ -45,51 +45,6 @@ export class LocalDate implements LocalDateType {
   }
 }
 
-// Matcher registry
-const matcherRegistry = new Map<string, Matcher>();
-
-export function registerMatcher(matcher: Matcher): void {
-  console.log(`[Extension] Registering matcher: ${matcher.name}`);
-  matcherRegistry.set(matcher.id, matcher);
-}
-
-export function unregisterMatcher(matcherId: string): void {
-  console.log(`[Extension] Unregistering matcher: ${matcherId}`);
-  matcherRegistry.delete(matcherId);
-}
-
-export function getActiveMatchers(): Matcher[] {
-  return Array.from(matcherRegistry.values()).filter(m => m.enabled);
-}
-
-// DOM utilities
-export async function waitForSelector(selector: string, options: WaitOptions = {}): Promise<Element> {
-  const { timeout = 10000, interval = 100, visible = false } = options;
-  const startTime = Date.now();
-
-  return new Promise((resolve, reject) => {
-    const check = () => {
-      const element = document.querySelector(selector);
-
-      if (element) {
-        if (!visible || isElementVisible(element)) {
-          resolve(element);
-          return;
-        }
-      }
-
-      if (Date.now() - startTime > timeout) {
-        reject(new Error(`Timeout waiting for selector: ${selector}`));
-        return;
-      }
-
-      setTimeout(check, interval);
-    };
-
-    check();
-  });
-}
-
 export async function ensureFocus(
   target: HTMLElement | string,
   opts?: {
@@ -268,22 +223,6 @@ export function trackError(error: Error, context?: any): void {
     },
     timestamp: Date.now(),
   });
-}
-
-// Helper functions
-function isElementVisible(element: Element): boolean {
-  if (!(element instanceof HTMLElement)) return false;
-
-  const rect = element.getBoundingClientRect();
-  const style = window.getComputedStyle(element);
-
-  return (
-    rect.width > 0 &&
-    rect.height > 0 &&
-    style.display !== 'none' &&
-    style.visibility !== 'hidden' &&
-    style.opacity !== '0'
-  );
 }
 
 export async function sleep(ms: number): Promise<void> {

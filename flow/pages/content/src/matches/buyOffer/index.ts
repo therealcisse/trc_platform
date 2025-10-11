@@ -7,7 +7,7 @@ import {
   installGlobalErrorHandlers,
 } from '@extension/shared';
 import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
-import { registerMatcher, waitForSelector, clickWithVerification, sleep, ensureFocus } from '@src/lib';
+import { clickWithVerification, sleep, ensureFocus } from '@src/lib';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 import { TabManager } from '@extension/shared';
@@ -62,13 +62,11 @@ class BuyOfferMatcher implements Matcher {
     const currentUrl = window.location.href;
     const flowId = FlowUtils.parseIDFromPath(currentUrl);
     const log = Log.withFlow(MATCHER_IDS.BUY_OFFER, flowId);
-    log.info('🔄 Buy offer matcher activated');
-    log.debug('Current URL', { url: currentUrl, flowId });
+    log.info('🔄 Buy offer matcher activated').setMetadata({ url: currentUrl, flowId });
     const tabManager = TabManager.getInstance();
 
     try {
       // Get configuration and check if enabled
-      log.debug('Fetching extension configuration');
       const { config, enabled } = await BackgroundUtils.getExtensionConfig();
 
       if (!enabled) {
@@ -77,41 +75,39 @@ class BuyOfferMatcher implements Matcher {
         return;
       }
 
-      log.info('Extension enabled, proceeding with buy offer detection');
-
-      // Check if this flow is already being purchased
-      log.info('Checking if flow is already being purchased');
-      const buying = await BackgroundUtils.isBuying(flowId);
-
-      if (buying) {
-        log.info(`Flow ${flowId} is already being purchased by another tab`);
-        log.debug('Closing this duplicate tab');
-        await log.write();
-
-        // Close duplicate tab
-        await tabManager.closeCurrentTab();
-        return;
-      }
-
-      // Calculate timeout (delay + extra headroom)
-      const delaySeconds = 0;
-      const extraHeadroomSeconds = 300;
-      const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
-
-      // Mark flow as being purchased
-      log.info('Marking flow as being purchased to prevent duplicates');
-      await BackgroundUtils.markBuying({ flowId, timeout });
-
-      log.info(`🎯 Starting purchase process for flow ${flowId}`);
-      log.debug(`Timeout set to: ${new Date(timeout).toISOString()}`);
-
-      // Execute purchase directly
-      log.info('Triggering buy offer executor');
       try {
         const flow = await ConfigService.getFlow(flowId);
         if (!flow) {
           log.error('Flow not found, aborting buy offer execution');
         } else {
+          const managed = flow.source !== 'manual';
+
+          if (managed) {
+            // Check if this flow is already being purchased
+            const buying = await BackgroundUtils.isBuying(flowId);
+
+            if (buying) {
+              log.info(`Flow ${flowId} is already being purchased by another tab`);
+              await log.write();
+
+              // Close duplicate tab
+              await tabManager.closeCurrentTab();
+              return;
+            }
+
+            // Calculate timeout (delay + extra headroom)
+            const delaySeconds = 0;
+            const extraHeadroomSeconds = 300;
+            const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
+
+            // Mark flow as being purchased
+            await BackgroundUtils.markBuying({ flowId, timeout });
+
+            log.debug(
+              `🎯 Starting purchase process for flow ${flowId}. Timeout set to: ${new Date(timeout).toISOString()}`,
+            );
+          }
+
           const context: ExecutionContext = {
             matcherId: MATCHER_IDS.BUY_OFFER,
             url: currentUrl,
@@ -127,9 +123,9 @@ class BuyOfferMatcher implements Matcher {
               buyFormButton: 'button[name="action"]',
             },
             flow,
+            managed,
           );
-          log.info(`✅ Buy offer executor completed: ${result.success ? 'success' : 'failure'}`);
-          log.debug('Executor response', { result });
+          log.info(`✅ Buy offer executor completed: ${result.success ? 'success' : 'failure'}, result: ${result}`);
         }
       } catch (e: any) {
         log.error(`❌ Buy offer executor failed: ${e?.message || String(e)}`);
@@ -166,7 +162,6 @@ function checkAndRun() {
 
   if (matches) {
     console.log('[BuyOfferMatcher] URL matches, registering matcher');
-    registerMatcher(buyOfferMatcher);
 
     // Run the matcher after DOM is ready
     if (document.readyState === 'loading') {
@@ -185,6 +180,7 @@ export async function executeBuyOfferWorkflow(
   context: ExecutionContext,
   selectors: BuyOfferSelectors,
   flow: Flow,
+  managed: boolean,
 ): Promise<ExecutionResult> {
   const log = Log.withFlow(context.matcherId, flow.id);
   log.info(`Starting buy offer workflow`).setMetadata({ url: context.url });
@@ -192,24 +188,16 @@ export async function executeBuyOfferWorkflow(
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
   const captchaProcessor = CaptchaProcessor.getInstance();
-  const managed = flow.source !== 'manual';
 
   // Wait for and focus captcha input first
-  log.debug('Waiting for captcha input element');
-  const inputElement = (await waitForSelector(selectors.input, {
-    timeout: 5000,
-    visible: true,
-  })) as HTMLInputElement;
+  const inputElement = document.querySelector(selectors.input) as HTMLInputElement;
 
   if (!inputElement) {
     throw new Error('Captcha input not found');
   }
-  log.info('Captcha input element found and ready');
-
   try {
     // Focus the input with verification and retries
     await ensureFocus(inputElement);
-    log.debug('Captcha input focused', { focused: document.activeElement === inputElement });
   } catch {}
 
   if (managed) {
@@ -250,12 +238,7 @@ export async function executeBuyOfferWorkflow(
   }
 
   try {
-    log.info('Validating preconditions for buy offer workflow');
-
-    const titleLink = (await waitForSelector(selectors.productTitle, {
-      timeout: 5000,
-      visible: true,
-    })) as HTMLImageElement;
+    const titleLink = document.querySelector(selectors.productTitle) as HTMLImageElement;
 
     if (!titleLink) {
       log.info('No title found, skipping');
@@ -322,21 +305,11 @@ export async function executeBuyOfferWorkflow(
     }
 
     // Get buy button
-    log.debug('Locating buy button');
-    const buyButton = await waitForSelector(selectors.buyFormButton, {
-      timeout: 5000,
-      visible: true,
-    });
+    const buyButton = document.querySelector(selectors.buyFormButton);
 
     if (!buyButton) {
       throw new Error('Buy button not found');
     }
-    log.info('Buy button found and ready');
-
-    // Check buying state (prevent race conditions)
-    log.info('Checking buying state to prevent race conditions');
-
-    log.info('Flow validation successful');
 
     function getImageToDataURL(img: HTMLImageElement, type: string = 'image/png', quality?: number): string {
       if (!img.complete || img.naturalWidth === 0) {
@@ -362,25 +335,17 @@ export async function executeBuyOfferWorkflow(
 
     // Process captcha
     log.info('Starting captcha processing');
-    const imgElement = (await waitForSelector(selectors.img, {
-      timeout: 5000,
-      visible: true,
-    })) as HTMLImageElement;
+    const imgElement = document.querySelector(selectors.img) as HTMLImageElement;
 
     if (!imgElement || !imgElement.src) {
       log.error('Captcha image not found or invalid');
       throw new Error('Captcha image not found or invalid');
     }
-    log.debug(`Captcha image source: ${imgElement.src.substring(0, 50)}...`);
 
     // Convert image to data URL once
-    log.info('Converting captcha image to data URL for processing');
-
     const imageDataUrl = getImageToDataURL(imgElement);
 
     const answer = await captchaProcessor.solveCaptcha(imgElement.src, imageDataUrl, flow.id);
-
-    log.debug('Image conversion successful');
 
     log.info(`Captcha solved successfully: ${answer}`);
 
@@ -389,42 +354,33 @@ export async function executeBuyOfferWorkflow(
     log.debug('Answer entered into captcha field');
 
     // Execute purchase
-    log.info('EXECUTING FINAL PURCHASE');
-
     if (!context.dryRun) {
       log.info(`Flow ${flow.id} marked as completed`);
       // Clear buying state on success
-      log.debug('Clearing buying state');
-      await BackgroundUtils.clearBuying(flow.id);
+      managed && (await BackgroundUtils.clearBuying(flow.id));
 
       // Calculate remaining time
       const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(product, flow.timestamp, context.config);
 
       const timeoutMs = remainingTime * 1000 + 5000;
-      log.info(`Closing all tabs for flow: ${flow.id} after ${timeoutMs}ms`);
-      await BackgroundUtils.scheduleCloseAfterNavigation({
-        flowId: flow.id,
-        timeoutMs: timeoutMs,
-      });
+      managed &&
+        (await BackgroundUtils.scheduleCloseAfterNavigation({
+          flowId: flow.id,
+          timeoutMs: timeoutMs,
+        }));
 
       if (remainingTime > 0) {
         log.info(`Waiting ${remainingTime} seconds for remaining processing time`);
         await sleep(remainingTime * 1000 - 100);
-        log.debug('Processing time wait completed');
       } else {
         log.info(`Buying immediately ${flow.requestTimestamp}`);
       }
 
       // Mark flow as done
-      log.info('Purchase completed successfully, marking flow as done');
-      await ConfigService.doneFlow(flow.id);
-
-      log.info('Clicking on buyButton');
+      ConfigService.doneFlow(flow.id);
 
       log.info(`✅ Buy offer workflow completed successfully for flow ${flow.id}`);
       await log.write();
-
-      log.info('Clicking buy button to complete purchase');
 
       await clickWithVerification(buyButton, {
         verify: false,

@@ -7,7 +7,6 @@ import {
   installGlobalErrorHandlers,
 } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { registerMatcher, waitForSelector } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, PdfSelectors } from '@extension/types';
 
 /**
@@ -84,7 +83,6 @@ function checkAndRun() {
 
   if (matches) {
     console.log('[PDFMatcher] URL matches, registering matcher');
-    registerMatcher(pdfMatcher);
 
     // Run the matcher after DOM is ready
     if (document.readyState === 'loading') {
@@ -130,10 +128,7 @@ export async function executePdfWorkflow(context: ExecutionContext, selectors: P
     async function processPdf(): Promise<void> {
       try {
         log.debug('Locating product title');
-        const titleElement = await waitForSelector(selectors.productTitle, {
-          timeout: 5000,
-          visible: true,
-        });
+        const titleElement = document.querySelector(selectors.productTitle);
 
         if (!titleElement) {
           return;

@@ -7,7 +7,7 @@ import {
   startPreciseSecondTicker,
 } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
-import { isValidTimeOfDay, registerMatcher, sleep } from '@src/lib';
+import { isValidTimeOfDay, sleep } from '@src/lib';
 import type { ExecutionConfig, Matcher, ExecutionContext, ExecutionResult, InboxSelectors } from '@extension/types';
 
 /**
@@ -282,7 +282,6 @@ function checkAndRun() {
 
   if (matches) {
     console.log('[InboxMatcher] URL matches, registering matcher');
-    registerMatcher(inboxMatcher);
 
     if (document.readyState === 'loading') {
       document.addEventListener('DOMContentLoaded', () => inboxMatcher.run());

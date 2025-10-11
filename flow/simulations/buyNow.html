@@ -11504,7 +11504,7 @@ a.teaserlink:hover, a.pdflink:hover {
 input[type="text"] {
     font-size:24px !important;
 }
-</style> <div id="page_buy_now">  <br> <div class="panel_ panel-primary_"> <div class="panel-heading" style="height:40px;"> <h3 class="panel-title" style="margin-top:-10px;">Sofortkauf</h3> </div> <div class="panel-body"> <div class="row"> <div class="image col-sm-3"> <p style="margin-left:10px;">Leadnummer: 1456218</p> </div> <div class="col-sm-9"> <h2>KV-Voll Selbstständige KW: Kamp: Kampagne_aus_KV_Voll_SEO PLZ: 23909 Bisher versichert: gesetzlich (GKV) Alter: 40 * Berufliche Tätigkeit: Selbstständiger / Freiberufler, bereits selbstständig </h2> <form name="form-horizontal"> <input name="97cb57dc4cff555b089fc8e0910de844" type="hidden" value="97cb57dc4cff555b089fc8e0910de844"> <input name="id" type="hidden" value="1456218"> <div class="update_item" id="1456218"> <div class="row"> <label class="col-sm-4 text-right">Endet in</label> <div class="col-sm-8"><span class="time">16h:41m:02s</span></div> </div> <div class="row"> <label class="col-sm-4 text-right">Sofortkaufpreis pro Stück</label> <div class="buy_now col-sm-8"> <span class="buy_now_price">
+</style> <div id="page_buy_now">  <br> <div class="panel_ panel-primary_"> <div class="panel-heading" style="height:40px;"> <h3 class="panel-title" style="margin-top:-10px;">Sofortkauf</h3> </div> <div class="panel-body"> <div class="row"> <div class="image col-sm-3"> <p style="margin-left:10px;">Leadnummer: 1456218</p> </div> <div class="col-sm-9"> <h2>KV-Voll Selbstständige KW: Kamp: Kampagne_aus_KV_Voll_SEO PLZ: 23909 Bisher versichert: gesetzlich (GKV) Alter: 40 * Berufliche Tätigkeit: Selbstständiger / Freiberufler, bereits selbstständig </h2> <form name="form-horizontal" action="/done.html" method=get> <input name="97cb57dc4cff555b089fc8e0910de844" type="hidden" value="97cb57dc4cff555b089fc8e0910de844"> <input name="id" type="hidden" value="1456218"> <div class="update_item" id="1456218"> <div class="row"> <label class="col-sm-4 text-right">Endet in</label> <div class="col-sm-8"><span class="time">16h:41m:02s</span></div> </div> <div class="row"> <label class="col-sm-4 text-right">Sofortkaufpreis pro Stück</label> <div class="buy_now col-sm-8"> <span class="buy_now_price">
 															15,00 EUR
 														</span> </div> </div> <div class="row"> <label class="col-sm-4 text-right">Zahlungsmethode</label> <div class="col-sm-8"><p class="form-control-static">
 																																			Rechnung<br> </p></div> </div> <div class="row"> <label class="col-sm-4 text-right">Gesamtbetrag</label> <div class="col-sm-8"> <span><strong> <span id="calculate_total">15,00 EUR</span> </strong> </span> </div> </div> <div id="page_buy_now_captcha"> <label class="col-sm-4 text-right"><img alt="Captcha" src=""> *</label> <div class="col-sm-1"> <input class="form-control" id="captcha_code" name="captcha_code" style="height:27px;width:100px;margin-top:6px;margin-left:-16px;" type="text"> </div> </div> <div class="row" id="diusb"> <label class="col-sm-4 text-right">diusb</label> <div class="col-sm-8"> <input class="form-control" id="diusb" name="diusb" style="margin-top:10px;height:40px;width:100px;" type="text"> </div> </div> <div class="row"> <div class="col-sm-12"> <b>Ihr Gebot ist bindend.</b> Bestätigen Sie Ihr Gebot daher bitte nur, wenn Sie den Artikel auch wirklich kaufen möchten.
@@ -11528,26 +11528,26 @@ document.addEventListener("DOMContentLoaded", function(){
     if (form) {
       console.log("Found the form")
       // Remove action attribute
-      form.removeAttribute('action');
-
-      // Add onSubmit handler for captcha validation
-      form.addEventListener('submit', function(e) {
-        e.preventDefault(); // Prevent default form submission
-
-        // Get the captcha input value
-        var captchaInput = document.getElementById('captcha_code');
-        var userAnswer = captchaInput ? captchaInput.value.trim() : '';
-
-        // Extract correct answer from HM_CAPTCHA_SRC
-        var correctAnswer = extractAnswerFromCaptcha(HM_CAPTCHA_SRC);
-
-        // Validate and redirect
-        // if (userAnswer === correctAnswer) {
-        //   window.location.href = '/ok.html';
-        // } else {
-        //   window.location.href = '/ko.html';
-        // }
-      });
+      // form.removeAttribute('action');
+      //
+      // // Add onSubmit handler for captcha validation
+      // form.addEventListener('submit', function(e) {
+      //   e.preventDefault(); // Prevent default form submission
+      //
+      //   // Get the captcha input value
+      //   var captchaInput = document.getElementById('captcha_code');
+      //   var userAnswer = captchaInput ? captchaInput.value.trim() : '';
+      //
+      //   // Extract correct answer from HM_CAPTCHA_SRC
+      //   var correctAnswer = extractAnswerFromCaptcha(HM_CAPTCHA_SRC);
+      //
+      //   // Validate and redirect
+      //   // if (userAnswer === correctAnswer) {
+      //   //   window.location.href = '/ok.html';
+      //   // } else {
+      //   //   window.location.href = '/ko.html';
+      //   // }
+      // });
     }
 
     // 2) Update the captcha image src

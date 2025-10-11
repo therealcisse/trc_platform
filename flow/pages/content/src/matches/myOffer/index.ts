@@ -7,7 +7,7 @@ import {
   installGlobalErrorHandlers,
 } from '@extension/shared';
 import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
-import { clickWithVerification, registerMatcher } from '@src/lib';
+import { clickWithVerification } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors } from '@extension/types';
 
 /**
@@ -93,7 +93,6 @@ function checkAndRun() {
 
   if (matches) {
     console.log('[MyOfferMatcher] URL matches, registering matcher');
-    registerMatcher(myOfferMatcher);
 
     // Run the matcher after DOM is ready
     if (document.readyState === 'loading') {

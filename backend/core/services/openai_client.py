@@ -227,6 +227,13 @@ class ProductionOpenAIClient(BaseOpenAIClient):
         self.max_retries: int = getattr(settings, "OPENAI_MAX_RETRIES", 3)
         self.retry_delay: float = getattr(settings, "OPENAI_RETRY_DELAY", 1.0)
 
+        self.session = requests.Session()
+        # Configure connection pooling
+        adapter = requests.adapters.HTTPAdapter(
+            pool_connections=10, pool_maxsize=20, max_retries=0  # We handle retries ourselves
+        )
+        self.session.mount("https://", adapter)
+
         if not self.api_key:
             raise ValueError(
                 "OPENAI_API_KEY is required for production mode. "
@@ -263,13 +270,13 @@ class ProductionOpenAIClient(BaseOpenAIClient):
         timeout = timeout or self.timeout
 
         # Validate image before processing
-        validation = self.validate_image(image_bytes)
-        if not validation.is_valid:
-            raise InvalidImageError(
-                validation.error_message or "Invalid image",
-                image_size=validation.image_size_bytes,
-                image_format=validation.image_format,
-            )
+        # validation = self.validate_image(image_bytes)
+        # if not validation.is_valid:
+        #     raise InvalidImageError(
+        #         validation.error_message or "Invalid image",
+        #         image_size=validation.image_size_bytes,
+        #         image_format=validation.image_format,
+        #     )
 
         # Retry logic with exponential backoff
         last_exception: Exception | None = None
@@ -353,18 +360,29 @@ class ProductionOpenAIClient(BaseOpenAIClient):
             }
 
             # Make the API call
-            response = requests.post(
+            response = self.session.post(
                 f"{self.base_url}/chat/completions",
                 headers=headers,
                 json=payload,
                 timeout=timeout,
+                stream=True,
             )
 
+            max_response_size = 10 * 1024 * 1024  # 10MB
+            content = b""
+            for chunk in response.iter_content(chunk_size=8192):
+                content += chunk
+                if len(content) > max_response_size:
+                    response.close()
+                    raise InvalidResponseError("Response too large")
+
+            result = json.loads(content.decode("utf-8"))
+
             # Handle different status codes
-            self._handle_response_status(response)
+            # self._handle_response_status(response)
 
             # Parse the response
-            result = response.json()
+            # result = response.json()
             return self._parse_api_response(result, model, start_time)
 
         except requests.Timeout as e:

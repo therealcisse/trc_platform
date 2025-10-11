@@ -8,7 +8,7 @@ import {
   startPreciseSecondTicker,
 } from '@extension/shared';
 import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
-import { registerMatcher, clickWithVerification, isValidTimeOfDay } from '@src/lib';
+import { clickWithVerification, isValidTimeOfDay } from '@src/lib';
 import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
 
 /**
@@ -153,7 +153,6 @@ function checkAndRun() {
 
   if (matches) {
     console.log('[ItemMatcher] URL matches, registering matcher');
-    registerMatcher(itemMatcher);
 
     // Run the matcher after DOM is ready
     if (document.readyState === 'loading') {
