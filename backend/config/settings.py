@@ -46,7 +46,6 @@ MIDDLEWARE = [
     "django.contrib.messages.middleware.MessageMiddleware",
     "django.middleware.clickjacking.XFrameOptionsMiddleware",
     "core.middleware.RequestIDMiddleware",
-    # TokenAuthMiddleware removed - now applied per-view
 ]
 
 ROOT_URLCONF = "config.urls"
@@ -74,11 +73,13 @@ DATABASE_URL = os.environ.get("DATABASE_URL", "postgres://postgres:postgres@loca
 DATABASES = {
     "default": dj_database_url.parse(
         DATABASE_URL,
-        conn_max_age=600,  # Connection pooling: keep connections alive for 10 minutes
+        conn_max_age=0,
         conn_health_checks=True,  # Enable connection health checks
         ssl_require=not DEBUG,
     )
 }
+
+DISABLE_SERVER_SIDE_CURSORS = True
 
 # Database connection pooling settings for production
 if not DEBUG:

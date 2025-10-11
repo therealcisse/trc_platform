@@ -86,18 +86,22 @@ class SolveView(APIView):
 
     def post(self, request: Request) -> Response:
         start_time = time.time()
+        timings = {}
+
         # Extract optional flow_id for caching
         flow_id = request.query_params.get("flow_id") or request.data.get("flow_id")
         if flow_id:
             cached = _solve_cache.pop(flow_id, None)
             if cached:
                 _solve_cache[flow_id] = cached  # refresh LRU
-                duration_ms = int((time.time() - start_time) * 1000)
+                timings["total_ms"] = int((time.time() - start_time) * 1000)
+                logger.info(f"Request {request.request_id} timings: {timings}")
                 return Response(
                     {
                         "request_id": request.request_id,
                         "result": cached["result"],
-                        "duration_ms": cached["duration_ms"],
+                        "duration_ms": timings["total_ms"],
+                        "timings": timings,
                     }
                 )
 
@@ -110,16 +114,21 @@ class SolveView(APIView):
         user = request.user
 
         # Extract image data
+        start_extract = time.time()
         image_bytes = self._extract_image(request)
+        timings["extract_ms"] = int((time.time() - start_extract) * 1000)
         if image_bytes is None:
             return Response({"detail": "No image provided"}, status=status.HTTP_400_BAD_REQUEST)
 
         # Get cached settings
+        start_settings = time.time()
         app_settings = CachedSettings.get_settings()
+        timings["settings_ms"] = int((time.time() - start_settings) * 1000)
 
         # Process image (this is the main latency bottleneck)
         # After successful solve, cache result if flow_id provided
         try:
+            start_openai = time.time()
             result = openai_client.solve_image(
                 image_bytes,
                 model=app_settings.openai_model,
@@ -127,20 +136,25 @@ class SolveView(APIView):
                 return_dict=True,
             )
 
-            duration_ms = int((time.time() - start_time) * 1000)
+            timings["openai_ms"] = int((time.time() - start_openai) * 1000)
+            timings["total_ms"] = int((time.time() - start_time) * 1000)
 
             # Cache the result for this flow_id
             if flow_id:
-                _solve_cache[flow_id] = {"result": result["result"], "duration_ms": duration_ms}
+                _solve_cache[flow_id] = {
+                    "result": result["result"],
+                    "duration_ms": timings["total_ms"],
+                }
                 # Enforce cache size
                 if len(_solve_cache) > FLOW_CACHE_SIZE:
                     _solve_cache.popitem(last=False)
 
             # Defer logging and billing updates
+            start_log = time.time()
             self._defer_logging(
                 user=user,
                 token=getattr(request, "token", None),
-                duration_ms=duration_ms,
+                duration_ms=timings["total_ms"],
                 image_bytes=image_bytes,
                 result=result,
                 request_id=request.request_id,
@@ -148,13 +162,15 @@ class SolveView(APIView):
                 status_code="success",
                 flow_id=flow_id,
             )
+            timings["logging_ms"] = int((time.time() - start_log) * 1000)
 
             # Return response immediately
             return Response(
                 {
                     "request_id": request.request_id,
                     "result": result["result"],
-                    "duration_ms": duration_ms,
+                    "duration_ms": timings["total_ms"],
+                    "timings": timings,
                 }
             )
 
@@ -162,6 +178,7 @@ class SolveView(APIView):
             duration_ms = int((time.time() - start_time) * 1000)
 
             # Log error (deferred)
+            start_log = time.time()
             self._defer_logging(
                 user=user,
                 token=getattr(request, "token", None),
@@ -174,6 +191,9 @@ class SolveView(APIView):
                 flow_id=flow_id,
                 error_code=e.error_code.value,
             )
+
+            timings["logging_ms"] = int((time.time() - start_log) * 1000)
+            logger.info(f"Request {request.request_id} timings (error): {timings}")
 
             return Response(
                 {"detail": str(e), "code": e.error_code.value},
@@ -211,6 +231,7 @@ class SolveView(APIView):
         """
         # Use a separate thread or task queue in production
         # For MVP, we'll do a quick database write
+        start_db = time.time()
         try:
             with transaction.atomic():
                 # Get/create billing period (cached in transaction)
@@ -246,6 +267,8 @@ class SolveView(APIView):
                 ):
                     self._schedule_image_save(request_log.id, image_bytes)
 
+                db_ms = int((time.time() - start_db) * 1000)
+                logger.debug(f"DB transaction ms for {request_id}: {db_ms}")
         except Exception as e:
             # Log but don't fail the request
             logger.error(f"Failed to log request {request_id}: {e}")
