@@ -371,7 +371,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                     },
                 ],
                 # "max_tokens": 16,
-                "temperature": 0,
+                "temperature": 1,
             }
 
             # Make the API call
