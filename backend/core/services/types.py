@@ -29,7 +29,7 @@ class ModelType(str, Enum):
     """Supported OpenAI model types."""
 
     GPT5_NANO = "gpt-5-nano-2025-08-07"
-    GPT41_MINI = "gpt-4.1-2025-04-14"
+    GPT41_MINI = "gpt-4.1-mini-2025-04-14"
     O4_MINI = "o4-mini-2025-04-16"
 
     @property

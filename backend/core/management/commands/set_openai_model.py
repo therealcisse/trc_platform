@@ -10,9 +10,9 @@ class Command(BaseCommand):
     help = """Set the OpenAI model for image processing.
 
 Available models:
-    gpt-5-nano-2025-08-07  : GPT-5 Nano (2025-08-07)
-    gpt-4.1-2025-04-14     : GPT-4.1 Mini (2025-04-14)
-    o4-mini-2025-04-16     : O4 Mini (2025-04-16)
+    gpt-5-nano-2025-08-07    : GPT-5 Nano (2025-08-07)
+    gpt-4.1-mini-2025-04-14  : GPT-4.1 Mini (2025-04-14)
+    o4-mini-2025-04-16       : O4 Mini (2025-04-16)
 """
 
     def add_arguments(self, parser):
