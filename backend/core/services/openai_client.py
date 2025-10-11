@@ -370,7 +370,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                         ],
                     },
                 ],
-                "max_tokens": 16,
+                # "max_tokens": 16,
                 "temperature": 0,
             }
 
