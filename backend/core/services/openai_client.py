@@ -1,10 +1,12 @@
-import base64
 import json
 import logging
 import random
 import time
 from abc import ABC, abstractmethod
 from typing import Any, Literal, overload
+from PIL import Image
+import io, base64
+import httpx
 
 import requests
 from django.conf import settings
@@ -217,6 +219,18 @@ class MockOpenAIClient(BaseOpenAIClient):
         return True
 
 
+def _b64_png_1024(image_bytes: bytes) -> str:
+    img = Image.open(io.BytesIO(image_bytes))
+    img = img.convert("RGB")
+    w, h = img.size
+    if max(w, h) > 1024:
+        scale = 1024 / float(max(w, h))
+        img = img.resize((int(w * scale), int(h * scale)))
+    buf = io.BytesIO()
+    img.save(buf, format="PNG", quality=75, optimize=True)
+    return base64.b64encode(buf.getvalue()).decode("utf-8")
+
+
 class ProductionOpenAIClient(BaseOpenAIClient):
     """Production implementation using actual OpenAI API."""
 
@@ -227,12 +241,17 @@ class ProductionOpenAIClient(BaseOpenAIClient):
         self.max_retries: int = getattr(settings, "OPENAI_MAX_RETRIES", 3)
         self.retry_delay: float = getattr(settings, "OPENAI_RETRY_DELAY", 1.0)
 
-        self.session = requests.Session()
-        # Configure connection pooling
-        adapter = requests.adapters.HTTPAdapter(
-            pool_connections=10, pool_maxsize=20, max_retries=0  # We handle retries ourselves
+        # One shared client, HTTP/2, keep-alive, tuned pool
+        self.client = httpx.Client(
+            http2=True,
+            timeout=httpx.Timeout(connect=5, read=60, write=30, pool=60),
+            limits=httpx.Limits(max_keepalive_connections=20, max_connections=50),
+            headers={
+                "Authorization": f"Bearer {self.api_key}",
+                "Content-Type": "application/json",
+                "Accept": "application/json",
+            },
         )
-        self.session.mount("https://", adapter)
 
         if not self.api_key:
             raise ValueError(
@@ -319,7 +338,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
         """Make the actual API call to OpenAI."""
         try:
             # Encode image to base64
-            image_base64 = base64.b64encode(image_bytes).decode("utf-8")
+            image_base64 = _b64_png_1024(image_bytes)
 
             # Prepare the request
             headers = {
@@ -339,28 +358,24 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                         "content": [
                             {
                                 "type": "text",
-                                "text": (
-                                    "Solve the math problem in this image and "
-                                    "return only the numerical answer."
-                                ),
+                                "text": "Solve and return only the number.",
                             },
                             {
                                 "type": "image_url",
                                 "image_url": {
-                                    "url": f"data:image/jpeg;base64,{image_base64}",
-                                    "detail": "high",  # Use high detail for better OCR
+                                    "url": f"data:image/png;base64,{image_base64}",
+                                    "detail": "low",  # Use high detail for better OCR
                                 },
                             },
                         ],
                     },
                 ],
-                # "max_tokens": 100,  # Math answers are typically short
-                # "temperature": 0,  # Use deterministic output for math
-                "temperature": 1,  # Use deterministic output for math
+                "max_tokens": 16,
+                "temperature": 0,
             }
 
             # Make the API call
-            response = self.session.post(
+            resp = self.client.post(
                 f"{self.base_url}/chat/completions",
                 headers=headers,
                 json=payload,
@@ -368,21 +383,11 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                 stream=True,
             )
 
-            max_response_size = 10 * 1024 * 1024  # 10MB
-            content = b""
-            for chunk in response.iter_content(chunk_size=8192):
-                content += chunk
-                if len(content) > max_response_size:
-                    response.close()
-                    raise InvalidResponseError("Response too large")
-
-            result = json.loads(content.decode("utf-8"))
-
             # Handle different status codes
-            # self._handle_response_status(response)
+            self._handle_response_status(resp)
 
-            # Parse the response
-            # result = response.json()
+            result = resp.json()
+
             return self._parse_api_response(result, model, start_time)
 
         except requests.Timeout as e:
