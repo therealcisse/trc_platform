@@ -30,7 +30,7 @@ class ModelType(str, Enum):
 
     GPT5_NANO = "gpt-5-nano-2025-08-07"
     GPT5_MINI = "gpt-5-mini-2025-08-07"
-    GPT41_MINI = "gpt-4.1-2025-04-14"
+    GPT41_MINI = "gpt-4.1-mini-2025-04-14"
     GPT41_NANO = "gpt-4.1-nano-2025-04-14"
     O4_MINI = "o4-mini-2025-04-16"
 
