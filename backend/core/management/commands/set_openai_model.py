@@ -6,14 +6,18 @@ from core.models import Settings
 from core.services.types import ModelType
 
 
-class Command(BaseCommand):
-    help = """Set the OpenAI model for image processing.
+MODEL_HELP = "\n".join(
+    f"    {m.value:<22} : {m.title}" for m in ModelType
+)
 
-Available models:
-    gpt-5-nano-2025-08-07    : GPT-5 Nano (2025-08-07)
-    gpt-4.1-mini-2025-04-14  : GPT-4.1 Mini (2025-04-14)
-    o4-mini-2025-04-16       : O4 Mini (2025-04-16)
-"""
+
+class Command(BaseCommand):
+    help = (
+        "Set the OpenAI model for image processing.\n\n"
+        "Available models:\n"
+        f"{MODEL_HELP}\n\n"
+        "A model is required."
+    )
 
     def add_arguments(self, parser):
         parser.add_argument(
