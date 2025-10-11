@@ -143,7 +143,7 @@ class SolveView(APIView):
             self._defer_logging(
                 user=user,
                 token=getattr(request, "token", None),
-                duration_ms=timings["total_ms"],
+                duration_ms=timings["openai_ms"],
                 image_bytes=image_bytes,
                 result=result,
                 request_id=request.request_id,
