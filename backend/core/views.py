@@ -11,7 +11,10 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from django.conf import settings
+# Import models here to avoid circular import
+from django.db import models
+
+
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
 from django.db import transaction
@@ -26,6 +29,7 @@ from usage.models import RequestLog
 from usage.utils import get_or_create_current_billing_period
 
 from .authentication import BearerTokenAuthentication
+from .tasks import log_request_async
 from .models import Settings
 from .services import openai_client
 from .services.exceptions import OpenAIError
@@ -224,55 +228,20 @@ class SolveView(APIView):
     ) -> None:
         """
         Defer logging and billing updates to avoid blocking the response.
-
-        In production with task queue:
-        - This would push to Celery/RQ for async processing
-
-        For now, we'll use database transactions to batch operations.
         """
-        # Use a separate thread or task queue in production
-        # For MVP, we'll do a quick database write
-        start_db = time.time()
-        try:
-            with transaction.atomic():
-                # Get/create billing period (cached in transaction)
-                billing_period = get_or_create_current_billing_period(user)
-
-                # Create log entry
-                request_log = RequestLog.objects.create(
-                    user=user,
-                    token=token,
-                    billing_period=billing_period,
-                    flow_id=flow_id,
-                    service="core.image_solve",
-                    duration_ms=duration_ms,
-                    request_bytes=len(image_bytes),
-                    response_bytes=len(str(result["result"])) if result else 0,
-                    status=status_code,
-                    error_code=error_code,
-                    request_id=request_id,
-                    result=str(result["result"]) if result else None,
-                )
-
-                # Update billing totals (single UPDATE query)
-                billing_period.total_requests = models.F("total_requests") + 1
-                billing_period.total_cost_cents = (
-                    models.F("total_cost_cents") + app_settings.cost_per_request_cents
-                )
-                billing_period.save(update_fields=["total_requests", "total_cost_cents"])
-
-                # Skip image saving in critical path
-                # This can be done asynchronously or conditionally
-                if app_settings.save_request_images and self._should_save_image(
-                    image_bytes, app_settings
-                ):
-                    self._schedule_image_save(request_log.id, image_bytes)
-
-                db_ms = int((time.time() - start_db) * 1000)
-                logger.debug(f"DB transaction ms for {request_id}: {db_ms}")
-        except Exception as e:
-            # Log but don't fail the request
-            logger.error(f"Failed to log request {request_id}: {e}")
+        payload = {
+            "user_id": str(user.id),
+            "token_id": str(token.id) if token else None,
+            "duration_ms": duration_ms,
+            "request_len": len(image_bytes),
+            "response_len": len(str(result["result"])) if result else 0,
+            "status": status_code,
+            "error_code": error_code,
+            "request_id": request_id,
+            "flow_id": flow_id,
+            "cost_cents": app_settings.cost_per_request_cents,
+        }
+        transaction.on_commit(lambda: log_request_async.delay(payload))
 
     def _should_save_image(self, image_bytes: bytes, app_settings: Settings) -> bool:
         """Determine if image should be saved based on size and app settings."""
@@ -287,10 +256,6 @@ class SolveView(APIView):
         # For MVP, skip image saving in critical path
         # In production: celery_app.send_task("save_request_image", args=[request_log_id, image_bytes])
         pass
-
-
-# Import models here to avoid circular import
-from django.db import models
 
 
 @api_view(["GET", "HEAD"])

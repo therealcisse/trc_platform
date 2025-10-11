@@ -24,8 +24,6 @@ from .exceptions import (
 )
 from .types import (
     ImageBytes,
-    ImageValidationResult,
-    ModelType,
     ResponseDict,
     SolveImageResult,
     TimeoutSeconds,
@@ -90,50 +88,6 @@ class BaseOpenAIClient(ABC):
     def ping(self) -> bool:
         """Check if the service is available."""
         pass
-
-    @staticmethod
-    def validate_image(image_bytes: ImageBytes) -> ImageValidationResult:
-        """
-        Validate image input before processing.
-
-        Args:
-            image_bytes: Image data to validate
-
-        Returns:
-            ImageValidationResult with validation details
-        """
-        if not image_bytes:
-            return ImageValidationResult(
-                is_valid=False,
-                error_message="Empty image data",
-            )
-
-        size_bytes = len(image_bytes)
-        max_size = 20 * 1024 * 1024  # 20MB limit for OpenAI
-
-        if size_bytes > max_size:
-            return ImageValidationResult(
-                is_valid=False,
-                error_message=f"Image too large: {size_bytes} bytes (max {max_size} bytes)",
-                image_size_bytes=size_bytes,
-            )
-
-        # Basic image format detection
-        image_format = None
-        if image_bytes.startswith(b"\xff\xd8\xff"):
-            image_format = "jpeg"
-        elif image_bytes.startswith(b"\x89PNG\r\n\x1a\n"):
-            image_format = "png"
-        elif image_bytes.startswith(b"GIF87a") or image_bytes.startswith(b"GIF89a"):
-            image_format = "gif"
-        elif image_bytes.startswith(b"RIFF") and b"WEBP" in image_bytes[:12]:
-            image_format = "webp"
-
-        return ImageValidationResult(
-            is_valid=True,
-            image_format=image_format,
-            image_size_bytes=size_bytes,
-        )
 
 
 class MockOpenAIClient(BaseOpenAIClient):
@@ -241,6 +195,12 @@ class ProductionOpenAIClient(BaseOpenAIClient):
         self.max_retries: int = getattr(settings, "OPENAI_MAX_RETRIES", 3)
         self.retry_delay: float = getattr(settings, "OPENAI_RETRY_DELAY", 1.0)
 
+        if not self.api_key:
+            raise ValueError(
+                "OPENAI_API_KEY is required for production mode. "
+                "Set USE_MOCK_OPENAI=true to use mock mode instead."
+            )
+
         # One shared client, HTTP/2, keep-alive, tuned pool
         self.client = httpx.Client(
             http2=True,
@@ -252,12 +212,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                 "Accept": "application/json",
             },
         )
-
-        if not self.api_key:
-            raise ValueError(
-                "OPENAI_API_KEY is required for production mode. "
-                "Set USE_MOCK_OPENAI=true to use mock mode instead."
-            )
 
     def solve_image(
         self,
@@ -287,15 +241,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
         """
         start_time = time.time()
         timeout = timeout or self.timeout
-
-        # Validate image before processing
-        # validation = self.validate_image(image_bytes)
-        # if not validation.is_valid:
-        #     raise InvalidImageError(
-        #         validation.error_message or "Invalid image",
-        #         image_size=validation.image_size_bytes,
-        #         image_format=validation.image_format,
-        #     )
 
         # Retry logic with exponential backoff
         last_exception: Exception | None = None
@@ -340,12 +285,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
             # Encode image to base64
             image_base64 = _b64_png_1024(image_bytes)
 
-            # Prepare the request
-            headers = {
-                "Authorization": f"Bearer {self.api_key}",
-                "Content-Type": "application/json",
-            }
-
             payload = {
                 "model": model,
                 "messages": [
@@ -377,7 +316,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
             # Make the API call
             resp = self.client.post(
                 f"{self.base_url}/chat/completions",
-                headers=headers,
                 json=payload,
                 timeout=timeout,
             )

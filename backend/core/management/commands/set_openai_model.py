@@ -6,9 +6,7 @@ from core.models import Settings
 from core.services.types import ModelType
 
 
-MODEL_HELP = "\n".join(
-    f"    {m.value:<22} : {m.title}" for m in ModelType
-)
+MODEL_HELP = "\n".join(f"    {m.value:<22} : {m.title}" for m in ModelType)
 
 
 class Command(BaseCommand):
@@ -36,19 +34,11 @@ class Command(BaseCommand):
         try:
             model_type = ModelType(model)
         except ValueError:
-            valid_models = "\n".join(
-                f"  {m.value:<22} : {m.title}" for m in ModelType
-            )
-            raise CommandError(
-                f"Invalid model: {model}\n\nAvailable models:\n{valid_models}"
-            )
+            valid_models = "\n".join(f"  {m.value:<22} : {m.title}" for m in ModelType)
+            raise CommandError(f"Invalid model: {model}\n\nAvailable models:\n{valid_models}")
 
         # Update setting
         settings.openai_model = model
         settings.save()
 
-        self.stdout.write(
-            self.style.SUCCESS(
-                f"OpenAI model set to: {model_type.title}\n"
-            )
-        )
+        self.stdout.write(self.style.SUCCESS(f"OpenAI model set to: {model_type.title}\n"))
