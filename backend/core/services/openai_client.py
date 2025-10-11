@@ -380,7 +380,6 @@ class ProductionOpenAIClient(BaseOpenAIClient):
                 headers=headers,
                 json=payload,
                 timeout=timeout,
-                stream=True,
             )
 
             # Handle different status codes
