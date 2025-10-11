@@ -137,17 +137,6 @@ class SolveView(APIView):
             )
 
             timings["openai_ms"] = int((time.time() - start_openai) * 1000)
-            timings["total_ms"] = int((time.time() - start_time) * 1000)
-
-            # Cache the result for this flow_id
-            if flow_id:
-                _solve_cache[flow_id] = {
-                    "result": result["result"],
-                    "duration_ms": timings["total_ms"],
-                }
-                # Enforce cache size
-                if len(_solve_cache) > FLOW_CACHE_SIZE:
-                    _solve_cache.popitem(last=False)
 
             # Defer logging and billing updates
             start_log = time.time()
@@ -162,7 +151,19 @@ class SolveView(APIView):
                 status_code="success",
                 flow_id=flow_id,
             )
+
             timings["logging_ms"] = int((time.time() - start_log) * 1000)
+            timings["total_ms"] = int((time.time() - start_time) * 1000)
+
+            # Cache the result for this flow_id
+            if flow_id:
+                _solve_cache[flow_id] = {
+                    "result": result["result"],
+                    "duration_ms": timings["total_ms"],
+                }
+                # Enforce cache size
+                if len(_solve_cache) > FLOW_CACHE_SIZE:
+                    _solve_cache.popitem(last=False)
 
             # Return response immediately
             return Response(
