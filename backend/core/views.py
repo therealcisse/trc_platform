@@ -11,7 +11,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-from threading import Thread
+from concurrent.futures import ThreadPoolExecutor
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -38,6 +38,9 @@ from collections import OrderedDict
 
 FLOW_CACHE_SIZE = int(os.getenv("FLOW_CACHE_SIZE", 1024))
 _solve_cache = OrderedDict()
+
+# Global thread pool for deferring logging (reuse across requests)
+_logging_executor = ThreadPoolExecutor(max_workers=2, thread_name_prefix="logging-defer-")
 
 if TYPE_CHECKING:
     from customers.models import User
@@ -243,7 +246,7 @@ class SolveView(APIView):
         def run_logging():
             log_request_async.delay(payload)
 
-        Thread(target=run_logging).start()
+        _logging_executor.submit(run_logging)
 
     def _should_save_image(self, image_bytes: bytes, app_settings: Settings) -> bool:
         """Determine if image should be saved based on size and app settings."""
