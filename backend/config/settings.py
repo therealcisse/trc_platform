@@ -308,7 +308,8 @@ CELERY_WORKER_POOL_RESTARTS = True
 # Celery Serialization Settings
 CELERY_TASK_SERIALIZER = "msgpack"
 CELERY_RESULT_SERIALIZER = "msgpack"
-CELERY_ACCEPT_CONTENT = ["msgpack"]
+CELERY_ACCEPT_CONTENT = ["msgpack", "json"]
+CELERY_EVENT_SERIALIZER = 'msgpack'
 
 # SSL for rediss:// (Redis Cloud uses TLS)
 CELERY_BROKER_TRANSPORT_OPTIONS = {
