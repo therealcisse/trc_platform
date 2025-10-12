@@ -72,7 +72,7 @@ export const extensionRuntimeStorage: ExtensionRuntimeType = {
             ...currentState,
             flows: {
               ...currentState.flows,
-              [id]: { ...flow, status: 'done', doneTimestamp: Date.now() },
+              [id]: { ...flow, status: 'done', doneTimestamp: Date.now() + 500 },
             },
           };
         }

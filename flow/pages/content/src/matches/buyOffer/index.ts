@@ -104,26 +104,26 @@ class BuyOfferMatcher implements Matcher {
         } else {
           const managed = flow.source !== 'manual';
 
-          if (managed) {
-            // Calculate timeout (delay + extra headroom)
-            const delaySeconds = 0;
-            const extraHeadroomSeconds = 300;
-            const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
-
-            // Try to mark buying in a single background round-trip
-            const { alreadyBuying } = await BackgroundUtils.tryMarkBuying({ flowId, timeout });
-            if (alreadyBuying) {
-              log.info(`Flow ${flowId} is already being purchased by another tab`);
-              await log.write();
-              // Close duplicate tab
-              await tabManager.closeCurrentTab();
-              return;
-            }
-
-            log.debug(
-              `🎯 Starting purchase process for flow ${flowId}. Timeout set to: ${new Date(timeout).toISOString()}`,
-            );
-          }
+          // if (managed) {
+          //   // Calculate timeout (delay + extra headroom)
+          //   const delaySeconds = 0;
+          //   const extraHeadroomSeconds = 300;
+          //   const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
+          //
+          //   // Try to mark buying in a single background round-trip
+          //   const { alreadyBuying } = await BackgroundUtils.tryMarkBuying({ flowId, timeout });
+          //   if (alreadyBuying) {
+          //     log.info(`Flow ${flowId} is already being purchased by another tab`);
+          //     await log.write();
+          //     // Close duplicate tab
+          //     await tabManager.closeCurrentTab();
+          //     return;
+          //   }
+          //
+          //   log.debug(
+          //     `🎯 Starting purchase process for flow ${flowId}. Timeout set to: ${new Date(timeout).toISOString()}`,
+          //   );
+          // }
 
           const context: ExecutionContext = {
             matcherId: MATCHER_IDS.BUY_OFFER,
