@@ -11,7 +11,7 @@ export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
 } as const;
 
 export const DEFAULT_CONFIG: ExtensionStorage = {
-  schemaVersion: 0,
+  schemaVersion: 1,
   enabled: true,
   debugMode: false,
   config: {
@@ -33,7 +33,6 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     inboxReloadSeconds: [4, 7],
     inboxPostReloadDelayMs: 0,
     inboxMaxLinksPerScan: 10,
-    inboxInterOpenDelayMs: 400,
     inboxBuysImmediately: true,
 
     // Product strategies

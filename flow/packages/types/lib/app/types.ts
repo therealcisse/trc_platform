@@ -32,7 +32,6 @@ export interface ExecutionConfig {
   inboxReloadSeconds: number[]; // [0, 5] means reload at 0 and 5 seconds of each minute
   inboxPostReloadDelayMs: number; // Delay after reload before scanning
   inboxMaxLinksPerScan: number; // Max links to open per scan
-  inboxInterOpenDelayMs: number; // Delay between opening links
   inboxBuysImmediately: boolean; // When true, non-lead inbox items open Buy Offer directly
 
   // API Authentication
@@ -283,7 +282,7 @@ export interface ManagedTabInfo {
 }
 
 export interface ExtensionStorage {
-  schemaVersion: 0; // later 0 | 1 | ...
+  schemaVersion: 0 | 1; // versioned storage schema
   enabled: boolean;
   debugMode: boolean;
   config: ExecutionConfig;

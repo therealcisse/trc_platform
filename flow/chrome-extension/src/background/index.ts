@@ -32,6 +32,26 @@ async function init() {
   }
 }
 
+function createMutex() {
+  let tail = Promise.resolve<void>(undefined);
+  return async function runExclusive<T>(fn: () => Promise<T>): Promise<T> {
+    // capture previous tail and create a new one
+    const prev = tail;
+    let release!: () => void;
+    tail = new Promise<void>(resolve => (release = resolve));
+    // wait for previous task to finish
+    await prev;
+    try {
+      return await fn();
+    } finally {
+      // let the next task run
+      release();
+    }
+  };
+}
+
+const runStartFlowAndOpenExclusive = createMutex();
+
 // Setup message handlers for content scripts
 function setupMessageHandlers() {
   chrome.runtime.onMessage.addListener(
@@ -168,34 +188,34 @@ async function handleMessage(
         };
       }
 
-      case 'extension.startFlowAndOpen': {
+      case 'extension.startFlowAndOpen':
         const payload = message.payload as FlowPayload & { url: string };
+        return runStartFlowAndOpenExclusive(async () => {
+          let flow: Flow;
+          if (payload.type === 'email') {
+            flow = FlowUtils.email(payload.id);
+          } else if (payload.type === 'inbox') {
+            flow = FlowUtils.inbox(payload.id, payload.requestTimestamp);
+          } else if (payload.type === 'manual') {
+            flow = FlowUtils.manual(payload.id);
+          }
 
-        let flow: Flow;
-        if (payload.type === 'email') {
-          flow = FlowUtils.email(payload.id);
-        } else if (payload.type === 'inbox') {
-          flow = FlowUtils.inbox(payload.id, payload.requestTimestamp);
-        } else if (payload.type === 'manual') {
-          flow = FlowUtils.manual(payload.id);
-        }
+          const existed = await ConfigService.startFlow(flow);
+          if (existed) {
+            return {
+              success: true,
+              data: { existed: true },
+              requestId: payload.id,
+            };
+          }
 
-        const existed = await ConfigService.startFlow(flow);
-        if (existed) {
+          const tab = await tabService.openTab(payload.url, true, payload.id);
           return {
             success: true,
-            data: { existed: true },
+            data: { existed: false, tabId: tab.id },
             requestId: payload.id,
           };
-        }
-
-        const tab = await tabService.openTab(payload.url, true, payload.id);
-        return {
-          success: true,
-          data: { existed: false, tabId: tab.id },
-          requestId: payload.id,
-        };
-      }
+        });
 
       case 'extension.getFlow': {
         const { id } = message.payload as { id: string };

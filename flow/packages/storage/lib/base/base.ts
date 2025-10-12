@@ -99,14 +99,16 @@ export const createStorage = <D = string>(
     return deserialize(value[key]) ?? fallback;
   };
 
+  let writeQueue = Promise.resolve<void>(undefined);
   const set = async (valueOrUpdate: ValueOrUpdateType<D>) => {
-    if (!initialCache) {
-      cache = await get();
-    }
-    cache = await updateCache(valueOrUpdate, cache);
-
-    await chrome?.storage[storageEnum].set({ [key]: serialize(cache) });
-    _emitChange();
+    // chain writes so each set uses the latest cache
+    writeQueue = writeQueue.then(async () => {
+      if (!initialCache) cache = await get();
+      cache = await updateCache(valueOrUpdate, cache);
+      await chrome.storage[storageEnum].set({ [key]: serialize(cache) });
+      _emitChange();
+    });
+    return writeQueue;
   };
 
   const subscribe = (listener: () => void) => {

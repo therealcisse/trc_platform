@@ -366,15 +366,14 @@ export async function executeInboxWorkflow(
 
     let openedCount = 0;
     let skippedCount = 0;
-    const errors: string[] = [];
 
     const maxLinks = context.config.inboxMaxLinksPerScan;
-    const interOpenDelay = context.config.inboxInterOpenDelayMs;
 
-    const linksToProcess = links;
+    // Process up to maxLinks concurrently for minimal latency
+    const linksToProcess = links.slice(0, maxLinks);
     log.info(`Processing up to ${linksToProcess.length} links from ${links.length} total (newest first)`);
 
-    for (const link of linksToProcess) {
+    const tasks = linksToProcess.map(async function (link) {
       // Create flow-specific log for this link
       const flowLog = Log.withFlow(MATCHER_IDS.INBOX, link.id);
 
@@ -391,56 +390,35 @@ export async function executeInboxWorkflow(
         return link.href;
       })();
 
-      if (openedCount >= maxLinks) {
-        break;
-      }
-
       try {
         if (!context.dryRun) {
           const id = link.id;
-
-          // Start flow and open target in a single background round trip
           const { existed } = await BackgroundUtils.startInboxFlowAndOpen({
-            id: id,
+            id,
             requestTimestamp: link.requestTimestamp,
             url: targetHref,
           });
 
           if (existed) {
-            // Flow already exists - this is our duplicate detection
             flowLog.info(`Flow already exists, skipping`);
             skippedCount++;
-            await flowLog.write();
-            continue;
-          }
-
-          flowLog.info(`Processing new inbox flow: ${id}`);
-          flowLog.info(`Opening link: ${link.href}`);
-
-          if (!context.dryRun) {
-            openedCount++;
-            flowLog.info(`Flow started and tab opened`);
           } else {
-            flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
+            flowLog.info(`Processing new inbox flow: ${id}`);
+            openedCount++;
           }
         } else {
           flowLog.debug('Dry run: Would start flow');
         }
 
         await flowLog.write();
-
-        // Delay between processing
-        if (interOpenDelay > 0 && linksToProcess.indexOf(link) < linksToProcess.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, interOpenDelay));
-        }
       } catch (error) {
         const errorMsg = `Error processing link: ${error}`;
         flowLog.error(errorMsg);
         await flowLog.write();
-        errors.push(errorMsg);
       }
-    }
+    });
 
+    await Promise.allSettled(tasks);
     await log.write();
 
     return {

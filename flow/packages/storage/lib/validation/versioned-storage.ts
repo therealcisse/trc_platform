@@ -1,5 +1,5 @@
 import { z } from 'zod';
-import { ExecutionConfigSchema } from './primitives.js';
+import { ExecutionConfigSchemaV0, ExecutionConfigSchemaV1 } from './primitives.js';
 
 /**
  * Versioned schemas for ExtensionStorage
@@ -14,12 +14,19 @@ export const ExtensionStorageSchemaV0 = z.object({
   schemaVersion: z.literal(0),
   enabled: z.boolean(),
   debugMode: z.boolean().default(false),
-  config: ExecutionConfigSchema,
+  config: ExecutionConfigSchemaV0,
+});
+
+export const ExtensionStorageSchemaV1 = z.object({
+  schemaVersion: z.literal(1),
+  enabled: z.boolean(),
+  debugMode: z.boolean().default(false),
+  config: ExecutionConfigSchemaV1,
 });
 
 // Latest aliases
-export const LATEST_SCHEMA_VERSION = 0 as const;
-export const ExtensionStorageSchemaLatest = ExtensionStorageSchemaV0;
+export const LATEST_SCHEMA_VERSION = 1 as const;
+export const ExtensionStorageSchemaLatest = ExtensionStorageSchemaV1;
 
 // Types for consumers
 export type ExtensionStorageV0 = z.infer<typeof ExtensionStorageSchemaV0>;
