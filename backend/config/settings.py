@@ -305,13 +305,18 @@ CELERY_BROKER_POOL_LIMIT = 0
 CELERY_WORKER_POOL = "threads"
 CELERY_WORKER_POOL_RESTARTS = True
 
+# Celery Serialization Settings
+CELERY_TASK_SERIALIZER = "msgpack"
+CELERY_RESULT_SERIALIZER = "msgpack"
+CELERY_ACCEPT_CONTENT = ["msgpack"]
+
 # SSL for rediss:// (Redis Cloud uses TLS)
 CELERY_BROKER_TRANSPORT_OPTIONS = {
-    'ssl': {
-        'ssl_cert_reqs': 'required',
-        'ssl_ca_certs': None,
-        'ssl_certfile': None,
-        'ssl_keyfile': None,
+    "ssl": {
+        "ssl_cert_reqs": "required",
+        "ssl_ca_certs": None,
+        "ssl_certfile": None,
+        "ssl_keyfile": None,
     }
 }
 

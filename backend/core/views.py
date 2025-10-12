@@ -11,9 +11,7 @@ import logging
 import time
 from typing import TYPE_CHECKING, Any
 
-# Import models here to avoid circular import
-from django.db import models
-
+from threading import Thread
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
@@ -241,7 +239,11 @@ class SolveView(APIView):
             "flow_id": flow_id,
             "cost_cents": app_settings.cost_per_request_cents,
         }
-        transaction.on_commit(lambda: log_request_async.delay(payload))
+
+        def run_logging():
+            log_request_async.delay(payload)
+
+        Thread(target=run_logging).start()
 
     def _should_save_image(self, image_bytes: bytes, app_settings: Settings) -> bool:
         """Determine if image should be saved based on size and app settings."""

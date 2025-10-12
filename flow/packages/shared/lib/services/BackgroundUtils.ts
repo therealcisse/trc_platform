@@ -56,6 +56,38 @@ export class BackgroundUtils {
   }
 
   /**
+   * Start an inbox flow and open the target URL in a single background round trip.
+   * Returns { existed: true } when flow already existed and no tab is opened.
+   * When newly started, returns { existed: false, tabId }.
+   */
+  static async startInboxFlowAndOpen(args: {
+    id: string;
+    requestTimestamp: number;
+    url: string;
+  }): Promise<{ existed: boolean; tabId?: number }> {
+    const response = await sendBackgroundCommand('extension.startFlowAndOpen', {
+      type: 'inbox',
+      id: args.id,
+      requestTimestamp: args.requestTimestamp,
+      url: args.url,
+    });
+
+    if (!response.success) {
+      throw new Error(`Failed to start inbox flow and open: ${response.error}`);
+    }
+
+    // New handler returns a structured data object
+    if (response.data && typeof response.data === 'object') {
+      const existed = response.data.existed === true || response.data === true; // back-compat
+      const tabId = 'tabId' in response.data ? response.data.tabId : undefined;
+      return { existed, tabId };
+    }
+
+    // Back-compat fallback if background returns boolean
+    return { existed: response.data === true };
+  }
+
+  /**
    * Start a new manual flow or check if it already exists
    * @returns { existed: boolean } - true if flow already existed, false if newly created
    */
@@ -97,6 +129,24 @@ export class BackgroundUtils {
     }
 
     return response.data?.buying === true;
+  }
+
+  /**
+   * Try to mark a flow as being purchased in a single round-trip.
+   * Returns alreadyBuying=true if it was already marked, otherwise marks and returns false.
+   */
+  static async tryMarkBuying(args: { flowId: string; timeout: number }): Promise<{ alreadyBuying: boolean }> {
+    const response = await sendBackgroundCommand('state.buying', {
+      action: 'tryMark',
+      flowId: args.flowId,
+      timeout: args.timeout,
+    });
+
+    if (!response.success) {
+      throw new Error(`Failed to tryMark buying state: ${response.error}`);
+    }
+
+    return { alreadyBuying: response.data?.alreadyBuying === true };
   }
 
   /**

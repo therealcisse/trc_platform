@@ -54,7 +54,7 @@ const manifest = {
     {
       matches: ['https://outlook.office.com/mail/*', 'https://outlook.office.com.mcas.ms/mail/*'],
       js: ['content/email.iife.js'],
-      run_at: 'document_end',
+      run_at: 'document_start',
     },
     {
       matches: [
@@ -62,7 +62,7 @@ const manifest = {
         'https://auktion.hansemerkur.de/item.php*',
       ],
       js: ['content/item.iife.js'],
-      run_at: 'document_end',
+      run_at: 'document_start',
     },
     {
       matches: [
@@ -70,7 +70,7 @@ const manifest = {
         'https://auktion.hansemerkur.de/buy_now/id/*',
       ],
       js: ['content/buyOffer.iife.js'],
-      run_at: 'document_end',
+      run_at: 'document_start',
     },
     {
       matches: [
@@ -78,7 +78,7 @@ const manifest = {
         'https://auktion.hansemerkur.de/my_message_center_show_message.php*',
       ],
       js: ['content/myOffer.iife.js'],
-      run_at: 'document_end',
+      run_at: 'document_start',
     },
     {
       matches: [
@@ -86,7 +86,7 @@ const manifest = {
         'https://auktion.hansemerkur.de/item/id/*',
       ],
       js: ['content/pdf.iife.js'],
-      run_at: 'document_end',
+      run_at: 'document_start',
     },
     {
       matches: [
@@ -94,7 +94,7 @@ const manifest = {
         'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
       ],
       js: ['content/inbox.iife.js'],
-      run_at: 'document_end',
+      run_at: 'document_start',
     },
   ],
   web_accessible_resources: [

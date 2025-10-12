@@ -601,6 +601,7 @@ dependencies = [
     { name = "drf-spectacular" },
     { name = "gunicorn" },
     { name = "httpx", extra = ["http2"] },
+    { name = "msgpack-python" },
     { name = "pillow" },
     { name = "psycopg2-binary" },
     { name = "redis" },
@@ -662,6 +663,7 @@ requires-dist = [
     { name = "gunicorn", specifier = ">=21.0,<22.0" },
     { name = "httpx", extras = ["http2"], specifier = ">=0.28.1" },
     { name = "model-bakery", marker = "extra == 'dev'", specifier = ">=1.17" },
+    { name = "msgpack-python", specifier = ">=0.5.6" },
     { name = "mypy", marker = "extra == 'dev'", specifier = ">=1.8" },
     { name = "pillow", specifier = ">=10.0,<11.0" },
     { name = "psycopg2-binary", specifier = ">=2.9,<3.0" },
@@ -809,6 +811,12 @@ wheels = [
     { url = "https://files.pythonhosted.org/packages/15/86/d0071e94987f8db59d4eeb386ddc64d0bb9b10820a8d82bcd3e53eeb2da6/msgpack-1.1.2-cp314-cp314t-win_amd64.whl", hash = "sha256:5a46bf7e831d09470ad92dff02b8b1ac92175ca36b087f904a0519857c6be3ff", size = 85772, upload-time = "2025-10-08T09:15:43.954Z" },
     { url = "https://files.pythonhosted.org/packages/81/f2/08ace4142eb281c12701fc3b93a10795e4d4dc7f753911d836675050f886/msgpack-1.1.2-cp314-cp314t-win_arm64.whl", hash = "sha256:d99ef64f349d5ec3293688e91486c5fdb925ed03807f64d98d205d2713c60b46", size = 70868, upload-time = "2025-10-08T09:15:44.959Z" },
 ]
+
+[[package]]
+name = "msgpack-python"
+version = "0.5.6"
+source = { registry = "https://pypi.org/simple" }
+sdist = { url = "https://files.pythonhosted.org/packages/8a/20/6eca772d1a5830336f84aca1d8198e5a3f4715cd1c7fc36d3cc7f7185091/msgpack-python-0.5.6.tar.gz", hash = "sha256:378cc8a6d3545b532dfd149da715abae4fda2a3adb6d74e525d0d5e51f46909b", size = 138996, upload-time = "2018-03-10T09:22:56.493Z" }
 
 [[package]]
 name = "mypy"

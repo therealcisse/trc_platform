@@ -146,6 +146,7 @@ export interface BackgroundCommands {
   'image.solve': { imageData: string; flowId: string };
   'flows.scheduleCloseAfterNavigation': { flowId: string; timeoutMs: number };
   'extension.startFlow': FlowPayload;
+  'extension.startFlowAndOpen': FlowPayload & { url: string };
   'extension.getFlow': { id: string };
   'extension.getAllFlows': {};
   'logs.query': {
@@ -207,7 +208,7 @@ export interface TabManagementCommand {
 }
 
 export interface BuyingStateCommand {
-  action: 'mark' | 'check' | 'clear';
+  action: 'mark' | 'tryMark' | 'check' | 'clear' | 'purge';
   flowId: string;
   timeout?: number;
 }
@@ -329,7 +330,7 @@ export interface MessageHandlerRegistry {
 
 // Tab management service interface
 export interface TabManagementService {
-  openTab(url: string, managedTab?: boolean): Promise<chrome.tabs.Tab>;
+  openTab(url: string, managedTab?: boolean, flowId?: string): Promise<chrome.tabs.Tab>;
   closeTab(tabId: number): Promise<void>;
   reloadTab(tabId: number): Promise<void>;
   isManaged(tabId: number): Promise<boolean>;

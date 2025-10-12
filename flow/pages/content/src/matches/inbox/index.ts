@@ -2,7 +2,6 @@ import {
   FlowUtils,
   Log,
   BackgroundUtils,
-  TabManager,
   installGlobalErrorHandlers,
   startPreciseSecondTicker,
 } from '@extension/shared';
@@ -304,7 +303,6 @@ export async function executeInboxWorkflow(
   const log = new Log(context.matcherId);
   log.info(`Extracting inbox links`);
   const startTime = Date.now();
-  const tabManager = TabManager.getInstance();
 
   try {
     // Parse links from the page
@@ -401,10 +399,11 @@ export async function executeInboxWorkflow(
         if (!context.dryRun) {
           const id = link.id;
 
-          // Start flow for this link
-          const { existed } = await BackgroundUtils.startInboxFlow({
+          // Start flow and open target in a single background round trip
+          const { existed } = await BackgroundUtils.startInboxFlowAndOpen({
             id: id,
             requestTimestamp: link.requestTimestamp,
+            url: targetHref,
           });
 
           if (existed) {
@@ -416,14 +415,11 @@ export async function executeInboxWorkflow(
           }
 
           flowLog.info(`Processing new inbox flow: ${id}`);
-
           flowLog.info(`Opening link: ${link.href}`);
 
           if (!context.dryRun) {
-            // Flow created successfully - no need for separate tracking
-            tabManager.openTab(targetHref, id);
             openedCount++;
-            flowLog.info(`Flow started successfully`);
+            flowLog.info(`Flow started and tab opened`);
           } else {
             flowLog.debug(`Dry run: Would open link ${link.href} in new tab`);
           }

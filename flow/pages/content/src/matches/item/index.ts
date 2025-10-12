@@ -183,22 +183,6 @@ export async function executeItemWorkflow(
   const managed = flow.source !== 'manual';
 
   try {
-    if (managed) {
-      // Check if this is a managed tab
-      const isManagedTab = await tabManager.isPageManaged();
-
-      if (!isManagedTab) {
-        log.warn('Tab is not managed, skipping');
-        await log.write();
-        return {
-          success: false,
-          matcherId: context.matcherId,
-          executorName: 'item',
-          error: 'Tab is not managed',
-        };
-      }
-    }
-
     if (flow.status === 'done' || flow.status === 'failed') {
       log.info('❌ Flow is already completed, closing all tabs');
       if (managed) {

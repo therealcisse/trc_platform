@@ -12,6 +12,28 @@ import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 import { TabManager } from '@extension/shared';
 
+// Helper to convert an image element into a data URL, DPI-aware
+function getImageToDataURL(img: HTMLImageElement, type: string = 'image/png', quality?: number): string {
+  if (!img.complete || img.naturalWidth === 0) {
+    throw new Error('Image not loaded yet');
+  }
+  const dpr = window.devicePixelRatio || 1;
+  const w = img.naturalWidth;
+  const h = img.naturalHeight;
+
+  const canvas = document.createElement('canvas');
+  canvas.width = Math.round(w * dpr);
+  canvas.height = Math.round(h * dpr);
+
+  const ctx = canvas.getContext('2d');
+  if (!ctx) throw new Error('2D context not available');
+
+  ctx.scale(dpr, dpr);
+  ctx.drawImage(img, 0, 0, w, h);
+
+  return canvas.toDataURL(type, quality);
+}
+
 /**
  * Buy Offer Matcher - Detects and triggers purchase workflow for valid products
  */
@@ -83,25 +105,20 @@ class BuyOfferMatcher implements Matcher {
           const managed = flow.source !== 'manual';
 
           if (managed) {
-            // Check if this flow is already being purchased
-            const buying = await BackgroundUtils.isBuying(flowId);
-
-            if (buying) {
-              log.info(`Flow ${flowId} is already being purchased by another tab`);
-              await log.write();
-
-              // Close duplicate tab
-              await tabManager.closeCurrentTab();
-              return;
-            }
-
             // Calculate timeout (delay + extra headroom)
             const delaySeconds = 0;
             const extraHeadroomSeconds = 300;
             const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
 
-            // Mark flow as being purchased
-            await BackgroundUtils.markBuying({ flowId, timeout });
+            // Try to mark buying in a single background round-trip
+            const { alreadyBuying } = await BackgroundUtils.tryMarkBuying({ flowId, timeout });
+            if (alreadyBuying) {
+              log.info(`Flow ${flowId} is already being purchased by another tab`);
+              await log.write();
+              // Close duplicate tab
+              await tabManager.closeCurrentTab();
+              return;
+            }
 
             log.debug(
               `🎯 Starting purchase process for flow ${flowId}. Timeout set to: ${new Date(timeout).toISOString()}`,
@@ -200,21 +217,18 @@ export async function executeBuyOfferWorkflow(
     await ensureFocus(inputElement);
   } catch {}
 
-  if (managed) {
-    // Check if this is a managed tab
-    const isManagedTab = await tabManager.isPageManaged();
-
-    if (!isManagedTab) {
-      log.warn('Tab is not managed, skipping');
-      await log.write();
-      return {
-        success: false,
-        matcherId: context.matcherId,
-        executorName: 'myOffer',
-        error: 'Tab is not managed',
-      };
-    }
+  // Begin captcha image fetch and solve as early as possible, in parallel with other checks
+  const imgElement = document.querySelector(selectors.img) as HTMLImageElement;
+  if (!imgElement || !imgElement.src) {
+    log.error('Captcha image not found or invalid');
+    throw new Error('Captcha image not found or invalid');
   }
+  if (!imgElement.complete || imgElement.naturalWidth === 0) {
+    await new Promise<void>(resolve => imgElement.addEventListener('load', () => resolve(), { once: true }));
+  }
+  const earlyDataUrl = getImageToDataURL(imgElement);
+  log.info('Starting captcha processing');
+  const solvePromise = captchaProcessor.solveCaptcha(imgElement.src, earlyDataUrl, flow.id);
 
   if (flow.status === 'done' || flow.status === 'failed') {
     log.info('❌ Flow is already completed, closing all tabs');
@@ -311,41 +325,8 @@ export async function executeBuyOfferWorkflow(
       throw new Error('Buy button not found');
     }
 
-    function getImageToDataURL(img: HTMLImageElement, type: string = 'image/png', quality?: number): string {
-      if (!img.complete || img.naturalWidth === 0) {
-        throw new Error('Image not loaded yet');
-      }
-      const dpr = window.devicePixelRatio || 1;
-      const w = img.naturalWidth;
-      const h = img.naturalHeight;
-
-      const canvas = document.createElement('canvas');
-      canvas.width = Math.round(w * dpr);
-      canvas.height = Math.round(h * dpr);
-
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('2D context not available');
-
-      // Scale for high DPI only if you plan to draw at CSS size later
-      ctx.scale(dpr, dpr);
-      ctx.drawImage(img, 0, 0, w, h);
-
-      return canvas.toDataURL(type, quality);
-    }
-
-    // Process captcha
-    log.info('Starting captcha processing');
-    const imgElement = document.querySelector(selectors.img) as HTMLImageElement;
-
-    if (!imgElement || !imgElement.src) {
-      log.error('Captcha image not found or invalid');
-      throw new Error('Captcha image not found or invalid');
-    }
-
-    // Convert image to data URL once
-    const imageDataUrl = getImageToDataURL(imgElement);
-
-    const answer = await captchaProcessor.solveCaptcha(imgElement.src, imageDataUrl, flow.id);
+    // Await the captcha result we started earlier
+    const answer = await solvePromise;
 
     log.info(`Captcha solved successfully: ${answer}`);
 

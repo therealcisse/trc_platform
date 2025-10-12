@@ -168,6 +168,35 @@ async function handleMessage(
         };
       }
 
+      case 'extension.startFlowAndOpen': {
+        const payload = message.payload as FlowPayload & { url: string };
+
+        let flow: Flow;
+        if (payload.type === 'email') {
+          flow = FlowUtils.email(payload.id);
+        } else if (payload.type === 'inbox') {
+          flow = FlowUtils.inbox(payload.id, payload.requestTimestamp);
+        } else if (payload.type === 'manual') {
+          flow = FlowUtils.manual(payload.id);
+        }
+
+        const existed = await ConfigService.startFlow(flow);
+        if (existed) {
+          return {
+            success: true,
+            data: { existed: true },
+            requestId: payload.id,
+          };
+        }
+
+        const tab = await tabService.openTab(payload.url, true, payload.id);
+        return {
+          success: true,
+          data: { existed: false, tabId: tab.id },
+          requestId: payload.id,
+        };
+      }
+
       case 'extension.getFlow': {
         const { id } = message.payload as { id: string };
         const flow = await ConfigService.getFlow(id);
@@ -386,6 +415,26 @@ async function handleBuyingState(payload: {
           success: true,
           requestId,
         };
+
+      case 'tryMark': {
+        if (!payload.timeout) {
+          throw new Error('Timeout required for tryMark action');
+        }
+        const state = await buyingService.isBuying(payload.flowId);
+        if (state.buying) {
+          return {
+            success: true,
+            data: { alreadyBuying: true },
+            requestId,
+          };
+        }
+        await buyingService.markBuying(payload.flowId, payload.timeout);
+        return {
+          success: true,
+          data: { alreadyBuying: false },
+          requestId,
+        };
+      }
 
       case 'check':
         const buyingState = await buyingService.isBuying(payload.flowId);

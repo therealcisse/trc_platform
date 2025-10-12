@@ -121,20 +121,6 @@ export async function executeMyOfferWorkflow(
   const tabManager = TabManager.getInstance();
 
   try {
-    // Check if this is a managed tab
-    const isManagedTab = await tabManager.isPageManaged();
-
-    if (!isManagedTab) {
-      log.warn('Tab is not managed, skipping');
-      await log.write();
-      return {
-        success: false,
-        matcherId: context.matcherId,
-        executorName: 'myOffer',
-        error: 'Tab is not managed',
-      };
-    }
-
     await processMyOffer();
 
     // Process browse myOffer (list view)

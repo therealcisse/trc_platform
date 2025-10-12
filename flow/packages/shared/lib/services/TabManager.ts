@@ -18,23 +18,11 @@ export class TabManager {
   }
 
   async openTab(url: string, flowId: string): Promise<number> {
-    await this.cleanupStaleTabs();
-
-    // Check tab count and cleanup if necessary
-    const countResponse = await sendBackgroundCommand('tab.manage', {
-      action: 'getTabCount',
-    });
-
-    if (countResponse.success && countResponse.data?.count >= this.maxTabs) {
-      await sendBackgroundCommand('tab.manage', {
-        action: 'cleanupStale',
-      });
-    }
-
-    // Open the tab via background
+    // Open the tab via background and mark as managed in a single round-trip
     const response = await sendBackgroundCommand('tab.manage', {
       action: 'open',
       url,
+      flowId,
     });
 
     if (!response.success || !response.data?.tabId) {
@@ -42,19 +30,7 @@ export class TabManager {
     }
 
     const tabId = response.data.tabId;
-
-    // Add to managed tabs with flowId
-    const addResponse = await sendBackgroundCommand('tab.manage', {
-      action: 'addManagedTab',
-      tabId,
-      flowId,
-    });
-
-    if (!addResponse.success) {
-      this.log.warn(`Failed to mark tab ${tabId} as managed: ${addResponse.error}`);
-    }
-
-    this.log.info(`Opened new tab ${tabId} for flow ${flowId}`);
+    this.log.info(`Opened new managed tab ${tabId} for flow ${flowId}`);
     return tabId;
   }
 
