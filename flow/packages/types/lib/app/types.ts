@@ -130,7 +130,6 @@ export type FlowPayload = EmailFlowPayload | ManualFlowPayload | InboxFlowPayloa
 export interface BackgroundCommands {
   'item.printProductConfirmation': PDFCommand;
   'tab.manage': TabManagementCommand;
-  'state.buying': BuyingStateCommand;
   'extension.log': {
     matcherId: string;
     flowId?: string;
@@ -204,12 +203,6 @@ export interface TabManagementCommand {
   tabId?: number;
   url?: string;
   flowId?: string;
-}
-
-export interface BuyingStateCommand {
-  action: 'mark' | 'tryMark' | 'check' | 'clear' | 'purge';
-  flowId: string;
-  timeout?: number;
 }
 
 // Telemetry and logging
@@ -294,13 +287,7 @@ export interface ExtensionRuntime {
     message: string;
   }[];
   managedTabs: Record<string, ManagedTabInfo>;
-  buyingOffers: Record<string, BuyingOffer>;
   flows: FlowState;
-}
-
-export interface BuyingOffer {
-  id: string;
-  timeout: number;
 }
 
 // Utility types
@@ -338,13 +325,6 @@ export interface TabManagementService {
 }
 
 // Buying state service interface
-export interface BuyingStateService {
-  markBuying(flowId: string, timeout: number): Promise<void>;
-  isBuying(flowId: string): Promise<{ buying: boolean }>;
-  clearBuying(flowId: string): Promise<void>;
-  clearExpired(): Promise<void>;
-  getBuyingOffer(flowId: string): Promise<BuyingOffer | undefined>;
-}
 
 // Product type discriminator
 export type ProductType = 'HEALTH' | 'ANIMAL' | 'CANCER' | 'ACCIDENT' | 'INVALID';

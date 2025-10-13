@@ -5,7 +5,6 @@ import type { ExtensionRuntime, Flow } from '@extension/types';
 export const DEFAULT_RUNTIME: ExtensionRuntime = {
   logs: [],
   managedTabs: {},
-  buyingOffers: {},
   flows: {},
 };
 
@@ -109,77 +108,6 @@ export const extensionRuntimeStorage: ExtensionRuntimeType = {
     async getAllFlows(): Promise<Flow[]> {
       const current = await storage.get();
       return Object.values(current.flows);
-    },
-  },
-
-  // Buying state namespace
-  buyingState: {
-    async markBuying(flowId: string, timeout: number) {
-      const offer = { id: flowId, timeout };
-      await storage.set(currentState => ({
-        ...currentState,
-        buyingOffers: {
-          ...currentState.buyingOffers,
-          [flowId]: offer,
-        },
-      }));
-    },
-
-    async checkBuying(flowId: string) {
-      const current = await storage.get();
-      const offer = current.buyingOffers[flowId];
-
-      if (!offer) return { buying: false };
-
-      const validated = offer;
-      if (Date.now() > validated.timeout) {
-        await this.clearBuying(flowId);
-        return { buying: false };
-      }
-
-      return { buying: true };
-    },
-
-    async clearBuying(flowId: string) {
-      await storage.set(currentState => {
-        const { [flowId]: _, ...remainingOffers } = currentState.buyingOffers;
-        return {
-          ...currentState,
-          buyingOffers: remainingOffers,
-        };
-      });
-    },
-
-    async purgeBuying(flowId: string) {
-      await storage.set(currentState => {
-        const { [flowId]: _, ...remainingOffers } = currentState.buyingOffers;
-        return {
-          ...currentState,
-          buyingOffers: remainingOffers,
-        };
-      });
-    },
-
-    async clearExpired() {
-      const current = await storage.get();
-      const now = Date.now();
-
-      await storage.set(currentState => {
-        const validOffers = Object.entries(currentState.buyingOffers)
-          .filter(([_, offer]) => offer.timeout > now)
-          .reduce((acc, [key, offer]) => ({ ...acc, [key]: offer }), {});
-
-        return {
-          ...currentState,
-          buyingOffers: validOffers,
-        };
-      });
-    },
-
-    async getBuyingOffer(flowId: string) {
-      const current = await storage.get();
-      const offer = current.buyingOffers[flowId];
-      return offer ? offer : undefined;
     },
   },
 
@@ -389,18 +317,6 @@ export const extensionRuntimeStorage: ExtensionRuntimeType = {
   },
 
   async clearFlowDatabase() {
-    const flows = (await storage.get()).flows;
-
-    for (const [id, _] of Object.entries(flows)) {
-      await chrome.runtime.sendMessage({
-        type: 'state.buying',
-        payload: {
-          action: 'purge',
-          flowId: id,
-        },
-      });
-    }
-
     await storage.set(currentState => ({
       ...currentState,
       flows: {},

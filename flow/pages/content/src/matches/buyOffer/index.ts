@@ -104,27 +104,6 @@ class BuyOfferMatcher implements Matcher {
         } else {
           const managed = flow.source !== 'manual';
 
-          // if (managed) {
-          //   // Calculate timeout (delay + extra headroom)
-          //   const delaySeconds = 0;
-          //   const extraHeadroomSeconds = 300;
-          //   const timeout = Date.now() + (delaySeconds + extraHeadroomSeconds) * 1000;
-          //
-          //   // Try to mark buying in a single background round-trip
-          //   const { alreadyBuying } = await BackgroundUtils.tryMarkBuying({ flowId, timeout });
-          //   if (alreadyBuying) {
-          //     log.info(`Flow ${flowId} is already being purchased by another tab`);
-          //     await log.write();
-          //     // Close duplicate tab
-          //     await tabManager.closeCurrentTab();
-          //     return;
-          //   }
-          //
-          //   log.debug(
-          //     `🎯 Starting purchase process for flow ${flowId}. Timeout set to: ${new Date(timeout).toISOString()}`,
-          //   );
-          // }
-
           const context: ExecutionContext = {
             matcherId: MATCHER_IDS.BUY_OFFER,
             url: currentUrl,
@@ -146,11 +125,6 @@ class BuyOfferMatcher implements Matcher {
         }
       } catch (e: any) {
         log.error(`❌ Buy offer executor failed: ${e?.message || String(e)}`);
-        log.debug('Clearing buying state after executor failure');
-
-        // Clear buying state on failure
-        await BackgroundUtils.clearBuying(flowId);
-        log.info('Buying state cleared');
       }
 
       await log.write();
@@ -337,8 +311,6 @@ export async function executeBuyOfferWorkflow(
     // Execute purchase
     if (!context.dryRun) {
       log.info(`Flow ${flow.id} marked as completed`);
-      // Clear buying state on success
-      managed && (await BackgroundUtils.clearBuying(flow.id));
 
       // Calculate remaining time
       const remainingTime = ProductFactory.getRemainingProcessingTimeSeconds(product, flow.timestamp, context.config);
@@ -413,19 +385,6 @@ export async function executeBuyOfferWorkflow(
         log.error('Flow validation failure - flow may have expired or been processed');
       } else if (error.message.includes('button')) {
         log.error('UI interaction failure - page structure may have changed');
-      }
-    }
-
-    // Clear buying state on failure
-    try {
-      log.debug('Attempting to clear buying state after error');
-      await BackgroundUtils.clearBuying(flow.id);
-      log.info('Buying state cleared after error');
-    } catch (cleanupError) {
-      console.error('[BuyOfferExecutor] Error clearing buying state:', cleanupError);
-      log.error('Failed to clear buying state', { error: cleanupError });
-      if (cleanupError instanceof Error) {
-        errors.push(cleanupError);
       }
     }
 

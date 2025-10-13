@@ -116,69 +116,6 @@ export class BackgroundUtils {
   }
 
   /**
-   * Check if a flow is currently being purchased
-   */
-  static async isBuying(flowId: string): Promise<boolean> {
-    const response = await sendBackgroundCommand('state.buying', {
-      action: 'check',
-      flowId,
-    });
-
-    if (!response.success) {
-      throw new Error(`Failed to check buying state: ${response.error}`);
-    }
-
-    return response.data?.buying === true;
-  }
-
-  /**
-   * Try to mark a flow as being purchased in a single round-trip.
-   * Returns alreadyBuying=true if it was already marked, otherwise marks and returns false.
-   */
-  static async tryMarkBuying(args: { flowId: string; timeout: number }): Promise<{ alreadyBuying: boolean }> {
-    const response = await sendBackgroundCommand('state.buying', {
-      action: 'tryMark',
-      flowId: args.flowId,
-      timeout: args.timeout,
-    });
-
-    if (!response.success) {
-      throw new Error(`Failed to tryMark buying state: ${response.error}`);
-    }
-
-    return { alreadyBuying: response.data?.alreadyBuying === true };
-  }
-
-  /**
-   * Mark a flow as being purchased with timeout
-   */
-  static async markBuying(args: { flowId: string; timeout: number }): Promise<void> {
-    const response = await sendBackgroundCommand('state.buying', {
-      action: 'mark',
-      flowId: args.flowId,
-      timeout: args.timeout,
-    });
-
-    if (!response.success) {
-      throw new Error(`Failed to mark buying state: ${response.error}`);
-    }
-  }
-
-  /**
-   * Clear buying state for a flow
-   */
-  static async clearBuying(flowId: string): Promise<void> {
-    const response = await sendBackgroundCommand('state.buying', {
-      action: 'clear',
-      flowId,
-    });
-
-    if (!response.success) {
-      throw new Error(`Failed to clear buying state: ${response.error}`);
-    }
-  }
-
-  /**
    * Send telemetry events to background
    */
   static async sendTelemetry(events: TelemetryEvent[]): Promise<void> {

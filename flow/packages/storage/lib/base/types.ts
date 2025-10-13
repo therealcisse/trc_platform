@@ -61,22 +61,6 @@ export type ExtensionStorageType = BaseStorageType<ExtensionStorage> & {
 };
 
 export type ExtensionRuntimeType = BaseStorageType<ExtensionRuntime> & {
-  // Buying state namespace
-  buyingState: {
-    markBuying(flowId: string, timeout: number): Promise<void>;
-    checkBuying(flowId: string): Promise<{ buying: boolean }>;
-    clearBuying(flowId: string): Promise<void>;
-    purgeBuying(flowId: string): Promise<void>;
-    clearExpired(): Promise<void>;
-    getBuyingOffer(flowId: string): Promise<
-      | {
-          id: string;
-          timeout: number;
-        }
-      | undefined
-    >;
-  };
-
   // Tab management namespace
   tabManagement: {
     markManaged(tabId: number, flowId: string): Promise<void>;

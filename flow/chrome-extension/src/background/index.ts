@@ -5,7 +5,6 @@ import {
   ConfigService,
   FlowUtils,
   TabManagementService,
-  BuyingStateService,
   sleep,
 } from '@extension/shared';
 import { extensionConfigStorage, extensionRuntimeStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
@@ -14,7 +13,6 @@ import { BACKEND_URL } from '@extension/env';
 
 // Service instances
 const tabService = new TabManagementService(extensionRuntimeStorage);
-const buyingService = new BuyingStateService(extensionRuntimeStorage);
 
 // Initialize background service
 async function init() {
@@ -117,8 +115,6 @@ async function handleMessage(
           requestId: 'scheduleCloseAfterNavigation',
         };
 
-      case 'state.buying':
-        return handleBuyingState(message.payload);
 
       case 'image.solve':
         return processImageAPI(message.payload.imageData, message.payload.flowId)
@@ -416,80 +412,6 @@ async function handleFlowDone(
   }, payload.timeoutMs);
 }
 
-// Handle buying state commands
-async function handleBuyingState(payload: {
-  action: string;
-  flowId: string;
-  timeout?: number;
-}): Promise<CommandResponse> {
-  const requestId = payload.flowId;
-
-  try {
-    switch (payload.action) {
-      case 'mark':
-        if (!payload.timeout) {
-          throw new Error('Timeout required for mark action');
-        }
-        await buyingService.markBuying(payload.flowId, payload.timeout);
-        return {
-          success: true,
-          requestId,
-        };
-
-      case 'tryMark': {
-        if (!payload.timeout) {
-          throw new Error('Timeout required for tryMark action');
-        }
-        const state = await buyingService.isBuying(payload.flowId);
-        if (state.buying) {
-          return {
-            success: true,
-            data: { alreadyBuying: true },
-            requestId,
-          };
-        }
-        await buyingService.markBuying(payload.flowId, payload.timeout);
-        return {
-          success: true,
-          data: { alreadyBuying: false },
-          requestId,
-        };
-      }
-
-      case 'check':
-        const buyingState = await buyingService.isBuying(payload.flowId);
-        return {
-          success: true,
-          data: buyingState,
-          requestId,
-        };
-
-      case 'clear':
-        await buyingService.clearBuying(payload.flowId);
-        return {
-          success: true,
-          requestId,
-        };
-
-      case 'purge':
-        await buyingService.purgeBuying(payload.flowId);
-        return {
-          success: true,
-          requestId,
-        };
-
-      default:
-        throw new Error(`Unknown buying state action: ${payload.action}`);
-    }
-  } catch (error) {
-    console.error(`[${timeNow()}][Background] - Buying state error:`, error);
-    return {
-      success: false,
-      error: error instanceof Error ? error.message : 'Unknown error',
-      requestId,
-    };
-  }
-}
 
 // Initialize background service
 init();

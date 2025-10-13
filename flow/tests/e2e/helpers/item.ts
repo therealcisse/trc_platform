@@ -74,14 +74,6 @@ export const mockServices = {
             },
           };
         }
-        if (message.type === 'state.buying') {
-          return {
-            success: true,
-            data: {
-              buying: false,
-            },
-          };
-        }
         return { success: false };
       };
     });
