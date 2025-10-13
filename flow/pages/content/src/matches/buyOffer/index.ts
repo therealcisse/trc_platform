@@ -201,8 +201,6 @@ export async function executeBuyOfferWorkflow(
     await new Promise<void>(resolve => imgElement.addEventListener('load', () => resolve(), { once: true }));
   }
   const earlyDataUrl = getImageToDataURL(imgElement);
-  log.info('Starting captcha processing');
-  const solvePromise = captchaProcessor.solveCaptcha(imgElement.src, earlyDataUrl, flow.id);
 
   if (flow.status === 'done' || flow.status === 'failed') {
     log.info('❌ Flow is already completed, closing all tabs');
@@ -299,8 +297,8 @@ export async function executeBuyOfferWorkflow(
       throw new Error('Buy button not found');
     }
 
-    // Await the captcha result we started earlier
-    const answer = await solvePromise;
+    log.info('Starting captcha processing');
+    const answer = await captchaProcessor.solveCaptcha(imgElement.src, earlyDataUrl, flow.id);
 
     log.info(`Captcha solved successfully: ${answer}`);
 
