@@ -6,31 +6,6 @@ from django.core.validators import URLValidator
 from django.db import models
 
 
-class FlexibleURLValidator(URLValidator):
-    """URLValidator that allows underscores in domain names for Cloudflare Workers."""
-
-    def __call__(self, value: str) -> None:
-        """Validate URL, allowing underscores for Cloudflare Workers domains.
-
-        Args:
-            value: The URL string to validate
-
-        Raises:
-            ValidationError: If the URL is invalid
-        """
-        # Temporarily replace underscores with hyphens for validation
-        # This allows Cloudflare Workers domains like xxx_xxx.workers.dev
-        if "_" in value:
-            # Extract the domain part and check if it's a workers.dev domain
-            parsed = urlparse(value)
-            if parsed.hostname and ".workers.dev" in parsed.hostname:
-                # Replace underscores with hyphens just for validation
-                temp_value = value.replace("_", "-")
-                super().__call__(temp_value)
-                return
-        super().__call__(value)
-
-
 class Settings(models.Model):
     """Singleton settings model for the application."""
 
@@ -42,7 +17,7 @@ class Settings(models.Model):
         blank=True,
         help_text="Frontend application domain for email verification links (e.g., https://app.example.com). If empty, uses the backend domain.",
         verbose_name="Application Domain",
-        validators=[FlexibleURLValidator()],
+        validators=[],
     )
 
     # Image storage settings

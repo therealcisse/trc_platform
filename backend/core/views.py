@@ -15,7 +15,8 @@ from concurrent.futures import ThreadPoolExecutor
 
 from django.contrib.auth import get_user_model
 from django.core.cache import cache
-from django.db import transaction
+from django.db.models.signals import post_delete, post_save
+from django.dispatch import receiver
 from rest_framework import status
 from rest_framework.decorators import api_view, permission_classes
 from rest_framework.parsers import FileUploadParser, MultiPartParser
@@ -23,8 +24,6 @@ from rest_framework.request import Request
 from rest_framework.response import Response
 from rest_framework.views import APIView
 
-from usage.models import RequestLog
-from usage.utils import get_or_create_current_billing_period
 
 from .authentication import BearerTokenAuthentication
 from .tasks import log_request_async
@@ -48,6 +47,13 @@ else:
     User = get_user_model()
 
 logger = logging.getLogger(__name__)
+
+APP_SETTINGS_CACHE_KEY = "app_settings"
+
+
+@receiver([post_save, post_delete], sender=Settings)
+def clear_app_settings_cache(sender: type[Settings], **kwargs: Any) -> None:
+    cache.delete(APP_SETTINGS_CACHE_KEY)
 
 
 class CachedSettings:
@@ -177,6 +183,7 @@ class SolveView(APIView):
                     "result": result["result"],
                     "duration_ms": timings["total_ms"],
                     "timings": timings,
+                    "model": app_settings.openai_model,
                 }
             )
 

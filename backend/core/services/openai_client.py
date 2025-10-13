@@ -62,18 +62,6 @@ Examples:
 class BaseOpenAIClient(ABC):
     """Abstract base class for OpenAI client implementations."""
 
-    def __init__(self) -> None:
-        self.model: str = settings.OPENAI_MODEL
-        self.timeout: int = settings.OPENAI_TIMEOUT_S
-        self._validate_configuration()
-
-    def _validate_configuration(self) -> None:
-        """Validate client configuration."""
-        if self.timeout <= 0:
-            raise ValueError(f"Invalid timeout value: {self.timeout}")
-        if not self.model:
-            raise ValueError("Model name is required")
-
     @abstractmethod
     def solve_image(
         self,

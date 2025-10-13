@@ -219,8 +219,6 @@ SPECTACULAR_SETTINGS = {
 
 # OpenAI settings
 OPENAI_API_KEY = os.environ.get("OPENAI_API_KEY", "")
-OPENAI_MODEL = os.environ.get("OPENAI_MODEL", "gpt-vision")
-OPENAI_TIMEOUT_S = int(os.environ.get("OPENAI_TIMEOUT_S", "30"))
 USE_MOCK_OPENAI = os.environ.get("USE_MOCK_OPENAI", "true").lower() == "true"
 
 # Billing settings

@@ -33,6 +33,7 @@ class ModelType(str, Enum):
     GPT41_MINI = "gpt-4.1-mini-2025-04-14"
     GPT41_NANO = "gpt-4.1-nano-2025-04-14"
     O4_MINI = "o4-mini-2025-04-16"
+    GPT4O_MINI = "gpt-4o-mini-2024-07-18"
 
     @property
     def title(self) -> str:
@@ -43,6 +44,7 @@ class ModelType(str, Enum):
             ModelType.GPT41_MINI: "GPT-4.1 Mini (2025-04-14)",
             ModelType.GPT41_NANO: "GPT-4.1 Nano (2025-04-14)",
             ModelType.O4_MINI: "O4 Mini (2025-04-16)",
+            ModelType.GPT4O_MINI: "GPT-4o Mini (2024-07-18)",
         }
         return titles[self]
 

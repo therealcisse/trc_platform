@@ -18,7 +18,7 @@ class Migration(migrations.Migration):
                 blank=True,
                 help_text="Frontend application domain for email verification links (e.g., https://app.example.com). If empty, uses the backend domain.",
                 max_length=255,
-                validators=[core.models.FlexibleURLValidator()],
+                validators=[],
                 verbose_name="Application Domain",
             ),
         ),

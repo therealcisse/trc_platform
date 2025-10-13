@@ -1,6 +1,5 @@
 from typing import Any
 
-from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 
 from core.models import Settings
@@ -60,9 +59,6 @@ class Command(BaseCommand):
         # Always update timestamp
         updates.append("updated_at")
         s.save(update_fields=list(set(updates)))
-
-        # Invalidate CachedSettings cache so API sees changes immediately
-        cache.delete("app_settings")
 
         self.stdout.write(self._status(s))
 

@@ -1,6 +1,5 @@
 """Management command to set or show the cost per request in cents."""
 
-from django.core.cache import cache
 from django.core.management.base import BaseCommand, CommandError
 
 from core.models import Settings
@@ -35,9 +34,6 @@ class Command(BaseCommand):
         # Update setting
         settings.cost_per_request_cents = cents
         settings.save(update_fields=["cost_per_request_cents", "updated_at"])
-
-        # Invalidate cached settings so change takes immediate effect
-        cache.delete("app_settings")
 
         dollars = cents / 100.0
         self.stdout.write(

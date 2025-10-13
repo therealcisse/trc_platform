@@ -43,7 +43,7 @@ class SettingsAdmin(admin.ModelAdmin):
         "cost_per_request_cents",
         "openai_model",
         "openai_timeout_s",
-        "app_domain",
+        # "app_domain",
         "updated_at",
     ]
     list_display_links = ["display_title"]  # Make the title clickable
@@ -63,24 +63,24 @@ class SettingsAdmin(admin.ModelAdmin):
                 "description": "Cost configuration for usage tracking",
             },
         ),
-        (
-            "Image Storage Settings",
-            {
-                "fields": [
-                    "save_request_images",
-                    "max_saved_image_size_mb",
-                    "image_retention_days",
-                ],
-                "description": "Control storing request images and retention policy",
-            },
-        ),
-        (
-            "Application Settings",
-            {
-                "fields": ["app_domain"],
-                "description": "Frontend application configuration. Set the app_domain to your frontend URL (e.g., https://trc_platform.cisse-amadou-9.workers.dev)",
-            },
-        ),
+        # (
+        #     "Image Storage Settings",
+        #     {
+        #         "fields": [
+        #             "save_request_images",
+        #             "max_saved_image_size_mb",
+        #             "image_retention_days",
+        #         ],
+        #         "description": "Control storing request images and retention policy",
+        #     },
+        # ),
+        # (
+        #     "Application Settings",
+        #     {
+        #         "fields": ["app_domain"],
+        #         "description": "Frontend application configuration. Set the app_domain to your frontend URL (e.g., https://trc_platform.cisse-amadou-9.workers.dev)",
+        #     },
+        # ),
     ]
 
     def display_title(self, obj: Settings) -> str:
