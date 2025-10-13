@@ -183,7 +183,7 @@ class SolveView(APIView):
                     "result": result["result"],
                     "duration_ms": timings["total_ms"],
                     "timings": timings,
-                    "model": app_settings.openai_model,
+                    # "model": app_settings.openai_model,
                 }
             )
 
