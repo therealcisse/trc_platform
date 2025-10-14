@@ -34,6 +34,7 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     inboxPostReloadDelayMs: 0,
     inboxMaxLinksPerScan: 10,
     inboxBuysImmediately: true,
+    inboxAutoRefreshMs: 300000, // 5 minutes in milliseconds
 
     // Product strategies
     animal: { dogs: true, cats: true },

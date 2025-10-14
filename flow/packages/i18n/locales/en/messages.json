@@ -349,6 +349,9 @@
   "animals_dogs": { "message": "Dogs" },
   "animals_cats": { "message": "Cats" },
   "options_enable_debug_mode": { "message": "Enable Debug Mode" },
+  "options_inbox_auto_refresh_disabled": {
+    "message": "Disabled"
+  },
   "options_enable_debug_mode_description": {
     "message": "When enabled, the extension collects and prints verbose debug information for troubleshooting."
   },
@@ -357,5 +360,11 @@
   },
   "options_inbox_buys_immediately_description": {
     "message": "Open the Buy Offer page directly for non-lead messages, skipping the normal flow."
+  },
+  "options_inbox_auto_refresh_label": {
+    "message": "Inbox Auto-Refresh Interval (minutes)"
+  },
+  "options_inbox_auto_refresh_description": {
+    "message": "Sets how often the inbox refreshes automatically when outside operational hours."
   }
 }

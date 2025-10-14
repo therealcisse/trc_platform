@@ -4,3 +4,4 @@ export * from './sendBackgroundCommand.js';
 export * from './startPreciseSecondTicker.js';
 export * from './TabManager.js';
 export * from './BackgroundUtils.js';
+export * from './scheduleAutoRefresh.js';

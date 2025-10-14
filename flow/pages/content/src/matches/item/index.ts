@@ -6,6 +6,7 @@ import {
   TabManager,
   installGlobalErrorHandlers,
   startPreciseSecondTicker,
+  scheduleAutoRefresh,
 } from '@extension/shared';
 import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
 import { clickWithVerification, isValidTimeOfDay } from '@src/lib';
@@ -90,6 +91,9 @@ class ItemMatcher implements Matcher {
     } else {
       log.warn('Outside operational hours, scheduling manual mode');
     }
+
+    // Only schedule auto-refresh for manual mode
+    scheduleAutoRefresh('item', config);
 
     await startPreciseSecondTicker(
       async ({ scheduledWallTimeMs, receivedWallTimeMs, driftMs, workerId, seq, startCount }) => {

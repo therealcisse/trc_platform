@@ -4,6 +4,7 @@ import {
   BackgroundUtils,
   installGlobalErrorHandlers,
   startPreciseSecondTicker,
+  scheduleAutoRefresh,
 } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { isValidTimeOfDay, sleep } from '@src/lib';
@@ -53,6 +54,9 @@ class InboxMatcher implements Matcher {
         return;
       }
       const timeAllowed = () => isValidTimeOfDay(config);
+
+      // Schedule background auto-refresh outside operational hours
+      scheduleAutoRefresh('inbox', config);
 
       // Check if we need to handle a scheduled reload
       const shouldScanAfterReload = sessionStorage.getItem('inbox_scan_after_reload') === '1';

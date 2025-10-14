@@ -690,6 +690,27 @@ const Options = () => {
                         />
                         <p className="mt-1 text-xs text-gray-400">{t('options_post_reload_delay_help')}</p>
                       </div>
+
+                      {/* Inbox Auto-Refresh outside operational hours */}
+                      <div className="inline-grid">
+                        <label className="mb-1 block text-sm text-gray-300">
+                          {t('options_inbox_auto_refresh_label')}
+                        </label>
+                        <Select
+                          value={Math.round(config.inboxAutoRefreshMs / 60000)}
+                          onChange={v => extensionConfigStorage.updateConfig({ inboxAutoRefreshMs: Number(v) * 60000 })}
+                          options={[
+                            // { value: -1, label: t('options_inbox_auto_refresh_disabled') },
+                            { value: 1, label: '1' },
+                            { value: 5, label: '5' },
+                            { value: 10, label: '10' },
+                            { value: 15, label: '15' },
+                            { value: 30, label: '30' },
+                          ]}
+                          className="border-gray-600 bg-gray-700 text-gray-100"
+                        />
+                        <p className="mt-1 text-xs text-gray-400">{t('options_inbox_auto_refresh_description')}</p>
+                      </div>
                     </div>
                   )}
                 </div>

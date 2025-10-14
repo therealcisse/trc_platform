@@ -349,6 +349,9 @@
   "animals_dogs": { "message": "Hunde" },
   "animals_cats": { "message": "Katzen" },
   "options_enable_debug_mode": { "message": "Debug-Modus aktivieren" },
+  "options_inbox_auto_refresh_disabled": {
+    "message": "Deaktiviert"
+  },
   "options_enable_debug_mode_description": {
     "message": "Bei Aktivierung werden detaillierte Debug-Informationen zur Fehlerbehebung gesammelt und ausgegeben."
   },
@@ -357,5 +360,11 @@
   },
   "options_inbox_buys_immediately_description": {
     "message": "Öffnet die Kaufseite direkt für Nachrichten ohne Lead und überspringt den normalen Ablauf."
+  },
+  "options_inbox_auto_refresh_label": {
+    "message": "Automatisches Inbox-Aktualisierungsintervall (Minuten)"
+  },
+  "options_inbox_auto_refresh_description": {
+    "message": "Legt fest, wie oft der Posteingang außerhalb der Betriebszeiten automatisch aktualisiert wird."
   }
 }
