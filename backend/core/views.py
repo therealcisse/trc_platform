@@ -26,7 +26,7 @@ from rest_framework.views import APIView
 
 
 from .authentication import BearerTokenAuthentication
-from .tasks import log_request_async
+from .tasks import log_request
 from .models import Settings
 from .services import openai_client
 from .services.exceptions import OpenAIError
@@ -251,7 +251,7 @@ class SolveView(APIView):
         }
 
         def run_logging():
-            log_request_async.delay(payload)
+            log_request(payload)
 
         _logging_executor.submit(run_logging)
 
