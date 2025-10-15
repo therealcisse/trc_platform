@@ -248,6 +248,7 @@ class SolveView(APIView):
             "request_id": request_id,
             "flow_id": flow_id,
             "cost_cents": app_settings.cost_per_request_cents,
+            "result": str(result["result"]) if result else None,
         }
 
         def run_logging():

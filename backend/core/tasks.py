@@ -29,7 +29,7 @@ def log_request(p) -> None:
             status=p["status"],
             error_code=p["error_code"],
             request_id=p["request_id"],
-            result=None,  # see note below
+            result=p["result"],  # see note below
         )
         bp.total_requests = F("total_requests") + 1
         bp.total_cost_cents = F("total_cost_cents") + p["cost_cents"]
