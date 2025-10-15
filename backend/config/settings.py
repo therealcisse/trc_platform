@@ -285,83 +285,60 @@ LOGGING = {
     },
 }
 
-# Celery Configuration
-CELERY_BROKER_URL = os.getenv(
-    "CELERY_BROKER_URL", "redis://localhost:6379/0"
-)  # Fallback for local dev
-CELERY_RESULT_BACKEND = None  # Store task results
-CELERY_ACCEPT_CONTENT = ["json"]  # Task serialization format
-CELERY_TASK_SERIALIZER = "json"
-CELERY_RESULT_SERIALIZER = "json"
-CELERY_TIMEZONE = "Europe/Berlin"  # Adjust to your app's timezone if needed
-CELERY_BROKER_CONNECTION_TIMEOUT = 10  # Increase timeout for serverless services like Upstash
-CELERY_BROKER_CONNECTION_MAX_RETRIES = None  # Unlimited retries
-CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # Retry on worker startup
-CELERY_BROKER_POOL_LIMIT = 0
-
-# Use threads pool to avoid SIGSEGV issues with Python 3.12
-CELERY_WORKER_POOL = "threads"
-CELERY_WORKER_POOL_RESTARTS = True
-
-# Celery Serialization Settings
-CELERY_TASK_SERIALIZER = "msgpack"
-CELERY_RESULT_SERIALIZER = "msgpack"
-CELERY_ACCEPT_CONTENT = ["msgpack", "json"]
-CELERY_EVENT_SERIALIZER = "msgpack"
-
-# SSL for rediss:// (Redis Cloud uses TLS)
-CELERY_BROKER_TRANSPORT_OPTIONS = {
-    "ssl": {
-        "ssl_cert_reqs": "required",
-        "ssl_ca_certs": None,
-        "ssl_certfile": None,
-        "ssl_keyfile": None,
-    }
-}
-
-# ASGI Configuration
-ASGI_APPLICATION = "config.asgi:application"  # Points to your ASGI app
-
-# If using Django Channels with Redis for channel layers
-CHANNEL_LAYERS = {
-    "default": {
-        "BACKEND": "channels_redis.core.RedisChannelLayer",
-        "CONFIG": {
-            "hosts": [os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")],
-        },
-    },
-}
-
-CACHES = {
-    "default": {
-        "BACKEND": "django_redis.cache.RedisCache",
-        "LOCATION": os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
-        "OPTIONS": {
-            "CLIENT_CLASS": "django_redis.client.DefaultClient",
-        },
-    },
-    "tokens": {
-        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-        "LOCATION": "token-cache",
-        "OPTIONS": {
-            "MAX_ENTRIES": 500,
-        },
-        "KEY_PREFIX": "tok",
-        "TIMEOUT": 600,  # 10 minutes for token cache
-    },
-}
-
-# # Cache configuration (using local memory cache for zero-cost optimization)
+# # Celery Configuration
+# CELERY_BROKER_URL = os.getenv(
+#     "CELERY_BROKER_URL", "redis://localhost:6379/0"
+# )  # Fallback for local dev
+# CELERY_RESULT_BACKEND = None  # Store task results
+# CELERY_ACCEPT_CONTENT = ["json"]  # Task serialization format
+# CELERY_TASK_SERIALIZER = "json"
+# CELERY_RESULT_SERIALIZER = "json"
+# CELERY_TIMEZONE = "Europe/Berlin"  # Adjust to your app's timezone if needed
+# CELERY_BROKER_CONNECTION_TIMEOUT = 10  # Increase timeout for serverless services like Upstash
+# CELERY_BROKER_CONNECTION_MAX_RETRIES = None  # Unlimited retries
+# CELERY_BROKER_CONNECTION_RETRY_ON_STARTUP = True  # Retry on worker startup
+# CELERY_BROKER_POOL_LIMIT = 0
+#
+# # Use threads pool to avoid SIGSEGV issues with Python 3.12
+# CELERY_WORKER_POOL = "threads"
+# CELERY_WORKER_POOL_RESTARTS = True
+#
+# # Celery Serialization Settings
+# CELERY_TASK_SERIALIZER = "msgpack"
+# CELERY_RESULT_SERIALIZER = "msgpack"
+# CELERY_ACCEPT_CONTENT = ["msgpack", "json"]
+# CELERY_EVENT_SERIALIZER = "msgpack"
+#
+# # SSL for rediss:// (Redis Cloud uses TLS)
+# CELERY_BROKER_TRANSPORT_OPTIONS = {
+#     "ssl": {
+#         "ssl_cert_reqs": "required",
+#         "ssl_ca_certs": None,
+#         "ssl_certfile": None,
+#         "ssl_keyfile": None,
+#     }
+# }
+#
+# # ASGI Configuration
+# ASGI_APPLICATION = "config.asgi:application"  # Points to your ASGI app
+#
+# # If using Django Channels with Redis for channel layers
+# CHANNEL_LAYERS = {
+#     "default": {
+#         "BACKEND": "channels_redis.core.RedisChannelLayer",
+#         "CONFIG": {
+#             "hosts": [os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0")],
+#         },
+#     },
+# }
+#
 # CACHES = {
 #     "default": {
-#         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
-#         "LOCATION": "unique-snowflake",
+#         "BACKEND": "django_redis.cache.RedisCache",
+#         "LOCATION": os.getenv("CELERY_BROKER_URL", "redis://localhost:6379/0"),
 #         "OPTIONS": {
-#             "MAX_ENTRIES": 1000,
-#             "CULL_FREQUENCY": 3,  # Cull 1/3 of entries when MAX_ENTRIES is reached
+#             "CLIENT_CLASS": "django_redis.client.DefaultClient",
 #         },
-#         "KEY_PREFIX": "imagesolve",
-#         "TIMEOUT": 300,  # Default 5 minutes
 #     },
 #     "tokens": {
 #         "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
@@ -373,7 +350,29 @@ CACHES = {
 #         "TIMEOUT": 600,  # 10 minutes for token cache
 #     },
 # }
-#
+
+# Cache configuration (using local memory cache for zero-cost optimization)
+CACHES = {
+    "default": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "unique-snowflake",
+        "OPTIONS": {
+            "MAX_ENTRIES": 1000,
+            "CULL_FREQUENCY": 3,  # Cull 1/3 of entries when MAX_ENTRIES is reached
+        },
+        "KEY_PREFIX": "imagesolve",
+        "TIMEOUT": 300,  # Default 5 minutes
+    },
+    "tokens": {
+        "BACKEND": "django.core.cache.backends.locmem.LocMemCache",
+        "LOCATION": "token-cache",
+        "OPTIONS": {
+            "MAX_ENTRIES": 500,
+        },
+        "KEY_PREFIX": "tok",
+        "TIMEOUT": 600,  # 10 minutes for token cache
+    },
+}
 
 # Sentry error tracking for production
 if not DEBUG and os.getenv("SENTRY_DSN"):
