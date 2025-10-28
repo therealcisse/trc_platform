@@ -1,0 +1,18 @@
+spring:
+  jpa:
+    hibernate:
+      ddl-auto: validate
+    properties:
+      hibernate:
+        format_sql: false
+  flyway:
+    enabled: true
+
+logging:
+  level:
+    root: WARN
+
+security:
+  jwt:
+    secret: VG1mdk9kQ0ZqQ2RzVm1FaGZ1a0N3V0JRR1Z6Wm5Zc0I1dUpzQWJjZGU= # base64 dummy
+    ttl-hours: 12

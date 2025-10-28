@@ -7,7 +7,7 @@ from core.models import Settings
 
 
 def build_verification_url(request: Request, user_email: str) -> str:
-    """
+    """ye
     Build a verification URL using the configured app domain.
 
     Args:

@@ -75,10 +75,6 @@ make install
 # Run migrations
 make migrate
 
-# Create demo data (includes admin user)
-uv run python manage.py bootstrap_demo
-```
-
 5. **Run development server**:
 ```bash
 make dev
@@ -118,8 +114,6 @@ make clean       # Clean up generated files
 
 ### Management Commands
 ```bash
-# Bootstrap demo data (users, tokens, invite codes)
-uv run python manage.py bootstrap_demo
 
 # Billing period management
 uv run python manage.py create_billing_periods
@@ -336,14 +330,6 @@ backend/
 
 ### Core App
 - **Settings**: Global application settings
-
-## Demo Data
-
-The `bootstrap_demo` command creates:
-- Admin user: `admin@example.com` / `admin123`
-- Regular user: `user@example.com` / `user123`
-- Unused invite code: `DEMO1234`
-- Sample API token for the regular user
 
 ## Docker Services
 
