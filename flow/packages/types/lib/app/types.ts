@@ -369,7 +369,8 @@ export interface InvalidProduct {
 }
 
 // Union type of all possible products
-export type Product = HealthProduct | AnimalProduct | CancerProduct | AccidentProduct | InvalidProduct;
+export type AllowedProduct = HealthProduct | AnimalProduct | CancerProduct | AccidentProduct;
+export type Product = AllowedProduct | InvalidProduct;
 
 // Helper type for title parsing results
 export interface ParsedTitle {
@@ -401,6 +402,10 @@ export function isAccidentProduct(product: Product): product is AccidentProduct 
 
 export function isInvalidProduct(product: Product): product is InvalidProduct {
   return product.type === 'INVALID';
+}
+
+export function isProductNotAllowed(product: Product): product is Product {
+  return product.allowed === false;
 }
 
 // Local time value object for minute-precision operational hours

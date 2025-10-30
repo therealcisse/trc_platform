@@ -1,0 +1,78 @@
+<?xml version="1.0"?>
+<!DOCTYPE module PUBLIC
+    "-//Checkstyle//DTD Checkstyle Configuration 1.3//EN"
+    "https://checkstyle.org/dtds/configuration_1_3.dtd">
+
+<module name="Checker">
+    <property name="charset" value="UTF-8"/>
+    <property name="severity" value="warning"/>
+    <property name="fileExtensions" value="java"/>
+
+    <!-- LineLength should be at the Checker level -->
+    <module name="LineLength">
+        <property name="max" value="120"/>
+        <property name="ignorePattern" value="^package.*|^import.*|a href|href|http://|https://|ftp://"/>
+    </module>
+
+    <module name="TreeWalker">
+        <module name="OuterTypeFilename"/>
+        <module name="IllegalTokenText"/>
+        <module name="AvoidEscapedUnicodeCharacters"/>
+        <module name="AvoidStarImport">
+            <!-- Allow wildcard imports for JPA, Lombok, validation, and common frameworks -->
+            <property name="excludes" value="jakarta.persistence,lombok,jakarta.validation.constraints,org.springframework.data.jpa.repository,org.springframework.data.domain,io.jsonwebtoken"/>
+        </module>
+        <module name="OneTopLevelClass"/>
+        <module name="NoLineWrap"/>
+        <module name="EmptyBlock"/>
+        <module name="NeedBraces"/>
+        <module name="LeftCurly"/>
+        <module name="RightCurly"/>
+        <module name="WhitespaceAround"/>
+        <module name="OneStatementPerLine"/>
+        <module name="MultipleVariableDeclarations"/>
+        <module name="ArrayTypeStyle"/>
+        <module name="MissingSwitchDefault"/>
+        <module name="FallThrough"/>
+        <module name="UpperEll"/>
+        <module name="ModifierOrder"/>
+        <module name="EmptyLineSeparator"/>
+        <!-- SeparatorWrap disabled - conflicts with Google Java Format -->
+        <!-- <module name="SeparatorWrap"/> -->
+        <module name="PackageName"/>
+        <module name="TypeName"/>
+        <module name="MemberName"/>
+        <module name="ParameterName"/>
+        <module name="LocalVariableName"/>
+        <module name="ClassTypeParameterName"/>
+        <module name="MethodTypeParameterName"/>
+        <module name="InterfaceTypeParameterName"/>
+        <module name="NoFinalizer"/>
+        <module name="GenericWhitespace"/>
+        <module name="Indentation">
+            <property name="basicOffset" value="4"/>
+            <property name="braceAdjustment" value="0"/>
+            <!-- Note: Text blocks (""" ... """) may cause indentation warnings -->
+            <!-- This is a known limitation with checkstyle and text blocks -->
+        </module>
+        <module name="AbbreviationAsWordInName"/>
+        <module name="OverloadMethodsDeclarationOrder"/>
+        <module name="VariableDeclarationUsageDistance"/>
+        <!-- CustomImportOrder disabled - Google Java Format handles import ordering -->
+        <!--
+        <module name="CustomImportOrder">
+            <property name="customImportOrderRules" value="THIRD_PARTY_PACKAGE###SPECIAL_IMPORTS###STANDARD_JAVA_PACKAGE###STATIC"/>
+        </module>
+        -->
+        <module name="MethodParamPad"/>
+        <module name="ParenPad"/>
+        <module name="OperatorWrap"/>
+        <module name="AnnotationLocation"/>
+        <module name="NonEmptyAtclauseDescription"/>
+        <!-- Javadoc checks disabled for development - re-enable for production -->
+        <!-- <module name="JavadocMethod"/> -->
+        <!-- <module name="JavadocType"/> -->
+        <!-- <module name="JavadocVariable"/> -->
+        <module name="JavadocStyle"/>
+    </module>
+</module>

@@ -253,6 +253,7 @@ out/
 
 # Maven
 target/
+test-results.json
 pom.xml.tag
 pom.xml.releaseBackup
 pom.xml.versionsBackup

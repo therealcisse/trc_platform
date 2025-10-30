@@ -1,0 +1,113 @@
+[project]
+name = "trc-platform-api-token-uat"
+version = "1.0.0"
+description = "TRC Platform API Token User Acceptance Tests"
+authors = [
+    {name = "TRC Platform Team", email = "dev@trc-platform.local"}
+]
+readme = "README.md"
+requires-python = ">=3.13"
+dependencies = [
+    # HTTP requests
+    "requests>=2.31.0",
+    # Database connectivity
+    "psycopg2-binary>=2.9.9",
+    # Email parsing and validation
+    "email-validator>=2.1.0",
+    # Data validation
+    "pydantic>=2.5.0",
+    # Enhanced console output
+    "colorama>=0.4.6",
+    # Date and time utilities
+    "python-dateutil>=2.8.2",
+    # Environment variable management
+    "python-dotenv>=1.0.0",
+    # Configuration management
+    "pyyaml>=6.0.1",
+    # Logging enhancements
+    "loguru>=0.7.2",
+    # Test data generation
+    "faker>=20.1.0",
+    # HTTP response validation
+    "jsonschema>=4.20.0",
+    # Performance monitoring
+    "psutil>=5.9.6",
+    # String utilities
+    "stringcase>=1.2.0",
+    # Regular expression utilities
+    "regex>=2023.12.25",
+    # Cryptographic utilities (for token validation)
+    "cryptography>=41.0.8",
+    "pyjwt>=2.10.1",
+    # BCrypt for password hashing verification
+    "bcrypt>=4.0.1",
+]
+
+[project.optional-dependencies]
+dev = [
+    # Testing framework
+    "pytest>=7.4.3",
+    "pytest-cov>=4.1.0",
+
+    # Code formatting
+    "black>=23.11.0",
+
+    # Linting
+    "flake8>=6.1.0",
+
+    # Type checking
+    "mypy>=1.7.1",
+
+    # Advanced HTTP client (alternative to requests)
+    "httpx>=0.25.2",
+
+    # Webdriver for browser automation (if needed for email UI)
+    "selenium>=4.16.0",
+]
+
+
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[tool.hatch.build.targets.wheel]
+packages = ["*.py"]
+
+[tool.black]
+line-length = 88
+target-version = ['py313']
+include = '\.pyi?$'
+
+[tool.isort]
+profile = "black"
+multi_line_output = 3
+include_trailing_comma = true
+force_grid_wrap = 0
+use_parentheses = true
+ensure_newline_before_comments = true
+
+[tool.mypy]
+python_version = "3.13"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = true
+disallow_incomplete_defs = true
+check_untyped_defs = true
+disallow_untyped_decorators = true
+no_implicit_optional = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+warn_no_return = true
+warn_unreachable = true
+strict_equality = true
+
+[tool.pytest.ini_options]
+minversion = "6.0"
+addopts = "-ra -q --strict-markers --strict-config"
+testpaths = [
+    ".",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "integration: marks tests as integration tests",
+]

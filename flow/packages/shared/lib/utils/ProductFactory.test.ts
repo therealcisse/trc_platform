@@ -1,6 +1,6 @@
 import { describe, it, expect } from 'vitest';
 import { ProductFactory } from './ProductFactory.js';
-import { LocalTime, isInvalidProduct, type ExecutionConfig } from '@extension/types';
+import { LocalTime, isInvalidProduct, isProductNotAllowed, type ExecutionConfig } from '@extension/types';
 
 describe('ProductFactory.parseTitle', () => {
   // Test fixtures for parseTitle
@@ -174,6 +174,20 @@ describe('ProductFactory.parseTitle', () => {
       if (isInvalidProduct(result)) {
         expect(result.error).toBe('Product not allowed by configuration');
       }
+    });
+
+    it('should not match any product', () => {
+      const config: ExecutionConfig = {
+        ...createTestConfig(),
+        accidents: false,
+      };
+      const title =
+        'KV-Voll Arbeitnehmer KW: Kamp: Kampagne_aus_KV_Voll_SEO PLZ: 21365 Bisher versichert gesetzlich (GKV) Alter: 28 * Berufliche Tätigkeit: Angestellter, Jahres-Brutto-Einkommen liegt unter JAEG';
+      const result = ProductFactory.parse(config, title);
+      console.log(result);
+
+      expect(result.allowed).toBe(false);
+      expect(isProductNotAllowed(result)).toBe(true);
     });
   });
 });

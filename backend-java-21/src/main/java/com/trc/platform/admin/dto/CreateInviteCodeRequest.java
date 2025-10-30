@@ -1,0 +1,19 @@
+package com.trc.platform.admin.dto;
+
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import jakarta.validation.constraints.Future;
+import jakarta.validation.constraints.Size;
+import java.time.LocalDateTime;
+
+public record CreateInviteCodeRequest(
+    @Size(min = 6, max = 32)
+    @JsonProperty("code")
+    /** Field description. */
+    String code,
+
+    @Future(message = "expiresAt must be in the future")
+    @JsonProperty("expiresAt")
+    @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")
+    LocalDateTime expiresAt
+) {}

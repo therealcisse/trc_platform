@@ -358,8 +358,6 @@ Implementation checklist to apply:
 4) Ensure background init still calls ensureMigrated before other storage operations
 5) Add or adjust tests for idempotency and empty-storage behavior
 
-Prompt: I want to build an advanced note taking app. The user should be able to take notes in a beautiful, powerful, easy to use editor, be able to save notes into folders and organize them however they want, and even use AI functionality. Let’s build a PRD for this app
-
 Additional Rules:
 1. First think through the problem, read the codebase for relevant files, and write a plan to tasks/todo.md.
 2. The plan should have a list of todo items that you can check off as you complete them
@@ -370,3 +368,5 @@ Additional Rules:
 7. Finally, add a review section to the todo.md file with a summary of the changes you made and any other relevant information.
 8. DO NOT BE LAZY. NEVER BE LAZY. IF THERE IS A BUG FIND THE ROOT CAUSE AND FIX IT. NO TEMPORARY FIXES. YOU ARE A SENIOR DEVELOPER. NEVER BE LAZY
 9. MAKE ALL FIXES AND CODE CHANGES AS SIMPLE AS HUMANLY POSSIBLE. THEY SHOULD ONLY IMPACT NECESSARY CODE RELEVANT TO THE TASK AND NOTHING ELSE. IT SHOULD IMPACT AS LITTLE CODE AS POSSIBLE. YOUR GOAL IS TO NOT INTRODUCE ANY BUGS. IT'S ALL ABOUT SIMPLICITY
+
+CRITICAL: When debugging, you MUST trace through the ENTIRE code flow step by step. No assumptions. No shortcuts.

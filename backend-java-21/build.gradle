@@ -1,0 +1,208 @@
+plugins {
+	id 'java'
+	id 'jacoco'
+	id 'checkstyle'
+	id 'pmd'
+	id 'com.diffplug.spotless' version '6.25.0'
+	id 'com.github.spotbugs' version '6.2.1'
+	id 'net.ltgt.errorprone' version '4.1.0'
+	id 'org.sonarqube' version '5.1.0.4882'
+	id 'org.owasp.dependencycheck' version '11.1.0'
+	id 'com.github.jk1.dependency-license-report' version '2.9'
+	id 'org.springframework.boot' version '3.5.7'
+	id 'io.spring.dependency-management' version '1.1.7'
+}
+
+group = 'com.trc.platform'
+version = '0.0.1-SNAPSHOT'
+description = 'TRC Platform Backend - Modern Spring Boot application with comprehensive code quality tools'
+
+java {
+	toolchain {
+		languageVersion = JavaLanguageVersion.of(21)
+	}
+}
+
+configurations {
+	compileOnly {
+		extendsFrom annotationProcessor
+	}
+}
+
+repositories {
+	mavenCentral()
+}
+
+dependencies {
+	// Spring Boot starters
+	implementation 'org.springframework.boot:spring-boot-starter-web'
+	implementation 'org.springframework.boot:spring-boot-starter-validation'
+	implementation 'org.springframework.boot:spring-boot-starter-security'
+	implementation 'org.springframework.boot:spring-boot-starter-data-jpa'
+	implementation 'org.springframework.boot:spring-boot-starter-cache'
+	implementation 'org.springframework.boot:spring-boot-starter-mail'
+	implementation 'org.springframework.boot:spring-boot-starter-webflux'
+
+	// Database
+	runtimeOnly 'org.postgresql:postgresql'
+	implementation 'org.flywaydb:flyway-core'
+	implementation 'org.flywaydb:flyway-database-postgresql'
+
+	// Cache providers
+	implementation 'com.github.ben-manes.caffeine:caffeine:3.1.8'
+	implementation 'org.springframework.boot:spring-boot-starter-data-redis'
+
+	// OpenAPI
+	implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:2.5.0'
+
+	// Resilience4j
+	implementation 'io.github.resilience4j:resilience4j-spring-boot3:2.2.0'
+
+	// Security utils
+	implementation 'org.springframework.security:spring-security-crypto'
+	implementation 'org.bouncycastle:bcprov-jdk18on:1.82'
+
+	// JWT for session tokens
+	implementation 'io.jsonwebtoken:jjwt-api:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-impl:0.11.5'
+	runtimeOnly 'io.jsonwebtoken:jjwt-jackson:0.11.5'
+
+	// Lombok
+	compileOnly 'org.projectlombok:lombok'
+	annotationProcessor 'org.projectlombok:lombok'
+
+	// ErrorProne - Compile-time Error Detection
+	errorprone 'com.google.errorprone:error_prone_core:2.36.0'
+	errorproneJavac 'com.google.errorprone:javac:9+181-r4173-1'
+
+	// Test
+	testImplementation 'org.springframework.boot:spring-boot-starter-test'
+	testImplementation 'org.springframework.security:spring-security-test'
+	testImplementation 'org.testcontainers:junit-jupiter:1.20.1'
+	testImplementation 'org.testcontainers:postgresql:1.20.1'
+	testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+// === Code Quality Configuration ===
+
+// Spotless - Code Formatting
+spotless {
+	java {
+		googleJavaFormat('1.22.0')
+			.style('AOSP') // AOSP uses 4-space indentation
+			.reflowLongStrings()
+		removeUnusedImports()
+		// No license header to avoid conflicts with checkstyle EmptyLineSeparator
+	}
+}
+
+// JaCoCo - Code Coverage
+jacoco {
+	toolVersion = '0.8.13'
+}
+
+jacocoTestReport {
+	reports {
+		xml.required = true
+		html.required = true
+	}
+}
+
+jacocoTestCoverageVerification {
+	violationRules {
+		rule {
+			limit {
+				minimum = 0.70
+			}
+		}
+	}
+}
+
+// PMD - Static Analysis
+pmd {
+	toolVersion = '7.7.0'
+	ignoreFailures = false
+	consoleOutput = true
+	ruleSetFiles = files('config/pmd/ruleset.xml')
+	ruleSets = []
+}
+
+tasks.withType(Pmd).configureEach {
+	exclude '**/generated/**'
+}
+
+// SpotBugs - Static Analysis
+spotbugs {
+	toolVersion = '4.8.6'
+	ignoreFailures = false
+	excludeFilter = file('config/spotbugs/exclude.xml')
+	effort = 'max'
+	reportLevel = 'low'
+}
+
+spotbugsMain {
+	reports {
+		html {
+			required = true
+			outputLocation = file("$buildDir/reports/spotbugs/main.html")
+		}
+		xml {
+			required = true
+			outputLocation = file("$buildDir/reports/spotbugs/main.xml")
+		}
+	}
+}
+
+spotbugsTest {
+	enabled = false // Usually disabled for test code
+}
+
+// Checkstyle - Code Style
+checkstyle {
+	toolVersion = '10.20.2'
+	configFile = file('config/checkstyle/checkstyle.xml')
+	ignoreFailures = false
+	maxWarnings = 5 // Allow a few warnings for text block indentation (known limitation)
+}
+
+// ErrorProne - Compile-time Error Detection
+tasks.withType(JavaCompile).configureEach {
+	options.errorprone {
+		enabled = !name.toLowerCase().contains('test')
+		excludedPaths = '.*/generated/.*'
+		disable('UnusedVariable')
+		enable('MissingOverride')
+	}
+}
+
+// OWASP Dependency Check - Security Scanning
+dependencyCheck {
+	failBuildOnCVSS = 7.0
+	suppressionFile = file('config/dependencycheck/suppressions.xml')
+}
+
+// SonarQube Integration
+sonarqube {
+	properties {
+		property 'sonar.projectKey', 'trc-platform-backend'
+		property 'sonar.host.url', 'https://sonarcloud.io'
+		property 'sonar.coverage.jacoco.xmlReportPaths', "${buildDir}/reports/jacoco/test/jacocoTestReport.xml"
+		property 'sonar.java.pmd.reportPaths', "${buildDir}/reports/pmd/main.xml"
+		property 'sonar.java.spotbugs.reportPaths', "${buildDir}/reports/spotbugs/main.xml"
+	}
+}
+
+// License Report
+licenseReport {
+	renderers = [new com.github.jk1.license.render.CsvReportRenderer()]
+}
+
+// Task Dependencies
+tasks.named('test') {
+	useJUnitPlatform()
+	finalizedBy jacocoTestReport
+}
+
+tasks.check {
+	dependsOn jacocoTestCoverageVerification
+}

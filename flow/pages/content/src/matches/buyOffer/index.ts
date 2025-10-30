@@ -6,7 +6,7 @@ import {
   BackgroundUtils,
   installGlobalErrorHandlers,
 } from '@extension/shared';
-import { isInvalidProduct, MATCHER_IDS } from '@extension/types';
+import { isInvalidProduct, isProductNotAllowed as isProductNotAllowed, MATCHER_IDS } from '@extension/types';
 import { clickWithVerification, sleep, ensureFocus } from '@src/lib';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
@@ -263,6 +263,35 @@ export async function executeBuyOfferWorkflow(
 
     if (isInvalidProduct(product)) {
       log.warn(`Invalid product format: ${product.name} ${product.error}`);
+
+      log.info('❌ Purchase completed unsuccessfully, marking flow as done');
+      await ConfigService.failedFlow(flow.id);
+      log.info(`Flow ${flow.id} marked as completed`);
+
+      log.info(`Closing all tabs for flow: ${flow.id}`);
+      setTimeout(async function () {
+        await tabManager.closeAllTabs(flow.id);
+      }, 100);
+
+      return {
+        success: true,
+        matcherId: context.matcherId,
+        executorName: 'buyOffer',
+        data: {
+          flowId: flow.id,
+          product: product,
+          completedAt: Date.now(),
+        },
+        telemetry: {
+          startTime,
+          endTime: Date.now(),
+          errors,
+        },
+      };
+    }
+
+    if (isProductNotAllowed(product)) {
+      log.warn(`Unallowed product format: ${product.name}`);
 
       log.info('❌ Purchase completed unsuccessfully, marking flow as done');
       await ConfigService.failedFlow(flow.id);
