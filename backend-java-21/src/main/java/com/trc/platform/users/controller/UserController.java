@@ -7,8 +7,6 @@ import com.trc.platform.users.dto.CreateApiTokenRequest;
 import com.trc.platform.users.entity.ApiToken;
 import com.trc.platform.users.service.ApiTokenService;
 import jakarta.validation.Valid;
-import java.time.LocalDateTime;
-import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 import java.util.UUID;
@@ -56,31 +54,33 @@ public class UserController {
         return data;
     }
 
-    @PostMapping(value = "/tokens", produces = MediaType.APPLICATION_JSON_VALUE, consumes = MediaType.APPLICATION_JSON_VALUE)
+    @PostMapping(
+            value = "/tokens",
+            produces = MediaType.APPLICATION_JSON_VALUE,
+            consumes = MediaType.APPLICATION_JSON_VALUE)
     public ResponseEntity<ApiTokenResponse> createToken(
             @AuthenticationPrincipal UserPrincipal principal,
             @Valid @RequestBody CreateApiTokenRequest request) {
 
         if (principal == null) {
             throw new org.springframework.security.authentication
-                    .AuthenticationCredentialsNotFoundException(
-                            "Authentication required");
+                    .AuthenticationCredentialsNotFoundException("Authentication required");
         }
 
         var user = principal.getUser();
         var created = apiTokenService.createTokenFor(user, request.name(), request.expiresAt());
         var token = created.token();
 
-        ApiTokenResponse response = new ApiTokenResponse(
-                token.getId(),
-                Optional.of(created.plainToken()),
-                token.getName(),
-                token.getCreatedAt(),
-                token.getLastUsedAt(),
-                token.getExpiresAt(),
-                token.getRevokedAt(),
-                token.getTokenPrefix()
-        );
+        ApiTokenResponse response =
+                new ApiTokenResponse(
+                        token.getId(),
+                        Optional.of(created.plainToken()),
+                        token.getName(),
+                        token.getCreatedAt(),
+                        token.getLastUsedAt(),
+                        token.getExpiresAt(),
+                        token.getRevokedAt(),
+                        token.getTokenPrefix());
 
         return ResponseEntity.status(HttpStatus.CREATED).body(response);
     }
@@ -99,23 +99,24 @@ public class UserController {
         Pageable pageable = PageRequest.of(page, size);
         Page<ApiToken> tokens = apiTokenService.getUserTokens(user, pageable);
 
-        Page<ApiTokenListResponse> responses = tokens.map(token -> new ApiTokenListResponse(
-                token.getId(),
-                token.getName(),
-                token.getCreatedAt(),
-                token.getLastUsedAt(),
-                token.getExpiresAt(),
-                token.getRevokedAt(),
-                token.getTokenPrefix()
-        ));
+        Page<ApiTokenListResponse> responses =
+                tokens.map(
+                        token ->
+                                new ApiTokenListResponse(
+                                        token.getId(),
+                                        token.getName(),
+                                        token.getCreatedAt(),
+                                        token.getLastUsedAt(),
+                                        token.getExpiresAt(),
+                                        token.getRevokedAt(),
+                                        token.getTokenPrefix()));
 
         return ResponseEntity.ok(responses);
     }
 
     @DeleteMapping(value = "/tokens/{tokenId}")
     public ResponseEntity<Void> revokeToken(
-            @AuthenticationPrincipal UserPrincipal principal,
-            @PathVariable UUID tokenId) {
+            @AuthenticationPrincipal UserPrincipal principal, @PathVariable UUID tokenId) {
 
         if (principal == null) {
             throw new org.springframework.security.authentication

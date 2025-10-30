@@ -46,9 +46,6 @@ public class CoreController {
     @GetMapping("/health")
     /** Field description. */
     public HealthResponse health() {
-        return new HealthResponse(
-                "ok",
-                Map.of("database", true, "openai", true)
-        );
+        return new HealthResponse("ok", Map.of("database", true, "openai", true));
     }
 }

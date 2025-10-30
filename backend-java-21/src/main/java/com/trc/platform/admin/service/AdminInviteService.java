@@ -74,17 +74,19 @@ public class AdminInviteService {
 
     /** Field description. */
     private InviteCodeResponse toDto(InviteCode ic) {
-        return new InviteCodeResponse(
-                ic.getId(),
-                ic.getCode(),
-                ic.getActive(),
-                ic.getCreatedAt(),
-                ic.getExpiresAt(),
-                ic.getUsedAt(),
-                ic.getUsedBy() != null ? ic.getUsedBy().getId() : null,
-                ic.getCreatedByUser() != null ? ic.getCreatedByUser().getId() : null,
-                ic.getCreatedByUser() != null ? ic.getCreatedByUser().getEmail() : null
-        );
+        return InviteCodeResponse.builder()
+                .id(ic.getId())
+                .code(ic.getCode())
+                .active(ic.getActive())
+                .createdAt(ic.getCreatedAt())
+                .expiresAt(ic.getExpiresAt())
+                .usedAt(ic.getUsedAt())
+                .usedByUserId(ic.getUsedBy() != null ? ic.getUsedBy().getId() : null)
+                .createdByUserId(
+                        ic.getCreatedByUser() != null ? ic.getCreatedByUser().getId() : null)
+                .createdByUserEmail(
+                        ic.getCreatedByUser() != null ? ic.getCreatedByUser().getEmail() : null)
+                .build();
     }
 
     /** Field description. */

@@ -55,8 +55,7 @@ public class AdminBillingService {
                         .orElseThrow(
                                 () -> new IllegalArgumentException("Billing period not found"));
         bp.setPaymentStatus(BillingPeriod.PaymentStatus.paid);
-        bp.setPaidAt(
-                request.paymentDate() != null ? request.paymentDate() : LocalDateTime.now());
+        bp.setPaidAt(request.paymentDate() != null ? request.paymentDate() : LocalDateTime.now());
         bp.setPaidAmountCents(request.paidAmountCents());
         bp.setPaymentReference(request.paymentReference());
         setNotesIfNotEmpty(bp, request.notes());
@@ -94,18 +93,18 @@ public class AdminBillingService {
 
     /** Field description. */
     private BillingPeriodAdminResponse toDto(BillingPeriod bp) {
-        return new BillingPeriodAdminResponse(
-                bp.getId(),
-                bp.getUser().getId(),
-                bp.getPaymentStatus(),
-                bp.getCurrent(),
-                bp.getTotalRequests(),
-                bp.getTotalCostCents(),
-                bp.getPaidAt(),
-                bp.getPaidAmountCents(),
-                bp.getPaymentReference(),
-                bp.getNotes()
-        );
+        return BillingPeriodAdminResponse.builder()
+                .id(bp.getId())
+                .userId(bp.getUser().getId())
+                .paymentStatus(bp.getPaymentStatus())
+                .current(bp.getCurrent())
+                .totalRequests(bp.getTotalRequests())
+                .totalCostCents(bp.getTotalCostCents())
+                .paidAt(bp.getPaidAt())
+                .paidAmountCents(bp.getPaidAmountCents())
+                .paymentReference(bp.getPaymentReference())
+                .notes(bp.getNotes())
+                .build();
     }
 
     /** Field description. */

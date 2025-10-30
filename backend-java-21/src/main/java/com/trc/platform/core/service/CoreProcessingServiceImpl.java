@@ -110,15 +110,16 @@ public class CoreProcessingServiceImpl implements CoreProcessingService {
 
         int extractMs = 0; // placeholder for future image pre processing timing
 
-        return new SolveResponse(
-                requestId.toString(),
-                result,
-                totalMs,
-                Map.of(
-                        "extract_ms", extractMs,
-                        "settings_ms", settingsMs,
-                        "openai_ms", openaiMs,
-                        "total_ms", totalMs)
-        );
+        return SolveResponse.builder()
+                .requestId(requestId.toString())
+                .result(result)
+                .durationMs(totalMs)
+                .timings(
+                        Map.of(
+                                "extract_ms", extractMs,
+                                "settings_ms", settingsMs,
+                                "openai_ms", openaiMs,
+                                "total_ms", totalMs))
+                .build();
     }
 }

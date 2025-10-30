@@ -15,7 +15,6 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.crypto.bcrypt.BCrypt;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.StringUtils;
 import org.springframework.web.filter.OncePerRequestFilter;
@@ -40,8 +39,7 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
             String token = extractToken(request);
             if (token != null && token.startsWith("tok_")) {
                 // Find token by hash - the token itself is the hash
-                apiTokenRepository.findByTokenHash(token)
-                        .ifPresent(this::authenticateWithToken);
+                apiTokenRepository.findByTokenHash(token).ifPresent(this::authenticateWithToken);
             }
         }
 

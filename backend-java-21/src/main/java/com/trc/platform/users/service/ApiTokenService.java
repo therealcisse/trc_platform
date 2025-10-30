@@ -4,7 +4,6 @@ import com.trc.platform.users.entity.ApiToken;
 import com.trc.platform.users.entity.User;
 import com.trc.platform.users.repository.ApiTokenRepository;
 import java.time.LocalDateTime;
-import java.time.ZoneId;
 import java.util.Base64;
 import java.util.List;
 import java.util.UUID;
@@ -63,7 +62,8 @@ public class ApiTokenService {
 
     /** Field description. */
     public ApiToken getToken(UUID tokenId, UUID userId) {
-        return apiTokenRepository.findByIdAndUserId(tokenId, userId)
+        return apiTokenRepository
+                .findByIdAndUserId(tokenId, userId)
                 .orElseThrow(() -> new RuntimeException("Token not found"));
     }
 

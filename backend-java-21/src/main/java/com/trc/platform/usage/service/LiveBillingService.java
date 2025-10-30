@@ -38,16 +38,16 @@ public class LiveBillingService implements BillingService {
     public CurrentBillingResponse getCurrentBilling(User user) {
         BillingPeriod currentPeriod = getCurrentBillingPeriod(user);
 
-        return new CurrentBillingResponse(
-                currentPeriod.getId(),
-                currentPeriod.getCurrent(),
-                currentPeriod.getPeriodStart(),
-                currentPeriod.getPeriodEnd(),
-                formatPeriodLabel(currentPeriod.getPeriodStart()),
-                currentPeriod.getPaymentStatus().name(),
-                currentPeriod.getTotalRequests(),
-                currentPeriod.getTotalCostCents()
-        );
+        return CurrentBillingResponse.builder()
+                .id(currentPeriod.getId())
+                .isCurrent(currentPeriod.getCurrent())
+                .periodStart(currentPeriod.getPeriodStart())
+                .periodEnd(currentPeriod.getPeriodEnd())
+                .periodLabel(formatPeriodLabel(currentPeriod.getPeriodStart()))
+                .paymentStatus(currentPeriod.getPaymentStatus().name())
+                .totalRequests(currentPeriod.getTotalRequests())
+                .totalCostCents(currentPeriod.getTotalCostCents())
+                .build();
     }
 
     @Override
@@ -82,25 +82,27 @@ public class LiveBillingService implements BillingService {
         BillingPeriod period = periodOpt.get();
         List<RequestLog> requests = billingPeriodRepository.findRequestsByPeriodId(periodId);
 
-        return new BillingPeriodDetailDto(
-                period.getId(),
-                period.getPeriodStart(),
-                period.getPeriodEnd(),
-                period.getTotalRequests(),
-                period.getTotalCostCents(),
-                period.getPaymentStatus(),
-                period.getCurrent(),
-                requests.stream()
-                        .map(rl ->
-                                new BillingPeriodDetailDto.RequestLogDto(
-                                        rl.getId(),
-                                        rl.getStatus().name(),
-                                        rl.getDurationMs(),
-                                        rl.getFlowId(),
-                                        rl.getResult()
-                                ))
-                        .toList()
-        );
+        return BillingPeriodDetailDto.builder()
+                .id(period.getId())
+                .periodStart(period.getPeriodStart())
+                .periodEnd(period.getPeriodEnd())
+                .totalRequests(period.getTotalRequests())
+                .totalCostCents(period.getTotalCostCents())
+                .paymentStatus(period.getPaymentStatus())
+                .current(period.getCurrent())
+                .requests(
+                        requests.stream()
+                                .map(
+                                        rl ->
+                                                BillingPeriodDetailDto.RequestLogDto.builder()
+                                                        .id(rl.getId())
+                                                        .status(rl.getStatus().name())
+                                                        .durationMs(rl.getDurationMs())
+                                                        .flowId(rl.getFlowId())
+                                                        .result(rl.getResult())
+                                                        .build())
+                                .toList())
+                .build();
     }
 
     @Override

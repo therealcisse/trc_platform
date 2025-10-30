@@ -2,32 +2,33 @@ package com.trc.platform.admin.dto;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
+import lombok.Builder;
 
+@Builder
 public record InviteCodeResponse(
-    /** Field description. */
-    UUID id,
+        /** Field description. */
+        UUID id,
 
-    /** Field description. */
-    String code,
+        /** Field description. */
+        String code,
 
-    /** Field description. */
-    Boolean active,
+        /** Field description. */
+        Boolean active,
 
-    /** Field description. */
-    LocalDateTime createdAt,
+        /** Field description. */
+        LocalDateTime createdAt,
 
-    /** Field description. */
-    LocalDateTime expiresAt,
+        /** Field description. */
+        LocalDateTime expiresAt,
 
-    /** Field description. */
-    LocalDateTime usedAt,
+        /** Field description. */
+        LocalDateTime usedAt,
 
-    /** Field description. */
-    UUID usedByUserId,
+        /** Field description. */
+        UUID usedByUserId,
 
-    /** Field description. */
-    UUID createdByUserId,
+        /** Field description. */
+        UUID createdByUserId,
 
-    /** Field description. */
-    String createdByUserEmail
-) {}
+        /** Field description. */
+        String createdByUserEmail) {}
