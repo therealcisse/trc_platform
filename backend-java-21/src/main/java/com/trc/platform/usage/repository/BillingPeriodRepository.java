@@ -43,4 +43,21 @@ public interface BillingPeriodRepository extends JpaRepository<BillingPeriod, UU
                     + " :periodStart")
     Optional<BillingPeriod> findByUserIdAndPeriodStart(
             @Param("userId") UUID userId, @Param("periodStart") java.time.LocalDate periodStart);
+
+    @Modifying
+    @Query("UPDATE BillingPeriod bp SET bp.current = false WHERE bp.user.id = :userId AND bp.id != :excludePeriodId")
+    int markAllOtherPeriodsNotCurrent(@Param("userId") UUID userId, @Param("excludePeriodId") UUID excludePeriodId);
+
+    // Admin queries for billing management
+    @Query("SELECT bp FROM BillingPeriod bp ORDER BY bp.periodStart DESC")
+    Page<BillingPeriod> findAllAdmin(Pageable pageable);
+
+    @Query("SELECT bp FROM BillingPeriod bp WHERE bp.user.id = :userId ORDER BY bp.periodStart DESC")
+    Page<BillingPeriod> findByUserIdAdmin(@Param("userId") UUID userId, Pageable pageable);
+
+    @Query("SELECT bp FROM BillingPeriod bp WHERE bp.paymentStatus = :status ORDER BY bp.periodStart DESC")
+    Page<BillingPeriod> findByPaymentStatusAdmin(@Param("status") com.trc.platform.usage.entity.PaymentStatus status, Pageable pageable);
+
+    @Query("SELECT bp FROM BillingPeriod bp WHERE bp.user.id = :userId AND bp.paymentStatus = :status ORDER BY bp.periodStart DESC")
+    Page<BillingPeriod> findByUserIdAndPaymentStatusAdmin(@Param("userId") UUID userId, @Param("status") com.trc.platform.usage.entity.PaymentStatus status, Pageable pageable);
 }

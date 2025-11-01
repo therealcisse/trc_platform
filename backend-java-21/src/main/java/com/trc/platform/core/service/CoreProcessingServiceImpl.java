@@ -22,28 +22,22 @@ import reactor.core.publisher.Mono;
 @RequiredArgsConstructor
 public class CoreProcessingServiceImpl implements CoreProcessingService {
 
-    /** Field description. */
     private final OpenAIClientService openAIClientService;
 
-    /** Field description. */
     private final SettingsService settingsService;
 
-    /** Field description. */
     private final BillingPeriodRepository billingRepo;
 
     @Override
-    /** Field description. */
     public SolveResponse solveMathProblem(MultipartFile imageFile, User user) {
         return doSolve(imageFile, user, false);
     }
 
     @Override
-    /** Field description. */
     public SolveResponse testSolveMathProblem(MultipartFile imageFile, User user) {
         return doSolve(imageFile, user, true);
     }
 
-    /** Field description. */
     private SolveResponse doSolve(MultipartFile imageFile, User user, boolean test) {
         long t0 = System.currentTimeMillis();
         UUID requestId = UUID.randomUUID();

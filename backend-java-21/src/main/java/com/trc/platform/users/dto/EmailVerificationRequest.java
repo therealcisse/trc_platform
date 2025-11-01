@@ -5,6 +5,4 @@ import lombok.Builder;
 
 @Builder
 public record EmailVerificationRequest(
-        @NotBlank(message = "Verification token is required")
-                /** Field description. */
-                String token) {}
+        @NotBlank(message = "Verification token is required") String token) {}

@@ -27,10 +27,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+      naming:
+        physical: org.hibernate.boot.model.naming.CamelCaseToUnderscoresNamingStrategy
     show-sql: false
     properties:
       hibernate:
         format_sql: true
+        dialect: org.hibernate.dialect.PostgreSQLDialect
         jdbc:
           batch_size: 20
           time_zone: UTC
@@ -68,8 +71,9 @@ logging:
     com.zaxxer.hikari.pool: DEBUG
     com.zaxxer.hikari.HikariConfig: DEBUG
   pattern:
-    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
-    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n"
+    # Include full stack traces when exceptions are logged
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%wEx"
+    file: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%wEx"
 
 cors:
   allowed-origins: ${CORS_ALLOWED_ORIGINS:}

@@ -27,25 +27,21 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class AuthController {
 
-    /** Field description. */
     private final AuthenticationService authenticationService;
 
     @PostMapping(value = "/customers/login", produces = MediaType.APPLICATION_JSON_VALUE)
     @ResponseBody
-    /** Field description. */
     public Map<String, Object> login(@Valid @RequestBody LoginRequest body) {
         return authenticationService.login(body);
     }
 
     @PostMapping("/customers/register")
     @ResponseStatus(HttpStatus.ACCEPTED)
-    /** Field description. */
     public void register(@Valid @RequestBody RegistrationRequest body, HttpServletRequest request) {
         authenticationService.register(body, request);
     }
 
     @PostMapping("/auth/password/change")
-    /** Field description. */
     public ResponseEntity<Void> changePassword(
             @Valid @RequestBody PasswordChangeRequest body,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -57,14 +53,12 @@ public class AuthController {
     }
 
     @PostMapping("/auth/verify-email")
-    /** Field description. */
     public ResponseEntity<Void> verifyEmail(@Valid @RequestBody EmailVerificationRequest body) {
         authenticationService.verifyEmail(body.token());
         return ResponseEntity.ok().build();
     }
 
     @PostMapping("/auth/resend-verification")
-    /** Field description. */
     public ResponseEntity<Void> resendVerification(
             @Valid @RequestBody ResendVerificationRequest body, HttpServletRequest request) {
         authenticationService.resendVerificationEmail(body.email(), request);

@@ -27,11 +27,9 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminInviteController {
 
-    /** Field description. */
     private final AdminInviteService service;
 
     @GetMapping
-    /** Field description. */
     public Page<InviteCodeResponse> list(
             @RequestParam(name = "page", defaultValue = "0") int page,
             @RequestParam(name = "size", defaultValue = "20") int size) {
@@ -39,7 +37,6 @@ public class AdminInviteController {
     }
 
     @PostMapping(produces = MediaType.APPLICATION_JSON_VALUE)
-    /** Field description. */
     public InviteCodeResponse create(
             @Valid @RequestBody CreateInviteCodeRequest req,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
@@ -48,19 +45,16 @@ public class AdminInviteController {
     }
 
     @PostMapping(value = "/{code}/activate", produces = MediaType.APPLICATION_JSON_VALUE)
-    /** Field description. */
     public InviteCodeResponse activate(@PathVariable String code) {
         return service.activate(code);
     }
 
     @PostMapping(value = "/{code}/deactivate", produces = MediaType.APPLICATION_JSON_VALUE)
-    /** Field description. */
     public InviteCodeResponse deactivate(@PathVariable String code) {
         return service.deactivate(code);
     }
 
     @DeleteMapping(value = "/expired")
-    /** Field description. */
     public void deleteExpired() {
         service.deleteExpired();
     }

@@ -5,45 +5,19 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
+import com.trc.platform.usage.entity.PaymentStatus;
 
 @Builder
 public record BillingPeriodDetailDto(
-        /** Field description. */
         UUID id,
-
-        /** Field description. */
         LocalDate periodStart,
-
-        /** Field description. */
         LocalDate periodEnd,
-
-        /** Field description. */
         Integer totalRequests,
-
-        /** Field description. */
         Integer totalCostCents,
-        BillingPeriod.PaymentStatus paymentStatus,
-
-        /** Field description. */
+        PaymentStatus paymentStatus,
         Boolean current,
-
-        /** Field description. */
         List<RequestLogDto> requests) {
-    /** Field description. */
     @Builder
     public record RequestLogDto(
-            /** Field description. */
-            UUID id,
-
-            /** Field description. */
-            String status,
-
-            /** Field description. */
-            Integer durationMs,
-
-            /** Field description. */
-            String flowId,
-
-            /** Field description. */
-            String result) {}
+            UUID id, String status, Integer durationMs, String flowId, String result) {}
 }

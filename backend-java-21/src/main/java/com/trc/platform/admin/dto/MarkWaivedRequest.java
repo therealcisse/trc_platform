@@ -3,6 +3,4 @@ package com.trc.platform.admin.dto;
 import lombok.Builder;
 
 @Builder
-public record MarkWaivedRequest(
-        /** Field description. */
-        String notes) {}
+public record MarkWaivedRequest(String notes) {}

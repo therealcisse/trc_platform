@@ -8,9 +8,5 @@ import lombok.Builder;
 
 @Builder
 public record LoginRequest(
-        @NotBlank @Email @Size(max = 255) @JsonProperty("email")
-                /** Field description. */
-                String email,
-        @NotBlank @Size(min = 8, max = 128) @JsonProperty("password")
-                /** Field description. */
-                String password) {}
+        @NotBlank @Email @Size(max = 255) @JsonProperty("email") String email,
+        @NotBlank @Size(min = 8, max = 128) @JsonProperty("password") String password) {}

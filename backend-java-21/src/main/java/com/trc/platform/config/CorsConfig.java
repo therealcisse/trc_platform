@@ -18,11 +18,9 @@ import org.springframework.web.filter.CorsFilter;
 public class CorsConfig {
 
     @Value("${cors.allowed-origins:}")
-    /** Field description. */
     private String allowedOriginsCsv;
 
     @Bean
-    /** Field description. */
     public CorsFilter corsFilter() {
         CorsConfiguration config = new CorsConfiguration();
         List<String> origins =

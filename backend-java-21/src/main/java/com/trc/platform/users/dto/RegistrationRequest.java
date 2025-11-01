@@ -8,17 +8,9 @@ import lombok.Builder;
 
 @Builder
 public record RegistrationRequest(
-        @NotBlank @Email @Size(max = 255)
-                /** Field description. */
-                String email,
-        @NotBlank @Size(min = 8, max = 128)
-                /** Field description. */
-                String password,
-        @NotBlank @Size(min = 8, max = 128)
-                /** Field description. */
-                String confirmPassword,
-        @NotBlank @Size(max = 32)
-                /** Field description. */
-                String inviteCode,
+        @NotBlank @Email @Size(max = 255) String email,
+        @NotBlank @Size(min = 8, max = 128) String password,
+        @NotBlank @Size(min = 8, max = 128) String confirmPassword,
+        @NotBlank @Size(max = 32) String inviteCode,
         @NotNull Boolean userAcceptedTerms,
         @NotNull Boolean userAcknowledgedDisclaimer) {}

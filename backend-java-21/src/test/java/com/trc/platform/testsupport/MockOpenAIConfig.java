@@ -9,11 +9,9 @@ import reactor.core.publisher.Mono;
 public class MockOpenAIConfig {
 
     @Bean
-    /** Field description. */
     public OpenAIClientService openAIClientService() {
         return new OpenAIClientService(null) {
             @Override
-            /** Field description. */
             public Mono<String> solveMathFromImage(
                     byte[] imageBytes, String model, int timeoutSeconds) {
                 return Mono.just("42");

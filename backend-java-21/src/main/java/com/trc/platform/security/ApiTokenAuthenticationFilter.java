@@ -23,14 +23,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
 
-    /** Field description. */
     private final ApiTokenRepository apiTokenRepository;
 
-    /** Field description. */
     private final UserRepository userRepository;
 
     @Override
-    /** Field description. */
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {
@@ -46,7 +43,6 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
-    /** Field description. */
     @Transactional
     private void authenticateWithToken(ApiToken apiToken) {
         if (apiToken.getRevokedAt() != null) {
@@ -68,7 +64,6 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
         SecurityContextHolder.getContext().setAuthentication(authToken);
     }
 
-    /** Field description. */
     private String extractToken(HttpServletRequest request) {
         String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(auth) && auth.startsWith("Bearer ")) {

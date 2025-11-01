@@ -4,6 +4,7 @@ services:
     environment:
       POSTGRES_USER: trc_user
       POSTGRES_DB: trc_platform
+      POSTGRES_PASSWORD: trc_password
       POSTGRES_HOST_AUTH_METHOD: trust  # Enables passwordless access
     ports:
       - "5432:5432"
@@ -13,12 +14,9 @@ services:
       - app-network
 
   adminer:
-    build:
-      context: .  # Current directory (where docker-compose.yml is)
-      dockerfile: docker/adminer.Dockerfile  # Path to the renamed Dockerfile
+    image: adminer:latest
     environment:
       ADMINER_DESIGN: hever
-      ADMINER_DEFAULT_SERVER: db  # Pre-fills the server field
     ports:
       - "8090:8080"
     networks:

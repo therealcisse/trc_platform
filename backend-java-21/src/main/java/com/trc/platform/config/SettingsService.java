@@ -7,7 +7,6 @@ import org.springframework.stereotype.Service;
 @Service
 public class SettingsService {
 
-    /** Field description. */
     private final SettingsRepository repo;
 
     public SettingsService(SettingsRepository repo) {
@@ -15,7 +14,6 @@ public class SettingsService {
     }
 
     @Cacheable("settingsCache")
-    /** Field description. */
     public Settings getSettings() {
         return repo.findById(1L)
                 .orElseGet(
@@ -26,12 +24,10 @@ public class SettingsService {
                         });
     }
 
-    /** Field description. */
     public Settings save(Settings s) {
         return repo.save(s);
     }
 
-    /** Field description. */
     public Optional<String> getAppDomain() {
         String v = getSettings().getAppDomain();
         return v == null || v.isBlank() ? Optional.empty() : Optional.of(v.replaceAll("/$", ""));

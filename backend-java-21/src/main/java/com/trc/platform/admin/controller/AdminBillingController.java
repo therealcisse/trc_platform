@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+import com.trc.platform.usage.entity.PaymentStatus;
 
 @RestController
 @RequestMapping("/api/v1/admin/billing/periods")
@@ -26,35 +27,30 @@ import org.springframework.web.bind.annotation.RestController;
 @PreAuthorize("hasRole('ADMIN')")
 public class AdminBillingController {
 
-    /** Field description. */
     private final AdminBillingService service;
 
     @GetMapping
-    /** Field description. */
     public Page<BillingPeriodAdminResponse> list(
             @RequestParam(required = false) UUID userId,
-            @RequestParam(required = false) BillingPeriod.PaymentStatus status,
+            @RequestParam(required = false) PaymentStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return service.list(userId, status, PageRequest.of(page, size));
     }
 
     @PostMapping("/{periodId}/mark-paid")
-    /** Field description. */
     public BillingPeriodAdminResponse markPaid(
             @PathVariable UUID periodId, @RequestBody @Valid MarkPaidRequest request) {
         return service.markPaid(periodId, request);
     }
 
     @PostMapping("/{periodId}/mark-overdue")
-    /** Field description. */
     public BillingPeriodAdminResponse markOverdue(
             @PathVariable UUID periodId, @RequestBody @Valid MarkOverdueRequest request) {
         return service.markOverdue(periodId, request);
     }
 
     @PostMapping("/{periodId}/mark-waived")
-    /** Field description. */
     public BillingPeriodAdminResponse markWaived(
             @PathVariable UUID periodId, @RequestBody @Valid MarkWaivedRequest request) {
         return service.markWaived(periodId, request);

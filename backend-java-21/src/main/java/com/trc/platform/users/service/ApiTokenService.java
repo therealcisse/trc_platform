@@ -22,10 +22,8 @@ public class ApiTokenService {
         this.apiTokenRepository = apiTokenRepository;
     }
 
-    /** Field description. */
     public record CreatedToken(ApiToken token, String plainToken) {}
 
-    /** Field description. */
     @Transactional
     public CreatedToken createTokenFor(User user, String name, LocalDateTime expiresAt) {
         byte[] bytes = new byte[32];
@@ -48,26 +46,22 @@ public class ApiTokenService {
         return new CreatedToken(savedToken, full);
     }
 
-    /** Field description. */
     public List<ApiToken> getUserTokens(User user) {
         return apiTokenRepository.findAll().stream()
                 .filter(token -> token.getUser().getId().equals(user.getId()))
                 .toList();
     }
 
-    /** Field description. */
     public Page<ApiToken> getUserTokens(User user, Pageable pageable) {
         return apiTokenRepository.findByUserId(user.getId(), pageable);
     }
 
-    /** Field description. */
     public ApiToken getToken(UUID tokenId, UUID userId) {
         return apiTokenRepository
                 .findByIdAndUserId(tokenId, userId)
                 .orElseThrow(() -> new RuntimeException("Token not found"));
     }
 
-    /** Field description. */
     @Transactional
     public void revokeToken(UUID tokenId, UUID userId) {
         ApiToken token = getToken(tokenId, userId);

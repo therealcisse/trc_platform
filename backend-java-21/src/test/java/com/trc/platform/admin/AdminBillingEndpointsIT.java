@@ -20,6 +20,7 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 // import org.springframework.test.context.Import;
 import org.springframework.test.web.servlet.MockMvc;
+import com.trc.platform.usage.entity.PaymentStatus;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -37,7 +38,6 @@ class AdminBillingEndpointsIT extends PostgresIT {
 
     @Autowired BillingPeriodRepository billingRepo;
 
-    /** Field description. */
     private String adminAuth() {
         var admin = data.createUser("admin2@example.com", true);
         return "Bearer " + jwt.generateSessionToken(admin.getId(), true);
@@ -52,7 +52,7 @@ class AdminBillingEndpointsIT extends PostgresIT {
                         .periodStart(LocalDate.now().withDayOfMonth(1))
                         .periodEnd(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()))
                         .current(true)
-                        .paymentStatus(BillingPeriod.PaymentStatus.pending)
+                        .paymentStatus(PaymentStatus.pending)
                         .totalCostCents(500)
                         .totalRequests(10)
                         .build();

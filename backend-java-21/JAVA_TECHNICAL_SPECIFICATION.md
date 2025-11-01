@@ -854,7 +854,7 @@ public class BillingPeriodDetailDto {
     private LocalDate periodEnd;
     private Integer totalRequests;
     private Integer totalCostCents;
-    private BillingPeriod.PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus;
     private Boolean current;
     private List<RequestLogDto> requests;
 }

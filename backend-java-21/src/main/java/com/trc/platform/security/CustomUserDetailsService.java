@@ -12,14 +12,11 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class CustomUserDetailsService implements UserDetailsService {
 
-    /** Field description. */
     private final AuthenticationService authenticationService;
 
-    /** Field description. */
     private final EmailVerificationService emailVerificationService;
 
     @Override
-    /** Field description. */
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         try {
             // Find user by email using the AuthenticationService

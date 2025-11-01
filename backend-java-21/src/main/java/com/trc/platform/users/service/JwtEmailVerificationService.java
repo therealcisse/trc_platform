@@ -14,10 +14,8 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class JwtEmailVerificationService {
 
-    /** Field description. */
     private final SecretKey signingKey;
 
-    /** Field description. */
     private static final long TOKEN_EXPIRY_HOURS = 24;
 
     public JwtEmailVerificationService(@Value("${email.verification.secret}") String secret) {
@@ -30,7 +28,6 @@ public class JwtEmailVerificationService {
         log.info("JWT Email Verification Service initialized with secure signing key");
     }
 
-    /** Field description. */
     public String generateVerificationToken(String email) {
         Instant now = Instant.now();
         Instant expiry = now.plus(TOKEN_EXPIRY_HOURS, ChronoUnit.HOURS);
@@ -43,7 +40,6 @@ public class JwtEmailVerificationService {
                 .compact();
     }
 
-    /** Field description. */
     public boolean validateVerificationToken(String token) {
         try {
             Jwts.parserBuilder().setSigningKey(signingKey).build().parseClaimsJws(token);
@@ -69,7 +65,6 @@ public class JwtEmailVerificationService {
         }
     }
 
-    /** Field description. */
     public String extractEmailFromToken(String token) {
         try {
             Claims claims =
@@ -85,7 +80,6 @@ public class JwtEmailVerificationService {
         }
     }
 
-    /** Field description. */
     public boolean isTokenExpired(String token) {
         try {
             Claims claims =
@@ -100,7 +94,6 @@ public class JwtEmailVerificationService {
         }
     }
 
-    /** Field description. */
     public Instant getTokenExpiration(String token) {
         try {
             Claims claims =

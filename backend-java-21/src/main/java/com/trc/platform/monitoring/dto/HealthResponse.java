@@ -4,9 +4,4 @@ import java.util.Map;
 import lombok.Builder;
 
 @Builder
-public record HealthResponse(
-        /** Field description. */
-        String status,
-
-        /** Field description. */
-        Map<String, Boolean> checks) {}
+public record HealthResponse(String status, Map<String, Boolean> checks) {}

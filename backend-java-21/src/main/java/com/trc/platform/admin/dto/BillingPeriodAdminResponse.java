@@ -1,36 +1,22 @@
 package com.trc.platform.admin.dto;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.trc.platform.usage.entity.BillingPeriod;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
+import com.trc.platform.usage.entity.PaymentStatus;
 
 @Builder
 public record BillingPeriodAdminResponse(
-        /** Field description. */
         UUID id,
-
-        /** Field description. */
         UUID userId,
-        BillingPeriod.PaymentStatus paymentStatus,
-
-        /** Field description. */
+        PaymentStatus paymentStatus,
         Boolean current,
-
-        /** Field description. */
         Integer totalRequests,
-
-        /** Field description. */
         Integer totalCostCents,
-
-        /** Field description. */
+        @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd'T'HH:mm:ss.SSSSSS")
         LocalDateTime paidAt,
-
-        /** Field description. */
         Integer paidAmountCents,
-
-        /** Field description. */
         String paymentReference,
-
-        /** Field description. */
         String notes) {}

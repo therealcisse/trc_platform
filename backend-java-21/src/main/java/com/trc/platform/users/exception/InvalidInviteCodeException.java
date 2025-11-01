@@ -1,7 +1,6 @@
 package com.trc.platform.users.exception;
 
 public class InvalidInviteCodeException extends RuntimeException {
-    /** Field description. */
     private final String reason;
 
     public InvalidInviteCodeException(String message, String reason) {
@@ -9,7 +8,6 @@ public class InvalidInviteCodeException extends RuntimeException {
         this.reason = reason;
     }
 
-    /** Field description. */
     public String getReason() {
         return reason;
     }

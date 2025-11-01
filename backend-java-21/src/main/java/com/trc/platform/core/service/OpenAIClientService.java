@@ -12,22 +12,18 @@ import reactor.core.publisher.Mono;
 @Service
 public class OpenAIClientService {
 
-    /** Field description. */
     private final WebClient client;
 
     @Value("${openai.api.key:}")
-    /** Field description. */
     private String apiKey;
 
     @Value("${openai.api.url:https://api.openai.com/v1/chat/completions}")
-    /** Field description. */
     private String apiUrl;
 
     public OpenAIClientService(WebClient openAiWebClient) {
         this.client = openAiWebClient;
     }
 
-    /** Field description. */
     public Mono<String> solveMathFromImage(byte[] imageBytes, String model, int timeoutSeconds) {
         String base64 = Base64.getEncoder().encodeToString(imageBytes);
         String payload =

@@ -11,10 +11,8 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestDataFactory {
 
-    /** Field description. */
     private final UserRepository userRepository;
 
-    /** Field description. */
     private final ApiTokenRepository apiTokenRepository;
 
     public TestDataFactory(UserRepository userRepository, ApiTokenRepository apiTokenRepository) {
@@ -22,7 +20,6 @@ public class TestDataFactory {
         this.apiTokenRepository = apiTokenRepository;
     }
 
-    /** Field description. */
     public User createUser(String email, boolean admin) {
         User u =
                 User.builder()
@@ -35,7 +32,6 @@ public class TestDataFactory {
         return userRepository.save(u);
     }
 
-    /** Field description. */
     public ApiToken createApiToken(User user, String plainToken) {
         ApiToken t =
                 ApiToken.builder()
@@ -48,7 +44,6 @@ public class TestDataFactory {
         return apiTokenRepository.save(t);
     }
 
-    /** Field description. */
     public String anyImagePngDataUrl() {
         // 1x1 transparent PNG
         return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQAB";

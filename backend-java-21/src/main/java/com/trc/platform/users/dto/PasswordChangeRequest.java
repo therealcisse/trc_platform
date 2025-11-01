@@ -5,9 +5,7 @@ import lombok.Builder;
 
 @Builder
 public record PasswordChangeRequest(
-        @NotBlank(message = "Current password is required")
-                /** Field description. */
-                String currentPassword,
+        @NotBlank(message = "Current password is required") String currentPassword,
         @NotBlank(message = "New password is required")
                 @Size(min = 8, max = 128, message = "Password must be between 8 and 128 characters")
                 @Pattern(
@@ -15,8 +13,5 @@ public record PasswordChangeRequest(
                         message =
                                 "Password must contain uppercase, lowercase, digit, and special"
                                         + " character")
-                /** Field description. */
                 String newPassword,
-        @NotBlank(message = "Password confirmation is required")
-                /** Field description. */
-                String confirmPassword) {}
+        @NotBlank(message = "Password confirmation is required") String confirmPassword) {}

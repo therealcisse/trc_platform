@@ -34,7 +34,6 @@ class AdminInviteEndpointsIT extends PostgresIT {
 
     @Autowired JwtService jwt;
 
-    /** Field description. */
     private String adminAuth() {
         var admin = data.createUser("admin@example.com", true);
         return "Bearer " + jwt.generateSessionToken(admin.getId(), true);

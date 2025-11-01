@@ -9,9 +9,7 @@ import lombok.Builder;
 
 @Builder
 public record CreateInviteCodeRequest(
-        @Size(min = 6, max = 32) @JsonProperty("code")
-                /** Field description. */
-                String code,
+        @Size(min = 6, max = 32) @JsonProperty("code") String code,
         @Future(message = "expiresAt must be in the future")
                 @JsonProperty("expiresAt")
                 @JsonFormat(pattern = "yyyy-MM-dd'T'HH:mm:ss")

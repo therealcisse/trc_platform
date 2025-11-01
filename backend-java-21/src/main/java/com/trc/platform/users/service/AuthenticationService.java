@@ -26,23 +26,17 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-    /** Field description. */
     private final UserRepository userRepository;
 
-    /** Field description. */
     private final InviteCodeRepository inviteCodeRepository;
 
-    /** Field description. */
     private final PasswordEncoder passwordEncoder;
 
-    /** Field description. */
     private final JwtService jwtService;
 
-    /** Field description. */
     private final EmailService emailService;
 
     @Transactional
-    /** Field description. */
     public void register(RegistrationRequest req, HttpServletRequest request) {
         // Validate email uniqueness (case-insensitive)
         validateEmail(req.email());
@@ -78,7 +72,6 @@ public class AuthenticationService {
         emailService.sendVerificationEmail(user.getEmail(), request);
     }
 
-    /** Field description. */
     private void validateEmail(String email) {
         userRepository
                 .findByEmailIgnoreCase(email)
@@ -88,21 +81,18 @@ public class AuthenticationService {
                         });
     }
 
-    /** Field description. */
     private void validatePasswordConfirmation(String password, String confirmPassword) {
         if (!password.equals(confirmPassword)) {
             throw new PasswordMismatchException("Password confirmation does not match");
         }
     }
 
-    /** Field description. */
     private void validateTermsAcceptance(Boolean userAcceptedTerms) {
         if (!Boolean.TRUE.equals(userAcceptedTerms)) {
             throw new TermsNotAcceptedException("You must accept the terms to register");
         }
     }
 
-    /** Field description. */
     private InviteCode validateAndConsumeInviteCode(String code) {
         InviteCode inviteCode =
                 inviteCodeRepository
@@ -125,7 +115,6 @@ public class AuthenticationService {
         return inviteCode;
     }
 
-    /** Field description. */
     public Map<String, Object> login(LoginRequest req) {
         User user =
                 userRepository
@@ -147,13 +136,11 @@ public class AuthenticationService {
                 "token", token);
     }
 
-    /** Field description. */
     public UUID getUserIdFromToken(String jwt) {
         return jwtService.parseUserId(jwt);
     }
 
     @Transactional
-    /** Field description. */
     public void changePassword(UUID userId, PasswordChangeRequest req) {
         // Hash password outside of transaction to avoid holding DB connections
         String hashedPassword = passwordEncoder.encode(req.newPassword());
@@ -162,7 +149,6 @@ public class AuthenticationService {
         updatePasswordHash(userId, req, hashedPassword);
     }
 
-    /** Field description. */
     public void updatePasswordHash(UUID userId, PasswordChangeRequest req, String hashedPassword) {
         User user =
                 userRepository
@@ -183,7 +169,6 @@ public class AuthenticationService {
     }
 
     @Transactional
-    /** Field description. */
     public void verifyEmail(String token) {
         if (!emailService.validateVerificationToken(token)) {
             throw new IllegalArgumentException("Invalid or expired verification token");
@@ -208,7 +193,6 @@ public class AuthenticationService {
         userRepository.verifyEmail(user.getId(), email, LocalDateTime.now());
     }
 
-    /** Field description. */
     public void resendVerificationEmail(String email, HttpServletRequest request) {
         User user =
                 userRepository
@@ -222,7 +206,6 @@ public class AuthenticationService {
         emailService.sendVerificationEmail(email, request);
     }
 
-    /** Field description. */
     public User findByEmail(String email) {
         return userRepository
                 .findByEmailIgnoreCase(email)

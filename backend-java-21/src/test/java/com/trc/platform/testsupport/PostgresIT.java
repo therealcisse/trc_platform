@@ -10,7 +10,6 @@ import org.testcontainers.containers.PostgreSQLContainer;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 public abstract class PostgresIT {
 
-    /** Field description. */
     private static final PostgreSQLContainer<?> POSTGRES =
             new PostgreSQLContainer<>("postgres:16")
                     .withDatabaseName("trc_platform_test")

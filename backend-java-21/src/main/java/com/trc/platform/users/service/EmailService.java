@@ -15,23 +15,17 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class EmailService {
 
-    /** Field description. */
     private final JavaMailSender mailSender;
 
-    /** Field description. */
     private final SettingsService settingsService;
 
-    /** Field description. */
     private final EmailVerificationService emailVerificationService;
 
-    /** Field description. */
     private final JwtEmailVerificationService jwtEmailVerificationService;
 
     @Value("${spring.mail.from:noreply@trc-platform.com}")
-    /** Field description. */
     private String fromEmail;
 
-    /** Field description. */
     public void sendVerificationEmail(String email, HttpServletRequest request) {
         try {
             String token = jwtEmailVerificationService.generateVerificationToken(email);
@@ -48,7 +42,6 @@ public class EmailService {
         }
     }
 
-    /** Field description. */
     public void resendVerificationEmail(String email, HttpServletRequest request) {
         try {
             String token = jwtEmailVerificationService.generateVerificationToken(email);
@@ -65,17 +58,14 @@ public class EmailService {
         }
     }
 
-    /** Field description. */
     public boolean validateVerificationToken(String token) {
         return jwtEmailVerificationService.validateVerificationToken(token);
     }
 
-    /** Field description. */
     public String extractEmailFromToken(String token) {
         return jwtEmailVerificationService.extractEmailFromToken(token);
     }
 
-    /** Field description. */
     private void sendEmail(String to, String subject, String htmlContent) {
         try {
             MimeMessage message = mailSender.createMimeMessage();
@@ -93,7 +83,6 @@ public class EmailService {
         }
     }
 
-    /** Field description. */
     private String buildVerificationEmailTemplate(String verificationUrl) {
         return """
 <!DOCTYPE html>

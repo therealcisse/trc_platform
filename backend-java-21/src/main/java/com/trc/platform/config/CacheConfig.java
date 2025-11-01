@@ -11,7 +11,6 @@ import org.springframework.context.annotation.Configuration;
 public class CacheConfig {
 
     @Bean
-    /** Field description. */
     public CacheManager cacheManager() {
         CaffeineCacheManager mgr =
                 new CaffeineCacheManager(

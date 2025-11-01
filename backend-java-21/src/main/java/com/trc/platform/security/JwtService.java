@@ -17,20 +17,16 @@ import org.springframework.stereotype.Service;
 public class JwtService {
 
     @Value("${security.jwt.secret:}")
-    /** Field description. */
     private String base64Secret;
 
     @Value("${security.jwt.ttl-hours:24}")
-    /** Field description. */
     private long ttlHours;
 
-    /** Field description. */
     private Key key() {
         byte[] keyBytes = Decoders.BASE64.decode(base64Secret);
         return Keys.hmacShaKeyFor(keyBytes);
     }
 
-    /** Field description. */
     public String generateSessionToken(UUID userId, boolean admin) {
         Instant now = Instant.now();
         return Jwts.builder()
@@ -42,7 +38,6 @@ public class JwtService {
                 .compact();
     }
 
-    /** Field description. */
     public UUID parseUserId(String jwt) {
         String sub =
                 Jwts.parserBuilder()

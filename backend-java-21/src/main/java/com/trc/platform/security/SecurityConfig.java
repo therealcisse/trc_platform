@@ -21,30 +21,24 @@ import org.springframework.security.web.SecurityFilterChain;
 @RequiredArgsConstructor
 public class SecurityConfig {
 
-    /** Field description. */
     private final JwtService jwtService;
 
-    /** Field description. */
     private final UserRepository userRepository;
 
-    /** Field description. */
     private final ApiTokenRepository apiTokenRepository;
 
     @Bean
-    /** Field description. */
     public PasswordEncoder passwordEncoder() {
         return Argon2PasswordEncoder.defaultsForSpringSecurity_v5_8();
     }
 
     @Bean
-    /** Field description. */
     public UserDetailsService userDetailsService(
             CustomUserDetailsService customUserDetailsService) {
         return customUserDetailsService;
     }
 
     @Bean
-    /** Field description. */
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
         http.csrf(csrf -> csrf.disable())
                 .sessionManagement(

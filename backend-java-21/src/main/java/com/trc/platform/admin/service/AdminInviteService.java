@@ -20,17 +20,14 @@ import org.springframework.util.StringUtils;
 @RequiredArgsConstructor
 public class AdminInviteService {
 
-    /** Field description. */
     private final InviteCodeRepository inviteCodeRepository;
 
-    /** Field description. */
     public Page<InviteCodeResponse> list(Pageable pageable) {
         Page<InviteCode> page = inviteCodeRepository.findAll(pageable);
         return page.map(this::toDto);
     }
 
     @Transactional
-    /** Field description. */
     public InviteCodeResponse create(CreateInviteCodeRequest req, User createdBy) {
         String code = StringUtils.hasText(req.code()) ? req.code() : generateCode();
         InviteCode ic =
@@ -45,7 +42,6 @@ public class AdminInviteService {
     }
 
     @Transactional
-    /** Field description. */
     public InviteCodeResponse activate(String code) {
         InviteCode ic =
                 inviteCodeRepository
@@ -56,7 +52,6 @@ public class AdminInviteService {
     }
 
     @Transactional
-    /** Field description. */
     public InviteCodeResponse deactivate(String code) {
         InviteCode ic =
                 inviteCodeRepository
@@ -67,12 +62,10 @@ public class AdminInviteService {
     }
 
     @Transactional
-    /** Field description. */
     public int deleteExpired() {
         return inviteCodeRepository.deleteExpiredCodes(LocalDateTime.now());
     }
 
-    /** Field description. */
     private InviteCodeResponse toDto(InviteCode ic) {
         return InviteCodeResponse.builder()
                 .id(ic.getId())
@@ -89,7 +82,6 @@ public class AdminInviteService {
                 .build();
     }
 
-    /** Field description. */
     private String generateCode() {
         byte[] buf = new byte[12];
         new SecureRandom().nextBytes(buf);

@@ -19,14 +19,11 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-    /** Field description. */
     private final JwtService jwtService;
 
-    /** Field description. */
     private final UserRepository userRepository;
 
     @Override
-    /** Field description. */
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
             throws ServletException, IOException {

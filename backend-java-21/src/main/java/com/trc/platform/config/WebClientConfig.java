@@ -12,7 +12,6 @@ import org.springframework.web.reactive.function.client.WebClient;
 public class WebClientConfig {
 
     @Bean
-    /** Field description. */
     public WebClient openAiWebClient() {
         // Large buffer to allow base64 images upload
         ExchangeStrategies strategies =
@@ -24,7 +23,6 @@ public class WebClientConfig {
     }
 
     @Bean
-    /** Field description. */
     public CircuitBreakerConfig circuitBreakerConfig() {
         return CircuitBreakerConfig.custom()
                 .failureRateThreshold(50)
@@ -34,7 +32,6 @@ public class WebClientConfig {
     }
 
     @Bean
-    /** Field description. */
     public TimeLimiterConfig timeLimiterConfig() {
         return TimeLimiterConfig.custom().timeoutDuration(Duration.ofSeconds(30)).build();
     }

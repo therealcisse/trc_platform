@@ -1,5 +1,6 @@
 package com.trc.platform.usage.service;
 
+import com.trc.platform.usage.entity.PaymentStatus;
 import com.trc.platform.usage.dto.BillingPeriodDetailDto;
 import com.trc.platform.usage.dto.BillingPeriodResponse;
 import com.trc.platform.usage.dto.CurrentBillingResponse;
@@ -7,11 +8,13 @@ import com.trc.platform.usage.entity.BillingPeriod;
 import com.trc.platform.usage.entity.RequestLog;
 import com.trc.platform.usage.repository.BillingPeriodRepository;
 import com.trc.platform.users.entity.User;
+import com.trc.platform.users.repository.UserRepository;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -26,15 +29,14 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class LiveBillingService implements BillingService {
 
-    /** Field description. */
     private final BillingPeriodRepository billingPeriodRepository;
 
-    /** Field description. */
+    private final UserRepository userRepository;
+
     private static final int COST_PER_REQUEST_CENTS = 50;
 
     @Override
-    @Transactional(readOnly = true)
-    /** Field description. */
+    @Transactional
     public CurrentBillingResponse getCurrentBilling(User user) {
         BillingPeriod currentPeriod = getCurrentBillingPeriod(user);
 
@@ -52,26 +54,25 @@ public class LiveBillingService implements BillingService {
 
     @Override
     @Transactional(readOnly = true)
-    /** Field description. */
     public Page<BillingPeriod> getBillingPeriods(User user, Pageable pageable) {
         return billingPeriodRepository.findByUserIdOrderByPeriodStart(user.getId(), pageable);
     }
 
     @Override
     @Transactional(readOnly = true)
-    /** Field description. */
-    public List<BillingPeriodResponse> getBillingPeriodsList(User user) {
-        Page<BillingPeriod> periods =
-                billingPeriodRepository.findByUserIdOrderByPeriodStart(
-                        user.getId(), org.springframework.data.domain.PageRequest.of(0, 100));
-        return periods.getContent().stream()
-                .map(BillingPeriodResponse::fromEntity)
-                .collect(Collectors.toList());
+    public Page<BillingPeriodResponse> getBillingPeriodsList(User user, int page, int size) {
+        org.springframework.data.domain.Pageable pageable =
+                org.springframework.data.domain.PageRequest.of(page, size);
+        Page<BillingPeriod> periods = billingPeriodRepository.findByUserIdOrderByPeriodStart(user.getId(), pageable);
+
+        Page<BillingPeriodResponse> results = periods
+                .map(BillingPeriodResponse::fromEntity);
+
+        return results;
     }
 
     @Override
     @Transactional(readOnly = true)
-    /** Field description. */
     public BillingPeriodDetailDto getBillingPeriodDetail(User user, UUID periodId) {
         Optional<BillingPeriod> periodOpt =
                 billingPeriodRepository.findByUserIdAndId(user.getId(), periodId);
@@ -105,9 +106,11 @@ public class LiveBillingService implements BillingService {
                 .build();
     }
 
-    @Override
-    /** Field description. */
-    public BillingPeriod createOrUpdateCurrentBillingPeriod(User user) {
+    private BillingPeriod createOrUpdateCurrentBillingPeriod(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
         LocalDate now = LocalDate.now();
         LocalDate periodStart = now.withDayOfMonth(1);
 
@@ -123,56 +126,38 @@ public class LiveBillingService implements BillingService {
             return period;
         }
 
+        // Get a fresh reference to the User entity to avoid lazy loading issues
+        User freshUser = userRepository.findById(user.getId())
+                .orElseThrow(() -> new IllegalArgumentException("User not found: " + user.getId()));
+
         BillingPeriod newPeriod =
                 BillingPeriod.builder()
-                        .user(user)
+                        .user(freshUser)
                         .periodStart(periodStart)
                         .periodEnd(now.withDayOfMonth(now.lengthOfMonth()))
                         .totalRequests(0)
                         .totalCostCents(0)
                         .current(true)
-                        .paymentStatus(BillingPeriod.PaymentStatus.pending)
+                        .paymentStatus(PaymentStatus.pending)
                         .build();
 
-        return billingPeriodRepository.save(newPeriod);
+        // Save the new period first
+        BillingPeriod savedPeriod = billingPeriodRepository.save(newPeriod);
+
+        // Mark all other periods as not current (excluding the new period)
+        billingPeriodRepository.markAllOtherPeriodsNotCurrent(user.getId(), savedPeriod.getId());
+
+        return savedPeriod;
     }
 
-    @Override
-    /** Field description. */
-    public void updateBillingPeriodCosts(UUID periodId) {
-        Optional<BillingPeriod> periodOpt = billingPeriodRepository.findById(periodId);
-        if (periodOpt.isEmpty()) {
-            log.warn("Billing period not found for cost update: {}", periodId);
-            return;
-        }
-
-        BillingPeriod period = periodOpt.get();
-        Long requestCount = billingPeriodRepository.countRequestsByPeriodId(periodId);
-
-        period.setTotalRequests(requestCount.intValue());
-        period.setTotalCostCents(requestCount.intValue() * COST_PER_REQUEST_CENTS);
-
-        billingPeriodRepository.save(period);
-        log.debug(
-                "Updated billing period {} costs: {} requests, {} cents",
-                periodId,
-                requestCount,
-                period.getTotalCostCents());
-    }
-
-    /** Field description. */
     private BillingPeriod getCurrentBillingPeriod(User user) {
         Optional<BillingPeriod> currentPeriodOpt =
                 billingPeriodRepository.findCurrentByUserId(user.getId());
 
-        if (currentPeriodOpt.isPresent()) {
-            return currentPeriodOpt.get();
-        }
+        return currentPeriodOpt.orElseGet(() -> createOrUpdateCurrentBillingPeriod(user));
 
-        return createOrUpdateCurrentBillingPeriod(user);
     }
 
-    /** Field description. */
     private String formatPeriodLabel(LocalDate periodStart) {
         return periodStart.format(DateTimeFormatter.ofPattern("MMMM yyyy"));
     }

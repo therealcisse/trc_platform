@@ -7,14 +7,12 @@ import org.springframework.stereotype.Service;
 @Service
 public class EmailVerificationService {
 
-    /** Field description. */
     private final SettingsService settingsService;
 
     public EmailVerificationService(SettingsService settingsService) {
         this.settingsService = settingsService;
     }
 
-    /** Field description. */
     public String buildVerificationUrl(String token, HttpServletRequest request) {
         return settingsService
                 .getAppDomain()

@@ -9,6 +9,7 @@ DROP TYPE IF EXISTS payment_status_type CASCADE;
 
 -- Create enum types
 CREATE TYPE payment_status_type AS ENUM ('pending', 'paid', 'overdue', 'waived');
+CREATE TYPE request_logs_status_type AS ENUM ('SUCCESS', 'ERROR');
 
 -- Users
 create table if not exists users (
@@ -83,7 +84,7 @@ create table if not exists request_logs (
   duration_ms integer not null,
   request_bytes integer not null,
   response_bytes integer not null,
-  status varchar(16) not null,
+  status request_logs_status_type not null,
   error_code varchar(50) null,
   request_id uuid not null,
   flow_id varchar(255) null,
