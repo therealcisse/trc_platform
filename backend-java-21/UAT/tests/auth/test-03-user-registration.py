@@ -33,6 +33,7 @@ from uat_framework import (
 )
 from auth_helpers import AuthHelper, AuthDataManager
 # Configuration will be loaded from framework config
+from uat_config import config
 
 class Test03UserRegistration:
     """Test-03: Complete User Registration Flow"""
@@ -67,7 +68,7 @@ class Test03UserRegistration:
             }
 
             response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],
+                config.ENDPOINTS['login'],
                 login_data
             )
 
@@ -85,11 +86,6 @@ class Test03UserRegistration:
 
             self.admin_token = response_data['token']
             self.token_manager.store_token('admin', self.admin_token)
-
-            # Store token to file for potential reuse
-            token_path = config.get_token_path('admin_token')
-            with open(token_path, 'w') as f:
-                f.write(self.admin_token)
 
             print_success(f"Admin authentication successful ({format_response_time(response_time)})")
 
@@ -549,10 +545,6 @@ class Test03UserRegistration:
         try:
             # Save verification token to file
             verification_token = self.token_manager.get_token('verification_token')
-            if verification_token:
-                token_path = config.get_token_path('verification_token')
-                with open(token_path, 'w') as f:
-                    f.write(verification_token)
 
             # Save user credentials to file
             test_user_email = self.token_manager.get_token('test_user_email')

@@ -32,6 +32,7 @@ from uat_framework import (
 )
 from auth_helpers import AuthHelper, AuthDataManager
 # Configuration will be loaded from framework config
+from uat_config import config
 
 class Test07PasswordChange:
     """Test-07: Password Change Functionality"""
@@ -68,7 +69,7 @@ class Test07PasswordChange:
             }
 
             response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],
+                config.ENDPOINTS['login'],
                 login_data
             )
 
@@ -316,7 +317,7 @@ class Test07PasswordChange:
             step.request_data = login_data
 
             response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],
+                config.ENDPOINTS['login'],
                 login_data
             )
 
@@ -443,7 +444,7 @@ class Test07PasswordChange:
             step.request_data = login_data
 
             response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],
+                config.ENDPOINTS['login'],
                 login_data
             )
 

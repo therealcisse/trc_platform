@@ -36,6 +36,7 @@ from uat_framework import (
 )
 from auth_helpers import AuthHelper, AuthDataManager
 # Configuration will be loaded from framework config
+from uat_config import config
 
 class Test04EmailVerification:
     """Test-04: Self-Contained Email Verification Workflow"""
@@ -104,7 +105,7 @@ class Test04EmailVerification:
             }
 
             admin_response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],
+                config.ENDPOINTS['login'],
                 admin_credentials
             )
 
@@ -409,13 +410,6 @@ class Test04EmailVerification:
 
             with open(credentials_path, 'w') as f:
                 f.write(f"{self.test_user_email}:{self.test_user_password}")
-
-            # Save verification token for potential use
-            if self.verification_token:
-                token_path = config.get_token_path('verification_token')
-                os.makedirs(os.path.dirname(token_path), exist_ok=True)
-                with open(token_path, 'w') as f:
-                    f.write(self.verification_token)
 
             step.status = "PASS"
             step.message = "Verified user credentials saved for subsequent tests"

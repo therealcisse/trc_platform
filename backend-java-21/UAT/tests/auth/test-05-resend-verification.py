@@ -38,6 +38,7 @@ from uat_framework import (
 )
 from auth_helpers import AuthHelper, AuthDataManager
 # Configuration will be loaded from framework config
+from uat_config import config
 
 class Test05ResendVerification:
     """Test-05: Resend Verification Email Functionality"""
@@ -77,19 +78,25 @@ class Test05ResendVerification:
         # Clean up any existing test user to ensure clean state
         self.cleanup_existing_test_user()
 
-        # Load admin token from TEST-01
-        try:
-            token_path = config.get_token_path('admin_token')
-            if os.path.exists(token_path):
-                with open(token_path, 'r') as f:
-                    self.admin_token = f.read().strip()
-                print_success("Admin token loaded from previous test")
-            else:
-                print_error("Admin token not found - run TEST-01 first")
-                return False
-        except Exception as e:
-            print_error(f"Failed to load admin token: {e}")
+        # Get admin token to create invite codes
+        print_info("Authenticating as admin to create invite codes...")
+        admin_credentials = {
+            "email": config.ADMIN_EMAIL,
+            "password": config.ADMIN_PASSWORD
+        }
+
+        admin_response, response_time = self.http_client.post(
+            config.ENDPOINTS['login'],
+            admin_credentials
+        )
+
+        if admin_response.status_code != config.STATUS_CODES['success']:
+            print_error(f"Failed to authenticate as admin: {admin_response.status_code} - {admin_response.text}")
             return False
+
+        response_data = admin_response.json()
+        self.admin_token = response_data['token']
+        print_success("Admin authentication successful")
 
         print_success("Environment setup completed successfully")
         return True

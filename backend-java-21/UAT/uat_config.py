@@ -24,13 +24,13 @@ class UATConfig:
     email_timeout: int = 30
     database_timeout: int = 10
 
-    # Admin configuration
-    admin_email: str = "admin@trc-platform.local"
-    admin_password: str = "password"
+    # Admin configuration - loaded from environment variables for security
+    admin_email: str = None  # Load from UAT_ADMIN_EMAIL
+    admin_password: str = None  # Load from UAT_ADMIN_PASSWORD
 
-    # Test user configuration
+    # Test user configuration - more secure defaults
     test_email_domain: str = "uat-test.trc-platform.local"
-    test_password_base: str = "TestPass123!@#"
+    test_password_base: str = None  # Load from UAT_TEST_PASSWORD or generate securely
 
     # JWT configuration
     jwt_algorithm: str = "HS256"
@@ -57,14 +57,22 @@ class UATConfig:
         'admin_invites': '/api/v1/admin/invites',
         'api_tokens': '/api/customers/tokens',
         'core_solve': '/api/core/solve',
+        'core_test_solve': '/api/core/test-solve',
         'billing_current': '/api/customers/billing/current',
         'billing_periods': '/api/customers/billing/periods',
         'billing_period_detail': '/api/customers/billing/periods/{periodId}',
+        'billing_history': '/api/customers/billing/history',
         'usage_summary': '/api/customers/usage/summary',
+        'usage_requests': '/api/customers/usage/requests',
         'admin_billing_list': '/api/v1/admin/billing',
         'admin_billing_mark_paid': '/api/v1/admin/billing/{periodId}/mark-paid',
         'admin_billing_mark_overdue': '/api/v1/admin/billing/{periodId}/mark-overdue',
-        'admin_billing_waive': '/api/v1/admin/billing/{periodId}/waive'
+        'admin_billing_waive': '/api/v1/admin/billing/{periodId}/waive',
+        'email_verify': '/api/customers/verify-email',
+        'email_resend': '/api/customers/resend-verification',
+        'password_change': '/api/customers/password-change',
+        'users_me': '/api/customers/me',
+        'health': '/api/monitoring/health'
     }
 
     # Status codes
@@ -139,11 +147,52 @@ class UATConfig:
 
     def __post_init__(self):
         """Initialize configuration from environment variables"""
+        import secrets
+        import string
+
         # Override with environment variables if present
         self.app_url = os.getenv('UAT_APP_URL', self.app_url)
         self.database_url = os.getenv('UAT_DATABASE_URL', self.database_url)
         self.mailcatcher_url = os.getenv('UAT_MAILCATCHER_URL', self.mailcatcher_url)
         self.log_level = os.getenv('UAT_LOG_LEVEL', self.log_level)
+
+        # Load sensitive configuration from environment variables
+        self.admin_email = os.getenv('UAT_ADMIN_EMAIL', 'admin@trc-platform.local')
+        self.admin_password = os.getenv('UAT_ADMIN_PASSWORD')
+
+        # Generate secure test password if not provided
+        self.test_password_base = os.getenv('UAT_TEST_PASSWORD')
+        if not self.test_password_base:
+            # Generate a secure random password for testing
+            self.test_password_base = self._generate_secure_password()
+
+        # Validate that required sensitive config is available
+        self._validate_sensitive_config()
+
+    def _generate_secure_password(self) -> str:
+        """Generate a secure random password for testing"""
+        import secrets
+        import string
+
+        # Generate 16-character password with all required character types
+        alphabet = string.ascii_letters + string.digits + "!@#$%^&*"
+        while True:
+            password = ''.join(secrets.choice(alphabet) for _ in range(16))
+            # Ensure it meets password requirements
+            if (len(password) >= 8 and
+                any(c.isupper() for c in password) and
+                any(c.islower() for c in password) and
+                any(c.isdigit() for c in password) and
+                any(c in "!@#$%^&*" for c in password)):
+                return password
+
+    def _validate_sensitive_config(self):
+        """Validate that sensitive configuration is available"""
+        if not self.admin_password:
+            raise ValueError(
+                "UAT_ADMIN_PASSWORD environment variable is required. "
+                "This is a security measure to prevent hardcoded credentials."
+            )
 
         # Initialize default values for list fields
         if self.usage_supported_services is None:
@@ -253,6 +302,104 @@ class UATConfig:
 
         return all_good
 
+    # Add missing method for backward compatibility
+    def print_config_summary(self):
+        """Print configuration summary (method version for backward compatibility)"""
+        from uat_framework import print_info, print_success
+
+        print_info("UAT Configuration Summary:")
+        print_info(f"  Application URL: {self.app_url}")
+        print_info(f"  Database: {self.database_url}")
+        print_info(f"  Mailcatcher: {self.mailcatcher_url}")
+        print_info(f"  Log Level: {self.log_level}")
+
+        print_success("Configuration loaded successfully")
+
+    # Centralized database queries for all test domains
+    DB_QUERIES = {
+        # User and authentication queries
+        'check_admin_user': 'SELECT id, email, is_staff, email_verified_at FROM users WHERE email = %s',
+        'check_complete_user': 'SELECT id, email, email_verified_at FROM users WHERE email = %s',
+        'get_user_by_email': 'SELECT id, email, is_staff, email_verified_at, created_at FROM users WHERE email = %s',
+        'get_user_id': 'SELECT id FROM users WHERE email = %s',
+        'verify_email_exists': 'SELECT id FROM users WHERE email = %s AND email_verified_at IS NOT NULL',
+
+        # Invite code queries
+        'check_invite_code': 'SELECT id, code, is_active, expires_at FROM invite_codes WHERE code = %s',
+        'check_active_invite_code': 'SELECT id, code, is_active, expires_at FROM invite_codes WHERE code = %s AND is_active = true',
+        'create_invite_code': 'INSERT INTO invite_codes (code, is_active, created_by, expires_at) VALUES (%s, %s, %s, %s) RETURNING id',
+
+        # API token queries
+        'get_user_tokens': 'SELECT id, name, token_prefix, created_at, last_used_at, expires_at, revoked_at FROM api_tokens WHERE user_id = %s ORDER BY created_at DESC',
+        'get_token_by_id': 'SELECT id, user_id, name, token_prefix, created_at, expires_at, revoked_at FROM api_tokens WHERE id = %s',
+        'revoke_token': 'UPDATE api_tokens SET revoked_at = NOW() WHERE id = %s',
+
+        # Billing queries
+        'get_current_billing_period': 'SELECT id, start_date, end_date, total_requests, total_cost_cents, status FROM billing_periods WHERE user_id = %s AND status = \'ACTIVE\' ORDER BY start_date DESC LIMIT 1',
+        'get_billing_periods': 'SELECT id, start_date, end_date, total_requests, total_cost_cents, status FROM billing_periods WHERE user_id = %s ORDER BY start_date DESC',
+        'get_billing_period_by_id': 'SELECT * FROM billing_periods WHERE id = %s',
+        'update_billing_period': 'UPDATE billing_periods SET status = %s, updated_at = NOW() WHERE id = %s',
+
+        # Usage queries
+        'get_usage_requests': 'SELECT id, request_type, processing_time_ms, cost_cents, created_at FROM usage_requests WHERE user_id = %s ORDER BY created_at DESC',
+        'get_usage_summary': 'SELECT COUNT(*) as total_requests, SUM(cost_cents) as total_cost FROM usage_requests WHERE user_id = %s AND created_at >= %s',
+
+        # Email verification queries
+        'get_email_verification': 'SELECT id, token, expires_at FROM email_verifications WHERE email = %s ORDER BY created_at DESC LIMIT 1',
+        'verify_user_email': 'UPDATE users SET email_verified_at = NOW() WHERE email = %s RETURNING id',
+    }
+
+    # Centralized response field validation for all test domains
+    REQUIRED_RESPONSE_FIELDS = {
+        # Authentication endpoints
+        'login': ['id', 'email', 'token'],
+        'user_registration': ['id', 'email'],
+        'admin_login': ['id', 'email', 'token'],
+
+        # Email verification endpoints
+        'email_verification': ['message'],
+        'resend_verification': ['message'],
+
+        # API token endpoints
+        'token_creation': ['id', 'name', 'token', 'expires_at'],
+        'token_listing': ['id', 'name', 'token_prefix', 'created_at', 'expires_at'],
+        'token_details': ['id', 'name', 'token_prefix', 'created_at', 'expires_at', 'last_used_at'],
+
+        # Billing endpoints
+        'billing_current': ['id', 'start_date', 'end_date', 'total_requests', 'total_cost_cents', 'status'],
+        'billing_periods': ['id', 'start_date', 'end_date', 'total_requests', 'total_cost_cents', 'status'],
+        'billing_period_detail': ['id', 'start_date', 'end_date', 'total_requests', 'total_cost_cents', 'status'],
+        'billing_history': ['id', 'start_date', 'end_date', 'total_requests', 'total_cost_cents', 'status'],
+        'usage_summary': ['total_requests', 'total_cost_cents', 'period_start', 'period_end'],
+
+        # Admin endpoints
+        'invite_creation': ['id', 'code', 'is_active'],
+        'invite_list': ['id', 'code', 'is_active', 'created_at', 'expires_at'],
+        'admin_billing_list': ['id', 'user_email', 'start_date', 'end_date', 'total_requests', 'total_cost_cents', 'status'],
+
+        # Usage endpoints
+        'usage_requests': ['id', 'request_type', 'processing_time_ms', 'cost_cents', 'created_at'],
+
+        # Core endpoints
+        'core_solve': ['id', 'solution', 'processing_time_ms', 'cost_cents'],
+        'core_test_solve': ['id', 'solution', 'processing_time_ms', 'cost_cents'],
+    }
+
+    # Property aliases for backward compatibility
+    @property
+    def APP_URL(self):
+        """Backward compatibility property"""
+        return self.app_url
+
+    @property
+    def DATABASE_URL(self):
+        """Backward compatibility property"""
+        return self.database_url
+
+    @property
+    def MAILCATCHER_URL(self):
+        """Backward compatibility property"""
+        return self.mailcatcher_url
 
 # Domain-specific configurations
 class AuthConfig:

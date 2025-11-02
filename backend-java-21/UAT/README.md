@@ -23,7 +23,7 @@ This is the **consolidated UAT test suite** for the TRC Platform, bringing toget
 ### 🏗️ Architecture
 
 ```
-trc-platform-uat/
+UAT/
 ├── 📁 tests/                     # Test implementations
 │   ├── auth/                     # Authentication domain (7 tests)
 │   ├── api_token/                # API token domain (7 tests)

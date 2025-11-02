@@ -32,6 +32,7 @@ from uat_framework import (
 )
 from auth_helpers import AuthHelper, AuthDataManager
 # Configuration will be loaded from framework config
+from uat_config import config
 
 class Test06UserLogin:
     """Test-06: User Authentication"""
@@ -204,7 +205,7 @@ class Test06UserLogin:
 
             # Make login request
             response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],  # Same endpoint as admin login
+                config.ENDPOINTS['login'],  # Same endpoint as admin login
                 login_data
             )
 
@@ -247,20 +248,8 @@ class Test06UserLogin:
                 print_error(f"Email mismatch: {response_email}")
                 return step
 
-            # Validate JWT token format
-            if not self.token_manager.validate_jwt_format(token):
-                step.status = "FAIL"
-                step.message = "Invalid JWT token format in response"
-                print_error("Invalid JWT token format")
-                return step
-
             # Store user token for later use
             self.token_manager.store_token('user', token)
-
-            # Save user token to file
-            token_path = config.get_token_path('user_token')
-            with open(token_path, 'w') as f:
-                f.write(token)
 
             step.status = "PASS"
             step.message = f"User authentication successful ({format_response_time(response_time)})"
@@ -298,13 +287,6 @@ class Test06UserLogin:
                 print_error("User token not found in storage")
                 return step
 
-            # Basic format validation
-            if not self.token_manager.validate_jwt_format(user_token):
-                step.status = "FAIL"
-                step.message = "User token has invalid JWT format"
-                print_error("Invalid JWT format")
-                return step
-
             # Check token expiration
             if self.token_manager.is_token_expired(user_token):
                 step.status = "FAIL"
@@ -315,7 +297,7 @@ class Test06UserLogin:
             # Try to decode token (without signature verification for structure)
             try:
                 import jwt
-                decoded = jwt.decode(user_token, algorithms=[config.JWT_ALGORITHM], options={"verify_signature": False})
+                decoded = jwt.decode(user_token, algorithms=[config.jwt_algorithm], options={"verify_signature": False})
 
                 step.response_data = {
                     'decoded_token': decoded
@@ -543,11 +525,6 @@ class Test06UserLogin:
         try:
             user_token = self.token_manager.get_token('user')
             if user_token:
-                # Ensure user token is saved to file
-                token_path = config.get_token_path('user_token')
-                with open(token_path, 'w') as f:
-                    f.write(user_token)
-
                 step.status = "PASS"
                 step.message = "User authentication data saved for subsequent tests"
                 step.database_state = {

@@ -100,7 +100,7 @@ class DatabaseHelper:
         self.connect()
 
     def connect(self) -> bool:
-        """Establish database connection"""
+        """Establish database connection with proper resource management"""
         try:
             self.connection = psycopg2.connect(
                 self.database_url,
@@ -111,49 +111,57 @@ class DatabaseHelper:
             if self.connection is None:
                 raise RuntimeError("Database connection failed")
 
-            # Test connection
-            cursor = self.connection.cursor()
-            cursor.execute("SELECT 1")
-            cursor.close()
+            # Test connection with automatic cursor cleanup
+            with self.connection.cursor() as cursor:
+                cursor.execute("SELECT 1")
 
-            print(f"{Colors.GREEN}✓ Database connection established{Colors.RESET}")
+            print_success("Database connection established")
             return True
         except Exception as e:
-            print(f"{Colors.RED}❌ Database connection failed: {e}{Colors.RESET}")
+            print_error(f"Database connection failed: {e}")
+            self.connection = None
             return False
 
+    def __enter__(self):
+        """Context manager entry"""
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        """Context manager exit with automatic cleanup"""
+        self.disconnect()
+
     def disconnect(self):
-        """Close database connection"""
-        if self.connection:
-            self.connection.close()
-            self.connection = None
+        """Close database connection safely"""
+        if self.connection and not self.connection.closed:
+            try:
+                self.connection.close()
+                print_info("Database connection closed")
+            except Exception as e:
+                print_warning(f"Error closing database connection: {e}")
+            finally:
+                self.connection = None
 
     def execute_query(self, query: str, params: tuple = None) -> List[Dict]:
-        """Execute SQL query and return results"""
+        """Execute SQL query with proper resource management and return results"""
+        if not self.connection:
+            raise Exception("No database connection")
+
         try:
-            cursor = self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor)
-            if params:
-                cursor.execute(query, params)
-            else:
-                cursor.execute(query)
+            with self.connection.cursor(cursor_factory=psycopg2.extras.RealDictCursor) as cursor:
+                cursor.execute(query, params or ())
+                rows = cursor.fetchall()
 
-            columns = [desc[0] for desc in cursor.description]
-            rows = cursor.fetchall()
-            print_info(f"DEBUG: Columns from cursor.description: {columns}")
-            print_info(f"DEBUG: Rows from cursor.fetchall(): {rows}")
-            print_info(f"DEBUG: Number of columns: {len(columns)}, Number of rows: {len(rows)}")
+                # Convert RealDictRow objects to dictionaries
+                results = []
+                for row in rows:
+                    if hasattr(row, 'items'):  # RealDictRow object
+                        results.append(dict(row))
+                    else:  # Regular tuple
+                        results.append(dict(row))
 
-            results = []
-            for row in rows:
-                # Handle both regular tuples and RealDictRow objects
-                if hasattr(row, 'items'):  # RealDictRow object
-                    results.append(dict(row))
-                else:  # Regular tuple
-                    results.append(dict(zip(columns, row)))
-
-            return results
+                return results
         except Exception as e:
-            print(f"{Colors.RED}❌ Database query failed: {e}{Colors.RESET}")
+            print_error(f"Database query failed: {e}")
             return []
 
     def execute_update(self, query: str, params: tuple = None) -> bool:
@@ -162,24 +170,15 @@ class DatabaseHelper:
             raise Exception("No database connection")
 
         try:
-            cursor = self.connection.cursor()
-            cursor.execute(query, params or ())
-            self.connection.commit()
-
-            # Return number of affected rows
-            affected_rows = cursor.rowcount
-            print_info(f"DEBUG: Update query affected {affected_rows} rows")
-
-            cursor.close()
-            return affected_rows > 0
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, params or ())
+                self.connection.commit()
+                return cursor.rowcount > 0
         except Exception as e:
             print_error(f"Update query execution failed: {e}")
             if self.connection:
                 self.connection.rollback()
             raise
-        finally:
-            if 'cursor' in locals():
-                cursor.close()
 
     def execute_update_with_count(self, query: str, params: tuple = None) -> int:
         """Execute an INSERT, UPDATE, or DELETE query and return affected row count"""
@@ -187,23 +186,15 @@ class DatabaseHelper:
             raise Exception("No database connection")
 
         try:
-            cursor = self.connection.cursor()
-            cursor.execute(query, params or ())
-            self.connection.commit()
-
-            affected_rows = cursor.rowcount
-            print_info(f"DEBUG: Update query affected {affected_rows} rows")
-
-            cursor.close()
-            return affected_rows
+            with self.connection.cursor() as cursor:
+                cursor.execute(query, params or ())
+                self.connection.commit()
+                return cursor.rowcount
         except Exception as e:
             print_error(f"Update query execution failed: {e}")
             if self.connection:
                 self.connection.rollback()
             raise
-        finally:
-            if 'cursor' in locals():
-                cursor.close()
 
     def verify_user_exists(self, email: str) -> bool:
         """Check if user exists in database"""
@@ -603,15 +594,6 @@ class TokenManager:
         """Retrieve stored token"""
         return self.tokens.get(name)
 
-    def validate_jwt_format(self, token: str) -> bool:
-        """Basic JWT format validation"""
-        try:
-            # JWT tokens have 3 parts separated by dots
-            parts = token.split('.')
-            return len(parts) == 3 and all(part.strip() for part in parts)
-        except:
-            return False
-
     def is_jwt_token_expired(self, token: str) -> bool:
         """Check if JWT token is expired"""
         try:
@@ -747,18 +729,33 @@ def wait_for_email_verification(email_helper, email: str, timeout: int = 30) -> 
 
     return email_found
 
-def wait_for_database_update(db_helper, table: str, condition: str, timeout: int = 10) -> bool:
-    """Wait for database update"""
+def wait_for_database_update(db_helper, table: str, where_clause: str, params: tuple = None, timeout: int = 10) -> bool:
+    """Wait for database update with parameterized queries to prevent SQL injection"""
+    # Validate table name against whitelist to prevent SQL injection
+    allowed_tables = {
+        'users',
+        'invite_codes',
+        'api_tokens',
+        'billing_periods',
+        'request_logs',
+        'settings',
+    }
+
+    if table.lower() not in allowed_tables:
+        raise ValueError(f"Table '{table}' is not in the allowed list")
+
     start_time = time.time()
 
     while time.time() - start_time < timeout:
         try:
-            # Execute check query
-            results = db_helper.execute_query(f"SELECT COUNT(*) FROM {table} WHERE {condition}")
+            # Execute check query with parameterized input
+            query = f"SELECT COUNT(*) as count FROM {table} WHERE {where_clause}"
+            results = db_helper.execute_query(query, params)
             if results and results[0]['count'] > 0:
                 return True
 
-        except:
+        except Exception as e:
+            print_warning(f"Database update check failed: {e}")
             pass
 
         time.sleep(1)

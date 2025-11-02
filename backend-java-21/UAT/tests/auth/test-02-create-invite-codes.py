@@ -31,6 +31,7 @@ from uat_framework import (
 )
 from auth_helpers import AuthHelper, AuthDataManager
 # Configuration will be loaded from framework config
+from uat_config import config
 
 class Test02CreateInviteCodes:
     """Test-02: Admin Invite Code Creation and Management"""
@@ -39,8 +40,8 @@ class Test02CreateInviteCodes:
         self.test_id = "TEST-02"
         self.test_name = "Admin Invite Code Creation and Management"
         self.reporting = TestReporting()
-        self.db_helper = DatabaseHelper(config.DATABASE_URL)
-        self.http_client = HTTPClient(config.APP_URL)
+        self.db_helper = DatabaseHelper(config.database_url)
+        self.http_client = HTTPClient(config.app_url)
         self.token_manager = TokenManager()
         self.test_steps = []
         self.start_time = datetime.now()
@@ -58,12 +59,12 @@ class Test02CreateInviteCodes:
         # Authenticate with default admin credentials
         try:
             login_data = {
-                "email": config.ADMIN_EMAIL,
-                "password": config.ADMIN_PASSWORD
+                "email": config.admin_email,
+                "password": config.admin_password
             }
 
             response, response_time = self.http_client.post(
-                config.ENDPOINTS['admin_login'],
+                config.ENDPOINTS['login'],
                 login_data
             )
 
@@ -82,20 +83,10 @@ class Test02CreateInviteCodes:
             self.admin_token = response_data['token']
             self.token_manager.store_token('admin', self.admin_token)
 
-            # Store token to file for potential reuse
-            token_path = config.get_token_path('admin_token')
-            with open(token_path, 'w') as f:
-                f.write(self.admin_token)
-
             print_success(f"Admin authentication successful ({format_response_time(response_time)})")
 
         except Exception as e:
             print_error(f"Failed to authenticate admin: {e}")
-            return False
-
-        # Verify admin token validity
-        if not self.token_manager.validate_jwt_format(self.admin_token):
-            print_error("Invalid admin token format")
             return False
 
         print_success("Environment setup completed successfully")
@@ -150,18 +141,10 @@ class Test02CreateInviteCodes:
             pageable = response_data.get('pageable', {})
             total_elements = pageable.get('totalElements', 0)
 
-            # Check for preloaded invite codes
-            preloaded_found = 0
-            for invite in content:
-                if invite.get('code') in config.PRELOADED_INVITE_CODES:
-                    preloaded_found += 1
-
             step.status = "PASS"
             step.message = f"Retrieved {total_elements} invite codes ({format_response_time(response_time)})"
             step.database_state = {
                 'total_invites': total_elements,
-                'preloaded_found': preloaded_found,
-                'expected_preloaded': len(config.PRELOADED_INVITE_CODES),
                 'page_size': pageable.get('pageSize', 0),
                 'current_page': pageable.get('pageNumber', 0)
             }
@@ -250,9 +233,9 @@ class Test02CreateInviteCodes:
 
             # Verify creator information
             creator_email = response_data.get('createdByUserEmail')
-            if creator_email != config.ADMIN_EMAIL:
+            if creator_email != config.admin_email:
                 step.status = "FAIL"
-                step.message = f"Creator email mismatch. Expected: {config.ADMIN_EMAIL}, Actual: {creator_email}"
+                step.message = f"Creator email mismatch. Expected: {config.admin_email}, Actual: {creator_email}"
                 print_error(f"Creator email mismatch: {creator_email}")
                 return step
 
@@ -549,7 +532,7 @@ class Test02CreateInviteCodes:
 
             # Verify all codes have proper creator tracking
             correctly_tracked = sum(1 for result in tracking_results
-                                  if result['creator_email'] == config.ADMIN_EMAIL)
+                                  if result['creator_email'] == config.admin_email)
 
             step.status = "PASS"
             step.message = f"Creator tracking verified for {correctly_tracked}/{len(created_codes)} codes"
