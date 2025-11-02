@@ -56,18 +56,18 @@ UAT-go/
 ### Setup
 
 1. Clone or navigate to the UAT-go directory:
-```bash
-cd /Users/therealcisse/Developer/trc_platform/backend-java-21/UAT-go
+```sh
+cd <PROJECT_ROOT>/backend-java/UAT-go
 ```
 
 2. Install dependencies:
-```bash
+```sh
 go mod tidy
 ```
 
 3. Build the application:
-```bash
-go build -o uat-go .
+```sh
+go build -o uat .
 ```
 
 ## Configuration
@@ -90,27 +90,27 @@ The framework uses environment variables for configuration. Required variables:
 
 ### Basic Commands
 
-```bash
+```sh
 # Show help and available options
-./uat-go --help
+./uat --help
 
 # Run all tests
-./uat-go run
+./uat run
 
 # Run tests with verbose output
-./uat-go run --verbose
+./uat run --verbose
 
 # Run specific domain
-./uat-go run --domain test
+./uat run --domain test
 
 # Run specific test by ID
-./uat-go run --filter "TEST-01"
+./uat run --filter "TEST-01"
 
 # Show test plan without execution
-./uat-go run --dry-run
+./uat run --dry-run
 
 # Run tests matching a pattern
-./uat-go run --filter "connectivity"
+./uat run --filter "connectivity"
 ```
 
 ### Command Line Options
@@ -125,18 +125,25 @@ The framework uses environment variables for configuration. Required variables:
 1. Start the TRC Platform application
 2. Start PostgreSQL database
 3. Start Mailcatcher:
-```bash
+```sh
 mailcatcher
 ```
 
 4. Set required environment variables:
-```bash
+```sh
 export UAT_ADMIN_PASSWORD="your-admin-password"
 ```
 
+or add the following to <PROJECT_ROOT>/backend-java/.env
+
+```sh
+UAT_ADMIN_PASSWORD=your-admin-password
+
+```
+
 5. Run tests:
-```bash
-./uat-go run
+```sh
+./uat run
 ```
 
 ## Test Domains
@@ -176,10 +183,10 @@ func (yd *YourDomain) GetTests() []framework.Test { /* return tests */ }
 
 ```go
 // This will cause a compilation error if endpoint name is misspelled
-endpoint, err := config.GetEndpoint("logn", true, nil) // Compile error: unknown endpoint
+endpoint, err := config.GetEndpoint("logn") // Compile error: unknown endpoint
 
 // Fixed version
-endpoint, err := config.GetEndpoint("login", true, nil) // OK
+endpoint, err := config.GetEndpoint("login") // OK
 ```
 
 ### Structured Configuration
@@ -302,7 +309,7 @@ The framework generates detailed test reports:
 
 ### Running Tests
 
-```bash
+```sh
 # Run the example tests
 go run domains/test/simple_test.go
 
@@ -312,7 +319,7 @@ UAT_ADMIN_PASSWORD="test123" go run main.go run --verbose
 
 ### Adding Dependencies
 
-```bash
+```sh
 # Add a new dependency
 go get github.com/example/package
 
@@ -322,13 +329,13 @@ go mod tidy
 
 ### Building
 
-```bash
+```sh
 # Build for current platform
-go build -o uat-go .
+go build -o uat .
 
 # Build for multiple platforms
-GOOS=linux go build -o uat-go-linux .
-GOOS=windows go build -o uat-go.exe .
+GOOS=linux go build -o uat-linux .
+GOOS=windows go build -o uat.exe .
 ```
 
 ## Contributing
