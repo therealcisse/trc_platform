@@ -18,3 +18,12 @@ cors:
     - "http://localhost:3000"
     - "http://localhost:5173"
 
+server:
+  error:
+    include-stacktrace: always
+    include-message: always
+    include-binding-errors: always
+
+logging:
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss.SSS} [%thread] %-5level %logger{36} - %msg%n%wEx"

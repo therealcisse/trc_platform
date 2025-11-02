@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,47 +26,52 @@ import org.springframework.test.web.servlet.MockMvc;
 // @Import(MockOpenAIConfig.class)
 class AdminInviteEndpointsIT extends PostgresIT {
 
-  @Autowired MockMvc mvc;
-  @Autowired ObjectMapper om;
-  @Autowired TestDataFactory data;
-  @Autowired JwtService jwt;
+    @Autowired MockMvc mvc;
 
-  private String adminAuth() {
-    var admin = data.createUser("admin@example.com", true);
-    return "Bearer " + jwt.generateSessionToken(admin.getId(), true);
-  }
+    @Autowired ObjectMapper om;
 
-  @Test
-  void create_list_deactivate_invite() throws Exception {
-    String auth = adminAuth();
+    @Autowired TestDataFactory data;
 
-    String createResp =
+    @Autowired JwtService jwt;
+
+    private String adminAuth() {
+        var admin = data.createUser("admin@example.com", true);
+        return "Bearer " + jwt.generateSessionToken(admin.getId(), true);
+    }
+
+    @Test
+    void create_list_deactivate_invite() throws Exception {
+        String auth = adminAuth();
+
+        String createResp =
+                mvc.perform(
+                                post("/api/v1/admin/invites")
+                                        .header("Authorization", auth)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"expiresAt\":null}"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JsonNode created = om.readTree(createResp).path("data");
+        String code = created.path("code").asText();
+        assertThat(code).isNotBlank();
+
+        String listResp =
+                mvc.perform(get("/api/v1/admin/invites").header("Authorization", auth))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        assertThat(om.readTree(listResp).path("data").path("content").isArray()).isTrue();
+
         mvc.perform(
-                post("/api/v1/admin/invites")
-                    .header("Authorization", auth)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"expiresAt\":null}"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+                        post("/api/v1/admin/invites/{code}/deactivate", code)
+                                .header("Authorization", auth))
+                .andExpect(status().isOk());
 
-    JsonNode created = om.readTree(createResp).path("data");
-    String code = created.path("code").asText();
-    assertThat(code).isNotBlank();
-
-    String listResp =
-        mvc.perform(get("/api/v1/admin/invites").header("Authorization", auth))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-    assertThat(om.readTree(listResp).path("data").path("content").isArray()).isTrue();
-
-    mvc.perform(post("/api/v1/admin/invites/{code}/deactivate", code).header("Authorization", auth))
-        .andExpect(status().isOk());
-
-    mvc.perform(delete("/api/v1/admin/invites/expired").header("Authorization", auth))
-        .andExpect(status().isOk());
-  }
+        mvc.perform(delete("/api/v1/admin/invites/expired").header("Authorization", auth))
+                .andExpect(status().isOk());
+    }
 }

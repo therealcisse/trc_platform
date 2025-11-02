@@ -8,9 +8,16 @@ spring:
   flyway:
     enabled: true
 
+server:
+  error:
+    include-stacktrace: always
+
 logging:
   level:
     root: WARN
+  pattern:
+    # Ensure exceptions print full stack traces in test logs
+    console: "%d{HH:mm:ss.SSS} %-5level %logger{36} - %msg%n%wEx"
 
 security:
   jwt:

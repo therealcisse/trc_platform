@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.security;
 
 import com.trc.platform.users.entity.User;
@@ -20,31 +19,33 @@ import org.springframework.web.filter.OncePerRequestFilter;
 @RequiredArgsConstructor
 public class JwtAuthenticationFilter extends OncePerRequestFilter {
 
-  private final JwtService jwtService;
-  private final UserRepository userRepository;
+    private final JwtService jwtService;
 
-  @Override
-  protected void doFilterInternal(
-      HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
-      throws ServletException, IOException {
+    private final UserRepository userRepository;
 
-    String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
-    if (StringUtils.hasText(auth) && auth.startsWith("Bearer ")) {
-      String token = auth.substring(7);
-      try {
-        UUID userId = jwtService.parseUserId(token);
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isPresent()) {
-          UserPrincipal principal = new UserPrincipal(userOpt.get());
-          var authToken =
-              new UsernamePasswordAuthenticationToken(principal, null, principal.getAuthorities());
-          SecurityContextHolder.getContext().setAuthentication(authToken);
+    @Override
+    protected void doFilterInternal(
+            HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
+            throws ServletException, IOException {
+
+        String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
+        if (StringUtils.hasText(auth) && auth.startsWith("Bearer ")) {
+            String token = auth.substring(7);
+            try {
+                UUID userId = jwtService.parseUserId(token);
+                Optional<User> userOpt = userRepository.findById(userId);
+                if (userOpt.isPresent()) {
+                    UserPrincipal principal = new UserPrincipal(userOpt.get());
+                    var authToken =
+                            new UsernamePasswordAuthenticationToken(
+                                    principal, null, principal.getAuthorities());
+                    SecurityContextHolder.getContext().setAuthentication(authToken);
+                }
+            } catch (Exception ignored) {
+                // invalid session token, fall through to API token filter or 401 later
+            }
         }
-      } catch (Exception ignored) {
-        // invalid session token, fall through to API token filter or 401 later
-      }
-    }
 
-    filterChain.doFilter(request, response);
-  }
+        filterChain.doFilter(request, response);
+    }
 }

@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.auth;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -23,36 +22,37 @@ import org.springframework.test.web.servlet.MockMvc;
 // @Import(MockOpenAIConfig.class)
 class AuthIntegrationTest extends PostgresIT {
 
-  @Autowired MockMvc mvc;
-  @Autowired ObjectMapper om;
+    @Autowired MockMvc mvc;
 
-  @Test
-  void register_and_login_returns_session_token() throws Exception {
-    var regBody =
-        """
+    @Autowired ObjectMapper om;
+
+    @Test
+    void register_and_login_returns_session_token() throws Exception {
+        var regBody =
+                """
 {"email":"user1@example.com","password":"P@ssw0rd!","acceptedTerms":true,"acknowledgedDisclaimer":true}
 """;
-    mvc.perform(
-            post("/api/customers/register")
-                .contentType(MediaType.APPLICATION_JSON)
-                .content(regBody))
-        .andExpect(status().isCreated());
-
-    var loginBody =
-        """
-        {"email":"user1@example.com","password":"P@ssw0rd!"}
-        """;
-    String resp =
         mvc.perform(
-                post("/api/customers/login")
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content(loginBody))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+                        post("/api/customers/register")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(regBody))
+                .andExpect(status().isCreated());
 
-    JsonNode root = om.readTree(resp);
-    assertThat(root.path("data").path("sessionToken").asText()).isNotBlank();
-  }
+        var loginBody =
+                """
+                {"email":"user1@example.com","password":"P@ssw0rd!"}
+                """;
+        String resp =
+                mvc.perform(
+                                post("/api/customers/login")
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(loginBody))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JsonNode root = om.readTree(resp);
+        assertThat(root.path("data").path("sessionToken").asText()).isNotBlank();
+    }
 }

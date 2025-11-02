@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.core;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -27,32 +26,37 @@ import org.springframework.test.web.servlet.MockMvc;
 // @Import(MockOpenAIConfig.class)
 class CoreSolveIntegrationTest extends PostgresIT {
 
-  @Autowired MockMvc mvc;
-  @Autowired ObjectMapper om;
-  @Autowired TestDataFactory data;
-  @Autowired JwtService jwt;
+    @Autowired MockMvc mvc;
 
-  @Test
-  void solve_with_jwt_auth_returns_solve_response() throws Exception {
-    var user = data.createUser("solver@example.com", false);
-    var token = jwt.generateSessionToken(user.getId(), false);
+    @Autowired ObjectMapper om;
 
-    byte[] img = "fakepng".getBytes(StandardCharsets.UTF_8);
-    MockMultipartFile file =
-        new MockMultipartFile("image", "img.png", MediaType.IMAGE_PNG_VALUE, img);
+    @Autowired TestDataFactory data;
 
-    String resp =
-        mvc.perform(
-                multipart("/api/core/solve").file(file).header("Authorization", "Bearer " + token))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+    @Autowired JwtService jwt;
 
-    JsonNode root = om.readTree(resp).path("data");
-    assertThat(root.path("requestId").asText()).isNotBlank();
-    assertThat(root.path("result").asText()).isEqualTo("42");
-    assertThat(root.path("durationMs").isInt()).isTrue();
-    assertThat(root.path("timings").path("openai_ms").isInt()).isTrue();
-  }
+    @Test
+    void solve_with_jwt_auth_returns_solve_response() throws Exception {
+        var user = data.createUser("solver@example.com", false);
+        var token = jwt.generateSessionToken(user.getId(), false);
+
+        byte[] img = "fakepng".getBytes(StandardCharsets.UTF_8);
+        MockMultipartFile file =
+                new MockMultipartFile("image", "img.png", MediaType.IMAGE_PNG_VALUE, img);
+
+        String resp =
+                mvc.perform(
+                                multipart("/api/core/solve")
+                                        .file(file)
+                                        .header("Authorization", "Bearer " + token))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JsonNode root = om.readTree(resp).path("data");
+        assertThat(root.path("requestId").asText()).isNotBlank();
+        assertThat(root.path("result").asText()).isEqualTo("42");
+        assertThat(root.path("durationMs").isInt()).isTrue();
+        assertThat(root.path("timings").path("openai_ms").isInt()).isTrue();
+    }
 }

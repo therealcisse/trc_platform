@@ -9,6 +9,7 @@ DROP TYPE IF EXISTS payment_status_type CASCADE;
 
 -- Create enum types
 CREATE TYPE payment_status_type AS ENUM ('pending', 'paid', 'overdue', 'waived');
+CREATE TYPE request_logs_status_type AS ENUM ('SUCCESS', 'ERROR');
 
 -- Users
 create table if not exists users (
@@ -17,8 +18,8 @@ create table if not exists users (
   password_hash varchar(255) not null,
   is_active boolean not null default true,
   is_staff boolean not null default false,
-  email_verified_at timestamp null,
-  date_joined timestamp not null,
+  email_verified_at timestamp with time zone null,
+  date_joined timestamp with time zone not null,
   user_accepted_terms boolean not null default false,
   user_acknowledged_disclaimer boolean not null default false,
   version bigint,
@@ -32,7 +33,7 @@ create table if not exists settings (
   openai_model varchar(255),
   openai_timeout_s integer not null default 30,
   app_domain varchar(1024),
-  updated_at timestamp not null
+  updated_at timestamp with time zone not null
 );
 
 -- API tokens
@@ -42,10 +43,10 @@ create table if not exists api_tokens (
   token_hash varchar(255) not null unique,
   token_prefix varchar(64) not null,
   name varchar(255) not null,
-  created_at timestamp not null,
-  last_used_at timestamp null,
-  expires_at timestamp null,
-  revoked_at timestamp null
+  created_at timestamp with time zone not null,
+  last_used_at timestamp with time zone null,
+  expires_at timestamp with time zone null,
+  revoked_at timestamp with time zone null
 );
 
 -- Optimize API token lookup by hash
@@ -61,7 +62,7 @@ create table if not exists billing_periods (
   total_cost_cents integer not null default 0,
   is_current boolean not null default false,
   payment_status payment_status_type not null default 'pending',
-  paid_at timestamp null,
+  paid_at timestamp with time zone null,
   paid_amount_cents integer,
   payment_reference varchar(255),
   notes text,
@@ -79,11 +80,11 @@ create table if not exists request_logs (
   token_id uuid null references api_tokens(id),
   billing_period_id uuid null references billing_periods(id),
   service varchar(255) not null,
-  request_ts timestamp not null,
+  request_ts timestamp with time zone not null,
   duration_ms integer not null,
   request_bytes integer not null,
   response_bytes integer not null,
-  status varchar(16) not null,
+  status request_logs_status_type not null,
   error_code varchar(50) null,
   request_id uuid not null,
   flow_id varchar(255) null,
@@ -100,9 +101,9 @@ create table if not exists invite_codes (
   id uuid primary key,
   code varchar(32) not null unique,
   is_active boolean not null default true,
-  expires_at timestamp null,
-  created_at timestamp not null,
-  used_at timestamp null,
+  expires_at timestamp with time zone null,
+  created_at timestamp with time zone not null,
+  used_at timestamp with time zone null,
   used_by_user_id uuid null references users(id),
   created_by_user_id uuid null references users(id)
 );

@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.users.service;
 
 import com.trc.platform.config.SettingsService;
@@ -16,73 +15,76 @@ import org.springframework.stereotype.Service;
 @Slf4j
 public class EmailService {
 
-  private final JavaMailSender mailSender;
-  private final SettingsService settingsService;
-  private final EmailVerificationService emailVerificationService;
-  private final JwtEmailVerificationService jwtEmailVerificationService;
+    private final JavaMailSender mailSender;
 
-  @Value("${spring.mail.from:noreply@trc-platform.com}")
-  private String fromEmail;
+    private final SettingsService settingsService;
 
-  public void sendVerificationEmail(String email, HttpServletRequest request) {
-    try {
-      String token = jwtEmailVerificationService.generateVerificationToken(email);
-      String verificationUrl = emailVerificationService.buildVerificationUrl(token, request);
+    private final EmailVerificationService emailVerificationService;
 
-      String subject = "Verify your TRC Platform account";
-      String htmlContent = buildVerificationEmailTemplate(verificationUrl);
+    private final JwtEmailVerificationService jwtEmailVerificationService;
 
-      sendEmail(email, subject, htmlContent);
-      log.info("JWT verification email sent to: {}", email);
-    } catch (Exception e) {
-      log.error("Failed to send JWT verification email to: {}", email, e);
-      throw new RuntimeException("Failed to send verification email", e);
+    @Value("${spring.mail.from:noreply@trc-platform.com}")
+    private String fromEmail;
+
+    public void sendVerificationEmail(String email, HttpServletRequest request) {
+        try {
+            String token = jwtEmailVerificationService.generateVerificationToken(email);
+            String verificationUrl = emailVerificationService.buildVerificationUrl(token, request);
+
+            String subject = "Verify your TRC Platform account";
+            String htmlContent = buildVerificationEmailTemplate(verificationUrl);
+
+            sendEmail(email, subject, htmlContent);
+            log.info("Email verification sent to: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to send Email verification to: {}", email, e);
+            throw new RuntimeException("Failed to send verification email", e);
+        }
     }
-  }
 
-  public void resendVerificationEmail(String email, HttpServletRequest request) {
-    try {
-      String token = jwtEmailVerificationService.generateVerificationToken(email);
-      String verificationUrl = emailVerificationService.buildVerificationUrl(token, request);
+    public void resendVerificationEmail(String email, HttpServletRequest request) {
+        try {
+            String token = jwtEmailVerificationService.generateVerificationToken(email);
+            String verificationUrl = emailVerificationService.buildVerificationUrl(token, request);
 
-      String subject = "Verify your TRC Platform account";
-      String htmlContent = buildVerificationEmailTemplate(verificationUrl);
+            String subject = "Verify your TRC Platform account";
+            String htmlContent = buildVerificationEmailTemplate(verificationUrl);
 
-      sendEmail(email, subject, htmlContent);
-      log.info("JWT verification email resent to: {}", email);
-    } catch (Exception e) {
-      log.error("Failed to resend JWT verification email to: {}", email, e);
-      throw new RuntimeException("Failed to resend verification email", e);
+            sendEmail(email, subject, htmlContent);
+            log.info("JWT verification email resent to: {}", email);
+        } catch (Exception e) {
+            log.error("Failed to resend JWT verification email to: {}", email, e);
+            throw new RuntimeException("Failed to resend verification email", e);
+        }
     }
-  }
 
-  public boolean validateVerificationToken(String token) {
-    return jwtEmailVerificationService.validateVerificationToken(token);
-  }
-
-  public String extractEmailFromToken(String token) {
-    return jwtEmailVerificationService.extractEmailFromToken(token);
-  }
-
-  private void sendEmail(String to, String subject, String htmlContent) {
-    try {
-      MimeMessage message = mailSender.createMimeMessage();
-      MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-      helper.setFrom(fromEmail);
-      helper.setTo(to);
-      helper.setSubject(subject);
-      helper.setText(htmlContent, true);
-
-      mailSender.send(message);
-    } catch (Exception e) {
-      log.error("Failed to send email to: {}", to, e);
-      throw new RuntimeException("Failed to send email", e);
+    public boolean validateVerificationToken(String token) {
+        return jwtEmailVerificationService.validateVerificationToken(token);
     }
-  }
 
-  private String buildVerificationEmailTemplate(String verificationUrl) {
-    return """
+    public String extractEmailFromToken(String token) {
+        return jwtEmailVerificationService.extractEmailFromToken(token);
+    }
+
+    private void sendEmail(String to, String subject, String htmlContent) {
+        try {
+            MimeMessage message = mailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+
+            helper.setFrom(fromEmail);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(htmlContent, true);
+
+            mailSender.send(message);
+        } catch (Exception e) {
+            log.error("Failed to send email to: {}", to, e);
+            throw new RuntimeException("Failed to send email", e);
+        }
+    }
+
+    private String buildVerificationEmailTemplate(String verificationUrl) {
+        return """
 <!DOCTYPE html>
 <html>
 <head>
@@ -92,7 +94,15 @@ public class EmailService {
         body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
         .container { max-width: 600px; margin: 0 auto; padding: 20px; }
         .header { text-align: center; margin-bottom: 30px; }
-        .button { display: inline-block; background-color: #007bff; color: white; padding: 12px 24px; text-decoration: none; border-radius: 4px; margin: 20px 0; }
+        .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 12px 24px;
+            text-decoration: none;
+            border-radius: 4px;
+            margin: 20px 0;
+        }
         .footer { margin-top: 30px; padding-top: 20px; border-top: 1px solid #eee; font-size: 12px; color: #666; }
     </style>
 </head>
@@ -102,7 +112,9 @@ public class EmailService {
             <h1>Welcome to TRC Platform!</h1>
         </div>
 
-        <p>Thank you for registering with TRC Platform. To complete your registration and activate your account, please verify your email address by clicking the button below:</p>
+        <p>Thank you for registering with TRC Platform. To complete your registration
+        and activate your account, please verify your email address by clicking
+        the button below:</p>
 
         <div style="text-align: center;">
             <a href="%s" class="button">Verify Email Address</a>
@@ -122,6 +134,6 @@ public class EmailService {
 </body>
 </html>
 """
-        .formatted(verificationUrl, verificationUrl);
-  }
+                .formatted(verificationUrl, verificationUrl);
+    }
 }

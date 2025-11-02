@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.config;
 
 import org.springframework.data.jpa.repository.JpaRepository;

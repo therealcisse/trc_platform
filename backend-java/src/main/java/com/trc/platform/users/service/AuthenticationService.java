@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.users.service;
 
 import com.trc.platform.admin.entity.InviteCode;
@@ -27,182 +26,189 @@ import org.springframework.transaction.annotation.Transactional;
 @RequiredArgsConstructor
 public class AuthenticationService {
 
-  private final UserRepository userRepository;
-  private final InviteCodeRepository inviteCodeRepository;
-  private final PasswordEncoder passwordEncoder;
-  private final JwtService jwtService;
-  private final EmailService emailService;
+    private final UserRepository userRepository;
 
-  @Transactional
-  public void register(RegistrationRequest req, HttpServletRequest request) {
-    // Validate email uniqueness (case-insensitive)
-    validateEmail(req.getEmail());
+    private final InviteCodeRepository inviteCodeRepository;
 
-    // Validate password confirmation
-    validatePasswordConfirmation(req.getPassword(), req.getConfirmPassword());
+    private final PasswordEncoder passwordEncoder;
 
-    // Validate terms acceptance
-    validateTermsAcceptance(req.getUserAcceptedTerms());
+    private final JwtService jwtService;
 
-    // Validate and consume invite code
-    InviteCode inviteCode = validateAndConsumeInviteCode(req.getInviteCode());
+    private final EmailService emailService;
 
-    // Create user
-    User user =
-        User.builder()
-            .email(req.getEmail().toLowerCase())
-            .passwordHash(passwordEncoder.encode(req.getPassword()))
-            .userAcceptedTerms(Boolean.TRUE.equals(req.getUserAcceptedTerms()))
-            .userAcknowledgedDisclaimer(Boolean.TRUE.equals(req.getUserAcknowledgedDisclaimer()))
-            .dateJoined(LocalDateTime.now())
-            .active(true)
-            .staff(false)
-            .build();
-    user = userRepository.save(user);
+    @Transactional
+    public void register(RegistrationRequest req, HttpServletRequest request) {
+        // Validate email uniqueness (case-insensitive)
+        validateEmail(req.email());
 
-    // Mark invite code as used
-    inviteCode.markAsUsed(user);
-    inviteCodeRepository.save(inviteCode);
+        // Validate password confirmation
+        validatePasswordConfirmation(req.password(), req.confirmPassword());
 
-    // Send verification email
-    emailService.sendVerificationEmail(user.getEmail(), request);
-  }
+        // Validate terms acceptance
+        validateTermsAcceptance(req.userAcceptedTerms());
 
-  private void validateEmail(String email) {
-    userRepository
-        .findByEmailIgnoreCase(email)
-        .ifPresent(
-            u -> {
-              throw new EmailExistsException("Email already registered");
-            });
-  }
+        // Validate and consume invite code
+        InviteCode inviteCode = validateAndConsumeInviteCode(req.inviteCode());
 
-  private void validatePasswordConfirmation(String password, String confirmPassword) {
-    if (!password.equals(confirmPassword)) {
-      throw new PasswordMismatchException("Password confirmation does not match");
-    }
-  }
+        // Create user
+        User user =
+                User.builder()
+                        .email(req.email().toLowerCase())
+                        .passwordHash(passwordEncoder.encode(req.password()))
+                        .userAcceptedTerms(Boolean.TRUE.equals(req.userAcceptedTerms()))
+                        .userAcknowledgedDisclaimer(
+                                Boolean.TRUE.equals(req.userAcknowledgedDisclaimer()))
+                        .dateJoined(LocalDateTime.now())
+                        .active(true)
+                        .staff(false)
+                        .build();
+        user = userRepository.save(user);
 
-  private void validateTermsAcceptance(Boolean userAcceptedTerms) {
-    if (!Boolean.TRUE.equals(userAcceptedTerms)) {
-      throw new TermsNotAcceptedException("You must accept the terms to register");
-    }
-  }
+        // Mark invite code as used
+        inviteCode.markAsUsed(user);
+        inviteCodeRepository.save(inviteCode);
 
-  private InviteCode validateAndConsumeInviteCode(String code) {
-    InviteCode inviteCode =
-        inviteCodeRepository
-            .findByCode(code)
-            .orElseThrow(
-                () -> new InvalidInviteCodeException("Invalid invite code", "invalid_invite"));
-
-    if (!inviteCode.isValid()) {
-      if (inviteCode.getUsedBy() != null) {
-        throw new InvalidInviteCodeException("Invite code already used", "invite_used");
-      } else if (inviteCode.isExpired()) {
-        throw new InvalidInviteCodeException("Invite code has expired", "invite_expired");
-      } else {
-        throw new InvalidInviteCodeException("Invalid invite code", "invalid_invite");
-      }
+        // Send verification email
+        emailService.sendVerificationEmail(user.getEmail(), request);
     }
 
-    return inviteCode;
-  }
-
-  public Map<String, Object> login(LoginRequest req) {
-    User user =
+    private void validateEmail(String email) {
         userRepository
-            .findByEmail(req.getEmail())
-            .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
-
-    if (!passwordEncoder.matches(req.getPassword(), user.getPasswordHash())) {
-      throw new IllegalArgumentException("Invalid credentials");
-    }
-    if (!Boolean.TRUE.equals(user.getActive())) {
-      throw new IllegalArgumentException("Account is disabled");
+                .findByEmailIgnoreCase(email)
+                .ifPresent(
+                        u -> {
+                            throw new EmailExistsException("Email already registered");
+                        });
     }
 
-    String token =
-        jwtService.generateSessionToken(user.getId(), Boolean.TRUE.equals(user.getStaff()));
-    return Map.of(
-        "id", user.getId().toString(),
-        "email", user.getEmail(),
-        "token", token);
-  }
-
-  public UUID getUserIdFromToken(String jwt) {
-    return jwtService.parseUserId(jwt);
-  }
-
-  @Transactional
-  public void changePassword(UUID userId, PasswordChangeRequest req) {
-    // Hash password outside of transaction to avoid holding DB connections
-    String hashedPassword = passwordEncoder.encode(req.getNewPassword());
-
-    // Only the save operation needs to be transactional
-    updatePasswordHash(userId, req, hashedPassword);
-  }
-
-  public void updatePasswordHash(UUID userId, PasswordChangeRequest req, String hashedPassword) {
-    User user =
-        userRepository
-            .findById(userId)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-    // Validate current password
-    if (!passwordEncoder.matches(req.getCurrentPassword(), user.getPasswordHash())) {
-      throw new PasswordMismatchException("Current password is incorrect");
+    private void validatePasswordConfirmation(String password, String confirmPassword) {
+        if (!password.equals(confirmPassword)) {
+            throw new PasswordMismatchException("Password confirmation does not match");
+        }
     }
 
-    // Validate new password confirmation (assuming confirmPassword field exists)
-    if (!req.getNewPassword().equals(req.getConfirmPassword())) {
-      throw new PasswordMismatchException("New password confirmation does not match");
+    private void validateTermsAcceptance(Boolean userAcceptedTerms) {
+        if (!Boolean.TRUE.equals(userAcceptedTerms)) {
+            throw new TermsNotAcceptedException("You must accept the terms to register");
+        }
     }
 
-    userRepository.updatePassword(userId, hashedPassword);
-  }
+    private InviteCode validateAndConsumeInviteCode(String code) {
+        InviteCode inviteCode =
+                inviteCodeRepository
+                        .findByCode(code)
+                        .orElseThrow(
+                                () ->
+                                        new InvalidInviteCodeException(
+                                                "Invalid invite code", "invalid_invite"));
 
-  @Transactional
-  public void verifyEmail(String token) {
-    if (!emailService.validateVerificationToken(token)) {
-      throw new IllegalArgumentException("Invalid or expired verification token");
+        if (!inviteCode.isValid()) {
+            if (inviteCode.getUsedBy() != null) {
+                throw new InvalidInviteCodeException("Invite code already used", "invite_used");
+            } else if (inviteCode.isExpired()) {
+                throw new InvalidInviteCodeException("Invite code has expired", "invite_expired");
+            } else {
+                throw new InvalidInviteCodeException("Invalid invite code", "invalid_invite");
+            }
+        }
+
+        return inviteCode;
     }
 
-    String email = emailService.extractEmailFromToken(token);
-    if (email == null) {
-      throw new IllegalArgumentException("Invalid verification token");
+    public Map<String, Object> login(LoginRequest req) {
+        User user =
+                userRepository
+                        .findByEmail(req.email())
+                        .orElseThrow(() -> new IllegalArgumentException("Invalid credentials"));
+
+        if (!passwordEncoder.matches(req.password(), user.getPasswordHash())) {
+            throw new IllegalArgumentException("Invalid credentials");
+        }
+        if (!Boolean.TRUE.equals(user.getActive())) {
+            throw new IllegalArgumentException("Account is disabled");
+        }
+
+        String token =
+                jwtService.generateSessionToken(user.getId(), Boolean.TRUE.equals(user.getStaff()));
+        return Map.of(
+                "id", user.getId().toString(),
+                "email", user.getEmail(),
+                "token", token);
     }
 
-    User user =
-        userRepository
-            .findByEmailIgnoreCase(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-    // Check if user is already verified
-    if (user.isEmailVerified()) {
-      // User is already verified - do nothing (gracefully handle token reuse)
-      return;
+    public UUID getUserIdFromToken(String jwt) {
+        return jwtService.parseUserId(jwt);
     }
 
-    userRepository.verifyEmail(user.getId(), email, LocalDateTime.now());
-  }
+    @Transactional
+    public void changePassword(UUID userId, PasswordChangeRequest req) {
+        // Hash password outside of transaction to avoid holding DB connections
+        String hashedPassword = passwordEncoder.encode(req.newPassword());
 
-  public void resendVerificationEmail(String email, HttpServletRequest request) {
-    User user =
-        userRepository
-            .findByEmailIgnoreCase(email)
-            .orElseThrow(() -> new IllegalArgumentException("User not found"));
-
-    if (user.isEmailVerified()) {
-      throw new IllegalArgumentException("Email is already verified");
+        // Only the save operation needs to be transactional
+        updatePasswordHash(userId, req, hashedPassword);
     }
 
-    emailService.sendVerificationEmail(email, request);
-  }
+    public void updatePasswordHash(UUID userId, PasswordChangeRequest req, String hashedPassword) {
+        User user =
+                userRepository
+                        .findById(userId)
+                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
 
-  public User findByEmail(String email) {
-    return userRepository
-        .findByEmailIgnoreCase(email)
-        .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
-  }
+        // Validate current password
+        if (!passwordEncoder.matches(req.currentPassword(), user.getPasswordHash())) {
+            throw new PasswordMismatchException("Current password is incorrect");
+        }
+
+        // Validate new password confirmation (assuming confirmPassword field exists)
+        if (!req.newPassword().equals(req.confirmPassword())) {
+            throw new PasswordMismatchException("New password confirmation does not match");
+        }
+
+        userRepository.updatePassword(userId, hashedPassword);
+    }
+
+    @Transactional
+    public void verifyEmail(String token) {
+        if (!emailService.validateVerificationToken(token)) {
+            throw new IllegalArgumentException("Invalid or expired verification token");
+        }
+
+        String email = emailService.extractEmailFromToken(token);
+        if (email == null) {
+            throw new IllegalArgumentException("Invalid verification token");
+        }
+
+        User user =
+                userRepository
+                        .findByEmailIgnoreCase(email)
+                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        // Check if user is already verified
+        if (user.isEmailVerified()) {
+            // User is already verified - do nothing (gracefully handle token reuse)
+            return;
+        }
+
+        userRepository.verifyEmail(user.getId(), email, LocalDateTime.now());
+    }
+
+    public void resendVerificationEmail(String email, HttpServletRequest request) {
+        User user =
+                userRepository
+                        .findByEmailIgnoreCase(email)
+                        .orElseThrow(() -> new IllegalArgumentException("User not found"));
+
+        if (user.isEmailVerified()) {
+            throw new IllegalArgumentException("Email is already verified");
+        }
+
+        emailService.sendVerificationEmail(email, request);
+    }
+
+    public User findByEmail(String email) {
+        return userRepository
+                .findByEmailIgnoreCase(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found: " + email));
+    }
 }

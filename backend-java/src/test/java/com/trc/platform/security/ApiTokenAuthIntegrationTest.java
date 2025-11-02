@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.security;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -25,28 +24,30 @@ import org.springframework.test.web.servlet.MockMvc;
 // @Import(MockOpenAIConfig.class)
 class ApiTokenAuthIntegrationTest extends PostgresIT {
 
-  @Autowired MockMvc mvc;
-  @Autowired ObjectMapper om;
-  @Autowired TestDataFactory data;
+    @Autowired MockMvc mvc;
 
-  @Test
-  void solve_with_api_token_header_succeeds() throws Exception {
-    var user = data.createUser("apitoken@example.com", false);
-    var plain = "tok_test_123456789";
-    data.createApiToken(user, plain);
+    @Autowired ObjectMapper om;
 
-    byte[] img = "fakepng".getBytes();
-    MockMultipartFile file =
-        new MockMultipartFile("image", "img.png", MediaType.IMAGE_PNG_VALUE, img);
+    @Autowired TestDataFactory data;
 
-    String resp =
-        mvc.perform(multipart("/api/core/solve").file(file).header("X-API-Token", plain))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
+    @Test
+    void solve_with_api_token_header_succeeds() throws Exception {
+        var user = data.createUser("apitoken@example.com", false);
+        var plain = "tok_test_123456789";
+        data.createApiToken(user, plain);
 
-    JsonNode root = om.readTree(resp).path("data");
-    assertThat(root.path("result").asText()).isEqualTo("42");
-  }
+        byte[] img = "fakepng".getBytes();
+        MockMultipartFile file =
+                new MockMultipartFile("image", "img.png", MediaType.IMAGE_PNG_VALUE, img);
+
+        String resp =
+                mvc.perform(multipart("/api/core/solve").file(file).header("X-API-Token", plain))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JsonNode root = om.readTree(resp).path("data");
+        assertThat(root.path("result").asText()).isEqualTo("42");
+    }
 }

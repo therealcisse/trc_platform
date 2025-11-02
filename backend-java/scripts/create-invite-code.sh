@@ -18,8 +18,8 @@ APP_URL=${APP_URL:-http://localhost:8080}
 LOGIN_PATH=${LOGIN_PATH:-/api/customers/login}
 INVITES_PATH=${INVITES_PATH:-/api/v1/admin/invites}
 
-ADMIN_EMAIL=${ADMIN_EMAIL:-}
-ADMIN_PASSWORD=${ADMIN_PASSWORD:-}
+ADMIN_EMAIL=${ADMIN_EMAIL:-admin@trc-platform.local}
+ADMIN_PASSWORD=${ADMIN_PASSWORD:-password}
 INVITE_CODE=${INVITE_CODE:-}
 EXPIRES_AT=${EXPIRES_AT:-}
 

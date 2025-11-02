@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.config;
 
 import io.swagger.v3.oas.models.ExternalDocumentation;
@@ -9,14 +8,14 @@ import org.springframework.context.annotation.Configuration;
 
 @Configuration
 public class OpenApiConfig {
-  @Bean
-  public OpenAPI apiDocs() {
-    return new OpenAPI()
-        .info(
-            new Info()
-                .title("TRC Platform API")
-                .version("1.0.0")
-                .description("OpenAPI documentation for TRC Platform"))
-        .externalDocs(new ExternalDocumentation().description("Product Requirements"));
-  }
+    @Bean
+    public OpenAPI apiDocs() {
+        return new OpenAPI()
+                .info(
+                        new Info()
+                                .title("TRC Platform API")
+                                .version("1.0.0")
+                                .description("OpenAPI documentation for TRC Platform"))
+                .externalDocs(new ExternalDocumentation().description("Product Requirements"));
+    }
 }

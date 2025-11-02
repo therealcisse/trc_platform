@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.usage.entity;
 
 import com.trc.platform.users.entity.User;
@@ -10,70 +9,71 @@ import java.util.Set;
 import java.util.UUID;
 import lombok.*;
 import org.hibernate.annotations.GenericGenerator;
+import org.hibernate.annotations.JdbcType;
+import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 
 @Entity
 @Table(
-    name = "billing_periods",
-    indexes = {
-      @Index(name = "idx_user_period", columnList = "user_id, period_start"),
-      @Index(name = "idx_current_period", columnList = "is_current")
-    })
+        name = "billing_periods",
+        indexes = {
+            @Index(name = "idx_user_period", columnList = "user_id, period_start"),
+            @Index(name = "idx_current_period", columnList = "is_current")
+        })
 @Data
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
 public class BillingPeriod {
+    public enum PaymentStatus {
+        pending,
+        paid,
+        overdue,
+        waived
+    }
+    @Id
+    @GeneratedValue(generator = "UUID")
+    @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
+    private UUID id;
 
-  public enum PaymentStatus {
-    pending,
-    paid,
-    overdue,
-    waived
-  }
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
 
-  @Id
-  @GeneratedValue(generator = "UUID")
-  @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
-  private UUID id;
+    @Column(name = "period_start", nullable = false)
+    private LocalDate periodStart;
 
-  @ManyToOne(fetch = FetchType.LAZY)
-  @JoinColumn(name = "user_id", nullable = false)
-  private User user;
+    @Column(name = "period_end", nullable = false)
+    private LocalDate periodEnd;
 
-  @Column(name = "period_start", nullable = false)
-  private LocalDate periodStart;
+    @Column(name = "total_requests", nullable = false)
+    private Integer totalRequests = 0;
 
-  @Column(name = "period_end", nullable = false)
-  private LocalDate periodEnd;
+    @Column(name = "total_cost_cents", nullable = false)
+    private Integer totalCostCents = 0;
 
-  @Column(name = "total_requests", nullable = false)
-  private Integer totalRequests = 0;
+    @Column(name = "is_current", nullable = false)
+    private Boolean current = false;
 
-  @Column(name = "total_cost_cents", nullable = false)
-  private Integer totalCostCents = 0;
+    @Enumerated(EnumType.STRING)
+    @Column(name = "payment_status", nullable = false)
+    @JdbcType(PostgreSQLEnumJdbcType.class)
+    private PaymentStatus paymentStatus = BillingPeriod.PaymentStatus.pending;
 
-  @Column(name = "is_current", nullable = false)
-  private Boolean current = false;
+    @Column(name = "paid_at")
+    private LocalDateTime paidAt;
 
-  @Enumerated(EnumType.STRING)
-  @Column(name = "payment_status", nullable = false)
-  private PaymentStatus paymentStatus = PaymentStatus.pending;
+    @Column(name = "paid_amount_cents")
+    private Integer paidAmountCents;
 
-  @Column(name = "paid_at")
-  private LocalDateTime paidAt;
+    @Column(name = "payment_reference", length = 255)
+    private String paymentReference;
 
-  @Column(name = "paid_amount_cents")
-  private Integer paidAmountCents;
+    @Column(name = "notes", columnDefinition = "TEXT")
+    private String notes;
 
-  @Column(name = "payment_reference", length = 255)
-  private String paymentReference;
+    @Version private Long version;
 
-  @Column(name = "notes", columnDefinition = "TEXT")
-  private String notes;
-
-  @Version private Long version;
-
-  @OneToMany(mappedBy = "billingPeriod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-  @Builder.Default
-  private Set<RequestLog> requests = new HashSet<>();
+    @OneToMany(mappedBy = "billingPeriod", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @Builder.Default
+    private Set<RequestLog> requests = new HashSet<>();
 }

@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.testsupport;
 
 import com.trc.platform.users.entity.ApiToken;
@@ -12,40 +11,41 @@ import org.springframework.stereotype.Component;
 @Component
 public class TestDataFactory {
 
-  private final UserRepository userRepository;
-  private final ApiTokenRepository apiTokenRepository;
+    private final UserRepository userRepository;
 
-  public TestDataFactory(UserRepository userRepository, ApiTokenRepository apiTokenRepository) {
-    this.userRepository = userRepository;
-    this.apiTokenRepository = apiTokenRepository;
-  }
+    private final ApiTokenRepository apiTokenRepository;
 
-  public User createUser(String email, boolean admin) {
-    User u =
-        User.builder()
-            .email(email)
-            .passwordHash(BCrypt.hashpw("P@ssw0rd!", BCrypt.gensalt()))
-            .active(true)
-            .staff(admin)
-            .dateJoined(LocalDateTime.now())
-            .build();
-    return userRepository.save(u);
-  }
+    public TestDataFactory(UserRepository userRepository, ApiTokenRepository apiTokenRepository) {
+        this.userRepository = userRepository;
+        this.apiTokenRepository = apiTokenRepository;
+    }
 
-  public ApiToken createApiToken(User user, String plainToken) {
-    ApiToken t =
-        ApiToken.builder()
-            .user(user)
-            .name("test")
-            .tokenPrefix(plainToken.substring(0, Math.min(12, plainToken.length())))
-            .tokenHash(BCrypt.hashpw(plainToken, BCrypt.gensalt()))
-            .createdAt(LocalDateTime.now())
-            .build();
-    return apiTokenRepository.save(t);
-  }
+    public User createUser(String email, boolean admin) {
+        User u =
+                User.builder()
+                        .email(email)
+                        .passwordHash(BCrypt.hashpw("P@ssw0rd!", BCrypt.gensalt()))
+                        .active(true)
+                        .staff(admin)
+                        .dateJoined(LocalDateTime.now())
+                        .build();
+        return userRepository.save(u);
+    }
 
-  public String anyImagePngDataUrl() {
-    // 1x1 transparent PNG
-    return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQAB";
-  }
+    public ApiToken createApiToken(User user, String plainToken) {
+        ApiToken t =
+                ApiToken.builder()
+                        .user(user)
+                        .name("test")
+                        .tokenPrefix(plainToken.substring(0, Math.min(12, plainToken.length())))
+                        .tokenHash(BCrypt.hashpw(plainToken, BCrypt.gensalt()))
+                        .createdAt(LocalDateTime.now())
+                        .build();
+        return apiTokenRepository.save(t);
+    }
+
+    public String anyImagePngDataUrl() {
+        // 1x1 transparent PNG
+        return "iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR4nGMAAQAABQAB";
+    }
 }

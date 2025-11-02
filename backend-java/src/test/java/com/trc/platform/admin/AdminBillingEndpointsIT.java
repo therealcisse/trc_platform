@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.admin;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -28,76 +27,82 @@ import org.springframework.test.web.servlet.MockMvc;
 // @Import(MockOpenAIConfig.class)
 class AdminBillingEndpointsIT extends PostgresIT {
 
-  @Autowired MockMvc mvc;
-  @Autowired ObjectMapper om;
-  @Autowired TestDataFactory data;
-  @Autowired JwtService jwt;
-  @Autowired BillingPeriodRepository billingRepo;
+    @Autowired MockMvc mvc;
 
-  private String adminAuth() {
-    var admin = data.createUser("admin2@example.com", true);
-    return "Bearer " + jwt.generateSessionToken(admin.getId(), true);
-  }
+    @Autowired ObjectMapper om;
 
-  @Test
-  void mark_paid_overdue_waived_and_list() throws Exception {
-    var user = data.createUser("billuser@example.com", false);
-    BillingPeriod bp =
-        BillingPeriod.builder()
-            .user(user)
-            .periodStart(LocalDate.now().withDayOfMonth(1))
-            .periodEnd(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()))
-            .current(true)
-            .paymentStatus(BillingPeriod.PaymentStatus.pending)
-            .totalCostCents(500)
-            .totalRequests(10)
-            .build();
-    bp = billingRepo.save(bp);
+    @Autowired TestDataFactory data;
 
-    String auth = adminAuth();
+    @Autowired JwtService jwt;
 
-    String paidResp =
-        mvc.perform(
-                post("/api/v1/admin/billing/periods/{id}/mark-paid", bp.getId())
-                    .header("Authorization", auth)
-                    .contentType(MediaType.APPLICATION_JSON)
-                    .content("{\"paidAmountCents\":500,\"paymentReference\":\"INV-1\"}"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-    assertThat(om.readTree(paidResp).path("data").path("paymentStatus").asText()).isEqualTo("PAID");
+    @Autowired BillingPeriodRepository billingRepo;
 
-    String overdueResp =
-        mvc.perform(
-                post("/api/v1/admin/billing/periods/{id}/mark-overdue", bp.getId())
-                    .header("Authorization", auth)
-                    .content("Late payment"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-    assertThat(om.readTree(overdueResp).path("data").path("paymentStatus").asText())
-        .isEqualTo("OVERDUE");
+    private String adminAuth() {
+        var admin = data.createUser("admin2@example.com", true);
+        return "Bearer " + jwt.generateSessionToken(admin.getId(), true);
+    }
 
-    String waivedResp =
-        mvc.perform(
-                post("/api/v1/admin/billing/periods/{id}/mark-waived", bp.getId())
-                    .header("Authorization", auth)
-                    .content("Waived by admin"))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-    assertThat(om.readTree(waivedResp).path("data").path("paymentStatus").asText())
-        .isEqualTo("WAIVED");
+    @Test
+    void mark_paid_overdue_waived_and_list() throws Exception {
+        var user = data.createUser("billuser@example.com", false);
+        BillingPeriod bp =
+                BillingPeriod.builder()
+                        .user(user)
+                        .periodStart(LocalDate.now().withDayOfMonth(1))
+                        .periodEnd(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()))
+                        .current(true)
+                        .paymentStatus(BillingPeriod.PaymentStatus.pending)
+                        .totalCostCents(500)
+                        .totalRequests(10)
+                        .build();
+        bp = billingRepo.save(bp);
 
-    String listResp =
-        mvc.perform(get("/api/v1/admin/billing/periods").header("Authorization", auth))
-            .andExpect(status().isOk())
-            .andReturn()
-            .getResponse()
-            .getContentAsString();
-    assertThat(om.readTree(listResp).path("data").path("content").isArray()).isTrue();
-  }
+        String auth = adminAuth();
+
+        String paidResp =
+                mvc.perform(
+                                post("/api/v1/admin/billing/periods/{id}/mark-paid", bp.getId())
+                                        .header("Authorization", auth)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content(
+                                                "{\"paidAmountCents\":500,\"paymentReference\":\"INV-1\"}"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        assertThat(om.readTree(paidResp).path("data").path("paymentStatus").asText())
+                .isEqualTo("PAID");
+
+        String overdueResp =
+                mvc.perform(
+                                post("/api/v1/admin/billing/periods/{id}/mark-overdue", bp.getId())
+                                        .header("Authorization", auth)
+                                        .content("Late payment"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        assertThat(om.readTree(overdueResp).path("data").path("paymentStatus").asText())
+                .isEqualTo("OVERDUE");
+
+        String waivedResp =
+                mvc.perform(
+                                post("/api/v1/admin/billing/periods/{id}/mark-waived", bp.getId())
+                                        .header("Authorization", auth)
+                                        .content("Waived by admin"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        assertThat(om.readTree(waivedResp).path("data").path("paymentStatus").asText())
+                .isEqualTo("WAIVED");
+
+        String listResp =
+                mvc.perform(get("/api/v1/admin/billing/periods").header("Authorization", auth))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+        assertThat(om.readTree(listResp).path("data").path("content").isArray()).isTrue();
+    }
 }

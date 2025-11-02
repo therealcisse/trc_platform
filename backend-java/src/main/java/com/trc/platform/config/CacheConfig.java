@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.config;
 
 import com.github.benmanes.caffeine.cache.Caffeine;
@@ -11,16 +10,16 @@ import org.springframework.context.annotation.Configuration;
 @Configuration
 public class CacheConfig {
 
-  @Bean
-  public CacheManager cacheManager() {
-    CaffeineCacheManager mgr =
-        new CaffeineCacheManager(
-            "userCache", "apiTokenCache", "settingsCache", "flowResponseCache");
-    mgr.setCaffeine(
-        Caffeine.newBuilder()
-            .initialCapacity(100)
-            .maximumSize(10_000)
-            .expireAfterWrite(5, TimeUnit.MINUTES));
-    return mgr;
-  }
+    @Bean
+    public CacheManager cacheManager() {
+        CaffeineCacheManager mgr =
+                new CaffeineCacheManager(
+                        "userCache", "apiTokenCache", "settingsCache", "flowResponseCache");
+        mgr.setCaffeine(
+                Caffeine.newBuilder()
+                        .initialCapacity(100)
+                        .maximumSize(10_000)
+                        .expireAfterWrite(5, TimeUnit.MINUTES));
+        return mgr;
+    }
 }

@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform.testsupport;
 
 import com.trc.platform.core.service.OpenAIClientService;
@@ -9,13 +8,14 @@ import reactor.core.publisher.Mono;
 @TestConfiguration
 public class MockOpenAIConfig {
 
-  @Bean
-  public OpenAIClientService openAIClientService() {
-    return new OpenAIClientService(null) {
-      @Override
-      public Mono<String> solveMathFromImage(byte[] imageBytes, String model, int timeoutSeconds) {
-        return Mono.just("42");
-      }
-    };
-  }
+    @Bean
+    public OpenAIClientService openAIClientService() {
+        return new OpenAIClientService(null) {
+            @Override
+            public Mono<String> solveMathFromImage(
+                    byte[] imageBytes, String model, int timeoutSeconds) {
+                return Mono.just("42");
+            }
+        };
+    }
 }

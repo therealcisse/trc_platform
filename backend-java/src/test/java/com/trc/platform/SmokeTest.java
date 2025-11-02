@@ -1,4 +1,3 @@
-/* (C) 2025 */
 package com.trc.platform;
 
 import static org.assertj.core.api.Assertions.assertThat;
@@ -11,10 +10,10 @@ import org.springframework.boot.test.context.SpringBootTest;
 @SpringBootTest
 class SmokeTest {
 
-  @Autowired CoreController coreController;
+    @Autowired CoreController coreController;
 
-  @Test
-  void contextLoads() {
-    assertThat(coreController).isNotNull();
-  }
+    @Test
+    void contextLoads() {
+        assertThat(coreController).isNotNull();
+    }
 }
