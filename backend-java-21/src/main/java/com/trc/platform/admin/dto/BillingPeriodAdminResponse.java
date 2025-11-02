@@ -5,13 +5,12 @@ import com.trc.platform.usage.entity.BillingPeriod;
 import java.time.LocalDateTime;
 import java.util.UUID;
 import lombok.Builder;
-import com.trc.platform.usage.entity.PaymentStatus;
 
 @Builder
 public record BillingPeriodAdminResponse(
         UUID id,
         UUID userId,
-        PaymentStatus paymentStatus,
+        BillingPeriod.PaymentStatus paymentStatus,
         Boolean current,
         Integer totalRequests,
         Integer totalCostCents,

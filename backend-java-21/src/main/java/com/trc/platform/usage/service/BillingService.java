@@ -12,6 +12,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 
 public interface BillingService {
+    BillingPeriod getCurrentBillingPeriod(User user);
 
     CurrentBillingResponse getCurrentBilling(User user);
 

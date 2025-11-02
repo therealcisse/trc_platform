@@ -1,0 +1,1 @@
+Each file under api-docs/<category>/ follows a consistent format with summary, request, and responses. Use Authorization: Bearer <token> where required. Replace example IDs and tokens with real values in your environment.

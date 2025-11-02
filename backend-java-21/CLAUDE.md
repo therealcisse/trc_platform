@@ -4,6 +4,15 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Development Commands
 
+### Python Package Management (UV Tool)
+- **IMPORTANT**: Use UV for all Python dependency management and virtual environment operations
+- `uv init` - Initialize a new Python project with UV
+- `uv add <package>` - Add dependencies to the project
+- `uv run <script>` - Execute Python scripts with project dependencies
+- `uv run python <file>` - Run Python files with proper dependency resolution
+- `uv sync` - Synchronize dependencies with pyproject.toml
+- `uv venv` - Create and manage virtual environments
+
 ### Application Lifecycle
 - `./gradlew bootRun` - Start the Spring Boot application in development mode
 - `./gradlew bootBuildImage` - Build Docker container image
@@ -14,8 +23,20 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 - `./gradlew test` - Run all tests with JUnit 5
 - `./gradlew test --tests "ClassName"` - Run single test class
 - `./gradlew test --tests "com.trc.platform.users.*"` - Run tests for specific package
-- `./gradlew jacocoTestReport` - Generate code coverage report after tests
-- `./gradlew jacocoTestCoverageVerification` - Verify minimum 70% code coverage
+- `gradlew jacocoTestReport` - Generate code coverage report after tests
+- `gradlew jacocoTestCoverageVerification` - Verify minimum 70% code coverage
+
+### UAT Testing
+- `uv run python run_all_tests.py` - Run all UAT tests using UV
+- `uv run python run_all_tests.py --domain usage` - Run usage domain tests
+- `uv run python run_all_tests.py --filter "USAGE-01"` - Run specific test by ID
+
+**Billing System Testing Strategy:**
+- **Cost Verification**: Validate `total_cost_cents = total_requests × cost_per_request_cents`
+- **Period Validation**: Test billing period creation, status transitions, and cost accumulation
+- **Settings Testing**: Verify cost per request configuration from `settings` table
+- **Integration Testing**: Confirm request logging properly links to billing periods
+- **Payment Status**: Test admin operations for marking periods as paid, overdue, or waived
 
 ### Code Quality (All Integrated into `./gradlew check`)
 - `./gradlew check` - Run all quality checks (PMD, SpotBugs, Checkstyle, JaCoCo)
@@ -88,6 +109,9 @@ The project includes specialized Claude sub-agents for expert guidance:
 - **Password hashing**: Argon2 for secure password storage
 
 #### Database Design
+**For complete database schema documentation, see `db.schema.md`**
+
+Key design patterns:
 - **Primary keys**: UUID-based using Hibernate `@UUIDGenerator`
 - **Optimistic locking**: `@Version` for concurrency control
 - **Soft deletion**: Logical deletion patterns where applicable
@@ -128,8 +152,19 @@ Request → JWT Filter → API Token Filter → Security Context → Controller
 - `CoreProcessingService` - OpenAI integration for math solving
 - `AuthenticationService` - JWT token generation and validation
 - `BillingService` - Usage-based billing calculations
+- `LiveBillingService` - Real-time billing period management and cost tracking (CRITICAL: Must maintain 100% cost calculation accuracy)
 - `EmailService` - Transactional email sending
 - `ApiTokenService` - Programmatic access token management
+
+#### Database Architecture
+**For complete database schema documentation, see `db.schema.md`**
+
+Key architectural patterns:
+- **Period-Based Billing**: Costs aggregated at billing period level, not per-request
+- **UUID Primary Keys**: All entities use UUID for distributed system compatibility
+- **Optimistic Locking**: Version columns for concurrency control
+- **Comprehensive Audit Trail**: Every API request logged with timing and status
+- **Multi-Factor Authentication**: Email verification combined with invite code system
 
 ## Environment Configuration
 
@@ -146,6 +181,64 @@ Request → JWT Filter → API Token Filter → Security Context → Controller
 - `application-dev.yml` - Development environment overrides
 - `application-prod.yml` - Production environment overrides
 - `application-test.yml` - Test environment configuration
+
+### Database Documentation
+- **`db.schema.md`** - Complete database schema documentation with tables, relationships, indexes, and business logic
+
+### API Documentation
+- **`api-docs/`** - Comprehensive API endpoint documentation with detailed specifications, examples, and error handling
+  - Organized by domain: admin, billing, core, usage, users
+  - Includes request/response examples, authentication requirements, and error codes
+  - Complete with OpenAPI specifications and integration examples
+
+**⚠️ IMPORTANT: Database Schema Update Requirement**
+When making any database schema changes (Flyway migrations, table modifications, etc.), you **MUST** update `db.schema.md` to keep the documentation current.
+
+**Schema Change Checklist:**
+1. ✅ Create/update Flyway migration in `src/main/resources/db/migration/`
+2. ✅ Test migration locally and verify it works correctly
+3. ✅ **MANDATORY**: Update `db.schema.md` with the new schema changes
+4. ✅ Verify all affected documentation sections are updated
+5. ✅ Test that `db.schema.md` accurately reflects the new database structure
+
+**How to Update db.schema.md:**
+- Use `psql postgresql://trc_user:trc_password@localhost:5432/trc_platform` to get updated schema
+- Run `\d tablename` to get new table definitions
+- Run `\dT` to check for new/modified enum types
+- Run `\di` to check for new/modified indexes
+- Update the appropriate sections in `db.schema.md`
+
+**Failure to update `db.schema.md` after schema changes will cause documentation drift and confusion for developers and AI assistants.**
+
+**⚠️ IMPORTANT: API Documentation Update Requirement**
+When making any API endpoint changes (new endpoints, modified request/response, authentication changes, etc.), you **MUST** update the documentation in the `api-docs/` folder.
+
+**API Change Checklist:**
+1. ✅ Modify controller or create new endpoint
+2. ✅ Update request/response DTOs if needed
+3. ✅ Test endpoint changes locally
+4. ✅ **MANDATORY**: Update corresponding documentation in `api-docs/`
+5. ✅ Verify authentication requirements are documented
+6. ✅ Update examples and error responses
+7. ✅ Test that api-docs accurately reflect the new API behavior
+
+**How to Update api-docs:**
+- Locate the appropriate domain folder: `api-docs/{domain}/`
+- Update the relevant endpoint markdown file
+- Include request/response examples with actual data
+- Document new query parameters, headers, or body changes
+- Update authentication requirements if they changed
+- Add new error codes and their descriptions
+- Follow existing documentation patterns for consistency
+
+**Documentation Locations:**
+- **Admin endpoints**: `api-docs/admin/`
+- **Billing endpoints**: `api-docs/billing/`
+- **Core endpoints**: `api-docs/core/`
+- **Usage endpoints**: `api-docs/usage/`
+- **User endpoints**: `api-docs/users/`
+
+**Failure to update `api-docs/` after API changes will cause outdated documentation, integration issues, and developer confusion.**
 
 ## Code Quality Standards
 
@@ -178,6 +271,7 @@ The project includes specialized rules in `.claude/rules/`:
    - Error handling and documentation standards
    - Business logic validation requirements
    - Code review and integration testing
+   - **Billing Accuracy**: 100% cost calculation validation, period-level verification, settings configuration testing
 
 ### Development Templates
 The project includes code templates in `.claude/templates/` for consistent development patterns:
@@ -202,19 +296,6 @@ The project includes code templates in `.claude/templates/` for consistent devel
 - Follow Google Java Style Guide (enforced by Spotless)
 - Write tests for business logic - JaCoCo coverage is verified
 - Handle errors gracefully with custom exceptions
-
-## API Structure
-
-### REST Endpoints
-- `/api/customers/` - User management (register, login, profile)
-- `/api/core/` - Core functionality (solve math problems, health check)
-- `/api/usage/` - Usage and billing information
-- `/api/v1/admin/` - Administrative functions (admin-only access)
-
-### Authentication
-- **JWT Authentication**: Include `Authorization: Bearer <token>` header
-- **API Token Authentication**: Include `X-API-Key: <token>` header
-- **Public endpoints**: Registration, login, health checks
 
 ## Development Workflow
 

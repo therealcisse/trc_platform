@@ -1,3 +1,12 @@
+management:
+  endpoints:
+    web:
+      exposure:
+        include: prometheus,health,info,metrics,loggers,threaddump,env
+  endpoint:
+    health:
+      show-details: when_authorized
+
 spring:
   jackson:
     parser:

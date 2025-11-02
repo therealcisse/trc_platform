@@ -1,6 +1,5 @@
 package com.trc.platform.usage.service;
 
-import com.trc.platform.usage.entity.PaymentStatus;
 import com.trc.platform.usage.dto.BillingPeriodDetailDto;
 import com.trc.platform.usage.dto.BillingPeriodResponse;
 import com.trc.platform.usage.dto.CurrentBillingResponse;
@@ -138,7 +137,7 @@ public class LiveBillingService implements BillingService {
                         .totalRequests(0)
                         .totalCostCents(0)
                         .current(true)
-                        .paymentStatus(PaymentStatus.pending)
+                        .paymentStatus(BillingPeriod.PaymentStatus.pending)
                         .build();
 
         // Save the new period first
@@ -150,7 +149,7 @@ public class LiveBillingService implements BillingService {
         return savedPeriod;
     }
 
-    private BillingPeriod getCurrentBillingPeriod(User user) {
+    public BillingPeriod getCurrentBillingPeriod(User user) {
         Optional<BillingPeriod> currentPeriodOpt =
                 billingPeriodRepository.findCurrentByUserId(user.getId());
 

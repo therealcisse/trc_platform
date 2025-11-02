@@ -56,8 +56,8 @@ public interface BillingPeriodRepository extends JpaRepository<BillingPeriod, UU
     Page<BillingPeriod> findByUserIdAdmin(@Param("userId") UUID userId, Pageable pageable);
 
     @Query("SELECT bp FROM BillingPeriod bp WHERE bp.paymentStatus = :status ORDER BY bp.periodStart DESC")
-    Page<BillingPeriod> findByPaymentStatusAdmin(@Param("status") com.trc.platform.usage.entity.PaymentStatus status, Pageable pageable);
+    Page<BillingPeriod> findByPaymentStatusAdmin(@Param("status") BillingPeriod.PaymentStatus status, Pageable pageable);
 
     @Query("SELECT bp FROM BillingPeriod bp WHERE bp.user.id = :userId AND bp.paymentStatus = :status ORDER BY bp.periodStart DESC")
-    Page<BillingPeriod> findByUserIdAndPaymentStatusAdmin(@Param("userId") UUID userId, @Param("status") com.trc.platform.usage.entity.PaymentStatus status, Pageable pageable);
+    Page<BillingPeriod> findByUserIdAndPaymentStatusAdmin(@Param("userId") UUID userId, @Param("status") BillingPeriod.PaymentStatus status, Pageable pageable);
 }

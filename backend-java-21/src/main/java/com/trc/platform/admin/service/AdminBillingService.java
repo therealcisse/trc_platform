@@ -13,7 +13,6 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
-import com.trc.platform.usage.entity.PaymentStatus;
 
 @Service
 @RequiredArgsConstructor
@@ -22,7 +21,7 @@ public class AdminBillingService {
     private final BillingPeriodRepository billingRepo;
 
     public Page<BillingPeriodAdminResponse> list(
-            UUID userId, PaymentStatus status, Pageable pageable) {
+            UUID userId, BillingPeriod.PaymentStatus status, Pageable pageable) {
         Page<BillingPeriod> page;
         if (userId != null && status != null) {
           page = billingRepo.findByUserIdAndPaymentStatusAdmin(userId, status, pageable);
@@ -43,7 +42,7 @@ public class AdminBillingService {
                         .findById(periodId)
                         .orElseThrow(
                                 () -> new IllegalArgumentException("Billing period not found"));
-        bp.setPaymentStatus(PaymentStatus.paid);
+        bp.setPaymentStatus(BillingPeriod.PaymentStatus.paid);
         bp.setPaidAt(request.paymentDate() != null ? request.paymentDate() : LocalDateTime.now());
         bp.setPaidAmountCents(request.paidAmountCents());
         bp.setPaymentReference(request.paymentReference());
@@ -58,7 +57,7 @@ public class AdminBillingService {
                         .findById(periodId)
                         .orElseThrow(
                                 () -> new IllegalArgumentException("Billing period not found"));
-        bp.setPaymentStatus(PaymentStatus.overdue);
+        bp.setPaymentStatus(BillingPeriod.PaymentStatus.overdue);
         bp.setPaidAt(LocalDateTime.now());
         setNotesIfNotEmpty(bp, request.notes());
         // do not mutate paid fields for overdue
@@ -72,7 +71,7 @@ public class AdminBillingService {
                         .findById(periodId)
                         .orElseThrow(
                                 () -> new IllegalArgumentException("Billing period not found"));
-        bp.setPaymentStatus(PaymentStatus.waived);
+        bp.setPaymentStatus(BillingPeriod.PaymentStatus.waived);
         bp.setPaidAt(LocalDateTime.now());
         setNotesIfNotEmpty(bp, request.notes());
         return toDto(billingRepo.save(bp));

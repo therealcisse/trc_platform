@@ -35,9 +35,9 @@ public class EmailService {
             String htmlContent = buildVerificationEmailTemplate(verificationUrl);
 
             sendEmail(email, subject, htmlContent);
-            log.info("JWT verification email sent to: {}", email);
+            log.info("Email verification sent to: {}", email);
         } catch (Exception e) {
-            log.error("Failed to send JWT verification email to: {}", email, e);
+            log.error("Failed to send Email verification to: {}", email, e);
             throw new RuntimeException("Failed to send verification email", e);
         }
     }

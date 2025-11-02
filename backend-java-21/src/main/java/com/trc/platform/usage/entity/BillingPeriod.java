@@ -24,6 +24,12 @@ import org.hibernate.dialect.PostgreSQLEnumJdbcType;
 @AllArgsConstructor
 @Builder
 public class BillingPeriod {
+    public enum PaymentStatus {
+        pending,
+        paid,
+        overdue,
+        waived
+    }
     @Id
     @GeneratedValue(generator = "UUID")
     @GenericGenerator(name = "UUID", strategy = "org.hibernate.id.UUIDGenerator")
@@ -51,7 +57,7 @@ public class BillingPeriod {
     @Enumerated(EnumType.STRING)
     @Column(name = "payment_status", nullable = false)
     @JdbcType(PostgreSQLEnumJdbcType.class)
-    private PaymentStatus paymentStatus = PaymentStatus.pending;
+    private PaymentStatus paymentStatus = BillingPeriod.PaymentStatus.pending;
 
     @Column(name = "paid_at")
     private LocalDateTime paidAt;

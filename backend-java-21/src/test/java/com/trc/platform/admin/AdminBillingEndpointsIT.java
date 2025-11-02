@@ -20,7 +20,6 @@ import org.springframework.http.MediaType;
 import org.springframework.test.context.ActiveProfiles;
 // import org.springframework.test.context.Import;
 import org.springframework.test.web.servlet.MockMvc;
-import com.trc.platform.usage.entity.PaymentStatus;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -52,7 +51,7 @@ class AdminBillingEndpointsIT extends PostgresIT {
                         .periodStart(LocalDate.now().withDayOfMonth(1))
                         .periodEnd(LocalDate.now().withDayOfMonth(LocalDate.now().lengthOfMonth()))
                         .current(true)
-                        .paymentStatus(PaymentStatus.pending)
+                        .paymentStatus(BillingPeriod.PaymentStatus.pending)
                         .totalCostCents(500)
                         .totalRequests(10)
                         .build();

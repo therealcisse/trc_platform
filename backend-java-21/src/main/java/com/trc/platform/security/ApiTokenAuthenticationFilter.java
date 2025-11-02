@@ -35,8 +35,8 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
         if (SecurityContextHolder.getContext().getAuthentication() == null) {
             String token = extractToken(request);
             if (token != null && token.startsWith("tok_")) {
-                // Find token by hash - the token itself is the hash
-                apiTokenRepository.findByTokenHash(token).ifPresent(this::authenticateWithToken);
+                var tokenPrefix = token.length() > 12 ? token.substring(0, 12) : token;
+                apiTokenRepository.findByTokenPrefix(tokenPrefix).ifPresent(this::authenticateWithToken);
             }
         }
 

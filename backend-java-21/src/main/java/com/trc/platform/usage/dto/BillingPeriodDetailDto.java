@@ -1,11 +1,10 @@
 package com.trc.platform.usage.dto;
 
-import com.trc.platform.usage.entity.BillingPeriod;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.UUID;
 import lombok.Builder;
-import com.trc.platform.usage.entity.PaymentStatus;
+import com.trc.platform.usage.entity.BillingPeriod;
 
 @Builder
 public record BillingPeriodDetailDto(
@@ -14,7 +13,7 @@ public record BillingPeriodDetailDto(
         LocalDate periodEnd,
         Integer totalRequests,
         Integer totalCostCents,
-        PaymentStatus paymentStatus,
+        BillingPeriod.PaymentStatus paymentStatus,
         Boolean current,
         List<RequestLogDto> requests) {
     @Builder

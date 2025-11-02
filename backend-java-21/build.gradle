@@ -11,6 +11,7 @@ plugins {
 	id 'com.github.jk1.dependency-license-report' version '2.9'
 	id 'org.springframework.boot' version '3.5.7'
 	id 'io.spring.dependency-management' version '1.1.7'
+  id 'com.gorylenko.gradle-git-properties' version "2.5.0"
 }
 
 group = 'com.trc.platform'
@@ -34,6 +35,11 @@ repositories {
 }
 
 dependencies {
+  // Actuator
+  implementation("org.springframework.boot:spring-boot-starter-actuator")
+  implementation("io.micrometer:micrometer-registry-prometheus")
+  implementation("org.springframework.boot:spring-boot-starter-security")
+
 	// Spring Boot starters
 	implementation 'org.springframework.boot:spring-boot-starter-web'
 	implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -206,3 +212,19 @@ tasks.named('test') {
 tasks.check {
 	dependsOn jacocoTestCoverageVerification
 }
+
+springBoot {
+  buildInfo {
+    properties {
+      artifact = "trc-platform-backend-service"
+      group = "com.trc.platform"
+      name = "trc-platform-backend"
+      version = project.version.toString()
+    }
+  }
+}
+
+gitProperties {
+  dotGitDirectory = file('../.git')
+}
+

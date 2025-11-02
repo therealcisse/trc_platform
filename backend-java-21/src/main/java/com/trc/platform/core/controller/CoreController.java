@@ -28,10 +28,14 @@ public class CoreController {
         this.coreService = coreService;
     }
 
-    @PostMapping(path = "/solve", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
+    @PostMapping(
+        path = "/solve",
+        consumes = MediaType.MULTIPART_FORM_DATA_VALUE,
+        produces = MediaType.APPLICATION_JSON_VALUE
+    )
     @ResponseBody
     public SolveResponse solve(
-            @RequestPart("image") @NotNull MultipartFile image,
+            @RequestPart("file") @NotNull MultipartFile image,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         if (userPrincipal == null) {
             throw new AccessDeniedException("Authentication required to access core solving functionality");
@@ -43,7 +47,7 @@ public class CoreController {
     @PostMapping(path = "/test-solve", consumes = MediaType.MULTIPART_FORM_DATA_VALUE)
     @ResponseBody
     public SolveResponse testSolve(
-            @RequestPart("image") @NotNull MultipartFile image,
+            @RequestPart("file") @NotNull MultipartFile image,
             @AuthenticationPrincipal UserPrincipal userPrincipal) {
         if (userPrincipal == null) {
             throw new AccessDeniedException("Authentication required to access test solving functionality");

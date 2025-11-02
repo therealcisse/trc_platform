@@ -19,7 +19,6 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
-import com.trc.platform.usage.entity.PaymentStatus;
 
 @RestController
 @RequestMapping("/api/v1/admin/billing/periods")
@@ -32,7 +31,7 @@ public class AdminBillingController {
     @GetMapping
     public Page<BillingPeriodAdminResponse> list(
             @RequestParam(required = false) UUID userId,
-            @RequestParam(required = false) PaymentStatus status,
+            @RequestParam(required = false) BillingPeriod.PaymentStatus status,
             @RequestParam(defaultValue = "0") int page,
             @RequestParam(defaultValue = "20") int size) {
         return service.list(userId, status, PageRequest.of(page, size));
