@@ -38,7 +38,7 @@ class ApiTokenAuthIntegrationTest extends PostgresIT {
 
         byte[] img = "fakepng".getBytes();
         MockMultipartFile file =
-                new MockMultipartFile("image", "img.png", MediaType.IMAGE_PNG_VALUE, img);
+                new MockMultipartFile("file", "img.png", MediaType.IMAGE_PNG_VALUE, img);
 
         String resp =
                 mvc.perform(multipart("/api/core/solve").file(file).header("X-API-Token", plain))
@@ -47,7 +47,7 @@ class ApiTokenAuthIntegrationTest extends PostgresIT {
                         .getResponse()
                         .getContentAsString();
 
-        JsonNode root = om.readTree(resp).path("data");
+        JsonNode root = om.readTree(resp);
         assertThat(root.path("result").asText()).isEqualTo("42");
     }
 }

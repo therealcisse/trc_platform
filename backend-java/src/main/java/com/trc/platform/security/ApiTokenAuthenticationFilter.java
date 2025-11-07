@@ -3,7 +3,6 @@ package com.trc.platform.security;
 import com.trc.platform.users.entity.ApiToken;
 import com.trc.platform.users.entity.User;
 import com.trc.platform.users.repository.ApiTokenRepository;
-import com.trc.platform.users.repository.UserRepository;
 import jakarta.servlet.FilterChain;
 import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
@@ -25,8 +24,6 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
 
     private final ApiTokenRepository apiTokenRepository;
 
-    private final UserRepository userRepository;
-
     @Override
     protected void doFilterInternal(
             HttpServletRequest request, HttpServletResponse response, FilterChain filterChain)
@@ -44,7 +41,7 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     @Transactional
-    private void authenticateWithToken(ApiToken apiToken) {
+    protected void authenticateWithToken(ApiToken apiToken) {
         if (apiToken.getRevokedAt() != null) {
             return;
         }
@@ -65,12 +62,15 @@ public class ApiTokenAuthenticationFilter extends OncePerRequestFilter {
     }
 
     private String extractToken(HttpServletRequest request) {
+        String token = request.getHeader("X-Api-Token");
+        if (StringUtils.hasText(token) && token.startsWith("tok_")) {
+           return token;
+        }
+
         String auth = request.getHeader(HttpHeaders.AUTHORIZATION);
         if (StringUtils.hasText(auth) && auth.startsWith("Bearer ")) {
             String bearer = auth.substring(7);
-            if (bearer.startsWith("tok_")) {
-                return bearer;
-            }
+            return bearer;
         }
         return null;
     }

@@ -86,7 +86,7 @@ public class LiveCoreProcessingService implements CoreProcessingService {
                         .durationMs(totalMs)
                         .requestBytes(bytes.length)
                         .responseBytes(result != null ? result.length() : 0)
-                        .service("core.image_solve")
+                        .service(test ? "core.test_image_solve" : "core.image_solve")
                         .status(
                                 "ERROR".equals(result)
                                         ? RequestStatus.ERROR

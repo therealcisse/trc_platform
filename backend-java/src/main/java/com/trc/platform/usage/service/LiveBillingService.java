@@ -37,7 +37,14 @@ public class LiveBillingService implements BillingService {
     @Override
     @Transactional
     public CurrentBillingResponse getCurrentBilling(User user) {
-        BillingPeriod currentPeriod = getCurrentBillingPeriod(user);
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
+        Optional<BillingPeriod> currentPeriodOpt =
+                billingPeriodRepository.findCurrentByUserId(user.getId());
+
+        BillingPeriod currentPeriod = currentPeriodOpt.orElseGet(() -> createOrUpdateCurrentBillingPeriod(user));
 
         return CurrentBillingResponse.builder()
                 .id(currentPeriod.getId())
@@ -106,10 +113,6 @@ public class LiveBillingService implements BillingService {
     }
 
     private BillingPeriod createOrUpdateCurrentBillingPeriod(User user) {
-        if (user == null) {
-            throw new IllegalArgumentException("User cannot be null");
-        }
-
         LocalDate now = LocalDate.now();
         LocalDate periodStart = now.withDayOfMonth(1);
 
@@ -150,6 +153,10 @@ public class LiveBillingService implements BillingService {
     }
 
     public BillingPeriod getCurrentBillingPeriod(User user) {
+        if (user == null) {
+            throw new IllegalArgumentException("User cannot be null");
+        }
+
         Optional<BillingPeriod> currentPeriodOpt =
                 billingPeriodRepository.findCurrentByUserId(user.getId());
 

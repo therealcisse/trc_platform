@@ -78,7 +78,7 @@ public class SecurityConfig {
                 org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter
                         .class);
         http.addFilterAfter(
-                new ApiTokenAuthenticationFilter(apiTokenRepository, userRepository),
+                new ApiTokenAuthenticationFilter(apiTokenRepository),
                 JwtAuthenticationFilter.class);
 
         return http.build();

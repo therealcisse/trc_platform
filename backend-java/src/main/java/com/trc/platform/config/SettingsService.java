@@ -13,7 +13,7 @@ public class SettingsService {
         this.repo = repo;
     }
 
-    @Cacheable("settingsCache")
+    @Cacheable("settings")
     public Settings getSettings() {
         return repo.findById(1L)
                 .orElseGet(

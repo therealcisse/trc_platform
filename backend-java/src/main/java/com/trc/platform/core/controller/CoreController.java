@@ -41,6 +41,15 @@ public class CoreController {
             throw new AccessDeniedException("Authentication required to access core solving functionality");
         }
         User user = userPrincipal.getUser();
+
+        if (!user.isEmailVerified()) {
+            throw new AccessDeniedException("Email not verified");
+        }
+
+        if (!user.hasAcknowledgedDisclaimer() || !user.hasAcceptedTerms()) {
+            throw new AccessDeniedException("Terms and disclaimer not accepte");
+        }
+
         return coreService.solveMathProblem(image, user);
     }
 

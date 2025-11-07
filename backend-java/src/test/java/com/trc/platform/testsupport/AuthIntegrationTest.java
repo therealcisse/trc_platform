@@ -1,4 +1,4 @@
-package com.trc.platform.auth;
+package com.trc.platform.testsupport;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.post;
@@ -6,7 +6,9 @@ import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.
 
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.trc.platform.security.JwtService;
 import com.trc.platform.testsupport.PostgresIT;
+import com.trc.platform.testsupport.TestDataFactory;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.web.servlet.AutoConfigureMockMvc;
@@ -16,7 +18,7 @@ import org.springframework.test.context.ActiveProfiles;
 // import org.springframework.test.context.Import;
 import org.springframework.test.web.servlet.MockMvc;
 
-@SpringBootTest
+@SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 @AutoConfigureMockMvc
 @ActiveProfiles("test")
 // @Import(MockOpenAIConfig.class)
@@ -26,12 +28,42 @@ class AuthIntegrationTest extends PostgresIT {
 
     @Autowired ObjectMapper om;
 
+    @Autowired TestDataFactory data;
+
+    @Autowired JwtService jwt;
+
+    private String adminAuth() {
+        var admin = data.createUser("admin@example.com", true);
+        return "Bearer " + jwt.generateSessionToken(admin.getId(), true);
+    }
+
+    private String createInviteCode() throws Exception {
+        String auth = adminAuth();
+
+        String createResp =
+                mvc.perform(
+                                post("/api/v1/admin/invites")
+                                        .header("Authorization", auth)
+                                        .contentType(MediaType.APPLICATION_JSON)
+                                        .content("{\"expiresAt\":null}"))
+                        .andExpect(status().isOk())
+                        .andReturn()
+                        .getResponse()
+                        .getContentAsString();
+
+        JsonNode created = om.readTree(createResp).path("data");
+        return created.path("code").asText();
+    }
+
     @Test
     void register_and_login_returns_session_token() throws Exception {
+        // Create invite code first
+        String inviteCode = createInviteCode();
+
         var regBody =
                 """
-{"email":"user1@example.com","password":"P@ssw0rd!","acceptedTerms":true,"acknowledgedDisclaimer":true}
-""";
+{"email":"user1@example.com","password":"P@ssw0rd!","userAcceptedTerms":true,"userAcknowledgedDisclaimer":true,"inviteCode":"%s"}
+""".formatted(inviteCode);
         mvc.perform(
                         post("/api/customers/register")
                                 .contentType(MediaType.APPLICATION_JSON)
@@ -53,6 +85,6 @@ class AuthIntegrationTest extends PostgresIT {
                         .getContentAsString();
 
         JsonNode root = om.readTree(resp);
-        assertThat(root.path("data").path("sessionToken").asText()).isNotBlank();
+        assertThat(root.path("token").asText()).isNotBlank();
     }
 }

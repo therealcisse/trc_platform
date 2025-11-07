@@ -30,6 +30,7 @@ public class JwtService {
     public String generateSessionToken(UUID userId, boolean admin) {
         Instant now = Instant.now();
         return Jwts.builder()
+                .setId(UUID.randomUUID().toString())
                 .setSubject(userId.toString())
                 .addClaims(Map.of("role", admin ? "ADMIN" : "USER"))
                 .setIssuedAt(Date.from(now))
