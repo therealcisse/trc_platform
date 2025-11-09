@@ -38,6 +38,16 @@ services:
   #   depends_on:
   #     - db
 
+  redis:
+    image: redis:7-alpine
+    ports:
+      - "6379:6379"
+    volumes:
+      - trc_redis:/data
+    networks:
+      - app-network
+    command: redis-server --appendonly yes
+
   mailcatcher:
     image: stpaquet/alpinemailcatcher
     ports:
@@ -49,6 +59,7 @@ services:
 
 volumes:
   trc_pg: {}
+  trc_redis: {}
 
 networks:
   app-network:

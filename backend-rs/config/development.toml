@@ -1,0 +1,90 @@
+# TRC Platform - Development Environment Configuration
+# This file contains overrides specific to the development environment
+# These settings override the defaults in default.toml
+
+[server]
+host = "127.0.0.1"
+port = 8080
+workers = 1  # Single worker for easier debugging
+
+[database]
+# Development database (typically connects to local Docker instance)
+url = "postgresql://trc_platform_dev:dev_password@localhost:5432/trc_platform_dev"
+max_connections = 5
+min_connections = 1
+
+[openai]
+# Development OpenAI settings (can use test API key)
+model = "gpt-3.5-turbo"  # Cheaper model for development
+timeout_seconds = 30
+max_retries = 1  # Fewer retries for development
+
+[jwt]
+# Shorter token lifetime for development
+ttl_hours = 8
+refresh_ttl_days = 1
+
+[email]
+# Development email settings (use mailhog or similar for local testing)
+smtp_host = "localhost"
+smtp_port = 1025  # Mailhog default port
+use_tls = false
+
+[cache]
+# Development Redis (can be local Docker instance)
+redis_url = "redis://localhost:6379/1"  # Use different database
+default_ttl_seconds = 300  # 5 minutes for development
+
+[logging]
+# Verbose logging for development
+level = "debug"
+format = "pretty"  # Human-readable format
+output = "stdout"
+
+# Enable all log targets for development
+targets = ["trc_platform", "tower_http", "axum", "sqlx", "redis"]
+
+[cors]
+# Permissive CORS for development
+allow_origins = ["http://localhost:3000", "http://localhost:8080", "http://127.0.0.1:3000"]
+allow_credentials = true
+
+[monitoring]
+# Enable all monitoring in development
+enable_metrics = true
+metrics_port = 9090
+enable_tracing = true
+
+[features]
+# All features enabled in development
+enable_registration = true
+enable_email_verification = false  # Disable for easier testing
+enable_password_reset = true
+enable_api_tokens = true
+enable_billing = true
+enable_admin_panel = true
+
+[security]
+# Relaxed security settings for development
+password_min_length = 6
+require_special_chars = false
+session_timeout_minutes = 120  # Longer sessions for development
+max_login_attempts = 10
+lockout_duration_minutes = 5
+rate_limit_requests_per_minute = 1000  # Higher limit for development
+
+[limits]
+# Generous limits for development testing
+max_api_tokens_per_user = 50
+max_requests_per_minute = 5000
+max_file_upload_size_mb = 50
+max_concurrent_requests = 50
+
+# Development-specific settings
+[development]
+# Enable hot-reload and debugging features
+auto_reload = true
+debug_mode = true
+pretty_print_errors = true
+enable_sql_logging = true
+enable_request_logging = true

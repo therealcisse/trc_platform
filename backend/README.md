@@ -281,7 +281,7 @@ EMAIL_USE_TLS=false
 
 # OpenAI Integration
 OPENAI_API_KEY="sk-..."  # Your OpenAI API key
-OPENAI_MODEL="gpt-4-vision-preview"
+OPENAI_MODEL="gpt-4.1-mini-2025-04-14"
 OPENAI_TIMEOUT_S=30
 USE_MOCK_OPENAI=true  # Set to false for production
 

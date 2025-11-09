@@ -1,0 +1,152 @@
+# TRC Platform - Local Development Configuration Template
+# Copy this file to local.toml and customize for your local development setup
+# This file is ignored by git and allows for personal configuration overrides
+#
+# To use: cp config/local.toml.example config/local.toml
+# Then edit config/local.toml with your local settings
+
+# =============================================================================
+# Local Development Configuration
+# =============================================================================
+# This file overrides all other configuration files and is suitable for
+# local development with your specific setup (Docker, local services, etc.)
+
+[server]
+host = "127.0.0.1"
+port = 8080
+workers = 1
+
+[database]
+# Configure based on your local database setup
+# Examples:
+# PostgreSQL via Docker: postgresql://postgres:password@localhost:5432/trc_platform_dev
+# Local PostgreSQL: postgresql://your_user:your_password@localhost:5432/trc_platform_dev
+url = "postgresql://trc_platform_dev:dev_password@localhost:5432/trc_platform_dev"
+max_connections = 5
+
+[openai]
+# Get your API key from https://platform.openai.com/api-keys
+# You can also set this via environment variable: TRC_OPENAI__API_KEY
+api_key = "your-openai-api-key-here"
+model = "gpt-3.5-turbo"  # Use cheaper model for development
+max_tokens = 2048
+
+[jwt]
+# Generate a secure secret for local development
+# You can also set this via environment variable: TRC_JWT__SECRET
+secret = "your-super-secret-jwt-key-for-local-development-only"
+expiration_hours = 24
+
+[email]
+# Local email development options:
+# 1. Use Mailhog: https://github.com/mailhog/MailHog
+# 2. Use Mailtrap: https://mailtrap.io/
+# 3. Use a test SMTP service
+
+# Example with Mailhog (recommended for local development)
+smtp_host = "localhost"
+smtp_port = 1025
+use_tls = false
+
+# Example with Mailtrap (requires account)
+# smtp_host = "sandbox.smtp.mailtrap.io"
+# smtp_port = 2525
+# smtp_username = "your-mailtrap-username"
+# smtp_password = "your-mailtrap-password"
+# use_tls = true
+
+[cache]
+# Redis configuration for local development
+# If using Docker: redis://localhost:6379
+# If using Redis Cloud or other service, update accordingly
+redis_url = "redis://localhost:6379/0"
+default_ttl_seconds = 300
+
+[logging]
+# Verbose logging for development
+level = "debug"
+format = "pretty"  # Human-readable output
+output = "stdout"
+
+[cors]
+# Allow your frontend development server
+allow_origins = ["http://localhost:3000", "http://localhost:5173", "http://127.0.0.1:3000"]
+
+[monitoring]
+# Enable monitoring for local development
+enable_metrics = true
+metrics_port = 9090
+enable_tracing = false  # Disable to reduce overhead
+
+[features]
+# All features enabled for development
+enable_registration = true
+enable_email_verification = false  # Disable for easier testing
+enable_password_reset = true
+enable_api_tokens = true
+enable_billing = true
+enable_admin_panel = true
+
+[security]
+# Relaxed security for local development
+password_min_length = 6
+require_special_chars = false
+session_timeout_minutes = 120
+max_login_attempts = 10
+rate_limit_requests_per_minute = 1000
+
+# =============================================================================
+# Development Tools Configuration
+# =============================================================================
+
+[development]
+auto_reload = true
+debug_mode = true
+pretty_print_errors = true
+enable_sql_logging = true
+enable_request_logging = true
+
+# =============================================================================
+# Example Environment Variables Setup
+# =============================================================================
+# Instead of putting sensitive values in this file, you can use environment variables:
+#
+# # Database
+# export TRC_DATABASE__URL="postgresql://user:password@localhost:5432/trc_platform_dev"
+#
+# # OpenAI
+# export TRC_OPENAI__API_KEY="sk-your-openai-api-key"
+#
+# # JWT
+# export TRC_JWT__SECRET="your-super-secret-jwt-key"
+#
+# # Email (Mailtrap example)
+# export TRC_EMAIL__SMTP_HOST="sandbox.smtp.mailtrap.io"
+# export TRC_EMAIL__SMTP_USERNAME="your-mailtrap-username"
+# export TRC_EMAIL__SMTP_PASSWORD="your-mailtrap-password"
+#
+# # Redis (if not using default)
+# export TRC_CACHE__REDIS_URL="redis://localhost:6379/0"
+#
+# =============================================================================
+# Docker Compose Integration
+# =============================================================================
+# If using Docker Compose, you might want to use service names:
+#
+# [database]
+# url = "postgresql://postgres:password@postgres:5432/trc_platform_dev"
+#
+# [cache]
+# redis_url = "redis://redis:6379/0"
+#
+# [email]
+# smtp_host = "mailhog"  # If using Mailhog in Docker Compose
+
+# =============================================================================
+# Notes
+# =============================================================================
+# 1. Never commit actual secrets to version control
+# 2. Use environment variables for sensitive data in production
+# 3. This file is automatically ignored by .gitignore
+# 4. Values here override all other configuration files
+# 5. Environment variables override values in this file

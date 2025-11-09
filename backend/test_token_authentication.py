@@ -116,7 +116,7 @@ class TokenAuthenticationTestCase(TestCase):
         """Test successful authentication with valid token."""
         mock_solve.return_value = {
             "result": "42",
-            "model": "gpt-4-vision",
+            "model": "gpt-4.1-mini-2025-04-14",
         }
 
         # Make request with valid token
@@ -215,7 +215,7 @@ class TokenAuthenticationTestCase(TestCase):
         """Test that requests are properly logged with token information."""
         mock_solve.return_value = {
             "result": "x = 5",
-            "model": "gpt-4-vision",
+            "model": "gpt-4.1-mini-2025-04-14",
         }
 
         from usage.models import RequestLog
@@ -239,7 +239,7 @@ class TokenAuthenticationTestCase(TestCase):
         """Test binary upload with token authentication."""
         mock_solve.return_value = {
             "result": "y = 10",
-            "model": "gpt-4-vision",
+            "model": "gpt-4.1-mini-2025-04-14",
             "return_dict": True,
         }
 

@@ -51,7 +51,7 @@ heroku config:set CSRF_TRUSTED_ORIGINS=https://your-frontend-domain.com
 
 # OpenAI Configuration
 heroku config:set OPENAI_API_KEY='sk-your-api-key'
-heroku config:set OPENAI_MODEL='gpt-4-vision-preview'
+heroku config:set OPENAI_MODEL='gpt-4.1-mini-2025-04-14'
 heroku config:set USE_MOCK_OPENAI=false
 
 # Email Configuration (using Resend)

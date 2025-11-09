@@ -1,0 +1,100 @@
+# TRC Platform - Test Environment Configuration
+# This file contains configuration specific to automated testing
+# These settings override the defaults in default.toml
+
+[server]
+host = "127.0.0.1"
+port = 0  # Let OS choose port for parallel test execution
+workers = 1
+
+[database]
+# Test database (should be isolated and reset between tests)
+url = "postgresql://trc_platform_test:test_password@localhost:5432/trc_platform_test"
+max_connections = 2
+min_connections = 1
+acquire_timeout_seconds = 5
+idle_timeout_seconds = 60
+max_lifetime_seconds = 300
+
+[openai]
+# Mock or use test API key for testing
+api_key = "test-key"
+base_url = "http://localhost:9999"  # Mock server URL
+model = "gpt-3.5-turbo"
+timeout_seconds = 5
+max_retries = 0  # No retries for tests
+
+[jwt]
+# Very short token lifetime for testing
+ttl_hours = 1
+refresh_ttl_days = 0  # Disable refresh tokens in tests
+secret = "test-secret-key-for-testing-only-this-is-long-enough"
+
+[email]
+# Disable email in tests or use test SMTP server
+from_address = "test@trcplatform.com"
+smtp_host = "localhost"
+smtp_port = 10025  # Test SMTP server port
+use_tls = false
+
+[cache]
+# Use separate Redis database for testing
+redis_url = "redis://localhost:6379/2"
+default_ttl_seconds = 60  # Short TTL for tests
+max_connections = 2
+
+[logging]
+# Minimal logging for tests (unless debugging)
+level = "warn"
+format = "json"
+output = "stdout"
+
+# Only log critical errors in tests
+targets = ["trc_platform"]
+
+[cors]
+# Permissive CORS for test clients
+allow_origins = ["*"]
+allow_methods = ["*"]
+allow_headers = ["*"]
+allow_credentials = false
+max_age_seconds = 60
+
+[monitoring]
+# Disable monitoring in tests to reduce overhead
+enable_metrics = false
+enable_tracing = false
+
+[features]
+# Selective features for testing
+enable_registration = true
+enable_email_verification = false  # Disable for easier test setup
+enable_password_reset = false  # Disable to avoid email dependency
+enable_api_tokens = true
+enable_billing = false  # Disable to avoid payment complexity
+enable_admin_panel = true
+
+[security]
+# Relaxed security for testing
+password_min_length = 4
+require_special_chars = false
+session_timeout_minutes = 60
+max_login_attempts = 20
+lockout_duration_minutes = 1
+rate_limit_requests_per_minute = 10000  # Very high limit for tests
+
+[limits]
+# Generous limits for testing scenarios
+max_api_tokens_per_user = 100
+max_requests_per_minute = 10000
+max_file_upload_size_mb = 100
+max_concurrent_requests = 100
+
+# Test-specific settings
+[test]
+# Test execution settings
+cleanup_after_test = true
+use_transactions = true
+mock_external_services = true
+disable_background_jobs = true
+parallel_test_execution = true

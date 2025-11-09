@@ -1,0 +1,81 @@
+# TRC Platform - Default Configuration
+# This file contains the base configuration that applies to all environments
+# unless overridden by environment-specific config files or environment variables.
+
+[server]
+# The address and port the server will bind to
+host = "127.0.0.1"
+port = 8080
+
+# Server configuration
+workers = null  # Auto-detect based on CPU cores
+keep_alive = 30  # seconds
+request_timeout_ms = 30000  # 30 seconds
+
+[database]
+# Database connection URL
+# Format: postgresql://user:password@host:port/database
+url = "postgresql://trc_platform:password@localhost:5432/trc_platform"
+
+# Connection pool settings
+max_connections = 20
+min_connections = 5
+acquire_timeout_seconds = 10
+idle_timeout_seconds = 300
+max_lifetime_seconds = 600
+connect_timeout_ms = 10000
+
+[openai]
+# OpenAI API configuration
+api_key = ""  # Set via environment variable TRC_OPENAI__API_KEY
+model = "gpt-4.1-mini-2025-04-14"
+timeout_seconds = 30
+max_retries = 3
+base_url = "https://api.openai.com/v1/chat/completions"
+
+[jwt]
+# JWT token configuration
+secret = "change-this-super-secret-key-in-production"  # At least 32 characters for HS256
+ttl_hours = 24
+refresh_ttl_days = 7
+issuer = "trc-platform"
+audience = "trc-platform-users"
+
+[email]
+# Email configuration (SMTP)
+smtp_host = "localhost"
+smtp_port = 587
+smtp_username = ""
+smtp_password = ""
+from_address = "noreply@trcplatform.com"
+from_name = "TRC Platform"
+use_tls = true
+connection_timeout_ms = 5000
+
+[cache]
+# Cache configuration
+redis_url = null  # Use local cache if not specified
+ttl_seconds = 3600
+max_capacity = 10000
+local_cache_size = 1000
+
+[logging]
+# Logging configuration
+level = "info"
+format = "pretty"  # "json" or "pretty"
+include_spans = true
+include_target = true
+otlp_endpoint = null  # OpenTelemetry endpoint
+
+[cors]
+# CORS configuration
+allowed_origins = ["http://localhost:3000"]
+allowed_methods = ["GET", "POST", "PUT", "DELETE"]
+allowed_headers = ["*"]
+expose_headers = []
+max_age = 3600
+allow_credentials = true
+
+# Environment (automatically detected)
+[environment]
+# This will be set automatically based on RUST_ENV or default to "development"

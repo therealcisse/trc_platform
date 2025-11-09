@@ -212,7 +212,7 @@ class ProductionOpenAIClient(BaseOpenAIClient):
 
         Args:
             image_bytes: The image data as bytes
-            model: Optional model override (defaults to gpt-4-vision-preview)
+            model: Optional model override (defaults to gpt-4.1-mini-2025-04-14)
             timeout: Optional timeout override
 
         Returns:
