@@ -144,7 +144,7 @@ async function handleMessage(
       case 'extension.telemetry':
         // Store telemetry events
         const { events } = message.payload;
-        events.forEach(event => {
+        events.forEach((event: any) => {
           console.log(`[${timeNow()}][Background][Telemetry] - ${event.eventName}:`, event);
         });
         return { success: true, requestId: 'telemetry' };
@@ -174,6 +174,8 @@ async function handleMessage(
           flow = FlowUtils.inbox(payload.id, payload.requestTimestamp);
         } else if (payload.type === 'manual') {
           flow = FlowUtils.manual(payload.id);
+        } else {
+          throw Error(`Invalid payload type`)
         }
 
         const existed = await ConfigService.startFlow(flow);
@@ -194,6 +196,8 @@ async function handleMessage(
             flow = FlowUtils.inbox(payload.id, payload.requestTimestamp);
           } else if (payload.type === 'manual') {
             flow = FlowUtils.manual(payload.id);
+          } else {
+            throw Error(`Invalid payload type`)
           }
 
           const existed = await ConfigService.startFlow(flow);

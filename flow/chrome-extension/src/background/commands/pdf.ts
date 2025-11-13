@@ -145,12 +145,13 @@ export async function exportTabToPdf(tabId: number, filenameBase?: string): Prom
     await chrome.debugger.sendCommand(target, "Page.enable");
 
     // Ask CDP to render as PDF, returns Base64 string
-    const { data } = await chrome.debugger.sendCommand(target, "Page.printToPDF", {
+    const pdfResp = (await chrome.debugger.sendCommand(target, "Page.printToPDF", {
       printBackground: true,
       displayHeaderFooter: false,
       preferCSSPageSize: true
       // add options as needed: landscape, paperWidth, paperHeight, margins, scale
-    });
+    })) as { data: string };
+    const { data } = pdfResp;
 
     // Build a filename
     const tab = await chrome.tabs.get(tabId);

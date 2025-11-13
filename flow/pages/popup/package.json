@@ -22,7 +22,8 @@
   "dependencies": {
     "@extension/shared": "workspace:*",
     "@extension/i18n": "workspace:*",
-    "@extension/ui": "workspace:*"
+    "@extension/ui": "workspace:*",
+    "@extension/types": "workspace:*"
   },
   "devDependencies": {
     "@extension/tailwindcss-config": "workspace:*",

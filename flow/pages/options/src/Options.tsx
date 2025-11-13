@@ -11,14 +11,14 @@ import {
 } from '@extension/storage';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { Fragment, useState } from 'react';
-import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow } from '@extension/types';
+import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow, ExtensionStorage, Flow } from '@extension/types';
 import { LocalTime, LocalTimeUtils } from '@extension/types';
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => ({ value: h, label: String(h).padStart(2, '0') }));
 const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, m) => ({ value: m, label: String(m).padStart(2, '0') }));
 const DAYS = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'] as const;
 
-const getDayTranslation = (day: DayName) => t(`days_${day.toLowerCase()}`);
+const getDayTranslation = (day: DayName) => t(`days_${day.toLowerCase()}` as any);
 
 function TimePicker({
   value,
@@ -360,9 +360,9 @@ const JsonDisplay = ({ data, title, onClose }: { data: any; title: string; onClo
 const Options = () => {
   const { enabled, debugMode, config } = useStorage(extensionConfigStorage);
   const [showJsonModal, setShowJsonModal] = useState(false);
-  const [flowData, setFlowData] = useState(null);
+  const [flowData, setFlowData] = useState<{ flows: Record<string, Flow> } | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
-  const [configData, setConfigData] = useState(null);
+  const [configData, setConfigData] = useState<ExtensionStorage | null>(null);
 
   const handleOperationalHoursChange = (
     day: DayName,
@@ -440,8 +440,7 @@ const Options = () => {
   const handleShowExtensionConfig = async () => {
     try {
       const currentData = await extensionConfigStorage.get();
-      const { flows, ...configOnly } = currentData;
-      setConfigData(configOnly);
+      setConfigData(currentData);
       setShowConfigModal(true);
     } catch (error) {
       console.error('Failed to get extension config:', error);

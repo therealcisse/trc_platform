@@ -180,6 +180,9 @@
   "source_inbox": {
     "message": "Inbox"
   },
+  "source_manual": {
+    "message": "Manual"
+  },
   "status_done": {
     "message": "Done"
   },

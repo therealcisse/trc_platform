@@ -1,4 +1,4 @@
-import type { ExtensionStorage } from '@extension/shared';
+import type { ExtensionStorage } from '@extension/types';
 
 export type DayConfig = {
   enabled: boolean;

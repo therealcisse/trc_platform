@@ -49,7 +49,7 @@ export class CaptchaProcessor {
     return Math.floor(min + Math.random() * (max - min));
   }
 
-  private classifyError(e: unknown, response?: any): SolveResult {
+  private classifyError(e: unknown, response?: any): Extract<SolveResult, { ok: false }> {
     // Decide if we should retry. Mark 5xx and transient network errors as retriable.
     const message = response?.error || (e as Error)?.message || 'Unknown error';
     const code = response?.code;
@@ -157,10 +157,8 @@ export class CaptchaProcessor {
         const attemptTimeout = Math.min(perAttemptTimeout, timeLeft);
         const response = await this.withTimeout(
           attemptTimeout,
-          signal =>
-            sendBackgroundCommand('image.solve', { imageData: imageDataUrl, flowId }, attemptTimeout, {
-              signal,
-            }) as Promise<any>,
+          _signal =>
+            sendBackgroundCommand('image.solve', { imageData: imageDataUrl, flowId }, attemptTimeout) as Promise<any>,
         );
 
         if (response?.success && response.data?.result) {

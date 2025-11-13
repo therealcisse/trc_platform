@@ -107,12 +107,14 @@ const Popup = () => {
     }
   };
 
-  const getSourceBadge = (source: 'email' | 'inbox') => {
+  const getSourceBadge = (source: 'email' | 'inbox' | 'manual') => {
     switch (source) {
       case 'email':
         return <span className="rounded bg-purple-100 px-2 py-0.5 text-xs text-purple-700">{t('source_email')}</span>;
       case 'inbox':
         return <span className="rounded bg-orange-100 px-2 py-0.5 text-xs text-orange-700">{t('source_inbox')}</span>;
+      case 'manual':
+        return <span className="rounded bg-orange-100 px-2 py-0.5 text-xs text-orange-700">{t('source_manual')}</span>;
     }
   };
 
