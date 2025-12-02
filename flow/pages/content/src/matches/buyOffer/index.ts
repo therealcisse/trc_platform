@@ -5,12 +5,12 @@ import {
   ConfigService,
   BackgroundUtils,
   installGlobalErrorHandlers,
+  TabManager,
 } from '@extension/shared';
 import { isInvalidProduct, isProductNotAllowed as isProductNotAllowed, MATCHER_IDS } from '@extension/types';
 import { clickWithVerification, sleep, ensureFocus } from '@src/lib';
 import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
-import { TabManager } from '@extension/shared';
 
 // Helper to convert an image element into a data URL, DPI-aware
 function getImageToDataURL(img: HTMLImageElement, type: string = 'image/png', quality?: number): string {

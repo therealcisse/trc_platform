@@ -1,6 +1,7 @@
-import { describe, it, expect } from 'vitest';
 import { ProductFactory } from './ProductFactory.js';
-import { LocalTime, isInvalidProduct, isProductNotAllowed, type ExecutionConfig } from '@extension/types';
+import { LocalTime, isInvalidProduct, isProductNotAllowed } from '@extension/types';
+import { describe, it, expect } from 'vitest';
+import type { ExecutionConfig } from '@extension/types';
 
 describe('ProductFactory.parseTitle', () => {
   // Test fixtures for parseTitle
@@ -42,8 +43,10 @@ describe('ProductFactory.parseTitle', () => {
     inboxBuysImmediately: true,
     inboxAutoRefreshMs: 15000,
 
-    // API Authentication
+    // API Authentication and solver routing
     token: undefined,
+    useLocal: false,
+    localModel: 'gpt-4.1-mini',
 
     // Operational hours
     operationalHours: {

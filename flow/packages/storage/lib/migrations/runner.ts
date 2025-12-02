@@ -1,5 +1,5 @@
-import { ExtensionStorageSchemaLatest } from '../validation/versioned-storage.js';
 import { LATEST_SCHEMA_VERSION, MIGRATIONS, getSchemaForVersion } from './registry.js';
+import { ExtensionStorageSchemaLatest } from '../validation/versioned-storage.js';
 
 // Very small deep merge tailored to the ExtensionStorage shape
 export function withDefaults<T extends { config: any }>(latestDefaults: T, value: Partial<T>): T {

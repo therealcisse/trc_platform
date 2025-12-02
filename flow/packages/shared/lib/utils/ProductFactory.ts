@@ -1,11 +1,5 @@
-import {
-  type ExecutionConfig,
-  type Product,
-  type ParsedTitle,
-  type ProcessingTimeWindow,
-  LocalTime,
-  LocalTimeUtils,
-} from '@extension/types';
+import { LocalTime, LocalTimeUtils } from '@extension/types';
+import type { ExecutionConfig, Product, ParsedTitle, ProcessingTimeWindow } from '@extension/types';
 
 export class ProductFactory {
   /**

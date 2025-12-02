@@ -63,6 +63,9 @@
   "options_api_token_placeholder": {
     "message": "Geben Sie Ihr API-Token ein"
   },
+  "options_api_token_missing_warning": {
+    "message": "API-Token ist leer. Die Erweiterung kann Bilder erst lösen, wenn ein gültiges Token konfiguriert ist."
+  },
   "options_message_monitoring": {
     "message": "Nachrichtenüberwachung"
   },
@@ -125,6 +128,15 @@
   },
   "options_accident_insurance": {
     "message": "Unfallversicherung"
+  },
+  "options_use_local_solver": {
+    "message": "Lokalen OpenAI-Löser verwenden"
+  },
+  "options_use_local_solver_description": {
+    "message": "Bilder direkt mit Ihrem OpenAI-API-Schlüssel statt über das TRC-Backend lösen."
+  },
+  "options_local_model": {
+    "message": "OpenAI-Modell (für lokale Lösung)"
   },
   "options_processing_time": {
     "message": "Verarbeitungszeit (Sekunden)"

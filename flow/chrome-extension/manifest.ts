@@ -1,7 +1,5 @@
+import { EXTENSION_KEY } from '@extension/env';
 import { readFileSync } from 'node:fs';
-import {
-  EXTENSION_KEY,
-} from '@extension/env';
 import type { ManifestType } from '@extension/shared';
 
 const packageJson = JSON.parse(readFileSync('./package.json', 'utf8'));
@@ -25,19 +23,11 @@ const manifest = {
   manifest_version: 3,
   default_locale: 'en',
   name: 'trc_platform_extension',
-  browser_specific_settings: {
-  },
+  browser_specific_settings: {},
   version: packageJson.version,
   description: 'TRC Platform Extension',
   host_permissions: ['<all_urls>'],
-  permissions: [
-    'storage',
-    'scripting',
-    'notifications',
-    "downloads",
-    "debugger",
-    "tabs",
-  ],
+  permissions: ['storage', 'scripting', 'notifications', 'downloads', 'debugger', 'tabs'],
   options_page: 'options/index.html',
   background: {
     service_worker: 'background.js',
@@ -57,18 +47,12 @@ const manifest = {
       run_at: 'document_start',
     },
     {
-      matches: [
-        'http://localhost:8082/item/*',
-        'https://auktion.hansemerkur.de/item.php*',
-      ],
+      matches: ['http://localhost:8082/item/*', 'https://auktion.hansemerkur.de/item.php*'],
       js: ['content/item.iife.js'],
       run_at: 'document_start',
     },
     {
-      matches: [
-        'http://localhost:8082/buy_now/id/*',
-        'https://auktion.hansemerkur.de/buy_now/id/*',
-      ],
+      matches: ['http://localhost:8082/buy_now/id/*', 'https://auktion.hansemerkur.de/buy_now/id/*'],
       js: ['content/buyOffer.iife.js'],
       run_at: 'document_start',
     },
@@ -81,32 +65,19 @@ const manifest = {
       run_at: 'document_start',
     },
     {
-      matches: [
-        'http://localhost:8082/pdf.html',
-        'https://auktion.hansemerkur.de/item/id/*',
-      ],
+      matches: ['http://localhost:8082/pdf.html', 'https://auktion.hansemerkur.de/item/id/*'],
       js: ['content/pdf.iife.js'],
       run_at: 'document_start',
     },
     {
-      matches: [
-        'http://localhost:8082/inbox.html',
-        'https://auktion.hansemerkur.de/my_message_center_inbox.html*',
-      ],
+      matches: ['http://localhost:8082/inbox.html', 'https://auktion.hansemerkur.de/my_message_center_inbox.html*'],
       js: ['content/inbox.iife.js'],
       run_at: 'document_start',
     },
   ],
   web_accessible_resources: [
     {
-      resources: [
-        'content/ticker.iife.js',
-        '*.js',
-        '*.css',
-        '*.svg',
-        'icon-128.png',
-        'icon-34.png',
-      ],
+      resources: ['content/ticker.iife.js', '*.js', '*.css', '*.svg', 'icon-128.png', 'icon-34.png'],
       matches: ['<all_urls>'],
     },
   ],

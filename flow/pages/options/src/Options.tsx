@@ -1,18 +1,18 @@
 import '@src/Options.css';
 import { t } from '@extension/i18n';
-import { TabManager } from '@extension/shared';
-import { PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
+import { TabManager, PROJECT_URL_OBJECT, useStorage, withErrorBoundary, withSuspense } from '@extension/shared';
 import {
   extensionConfigStorage,
   extensionRuntimeStorage,
   DEFAULT_OPERATIONAL_HOURS_CONFIG,
   migrateToLatest,
   DEFAULT_CONFIG,
+  DEFAULT_LOCAL_MODEL,
 } from '@extension/storage';
-import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
-import { Fragment, useState } from 'react';
-import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow, ExtensionStorage, Flow } from '@extension/types';
 import { LocalTime, LocalTimeUtils } from '@extension/types';
+import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
+import { Fragment, useEffect, useState } from 'react';
+import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow, ExtensionStorage, Flow } from '@extension/types';
 
 const HOUR_OPTIONS = Array.from({ length: 24 }, (_, h) => ({ value: h, label: String(h).padStart(2, '0') }));
 const MINUTE_OPTIONS = Array.from({ length: 60 }, (_, m) => ({ value: m, label: String(m).padStart(2, '0') }));
@@ -357,12 +357,90 @@ const JsonDisplay = ({ data, title, onClose }: { data: any; title: string; onClo
   );
 };
 
+const formatModelName = (id: string) => {
+  const known: Record<string, string> = {
+    'gpt-4.1-mini': 'GPT-4.1 Mini',
+    'gpt-4o-mini': 'GPT-4o Mini',
+  };
+  if (known[id]) return known[id];
+
+  // Capitalize and clean up
+  return id
+    .replace(/-/g, ' ')
+    .replace(/\b\w/g, c => c.toUpperCase())
+    .replace(/Gpt/g, 'GPT');
+};
+
 const Options = () => {
   const { enabled, debugMode, config } = useStorage(extensionConfigStorage);
   const [showJsonModal, setShowJsonModal] = useState(false);
   const [flowData, setFlowData] = useState<{ flows: Record<string, Flow> } | null>(null);
   const [showConfigModal, setShowConfigModal] = useState(false);
   const [configData, setConfigData] = useState<ExtensionStorage | null>(null);
+  const [availableModels, setAvailableModels] = useState<{ id: string; name: string }[]>([]);
+
+  useEffect(() => {
+    const fetchModels = async () => {
+      if (!config.token) {
+        // Fallback if no token
+        setAvailableModels([
+          { id: DEFAULT_LOCAL_MODEL, name: formatModelName(DEFAULT_LOCAL_MODEL) },
+          ...(config.localModel && config.localModel !== DEFAULT_LOCAL_MODEL
+            ? [{ id: config.localModel, name: formatModelName(config.localModel) }]
+            : []),
+        ]);
+        return;
+      }
+
+      try {
+        const res = await fetch('https://api.openai.com/v1/models', {
+          headers: { Authorization: `Bearer ${config.token}` },
+        });
+        if (!res.ok) throw new Error('Failed to fetch models');
+        const data = await res.json();
+        const models: any[] = data.data || [];
+
+        const excluded = [
+          'gpt-image-1-mini',
+          'gpt-audio-mini',
+          'gpt-audio-mini-2025-10-06',
+          'gpt-realtime-mini',
+          'gpt-realtime-mini-2025-10-06',
+          'gpt-5.1-codex-mini',
+          'codex-mini-latest',
+        ];
+
+        const chatModels = models
+          .filter(
+            (m: any) =>
+              (m.id.startsWith('gpt') || m.id.startsWith('o1') || m.id.startsWith('o3')) &&
+              (m.id.endsWith('-mini') || m.id.endsWith('-nano')) &&
+              !excluded.includes(m.id),
+          )
+          .map((m: any) => ({ id: m.id, name: formatModelName(m.id) }))
+          .sort((a, b) => a.name.localeCompare(b.name));
+
+        // Ensure current selected model is in the list even if fetch missed it (or it's deprecated/hidden)
+        const current = config.localModel || DEFAULT_LOCAL_MODEL;
+        if (!chatModels.find(m => m.id === current)) {
+          chatModels.unshift({ id: current, name: formatModelName(current) });
+        }
+
+        setAvailableModels(chatModels);
+      } catch (e) {
+        console.error('Failed to fetch OpenAI models:', e);
+        // Fallback on error
+        setAvailableModels([
+          { id: DEFAULT_LOCAL_MODEL, name: formatModelName(DEFAULT_LOCAL_MODEL) },
+          ...(config.localModel && config.localModel !== DEFAULT_LOCAL_MODEL
+            ? [{ id: config.localModel, name: formatModelName(config.localModel) }]
+            : []),
+        ]);
+      }
+    };
+
+    fetchModels();
+  }, [config.token, config.localModel]);
 
   const handleOperationalHoursChange = (
     day: DayName,
@@ -549,7 +627,7 @@ const Options = () => {
             {/* Authentication */}
             <section>
               <h2 className="mb-4 text-xl font-medium">{t('options_authentication')}</h2>
-              <div className="rounded-lg bg-gray-800 p-4">
+              <div className="space-y-4 rounded-lg bg-gray-800 p-4">
                 <div className="space-y-2">
                   <label className="block text-sm font-medium text-gray-300">{t('options_api_token')}</label>
                   <input
@@ -559,6 +637,30 @@ const Options = () => {
                     className="w-full rounded-md border border-gray-600 bg-gray-700 px-3 py-2 text-gray-100 placeholder-gray-400 focus:border-transparent focus:outline-none focus:ring-2 focus:ring-blue-500"
                     placeholder={t('options_api_token_placeholder')}
                   />
+                  {!config.token && <p className="text-xs text-amber-400">{t('options_api_token_missing_warning')}</p>}
+                </div>
+
+                <div className="space-y-3 border-t border-gray-700 pt-3">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <h3 className="font-medium">{t('options_use_local_solver')}</h3>
+                      <p className="text-sm text-gray-400">{t('options_use_local_solver_description')}</p>
+                    </div>
+                    <Switch
+                      checked={config.useLocal}
+                      onCheckedChange={checked => extensionConfigStorage.updateConfig({ useLocal: !!checked })}
+                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
+                    />
+                  </div>
+                  <div>
+                    <label className="mb-1 block text-sm text-gray-300">{t('options_local_model')}</label>
+                    <Select
+                      value={config.localModel || DEFAULT_LOCAL_MODEL}
+                      onChange={val => extensionConfigStorage.updateConfig({ localModel: val })}
+                      options={availableModels.map(m => ({ value: m.id, label: m.name }))}
+                      className="w-full border-gray-600 bg-gray-700 text-gray-100"
+                    />
+                  </div>
                 </div>
               </div>
             </section>

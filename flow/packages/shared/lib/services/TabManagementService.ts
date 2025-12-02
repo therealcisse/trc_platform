@@ -1,6 +1,6 @@
+import { ConfigService } from './config.js';
 import type { ExtensionRuntimeType } from '@extension/storage';
 import type { TabManagementService as ITabManagementService } from '@extension/types';
-import { ConfigService } from './config.js';
 
 export class TabManagementService implements ITabManagementService {
   constructor(private storage: ExtensionRuntimeType) {}

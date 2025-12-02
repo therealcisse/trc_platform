@@ -1,8 +1,9 @@
 import { createStorage, StorageEnum } from '../base/index.js';
+import { DEFAULT_LOCAL_MODEL } from '../constants.js';
 import { validateStorageData, ExtensionStorageSchema } from '../validation/storage.js';
+import { LocalTime } from '@extension/types';
 import type { ExtensionStorageType } from '../base/index.js';
 import type { ExecutionConfig, ExtensionStorage } from '@extension/types';
-import { LocalTime } from '@extension/types';
 
 export const DEFAULT_OPERATIONAL_HOURS_CONFIG = {
   enabled: false,
@@ -27,6 +28,10 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     emailMode: false,
     emailRefreshMin: 30,
     emailRefreshMax: 60,
+
+    // Local solver defaults
+    useLocal: true,
+    localModel: DEFAULT_LOCAL_MODEL,
 
     // Inbox mode defaults
     inboxMode: true,

@@ -1,3 +1,5 @@
+import { BackgroundUtils, TabManager } from '@extension/shared';
+import { LocalTime, LocalTimeUtils } from '@extension/types';
 import type {
   Matcher,
   WaitOptions,
@@ -6,9 +8,6 @@ import type {
   LocalDate as LocalDateType,
   ExecutionConfig,
 } from '@extension/types';
-import { LocalTime, LocalTimeUtils } from '@extension/types';
-
-import { BackgroundUtils, TabManager } from '@extension/shared';
 
 // LocalDate utility class
 export class LocalDate implements LocalDateType {

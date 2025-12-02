@@ -1,6 +1,6 @@
-import type { ExecutionConfig, OperationalHours } from '@extension/types';
-import { LocalTime, LocalTimeUtils, MATCHER_IDS } from '@extension/types';
 import { Log } from '../utils/logger.js';
+import { LocalTime, LocalTimeUtils, MATCHER_IDS } from '@extension/types';
+import type { ExecutionConfig, OperationalHours } from '@extension/types';
 
 // Use a module-scoped timer to ensure idempotency across calls
 let intervalRef: ReturnType<typeof setInterval> | null = null;

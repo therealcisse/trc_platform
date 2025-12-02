@@ -63,6 +63,9 @@
   "options_api_token_placeholder": {
     "message": "Enter your API token"
   },
+  "options_api_token_missing_warning": {
+    "message": "API token is empty. The extension cannot solve images until a valid token is configured."
+  },
   "options_message_monitoring": {
     "message": "Message monitoring"
   },
@@ -125,6 +128,15 @@
   },
   "options_accident_insurance": {
     "message": "Accident insurance"
+  },
+  "options_use_local_solver": {
+    "message": "Use local OpenAI solver"
+  },
+  "options_use_local_solver_description": {
+    "message": "Solve images directly with your OpenAI API key instead of the TRC backend."
+  },
+  "options_local_model": {
+    "message": "OpenAI model (for local solving)"
   },
   "options_processing_time": {
     "message": "Processing time (seconds)"

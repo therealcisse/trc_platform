@@ -1,4 +1,9 @@
-import { describe, it, expect, beforeEach, afterEach, vi, type MockInstance } from 'vitest';
+import { CaptchaProcessor } from './CaptchaProcessor';
+import * as Shared from '@extension/shared';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import type { MockInstance } from 'vitest';
+
+// 2) Import the SUT and the mocked namespace AFTER mocks are declared.
 
 // 1) Declare mocks BEFORE importing the SUT.
 vi.mock('@extension/shared', () => {
@@ -10,10 +15,20 @@ vi.mock('@extension/shared', () => {
       error: vi.fn((...a: any[]) => logs.push(['error', ...a])),
     })),
   };
+  const sendBackgroundCommand = vi.fn();
+  const BackgroundUtils = {
+    getExtensionConfig: vi.fn(async () => ({
+      config: {
+        useLocal: false,
+        localModel: 'gpt-4.1-mini',
+      },
+      enabled: true,
+    })),
+  };
   return {
     Log,
-    // This is a real Vitest mock function
-    sendBackgroundCommand: vi.fn(),
+    sendBackgroundCommand,
+    BackgroundUtils,
   };
 });
 
@@ -27,10 +42,6 @@ vi.mock('@src/lib', () => ({
     return m ? m[0] : '';
   }),
 }));
-
-// 2) Import the SUT and the mocked namespace AFTER mocks are declared.
-import * as Shared from '@extension/shared';
-import { CaptchaProcessor } from './CaptchaProcessor';
 
 // Handy typed accessor to the real mock function:
 const send = () => Shared.sendBackgroundCommand as unknown as MockInstance;
@@ -170,6 +181,24 @@ describe('CaptchaProcessor', () => {
     const result = await promise;
     expect(result).toBe('9999');
     expect(send()).toHaveBeenCalledTimes(3);
+  });
+
+  it('uses local solver command when config.useLocal is true', async () => {
+    (Shared.BackgroundUtils.getExtensionConfig as unknown as MockInstance).mockResolvedValueOnce({
+      config: {
+        useLocal: true,
+        localModel: 'gpt-4.1-mini',
+      },
+      enabled: true,
+    });
+
+    send().mockResolvedValueOnce({ success: true, data: { result: 'answer=5555' } });
+
+    const result = await processor.solveCaptcha('https://local/test.png', 'data:image/png;base64,LLL', 'flow-local');
+    expect(result).toBe('5555');
+    expect(send()).toHaveBeenCalledTimes(1);
+    const [command] = send().mock.calls[0];
+    expect(command).toBe('image.solve.local');
   });
 
   it('clearCacheForFlow removes only entries for the specified flow', async () => {

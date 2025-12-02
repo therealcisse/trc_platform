@@ -1,5 +1,5 @@
-import { Log } from '../utils/index.js';
 import { sendBackgroundCommand } from './index.js';
+import { Log } from '../utils/index.js';
 
 export class TabManager {
   private static instance: TabManager;

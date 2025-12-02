@@ -1,9 +1,9 @@
-import { z } from 'zod';
 import {
   ExtensionStorageSchemaV0,
   ExtensionStorageSchemaV1,
   LATEST_SCHEMA_VERSION,
 } from '../validation/versioned-storage.js';
+import type { z } from 'zod';
 
 export type Version = 0 | 1; // extended with v1
 

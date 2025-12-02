@@ -1,18 +1,42 @@
 import 'webextension-polyfill';
 import { pdfCommandHandler } from './commands/pdf';
 import { BackgroundLoggerService } from './services/logger-service';
-import {
-  ConfigService,
-  FlowUtils,
-  TabManagementService,
-  sleep,
-} from '@extension/shared';
-import { extensionConfigStorage, extensionRuntimeStorage, ensureMigrated, DEFAULT_CONFIG } from '@extension/storage';
-import type { FlowPayload, BackgroundCommands, CommandResponse, Flow } from '@extension/types';
 import { BACKEND_URL } from '@extension/env';
+import { ConfigService, FlowUtils, TabManagementService, sleep } from '@extension/shared';
+import {
+  extensionConfigStorage,
+  extensionRuntimeStorage,
+  ensureMigrated,
+  DEFAULT_CONFIG,
+  DEFAULT_LOCAL_MODEL,
+} from '@extension/storage';
+import type { FlowPayload, BackgroundCommands, CommandResponse, Flow } from '@extension/types';
 
 // Service instances
 const tabService = new TabManagementService(extensionRuntimeStorage);
+
+const MATH_SOLVER_PROMPT = `You are a mathematical problem solver. Your task is to:
+1. Identify the mathematical problem or expression in the image
+2. Solve it step by step
+3. Return ONLY the final numerical answer
+
+Rules:
+- If the image contains a math problem, return only the numerical answer
+- For expressions like "2+2", return "4"
+- For equations like "x=5+3", return "8"
+- If there are multiple problems, solve all and return answers separated by commas
+- If you cannot identify a math problem, return "ERROR: No math problem found"
+- Do not include units, explanations, or any other text, just the number(s)
+
+Examples:
+- Image shows "3 + 5" -> Return: "8"
+- Image shows "12 × 4" -> Return: "48"
+- Image shows "100 ÷ 5" -> Return: "20"
+- Image shows "7 - 3" -> Return: "4"
+- Image shows "2³" -> Return: "8"
+- Image shows "√16" -> Return: "4"
+- Image shows "What is 15% of 200?" -> Return: "30"
+- Image shows multiple: "2+2" and "3×3" -> Return: "4, 9"`;
 
 // Initialize background service
 async function init() {
@@ -80,10 +104,12 @@ const timeNow = () => new Date().toISOString();
 chrome.runtime.onConnect.addListener(port => {
   if (port.name !== KEEPALIVE_PORT_NAME) return;
 
-  console.log(`[${timeNow()}][KeepAlive][Background] - keepAlive port connected from tab ${port.sender?.tab?.id ?? 'unknown'}`);
+  console.log(
+    `[${timeNow()}][KeepAlive][Background] - keepAlive port connected from tab ${port.sender?.tab?.id ?? 'unknown'}`,
+  );
 
   // Optional: observe pings, suppressed to avoid noise
-  port.onMessage.addListener((_msg) => {
+  port.onMessage.addListener(_msg => {
     // no-op
   });
 
@@ -115,7 +141,6 @@ async function handleMessage(
           requestId: 'scheduleCloseAfterNavigation',
         };
 
-
       case 'image.solve':
         return processImageAPI(message.payload.imageData, message.payload.flowId)
           .then(result => {
@@ -127,6 +152,21 @@ async function handleMessage(
             return {
               success: false,
               requestId: 'image',
+              error: error instanceof Error ? error.message : 'Unknown error',
+            };
+          });
+
+      case 'image.solve.local':
+        return processImageLocal(message.payload.imageData, message.payload.flowId)
+          .then(result => {
+            console.log(`[${timeNow()}][Background] - Successfully processed image via local OpenAI`);
+            return { success: true, data: result, requestId: 'image.local' };
+          })
+          .catch(error => {
+            console.error(`[${timeNow()}][Background] - Error processing image via local OpenAI:`, error);
+            return {
+              success: false,
+              requestId: 'image.local',
               error: error instanceof Error ? error.message : 'Unknown error',
             };
           });
@@ -175,7 +215,7 @@ async function handleMessage(
         } else if (payload.type === 'manual') {
           flow = FlowUtils.manual(payload.id);
         } else {
-          throw Error(`Invalid payload type`)
+          throw Error(`Invalid payload type`);
         }
 
         const existed = await ConfigService.startFlow(flow);
@@ -197,7 +237,7 @@ async function handleMessage(
           } else if (payload.type === 'manual') {
             flow = FlowUtils.manual(payload.id);
           } else {
-            throw Error(`Invalid payload type`)
+            throw Error(`Invalid payload type`);
           }
 
           const existed = await ConfigService.startFlow(flow);
@@ -404,7 +444,8 @@ async function handleTabManagement(
 
 async function handleFlowDone(
   payload: {
-    flowId: string; timeoutMs: number;
+    flowId: string;
+    timeoutMs: number;
   },
   sender: chrome.runtime.MessageSender,
 ): Promise<void> {
@@ -416,7 +457,6 @@ async function handleFlowDone(
   }, payload.timeoutMs);
 }
 
-
 // Initialize background service
 init();
 
@@ -424,6 +464,87 @@ async function dataUrlToBlobFetch(dataUrl: string): Promise<Blob> {
   const res = await fetch(dataUrl);
   return res.blob();
 }
+
+/**
+ * Process an image by sending it directly to OpenAI using the local solver configuration.
+ */
+async function processImageLocal(imageData: string, flowId: string) {
+  const config = await ConfigService.getConfig();
+
+  if (!config.token) {
+    throw new Error('OpenAI API token not configured. Please set your API token in the extension options.');
+  }
+
+  const model = config.localModel || DEFAULT_LOCAL_MODEL;
+  const apiKey = config.token;
+
+  console.log(`[${timeNow()}][Background] - Processing image via local OpenAI solver with model ${model}...`);
+
+  const controller = new AbortController();
+  const timeoutMs = 60000;
+  const timeout = setTimeout(() => controller.abort(), timeoutMs);
+
+  try {
+    const payload = {
+      model,
+      messages: [
+        {
+          role: 'system',
+          content: MATH_SOLVER_PROMPT,
+        },
+        {
+          role: 'user',
+          content: [
+            {
+              type: 'text',
+              text: 'Solve and return only the number.',
+            },
+            {
+              type: 'image_url',
+              image_url: {
+                url: imageData,
+                detail: 'low',
+              },
+            },
+          ],
+        },
+      ],
+      temperature: 1,
+    } as const;
+
+    const startTime = performance.now();
+    const response = await fetch('https://api.openai.com/v1/chat/completions', {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${apiKey}`,
+      },
+      body: JSON.stringify(payload),
+      signal: controller.signal,
+    });
+
+    const duration = performance.now() - startTime;
+    console.log(`[${timeNow()}][Background] - OpenAI request completed in ${duration.toFixed(0)}ms`);
+
+    if (!response.ok) {
+      const text = await response.text();
+      throw new Error(`OpenAI request failed (${response.status}): ${text || response.statusText}`);
+    }
+
+    const data = await response.json();
+    const content = data?.choices?.[0]?.message?.content;
+    if (!content || typeof content !== 'string') {
+      throw new Error('No result in OpenAI response');
+    }
+
+    return {
+      result: content,
+    };
+  } finally {
+    clearTimeout(timeout);
+  }
+}
+
 /**
  * Process an image by sending it to the TRC backend API
  */
@@ -458,4 +579,3 @@ async function processImageAPI(imageData: string, flowId: string) {
   if (!data.result) throw new Error('No result in API response');
   return data;
 }
-

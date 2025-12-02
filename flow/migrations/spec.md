@@ -17,8 +17,8 @@ Design goals
 Key components
 1) Versioned schemas
 - Source: packages/storage/lib/validation/versioned-storage.ts
-- Current latest: ExtensionStorageSchemaV0 with schemaVersion: 0
-- Future versions: add ExtensionStorageSchemaV1, V2, ... and update LATEST_SCHEMA_VERSION and ExtensionStorageSchemaLatest
+-- Current latest: ExtensionStorageSchemaV1 with schemaVersion: 1
+-- Future versions: add ExtensionStorageSchemaV2, V3, ... and update LATEST_SCHEMA_VERSION and ExtensionStorageSchemaLatest
 
 2) Migration registry
 - Source: packages/storage/lib/migrations/registry.ts
@@ -41,8 +41,8 @@ Key components
 
 Versioning policy
 - schemaVersion is a numeric literal at the type level for ExtensionStorage
-  - Today: schemaVersion: 0
-  - Later: evolve to 0 | 1 | 2, ... as needed
+-  - Today: schemaVersion: 1
+-  - Later: evolve to 1 | 2 | 3, ... as needed
 - Every new version requires:
   - New zod schema with z.literal(nextVersion)
   - A migration step in MIGRATIONS from prev -> next

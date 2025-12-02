@@ -35,8 +35,10 @@ export interface ExecutionConfig {
   inboxBuysImmediately: boolean; // When true, non-lead inbox items open Buy Offer directly
   inboxAutoRefreshMs: number; // How often to refresh the inbox page when outside operational hours
 
-  // API Authentication
+  // API Authentication and solver routing
   token?: string;
+  useLocal: boolean;
+  localModel: string;
 
   operationalHours: OperationalHours;
   emailMode: boolean;
@@ -143,6 +145,7 @@ export interface BackgroundCommands {
   'extension.getConfig': {};
   'extension.toggleEnabled': {};
   'image.solve': { imageData: string; flowId: string };
+  'image.solve.local': { imageData: string; flowId: string };
   'flows.scheduleCloseAfterNavigation': { flowId: string; timeoutMs: number };
   'extension.startFlow': FlowPayload;
   'extension.startFlowAndOpen': FlowPayload & { url: string };

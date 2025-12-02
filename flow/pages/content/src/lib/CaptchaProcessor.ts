@@ -1,7 +1,6 @@
-import { Log } from '@extension/shared';
+import { Log, BackgroundUtils, sendBackgroundCommand } from '@extension/shared';
 import { MATCHER_IDS } from '@extension/types';
 import { extractNumericAnswer } from '@src/lib';
-import { sendBackgroundCommand } from '@extension/shared';
 
 interface CaptchaCache {
   answer: string;
@@ -134,6 +133,9 @@ export class CaptchaProcessor {
     maxRetries: number,
     opts?: { perAttemptTimeoutMs?: number; totalDeadlineMs?: number }, // testability
   ): Promise<string> {
+    const { config } = await BackgroundUtils.getExtensionConfig();
+    const command: 'image.solve' | 'image.solve.local' = config.useLocal ? 'image.solve.local' : 'image.solve';
+
     // Backoff parameters tuned for UI latency and burst smoothing.
     const base = 400; // base delay in ms
     const factor = 2.0; // growth factor
@@ -158,7 +160,7 @@ export class CaptchaProcessor {
         const response = await this.withTimeout(
           attemptTimeout,
           _signal =>
-            sendBackgroundCommand('image.solve', { imageData: imageDataUrl, flowId }, attemptTimeout) as Promise<any>,
+            sendBackgroundCommand(command, { imageData: imageDataUrl, flowId }, attemptTimeout) as Promise<any>,
         );
 
         if (response?.success && response.data?.result) {

@@ -6,9 +6,9 @@ import {
   TabManager,
   installGlobalErrorHandlers,
 } from '@extension/shared';
-import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
+import { MATCHER_IDS } from '@extension/types';
 import { clickWithVerification } from '@src/lib';
-import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors } from '@extension/types';
+import type { Matcher, ExecutionContext, ExecutionResult, MyOfferSelectors, ExecutionConfig } from '@extension/types';
 
 /**
  * MyOffer Matcher - Detects myOffer pages and triggers myOffer processing

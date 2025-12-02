@@ -1,5 +1,6 @@
-import { z } from 'zod';
+import { DEFAULT_LOCAL_MODEL } from '../constants.js';
 import { LocalTime } from '@extension/types';
+import { z } from 'zod';
 
 export const LocalTimeSchema = z
   .object({
@@ -76,6 +77,8 @@ export const ExecutionConfigSchemaV1 = z.object({
   inboxAutoRefreshMs: z.number().default(300000),
 
   token: z.string().optional(),
+  useLocal: z.boolean().default(true),
+  localModel: z.string().default(DEFAULT_LOCAL_MODEL),
 
   // Required fields
   operationalHours: OperationalHoursSchema,

@@ -8,9 +8,16 @@ import {
   startPreciseSecondTicker,
   scheduleAutoRefresh,
 } from '@extension/shared';
-import { MATCHER_IDS, ExecutionConfig } from '@extension/types';
+import { MATCHER_IDS } from '@extension/types';
 import { clickWithVerification, isValidTimeOfDay } from '@src/lib';
-import type { Matcher, ExecutionContext, ExecutionResult, ItemSelectors, Flow } from '@extension/types';
+import type {
+  Matcher,
+  ExecutionContext,
+  ExecutionResult,
+  ItemSelectors,
+  Flow,
+  ExecutionConfig,
+} from '@extension/types';
 
 /**
  * Item Matcher - Detects item pages and triggers item processing
