@@ -640,18 +640,18 @@ const Options = () => {
                   {!config.token && <p className="text-xs text-amber-400">{t('options_api_token_missing_warning')}</p>}
                 </div>
 
-                <div className="space-y-3 border-t border-gray-700 pt-3">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <h3 className="font-medium">{t('options_use_local_solver')}</h3>
-                      <p className="text-sm text-gray-400">{t('options_use_local_solver_description')}</p>
-                    </div>
-                    <Switch
-                      checked={config.useLocal}
-                      onCheckedChange={checked => extensionConfigStorage.updateConfig({ useLocal: !!checked })}
-                      className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200"
-                    />
-                  </div>
+                <div className="space-y-3 border-gray-700 pt-3">
+                  {/* <div className="flex items-center justify-between"> */}
+                  {/*   <div> */}
+                  {/*     <h3 className="font-medium">{t('options_use_local_solver')}</h3> */}
+                  {/*     <p className="text-sm text-gray-400">{t('options_use_local_solver_description')}</p> */}
+                  {/*   </div> */}
+                  {/*   <Switch */}
+                  {/*     checked={config.useLocal} */}
+                  {/*     onCheckedChange={checked => extensionConfigStorage.updateConfig({ useLocal: !!checked })} */}
+                  {/*     className="data-[state=checked]:bg-blue-600 data-[state=unchecked]:bg-gray-200" */}
+                  {/*   /> */}
+                  {/* </div> */}
                   <div>
                     <label className="mb-1 block text-sm text-gray-300">{t('options_local_model')}</label>
                     <Select
