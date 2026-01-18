@@ -9,7 +9,7 @@ import {
   DEFAULT_CONFIG,
   DEFAULT_LOCAL_MODEL,
 } from '@extension/storage';
-import { LocalTime, LocalTimeUtils } from '@extension/types';
+import { CaptchaSolverType, LocalTime, LocalTimeUtils } from '@extension/types';
 import { cn, ErrorDisplay, LoadingSpinner, Select, Switch } from '@extension/ui';
 import { Fragment, useEffect, useState } from 'react';
 import type { ExecutionConfig, OperationalHours, ProcessingTimeWindow, ExtensionStorage, Flow } from '@extension/types';
@@ -661,6 +661,30 @@ const Options = () => {
                       className="w-full border-gray-600 bg-gray-700 text-gray-100"
                     />
                   </div>
+                </div>
+              </div>
+            </section>
+
+            {/* Captcha solver */}
+            <section>
+              <h2 className="mb-4 text-xl font-medium">{t('options_captcha_solver_section_title')}</h2>
+              <div className="space-y-4 rounded-lg bg-gray-800 p-4">
+                <div>
+                  <h3 className="font-medium">{t('options_captcha_solver_label')}</h3>
+                  <p className="text-sm text-gray-400">{t('options_captcha_solver_section_description')}</p>
+                </div>
+
+                <div className="space-y-2">
+                  <Select
+                    value={config.captchaSolver || CaptchaSolverType.Math}
+                    onChange={val => extensionConfigStorage.updateConfig({ captchaSolver: val as CaptchaSolverType })}
+                    options={[
+                      { value: CaptchaSolverType.Math, label: t('options_captcha_solver_math') },
+                      { value: CaptchaSolverType.Text, label: t('options_captcha_solver_text') },
+                    ]}
+                    className="w-full border-gray-600 bg-gray-700 text-gray-100"
+                  />
+                  <p className="text-xs text-gray-400">{t('options_captcha_solver_help')}</p>
                 </div>
               </div>
             </section>

@@ -10,7 +10,8 @@ import {
   DEFAULT_CONFIG,
   DEFAULT_LOCAL_MODEL,
 } from '@extension/storage';
-import type { FlowPayload, BackgroundCommands, CommandResponse, Flow } from '@extension/types';
+import { CaptchaSolverType } from '@extension/types';
+import type { BackgroundCommands, CommandResponse, Flow, FlowPayload } from '@extension/types';
 
 // Service instances
 const tabService = new TabManagementService(extensionRuntimeStorage);
@@ -37,6 +38,30 @@ Examples:
 - Image shows "√16" -> Return: "4"
 - Image shows "What is 15% of 200?" -> Return: "30"
 - Image shows multiple: "2+2" and "3×3" -> Return: "4, 9"`;
+
+const CAPTCHA_TEXT_EXTRACT_PROMPT = `You are a CAPTCHA text extractor.
+Your task is to read the CAPTCHA text in the image and return ONLY that text.
+
+Rules:
+- Preserve case exactly (case sensitive)
+- Return only the characters of the CAPTCHA, no additional words, no quotes
+- Do not add spaces unless they are clearly part of the CAPTCHA
+- If you cannot read the text, return "ERROR: Unreadable"`;
+
+function assertNever(x: never): never {
+  throw new Error(`Unhandled CaptchaSolverType: ${String(x)}`);
+}
+
+function getPromptForSolver(solver: CaptchaSolverType): { system: string; user: string } {
+  switch (solver) {
+    case CaptchaSolverType.Math:
+      return { system: MATH_SOLVER_PROMPT, user: 'Solve and return only the number.' };
+    case CaptchaSolverType.Text:
+      return { system: CAPTCHA_TEXT_EXTRACT_PROMPT, user: 'Extract and return only the text, preserving case.' };
+    default:
+      return assertNever(solver);
+  }
+}
 
 // Initialize background service
 async function init() {
@@ -156,8 +181,9 @@ async function handleMessage(
             };
           });
 
-      case 'image.solve.local':
-        return processImageLocal(message.payload.imageData, message.payload.flowId)
+      case 'image.solve.local': {
+        const solver = (message.payload?.solver as CaptchaSolverType | undefined) ?? CaptchaSolverType.Math;
+        return processImageLocal(message.payload.imageData, message.payload.flowId, solver)
           .then(result => {
             console.log(`[${timeNow()}][Background] - Successfully processed image via local OpenAI`);
             return { success: true, data: result, requestId: 'image.local' };
@@ -170,6 +196,7 @@ async function handleMessage(
               error: error instanceof Error ? error.message : 'Unknown error',
             };
           });
+      }
 
       case 'extension.log':
         // Store logs in background LogManager
@@ -468,7 +495,7 @@ async function dataUrlToBlobFetch(dataUrl: string): Promise<Blob> {
 /**
  * Process an image by sending it directly to OpenAI using the local solver configuration.
  */
-async function processImageLocal(imageData: string, flowId: string) {
+async function processImageLocal(imageData: string, flowId: string, solver: CaptchaSolverType) {
   const config = await ConfigService.getConfig();
 
   if (!config.token) {
@@ -478,26 +505,30 @@ async function processImageLocal(imageData: string, flowId: string) {
   const model = config.localModel || DEFAULT_LOCAL_MODEL;
   const apiKey = config.token;
 
-  console.log(`[${timeNow()}][Background] - Processing image via local OpenAI solver with model ${model}...`);
+  console.log(
+    `[${timeNow()}][Background] - Processing image via local OpenAI solver with model ${model} (captchaSolver=${solver})...`,
+  );
 
   const controller = new AbortController();
   const timeoutMs = 60000;
   const timeout = setTimeout(() => controller.abort(), timeoutMs);
 
   try {
+    const prompt = getPromptForSolver(solver);
+
     const payload = {
       model,
       messages: [
         {
           role: 'system',
-          content: MATH_SOLVER_PROMPT,
+          content: prompt.system,
         },
         {
           role: 'user',
           content: [
             {
               type: 'text',
-              text: 'Solve and return only the number.',
+              text: prompt.user,
             },
             {
               type: 'image_url',

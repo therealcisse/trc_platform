@@ -138,6 +138,24 @@
   "options_local_model": {
     "message": "OpenAI-Modell (für lokale Lösung)"
   },
+  "options_captcha_solver_section_title": {
+    "message": "Captcha-Löser"
+  },
+  "options_captcha_solver_section_description": {
+    "message": "Wählen Sie aus, wie die Erweiterung Captchas auf der Kaufen-Seite löst."
+  },
+  "options_captcha_solver_label": {
+    "message": "Löser-Typ"
+  },
+  "options_captcha_solver_math": {
+    "message": "Mathe (numerische Antwort extrahieren)"
+  },
+  "options_captcha_solver_text": {
+    "message": "Text (Groß-/Kleinschreibung beibehalten)"
+  },
+  "options_captcha_solver_help": {
+    "message": "Verwenden Sie Text, wenn das Captcha aus Buchstaben und Zahlen besteht. Verwenden Sie Mathe, wenn es eine Rechenaufgabe ist."
+  },
   "options_processing_time": {
     "message": "Verarbeitungszeit (Sekunden)"
   },

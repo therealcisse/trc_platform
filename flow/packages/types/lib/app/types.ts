@@ -26,6 +26,11 @@ export interface ExecutionContext {
   dryRun?: boolean;
 }
 
+export enum CaptchaSolverType {
+  Math = 'math',
+  Text = 'text',
+}
+
 export interface ExecutionConfig {
   // Inbox mode configuration
   inboxMode: boolean;
@@ -39,6 +44,8 @@ export interface ExecutionConfig {
   token?: string;
   useLocal: boolean;
   localModel: string;
+
+  captchaSolver: CaptchaSolverType;
 
   operationalHours: OperationalHours;
   emailMode: boolean;
@@ -145,7 +152,7 @@ export interface BackgroundCommands {
   'extension.getConfig': {};
   'extension.toggleEnabled': {};
   'image.solve': { imageData: string; flowId: string };
-  'image.solve.local': { imageData: string; flowId: string };
+  'image.solve.local': { imageData: string; flowId: string; solver?: CaptchaSolverType };
   'flows.scheduleCloseAfterNavigation': { flowId: string; timeoutMs: number };
   'extension.startFlow': FlowPayload;
   'extension.startFlowAndOpen': FlowPayload & { url: string };

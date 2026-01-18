@@ -9,7 +9,7 @@ import {
 } from '@extension/shared';
 import { isInvalidProduct, isProductNotAllowed as isProductNotAllowed, MATCHER_IDS } from '@extension/types';
 import { clickWithVerification, sleep, ensureFocus } from '@src/lib';
-import { CaptchaProcessor } from '@src/lib/CaptchaProcessor';
+import { CaptchaSolver } from '@src/lib/CaptchaSolver';
 import type { Matcher, ExecutionContext, ExecutionResult, BuyOfferSelectors, Flow } from '@extension/types';
 
 // Helper to convert an image element into a data URL, DPI-aware
@@ -178,7 +178,7 @@ export async function executeBuyOfferWorkflow(
   const startTime = Date.now();
   const errors: Error[] = [];
   const tabManager = TabManager.getInstance();
-  const captchaProcessor = CaptchaProcessor.getInstance();
+  const captchaSolver = CaptchaSolver.getInstance();
 
   // Wait for and focus captcha input first
   const inputElement = document.querySelector(selectors.input) as HTMLInputElement;
@@ -327,7 +327,7 @@ export async function executeBuyOfferWorkflow(
     }
 
     log.info('Starting captcha processing');
-    const answer = await captchaProcessor.solveCaptcha(imgElement.src, earlyDataUrl, flow.id);
+    const answer = await captchaSolver.solveCaptcha(imgElement.src, earlyDataUrl, flow.id, context.config.captchaSolver);
 
     log.info(`Captcha solved successfully: ${answer}`);
 

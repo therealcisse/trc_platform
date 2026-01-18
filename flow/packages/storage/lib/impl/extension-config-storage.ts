@@ -1,7 +1,7 @@
 import { createStorage, StorageEnum } from '../base/index.js';
 import { DEFAULT_LOCAL_MODEL } from '../constants.js';
 import { validateStorageData, ExtensionStorageSchema } from '../validation/storage.js';
-import { LocalTime } from '@extension/types';
+import { CaptchaSolverType, LocalTime } from '@extension/types';
 import type { ExtensionStorageType } from '../base/index.js';
 import type { ExecutionConfig, ExtensionStorage } from '@extension/types';
 
@@ -28,6 +28,9 @@ export const DEFAULT_CONFIG: ExtensionStorage = {
     emailMode: false,
     emailRefreshMin: 30,
     emailRefreshMax: 60,
+
+    // Captcha solving defaults
+    captchaSolver: CaptchaSolverType.Math,
 
     // Local solver defaults
     useLocal: true,

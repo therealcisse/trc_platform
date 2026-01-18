@@ -138,6 +138,24 @@
   "options_local_model": {
     "message": "OpenAI model (for local solving)"
   },
+  "options_captcha_solver_section_title": {
+    "message": "Captcha solver"
+  },
+  "options_captcha_solver_section_description": {
+    "message": "Choose how the extension solves captchas on the buy offer page."
+  },
+  "options_captcha_solver_label": {
+    "message": "Solver type"
+  },
+  "options_captcha_solver_math": {
+    "message": "Math (extract numeric answer)"
+  },
+  "options_captcha_solver_text": {
+    "message": "Text (extract case sensitive text)"
+  },
+  "options_captcha_solver_help": {
+    "message": "Use Text if the captcha is letters and numbers. Use Math if the captcha is an arithmetic problem."
+  },
   "options_processing_time": {
     "message": "Processing time (seconds)"
   },

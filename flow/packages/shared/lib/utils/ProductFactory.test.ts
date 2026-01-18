@@ -1,5 +1,5 @@
 import { ProductFactory } from './ProductFactory.js';
-import { LocalTime, isInvalidProduct, isProductNotAllowed } from '@extension/types';
+import { CaptchaSolverType, LocalTime, isInvalidProduct, isProductNotAllowed } from '@extension/types';
 import { describe, it, expect } from 'vitest';
 import type { ExecutionConfig } from '@extension/types';
 
@@ -47,6 +47,7 @@ describe('ProductFactory.parseTitle', () => {
     token: undefined,
     useLocal: false,
     localModel: 'gpt-4.1-mini',
+    captchaSolver: CaptchaSolverType.Math,
 
     // Operational hours
     operationalHours: {
@@ -189,6 +190,25 @@ describe('ProductFactory.parseTitle', () => {
       const result = ProductFactory.parse(config, title);
       console.log(result);
 
+      expect(result.allowed).toBe(false);
+      expect(isProductNotAllowed(result)).toBe(true);
+    });
+
+    it('should not match unter', () => {
+      const config: ExecutionConfig = {
+        ...createTestConfig(),
+        accidents: false,
+      };
+      const title =
+        'KV-Voll Arbeitnehmer KW: Kamp: Kampagne_aus_KV_Voll_SEA PLZ: 22547 Bisher versichert: gesetzlich (GKV) Alter: 45 * Berufliche Tätigkeit: Angestellter, Jahres-Brutto-Einkommen liegt unter JAEG';
+      const result = ProductFactory.parse(config, title);
+      console.log(result);
+
+      expect(result.type).toBe('HEALTH');
+      if (result.type === 'HEALTH') {
+        expect(result.aboveIncomeLimit).toBe(false);
+
+      }
       expect(result.allowed).toBe(false);
       expect(isProductNotAllowed(result)).toBe(true);
     });

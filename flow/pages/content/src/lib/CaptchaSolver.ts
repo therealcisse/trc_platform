@@ -1,6 +1,21 @@
-import { Log, BackgroundUtils, sendBackgroundCommand } from '@extension/shared';
-import { MATCHER_IDS } from '@extension/types';
+import { Log, sendBackgroundCommand } from '@extension/shared';
+import { CaptchaSolverType, MATCHER_IDS } from '@extension/types';
 import { extractNumericAnswer } from '@src/lib';
+
+function assertNever(x: never): never {
+  throw new Error(`Unhandled CaptchaSolverType: ${String(x)}`);
+}
+
+function extractCaptchaText(result: string): string {
+  const clean = result.replace(/```[\s\S]*?```/g, '').trim();
+
+  const m = clean.match(/^["'`](.*)["'`]$/s);
+  if (m && m[1] != null) {
+    return m[1].trim();
+  }
+
+  return clean;
+}
 
 interface CaptchaCache {
   answer: string;
@@ -12,8 +27,8 @@ type SolveResult =
   | { ok: true; answer: string }
   | { ok: false; retriable: boolean; message: string; retryAfterMs?: number };
 
-export class CaptchaProcessor {
-  private static instance: CaptchaProcessor;
+export class CaptchaSolver {
+  private static instance: CaptchaSolver;
 
   private cache: Map<string, CaptchaCache> = new Map();
   private readonly cacheDuration = 5 * 60 * 1000; // 5 minutes
@@ -23,17 +38,28 @@ export class CaptchaProcessor {
 
   private constructor() {}
 
-  static getInstance(): CaptchaProcessor {
-    if (!CaptchaProcessor.instance) {
-      CaptchaProcessor.instance = new CaptchaProcessor();
+  static getInstance(): CaptchaSolver {
+    if (!CaptchaSolver.instance) {
+      CaptchaSolver.instance = new CaptchaSolver();
     }
-    return CaptchaProcessor.instance;
+    return CaptchaSolver.instance;
   }
 
-  private getCacheKey(imgSrc: string, flowId: string): string {
+  private getCacheKey(imgSrc: string, flowId: string, solver: CaptchaSolverType): string {
     const urlParts = imgSrc.split('/');
     const imagePart = urlParts[urlParts.length - 1] || imgSrc;
-    return `${flowId}:${imagePart}`;
+    return `${flowId}:${solver}:${imagePart}`;
+  }
+
+  private parseSolvedResult(result: string, solver: CaptchaSolverType): string {
+    switch (solver) {
+      case CaptchaSolverType.Math:
+        return extractNumericAnswer(result);
+      case CaptchaSolverType.Text:
+        return extractCaptchaText(result);
+      default:
+        return assertNever(solver);
+    }
   }
 
   private isCacheValid(cacheEntry: CaptchaCache): boolean {
@@ -81,6 +107,7 @@ export class CaptchaProcessor {
     // the task ignores AbortSignal.
     const controller = new AbortController();
     const timer = setTimeout(() => controller.abort(), ms);
+
     const timeoutPromise = new Promise<never>((_, reject) => {
       // Reject on abort with a stable error message that classifyError can read.
       controller.signal.addEventListener(
@@ -91,18 +118,24 @@ export class CaptchaProcessor {
         { once: true },
       );
     });
-    return Promise.race([task(controller.signal), timeoutPromise]).finally(() => clearTimeout(timer));
+
+    // Ensure synchronous throws from task are captured as a rejected promise so
+    // timers are always cleaned up and we do not leave a dangling timeoutPromise.
+    const taskPromise = Promise.resolve().then(() => task(controller.signal));
+
+    return Promise.race([taskPromise, timeoutPromise]).finally(() => clearTimeout(timer));
   }
 
   async solveCaptcha(
     imgSrc: string,
     imageDataUrl: string,
     flowId: string,
+    solver: CaptchaSolverType = CaptchaSolverType.Math,
     maxRetries = 7,
     opts?: { perAttemptTimeoutMs?: number; totalDeadlineMs?: number }, // testability
   ): Promise<string> {
     const log = Log.withFlow(MATCHER_IDS.BUY_OFFER, flowId);
-    const cacheKey = this.getCacheKey(imgSrc, flowId);
+    const cacheKey = this.getCacheKey(imgSrc, flowId, solver);
     const cached = this.cache.get(cacheKey);
 
     if (cached && this.isCacheValid(cached)) {
@@ -117,9 +150,13 @@ export class CaptchaProcessor {
       return existing;
     }
 
-    const solvePromise = this._solveWithRetries(cacheKey, imageDataUrl, flowId, log, maxRetries, opts).finally(() =>
-      this.inFlight.delete(cacheKey),
+    const solvePromise = this._solveWithRetries(cacheKey, imageDataUrl, flowId, solver, log, maxRetries, opts).finally(
+      () => this.inFlight.delete(cacheKey),
     );
+
+    // Attach a noop handler to avoid unhandled rejection warnings if callers attach
+    // their own handlers later (for example in tests).
+    void solvePromise.catch(() => {});
 
     this.inFlight.set(cacheKey, solvePromise);
     return solvePromise;
@@ -129,12 +166,12 @@ export class CaptchaProcessor {
     cacheKey: string,
     imageDataUrl: string,
     flowId: string,
+    solver: CaptchaSolverType,
     log: any,
     maxRetries: number,
     opts?: { perAttemptTimeoutMs?: number; totalDeadlineMs?: number }, // testability
   ): Promise<string> {
-    const { config } = await BackgroundUtils.getExtensionConfig();
-    const command: 'image.solve' | 'image.solve.local' = config.useLocal ? 'image.solve.local' : 'image.solve';
+    const command: 'image.solve.local' = 'image.solve.local';
 
     // Backoff parameters tuned for UI latency and burst smoothing.
     const base = 400; // base delay in ms
@@ -160,11 +197,11 @@ export class CaptchaProcessor {
         const response = await this.withTimeout(
           attemptTimeout,
           _signal =>
-            sendBackgroundCommand(command, { imageData: imageDataUrl, flowId }, attemptTimeout) as Promise<any>,
+            sendBackgroundCommand(command, { imageData: imageDataUrl, flowId, solver }, attemptTimeout) as Promise<any>,
         );
 
         if (response?.success && response.data?.result) {
-          const answer = extractNumericAnswer(response.data.result);
+          const answer = this.parseSolvedResult(response.data.result, solver);
           this.cache.set(cacheKey, { answer, timestamp: Date.now(), flowId });
           log.info('CAPTCHA solved successfully');
           return answer;

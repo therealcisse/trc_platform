@@ -1,5 +1,5 @@
 import { DEFAULT_LOCAL_MODEL } from '../constants.js';
-import { LocalTime } from '@extension/types';
+import { CaptchaSolverType, LocalTime } from '@extension/types';
 import { z } from 'zod';
 
 export const LocalTimeSchema = z
@@ -79,6 +79,8 @@ export const ExecutionConfigSchemaV1 = z.object({
   token: z.string().optional(),
   useLocal: z.boolean().default(true),
   localModel: z.string().default(DEFAULT_LOCAL_MODEL),
+
+  captchaSolver: z.nativeEnum(CaptchaSolverType).default(CaptchaSolverType.Math),
 
   // Required fields
   operationalHours: OperationalHoursSchema,
