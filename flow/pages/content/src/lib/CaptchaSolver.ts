@@ -10,11 +10,17 @@ function extractCaptchaText(result: string): string {
   const clean = result.replace(/```[\s\S]*?```/g, '').trim();
 
   const m = clean.match(/^["'`](.*)["'`]$/s);
-  if (m && m[1] != null) {
-    return m[1].trim();
+  const unquoted = m && m[1] != null ? m[1].trim() : clean;
+
+  // Preserve explicit error sentinel values as-is (aside from outer trimming).
+  if (/^error:/i.test(unquoted)) {
+    return unquoted;
   }
 
-  return clean;
+  // For normal CAPTCHA content, remove all internal whitespace so that any spaced or
+  // multi-line characters (for example, "r b k d", "AB CD", or "r\nb\nk\nd")
+  // become a single contiguous token (for example, "rbkd", "ABCD").
+  return unquoted.replace(/\s+/g, '');
 }
 
 interface CaptchaCache {

@@ -44,9 +44,10 @@ Your task is to read the CAPTCHA text in the image and return ONLY that text.
 
 Rules:
 - Preserve case exactly (case sensitive)
-- Return only the characters of the CAPTCHA, no additional words, no quotes
-- Do not add spaces unless they are clearly part of the CAPTCHA
-- If you cannot read the text, return "ERROR: Unreadable"`;
+- Return only the characters of the CAPTCHA, with no surrounding quotes
+- Return the CAPTCHA characters as a single, contiguous sequence with no spaces, line breaks, or punctuation between characters
+- Even if the CAPTCHA shows groups like "AB CD", return "ABCD" with no spaces
+- If you cannot read the text, return "ERROR: Unreadable" exactly`;
 
 function assertNever(x: never): never {
   throw new Error(`Unhandled CaptchaSolverType: ${String(x)}`);

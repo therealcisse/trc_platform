@@ -161,10 +161,17 @@ describe('CaptchaSolver', () => {
     send().mockImplementation(() => new Promise(() => {}));
 
     // Attach the rejection handler immediately to avoid unhandled rejection warnings.
-    const p = solver.solveCaptcha('https://a/b/slow.png', 'data:image/png;base64,DDD', 'flow-5', CaptchaSolverType.Math, 3, {
-      perAttemptTimeoutMs: 200,
-      totalDeadlineMs: 1000,
-    });
+    const p = solver.solveCaptcha(
+      'https://a/b/slow.png',
+      'data:image/png;base64,DDD',
+      'flow-5',
+      CaptchaSolverType.Math,
+      3,
+      {
+        perAttemptTimeoutMs: 200,
+        totalDeadlineMs: 1000,
+      },
+    );
     const assertion = expect(p).rejects.toThrow(/timeout|Failed|solve/i);
 
     await vi.advanceTimersByTimeAsync(1_200);
@@ -220,6 +227,71 @@ describe('CaptchaSolver', () => {
     );
 
     expect(result).toBe('AbC123xYz');
+  });
+
+  it('normalizes space-separated characters in text mode to a contiguous string', async () => {
+    send().mockResolvedValueOnce({ success: true, data: { result: 'r b k d' } });
+
+    const result = await solver.solveCaptcha(
+      'https://x/y/txt-space.png',
+      'data:image/png;base64,TXTSPACE',
+      'flow-text-space',
+      CaptchaSolverType.Text,
+    );
+
+    expect(result).toBe('rbkd');
+  });
+
+  it('strips outer quotes then normalizes inner spaces for text captchas', async () => {
+    send().mockResolvedValueOnce({ success: true, data: { result: "  ' r b k d '  " } });
+
+    const result = await solver.solveCaptcha(
+      'https://x/y/txt-quoted.png',
+      'data:image/png;base64,TXTQUOTED',
+      'flow-text-quoted',
+      CaptchaSolverType.Text,
+    );
+
+    expect(result).toBe('rbkd');
+  });
+
+  it('collapses word-level spaces like "AB CD" into "ABCD" in text mode', async () => {
+    send().mockResolvedValueOnce({ success: true, data: { result: 'AB CD' } });
+
+    const result = await solver.solveCaptcha(
+      'https://x/y/txt-abcd.png',
+      'data:image/png;base64,TXTABCD',
+      'flow-text-abcd',
+      CaptchaSolverType.Text,
+    );
+
+    expect(result).toBe('ABCD');
+  });
+
+  it('collapses newline-separated characters into a contiguous string in text mode', async () => {
+    send().mockResolvedValueOnce({ success: true, data: { result: 'r\nb\nk\nd' } });
+
+    const result = await solver.solveCaptcha(
+      'https://x/y/txt-newlines.png',
+      'data:image/png;base64,TXTNEWLINES',
+      'flow-text-newlines',
+      CaptchaSolverType.Text,
+    );
+
+    expect(result).toBe('rbkd');
+  });
+
+  it('preserves the explicit ERROR: Unreadable sentinel in text mode', async () => {
+    send().mockResolvedValueOnce({ success: true, data: { result: 'ERROR: Unreadable' } });
+
+    const result = await solver.solveCaptcha(
+      'https://x/y/txt-error.png',
+      'data:image/png;base64,TXTERROR',
+      'flow-text-error',
+      CaptchaSolverType.Text,
+    );
+
+    expect(result).toBe('ERROR: Unreadable');
   });
 
   it('does not reuse cache between different solver types', async () => {
@@ -281,16 +353,8 @@ describe('CaptchaSolver', () => {
   });
 
   it('getCacheKey uses trailing segment', () => {
-    const key1 = (solver as any).getCacheKey(
-      'https://server/a/b/image123.png',
-      'flow-Z',
-      CaptchaSolverType.Math,
-    );
-    const key2 = (solver as any).getCacheKey(
-      'https://server/a/b/image123.png?x=1',
-      'flow-Z',
-      CaptchaSolverType.Math,
-    );
+    const key1 = (solver as any).getCacheKey('https://server/a/b/image123.png', 'flow-Z', CaptchaSolverType.Math);
+    const key2 = (solver as any).getCacheKey('https://server/a/b/image123.png?x=1', 'flow-Z', CaptchaSolverType.Math);
 
     // Your current implementation keeps the query string in the trailing segment.
     expect(key1).toContain('flow-Z:');

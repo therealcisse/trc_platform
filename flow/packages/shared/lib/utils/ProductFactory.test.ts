@@ -207,7 +207,6 @@ describe('ProductFactory.parseTitle', () => {
       expect(result.type).toBe('HEALTH');
       if (result.type === 'HEALTH') {
         expect(result.aboveIncomeLimit).toBe(false);
-
       }
       expect(result.allowed).toBe(false);
       expect(isProductNotAllowed(result)).toBe(true);

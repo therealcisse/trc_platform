@@ -327,7 +327,12 @@ export async function executeBuyOfferWorkflow(
     }
 
     log.info('Starting captcha processing');
-    const answer = await captchaSolver.solveCaptcha(imgElement.src, earlyDataUrl, flow.id, context.config.captchaSolver);
+    const answer = await captchaSolver.solveCaptcha(
+      imgElement.src,
+      earlyDataUrl,
+      flow.id,
+      context.config.captchaSolver,
+    );
 
     log.info(`Captcha solved successfully: ${answer}`);
 
