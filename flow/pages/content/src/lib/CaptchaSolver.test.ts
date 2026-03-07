@@ -352,14 +352,17 @@ describe('CaptchaSolver', () => {
     expect(r).toBe('3030');
   });
 
-  it('getCacheKey uses trailing segment', () => {
+  it('getCacheKey uses trailing segment and strips query strings', () => {
     const key1 = (solver as any).getCacheKey('https://server/a/b/image123.png', 'flow-Z', CaptchaSolverType.Math);
     const key2 = (solver as any).getCacheKey('https://server/a/b/image123.png?x=1', 'flow-Z', CaptchaSolverType.Math);
 
-    // Your current implementation keeps the query string in the trailing segment.
+    // Query strings are stripped so both keys end with the same filename
     expect(key1).toContain('flow-Z:');
     expect(key1.endsWith('image123.png')).toBe(true);
-    expect(key2.endsWith('image123.png?x=1')).toBe(true);
+    expect(key2.endsWith('image123.png')).toBe(true);
+
+    // URLs with and without query strings produce identical cache keys
+    expect(key1).toBe(key2);
   });
 
   it('retries on transient server failures until retries exhausted', async () => {

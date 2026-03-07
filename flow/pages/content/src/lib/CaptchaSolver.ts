@@ -53,7 +53,11 @@ export class CaptchaSolver {
 
   private getCacheKey(imgSrc: string, flowId: string, solver: CaptchaSolverType): string {
     const urlParts = imgSrc.split('/');
-    const imagePart = urlParts[urlParts.length - 1] || imgSrc;
+    let imagePart = urlParts[urlParts.length - 1] || imgSrc;
+
+    // Strip query strings and fragments to ensure same images map to the same cache key
+    imagePart = imagePart.split('?')[0].split('#')[0];
+
     return `${flowId}:${solver}:${imagePart}`;
   }
 
